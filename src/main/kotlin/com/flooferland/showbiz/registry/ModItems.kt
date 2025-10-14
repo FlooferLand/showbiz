@@ -3,11 +3,12 @@ package com.flooferland.showbiz.registry
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Items
 
 enum class ModItems {
     Wand(
@@ -23,7 +24,10 @@ enum class ModItems {
         this.model = model;
         if (DataGenerator.engaged) return
 
-        this.item = constructor(props)
-        Registry.register(BuiltInRegistries.ITEM, this.id, this.item)
+        this.item = Items.registerItem(
+            ResourceKey.create(BuiltInRegistries.ITEM.key(), this.id),
+            constructor,
+            props
+        )
     }
 }

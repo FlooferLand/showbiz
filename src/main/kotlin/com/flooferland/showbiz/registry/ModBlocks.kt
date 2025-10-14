@@ -6,10 +6,13 @@ import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 
@@ -31,8 +34,11 @@ enum class ModBlocks {
         this.model = model;
         if (DataGenerator.engaged) return
 
-        this.block = Registry.register(BuiltInRegistries.BLOCK, this.id, constructor(props))
-        this.item = BlockItem(block, Item.Properties())
-        Registry.register(BuiltInRegistries.ITEM, this.id, this.item)
+        this.block = Blocks.register(
+            ResourceKey.create(BuiltInRegistries.BLOCK.key(), this.id),
+            constructor,
+            props
+        )
+        this.item = Items.registerBlock(this.block) as BlockItem
     }
 }
