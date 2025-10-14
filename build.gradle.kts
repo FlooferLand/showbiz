@@ -111,6 +111,7 @@ tasks.register<JavaExec>("runDatagen") {
     group = "flooferland"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.flooferland.showbiz.datagen.DataGenerator")
+    systemProperty("$modId.datagen", "true")
 }
 sourceSets {
     main {

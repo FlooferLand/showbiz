@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.datagen
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.datagen.providers.BlockProvider
 import com.flooferland.showbiz.datagen.providers.ItemProvider
 import com.flooferland.showbiz.registry.ModBlocks
@@ -17,20 +18,19 @@ import kotlin.io.path.div
 import kotlin.io.path.relativeTo
 
 object DataGenerator {
-    var engaged = false
+    val engaged = runCatching { System.getProperty("$MOD_ID.datagen") }.getOrNull() == "true"
 
     @JvmStatic
     fun main(args: Array<String>) {
+        if (!engaged) return;
+
         // Setup
-        engaged = true
         SharedConstants.tryDetectVersion()
         Bootstrap.bootStrap()
 
         // Registry
-        //CoroutineScope(Dispatchers.IO).launch {
         ModBlocks.entries
         generate()
-        //}
     }
 
     fun generate() {
