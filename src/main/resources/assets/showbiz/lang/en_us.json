@@ -1,3 +1,6 @@
 {
-    "itemGroup.showbiz.main": "Showbiz"
+    "itemGroup.showbiz.main": "Showbiz",
+
+    "block.showbiz.test_stage": "Test Stage",
+    "item.showbiz.wand": "Wand"
 }
