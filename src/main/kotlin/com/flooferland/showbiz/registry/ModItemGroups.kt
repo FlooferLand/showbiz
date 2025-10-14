@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.registry
 
 import com.flooferland.showbiz.utils.rl
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
@@ -14,7 +13,7 @@ enum class ModItemGroups {
     });
 
     constructor(name: String, generator: CreativeModeTab.DisplayItemsGenerator) {
-        val group = FabricItemGroup.builder()
+        val group = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
             .title(Component.translatable("itemGroup.showbiz.$name"))
             .icon({ ModBlocks.TestStage.item.defaultInstance })
             .displayItems(generator)
