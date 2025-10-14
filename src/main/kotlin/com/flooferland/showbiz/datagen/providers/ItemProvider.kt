@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import net.minecraft.resources.ResourceLocation
 
 object ItemProvider {
     enum class ItemModelId {
@@ -20,7 +21,7 @@ object ItemProvider {
         }
     }
 
-    fun generateItem(item: ModItems): JsonObject? {
+    fun generateModel(item: ModItems): JsonObject? {
         return when (item.model!!) {
             ItemModelId.Generated -> buildJsonObject {
                 put("parent", rlVanilla("generated").itemPath().toString())
@@ -29,6 +30,15 @@ object ItemProvider {
                 }
             }
             ItemModelId.Custom -> null
+        }
+    }
+
+    fun generateItem(id: ResourceLocation): JsonObject? {
+        return buildJsonObject {
+            putJsonObject("model") {
+                put("type", rlVanilla("model").toString())
+                put("model", id.toString())
+            }
         }
     }
 }

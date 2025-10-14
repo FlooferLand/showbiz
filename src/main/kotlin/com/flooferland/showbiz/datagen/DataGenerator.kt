@@ -6,6 +6,8 @@ import com.flooferland.showbiz.datagen.providers.BlockProvider
 import com.flooferland.showbiz.datagen.providers.ItemProvider
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.Extensions.blockPath
+import com.flooferland.showbiz.utils.Extensions.itemPath
 import kotlinx.io.bytestring.encodeToByteString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -60,14 +62,25 @@ object DataGenerator {
             val modelJson = BlockProvider.generateBlock(block) ?: continue
             val modelPath = assetsRoot / "models" / "block" / "${block.id.path}.json"
             writeAsset(modelPath, modelJson)
+
+            // Item
+            val itemJson = ItemProvider.generateItem(block.id.blockPath()) ?: continue
+            val itemPath = assetsRoot / "items" / "${block.id.path}.json"
+            writeAsset(itemPath, itemJson)
         }
         for (item in ModItems.entries) {
-            val modelJson = ItemProvider.generateItem(item) ?: run {
+            // Model
+            val modelJson = ItemProvider.generateModel(item) ?: run {
                 print("Skipped item '${item.id}'")
                 continue
             }
             val modelPath = assetsRoot / "models" / "item" / "${item.id.path}.json"
             writeAsset(modelPath, modelJson)
+
+            // Item
+            val itemJson = ItemProvider.generateItem(item.id.itemPath()) ?: continue
+            val itemPath = assetsRoot / "items" / "${item.id.path}.json"
+            writeAsset(itemPath, itemJson)
         }
 
         // Removing files that weren't in this build
