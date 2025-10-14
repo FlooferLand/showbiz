@@ -1,0 +1,87 @@
+package com.flooferland.showbiz.datagen
+
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.datagen.providers.BlockProvider
+import com.flooferland.showbiz.datagen.providers.ItemProvider
+import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModItems
+import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import net.minecraft.SharedConstants
+import net.minecraft.server.Bootstrap
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.div
+import kotlin.io.path.relativeTo
+
+object DataGenerator {
+    var engaged = false
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        // Setup
+        engaged = true
+        SharedConstants.tryDetectVersion()
+        Bootstrap.bootStrap()
+
+        // Registry
+        //CoroutineScope(Dispatchers.IO).launch {
+        ModBlocks.entries
+        generate()
+        //}
+    }
+
+    fun generate() {
+        val rootPath = Path.of("src", "main", "generated", "resources")
+        val assetsRoot = rootPath / "assets" / Showbiz.MOD_ID
+        val fileListPath = rootPath / "generated.txt"
+        val json = Json { prettyPrint = true }
+        val fileList = mutableListOf<Path>()
+        fun writeAsset(path: Path, data: JsonObject) {
+            path.createParentDirectories()
+            println("Writing '${path.relativeTo(rootPath)}'")
+            fileList.add(path)
+            Files.write(
+                path.toAbsolutePath(),
+                json.encodeToString(data).encodeToByteString().toByteArray()
+            )
+        }
+
+        // Generation
+        for (block in ModBlocks.entries) {
+            val stateJson = BlockProvider.generateState(block) ?: run {
+                print("Skipped block '${block.id}'")
+                continue
+            }
+            val statePath = assetsRoot / "blockstates" / "${block.id.path}.json"
+            writeAsset(statePath, stateJson)
+
+            val modelJson = BlockProvider.generateBlock(block) ?: continue
+            val modelPath = assetsRoot / "models" / "block" / "${block.id.path}.json"
+            writeAsset(modelPath, modelJson)
+        }
+        for (item in ModItems.entries) {
+            val modelJson = ItemProvider.generateItem(item) ?: run {
+                print("Skipped item '${item.id}'")
+                continue
+            }
+            val modelPath = assetsRoot / "models" / "item" / "${item.id.path}.json"
+            writeAsset(modelPath, modelJson)
+        }
+
+        // Removing files that weren't in this build
+        if (Files.exists(fileListPath)) {
+            for (line in Files.readAllLines(fileListPath)) {
+                val path = Path.of(line)
+                if (!fileList.any { p -> p == path }) {
+                    print("Removing '$path'")
+                    val path = path.toAbsolutePath()
+                    Files.deleteIfExists(path)
+                }
+            }
+        }
+        Files.writeString(fileListPath, fileList.joinToString("\n"))
+    }
+}

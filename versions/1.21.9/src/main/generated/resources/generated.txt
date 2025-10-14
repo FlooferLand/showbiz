@@ -1,0 +1,3 @@
+src\main\generated\resources\assets\showbiz\blockstates\test_stage.json
+src\main\generated\resources\assets\showbiz\models\block\test_stage.json
+src\main\generated\resources\assets\showbiz\models\item\wand.json

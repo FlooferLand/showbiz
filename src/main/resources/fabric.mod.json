@@ -1,0 +1,37 @@
+{
+    "schemaVersion": 1,
+    "id": "showbiz",
+    "version": "${version}",
+    "name": "Showbiz",
+    "description": "Unofficial Rock-afire Explosion simulator for Minecraft!\nNot affiliated to Aaron Fechter and/or his works. Rock-afire Explosion is owned property by Aaron Fechter.\n\nBuilt for $minecraft (Java $java, Kotlin $kotlin)",
+    "authors": ["FlooferLand"],
+    "contact": {
+        "homepage": "https://modrinth.com/mod/showbiz",
+        "sources": "https://github.com/FlooferLand/Showbiz-Mod",
+        "issues": "https://github.com/FlooferLand/Showbiz-Mod/issues"
+    },
+    "license": "LGPL3",
+    "icon": "assets/showbiz/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            {
+                "value": "com.flooferland.showbiz.Showbiz",
+                "adapter": "kotlin"
+            }
+        ],
+        "client": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizClient",
+                "adapter": "kotlin"
+            }
+        ]
+    },
+    "mixins": [],
+    "depends": {
+        "fabricloader": ">=$fabric_loader",
+        "minecraft": "$minecraft",
+        "java": ">=$java",
+        "fabric-language-kotlin": ">=$fabric_language_kotlin"
+    }
+}
