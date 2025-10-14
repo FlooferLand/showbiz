@@ -16,7 +16,7 @@ object Showbiz : ModInitializer {
         run {
             ModBlocks.entries
             ModItems.entries
-            ModItemGroups
+            ModItemGroups.entries
         }
 
         log.info("Enjoy the show!")
