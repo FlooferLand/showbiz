@@ -5,8 +5,8 @@
 ![Issue tracker](https://img.shields.io/github/issues/FlooferLand/showbiz?style=plastic&link=https://github.com/FlooferLand/showbiz/issues)
 ![Lines of code](https://img.shields.io/github/lines/FlooferLand/showbiz?style=plastic&link=https://github.com/FlooferLand/showbiz)
 
-A fan-made Minecraft mod focused around [The Rock-afire Explosion](https://www.youtube.com/watch?v=8SeSavNd9_c&list=PLB8A625C54121DA04)
+A fan-made Minecraft mod focused around re-creating the wonderful experience that is watching [The Rock-afire Explosion](https://www.youtube.com/watch?v=MyEbr6HvWy0) perform
 
-Minecraft lets you combine tons of different mods and situations, making this simulator able to be enjoyed in VR via mods like ViveCraft, and with friends via multiplayer.
+I made this since Minecraft lets you combine tons of different mods and situations, making this simulator able to be enjoyed in VR via mods like ViveCraft, or with multiplayer with friends.
 
 _Not affiliated nor associated with Aaron Fechter, Rock-afire Explosion, or Creative Engineering. This is purely a fan project._
