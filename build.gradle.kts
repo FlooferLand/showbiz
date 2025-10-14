@@ -53,6 +53,9 @@ dependencies {
         modImplementation("net.fabricmc.fabric-api:fabric-api:${dep("fabric_api")}")
         modImplementation("net.fabricmc:fabric-language-kotlin:${dep("fabric_language_kotlin")}")
     }
+
+    // Useful dev tools
+    modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
 }
 
 // Mappings
