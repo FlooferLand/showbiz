@@ -24,12 +24,9 @@ object DataGenerator {
     fun main(args: Array<String>) {
         if (!engaged) return;
 
-        // Setup
+        println("Running data generator..")
         SharedConstants.tryDetectVersion()
         Bootstrap.bootStrap()
-
-        // Registry
-        ModBlocks.entries
         generate()
     }
 
@@ -51,6 +48,7 @@ object DataGenerator {
 
         // Generation
         for (block in ModBlocks.entries) {
+            // States
             val stateJson = BlockProvider.generateState(block) ?: run {
                 print("Skipped block '${block.id}'")
                 continue
@@ -58,6 +56,7 @@ object DataGenerator {
             val statePath = assetsRoot / "blockstates" / "${block.id.path}.json"
             writeAsset(statePath, stateJson)
 
+            // Models
             val modelJson = BlockProvider.generateBlock(block) ?: continue
             val modelPath = assetsRoot / "models" / "block" / "${block.id.path}.json"
             writeAsset(modelPath, modelJson)
