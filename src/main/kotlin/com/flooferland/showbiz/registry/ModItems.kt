@@ -26,8 +26,11 @@ enum class ModItems {
 
         this.item = Items.registerItem(
             ResourceKey.create(BuiltInRegistries.ITEM.key(), this.id),
-            constructor,
-            props
+            //? if >1.21.9 {
+            /*constructor, props
+            *///?} else {
+            constructor(props)
+            //?}
         )
     }
 }

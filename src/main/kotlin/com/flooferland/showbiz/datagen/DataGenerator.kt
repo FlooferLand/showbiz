@@ -58,10 +58,15 @@ object DataGenerator {
             val statePath = assetsRoot / "blockstates" / "${block.id.path}.json"
             writeAsset(statePath, stateJson)
 
-            // Models
-            val modelJson = BlockProvider.generateBlock(block) ?: continue
+            // Block model
+            val modelJson = BlockProvider.generateBlockModel(block) ?: continue
             val modelPath = assetsRoot / "models" / "block" / "${block.id.path}.json"
             writeAsset(modelPath, modelJson)
+
+            // Item model
+            val itemModelJson = BlockProvider.generateBlockItemModel(block) ?: continue
+            val itemModelPath = assetsRoot / "models" / "item" / "${block.id.path}.json"
+            writeAsset(itemModelPath, itemModelJson)
 
             // Item
             val itemJson = ItemProvider.generateItem(block.id.blockPath()) ?: continue

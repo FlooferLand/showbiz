@@ -21,7 +21,7 @@ object BlockProvider {
         }
     }
 
-    fun generateBlock(block: ModBlocks): JsonObject? {
+    fun generateBlockModel(block: ModBlocks): JsonObject? {
         return when (block.model!!) {
             BlockModelId.CubeAll -> buildJsonObject {
                 put("parent", rlVanilla("cube_all").blockPath().toString())
@@ -31,6 +31,12 @@ object BlockProvider {
             }
             BlockModelId.BlockEntity -> null
             BlockModelId.Custom -> null
+        }
+    }
+
+    fun generateBlockItemModel(block: ModBlocks): JsonObject? {
+        return buildJsonObject {
+            put("parent", block.id.blockPath().toString())
         }
     }
 

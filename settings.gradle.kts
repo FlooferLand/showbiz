@@ -29,6 +29,6 @@ stonecutter {
         fun mc(mcVersion: String, name: String = mcVersion) =
             version(name, mcVersion)
 
-        mc("1.21.9")
+        mc("1.21.1")
     }
 }
