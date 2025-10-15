@@ -37,6 +37,12 @@ repositories {
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") {
         name = "GeckoLib"
     }
+    maven("https://maven.pkg.github.com/FlooferLand/bizlib") {
+        name = "bizlib"
+    }
+    maven("https://www.jitpack.io") {
+        name = "Jitpack"
+    }
 }
 
 fun vers(name: String): String = property("vers.${name}") as String
@@ -45,6 +51,7 @@ dependencies {
     minecraft("com.mojang:minecraft:${minecraft}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
+    // Loader-specific
     if (loader == "fabric") {
         @Suppress("UnstableApiUsage")  // Fabric.. why is this needed..
         mappings(loom.layered {
@@ -59,6 +66,10 @@ dependencies {
         modImplementation("net.fabricmc.fabric-api:fabric-api:${dep("fabric_api")}")
         modImplementation("net.fabricmc:fabric-language-kotlin:${dep("fabric_language_kotlin")}")
     }
+
+    // Showbiz data library (https://github.com/FlooferLand/bizlib)
+    implementation("com.flooferland:bizlib:${dep("bizlib")}")
+    include("com.flooferland:bizlib:${dep("bizlib")}")
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")

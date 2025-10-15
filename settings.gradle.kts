@@ -5,6 +5,9 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
 
+        // Jitpack (GitHub packages)
+        maven("https://www.jitpack.io") { name = "JitPack" }
+
         // Loom platform
         maven("https://maven.fabricmc.net/")
 
@@ -16,6 +19,7 @@ pluginManagement {
         maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
     }
 }
+
 
 plugins {
     id("dev.kikugie.stonecutter") version "0.7.10"
