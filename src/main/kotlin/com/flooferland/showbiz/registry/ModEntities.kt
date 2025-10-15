@@ -11,17 +11,21 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
 import net.minecraft.world.level.Level
 
-sealed class ModEntities<T: Entity> {
+@Suppress("unused")
+sealed class ModEntities<T : Entity> {
     // data object Bot : ModEntities<BotEntity>("bot", ::BotEntity);
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>
     val type: EntityType<T>
-    constructor(id: String, factory: (EntityType<T>, Level) -> T) {
+    constructor(id: String, factory: EntityFactory<T>) {
         this.id = rl(id)
         this.key = ResourceKey.create(Registries.ENTITY_TYPE, this.id)
-        this.type = EntityType.Builder.of({ type, level -> factory(type, level) }, MobCategory.MISC)
+        this.type = EntityType.Builder.of<T>({ type, level -> factory.factory(level) }, MobCategory.MISC)
             .build(id)
         Registry.register(BuiltInRegistries.ENTITY_TYPE, this.id, this.type)
+    }
+    fun interface EntityFactory<T : Entity> {
+        fun factory(level: Level): T;
     }
 }

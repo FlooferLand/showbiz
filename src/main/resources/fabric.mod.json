@@ -32,6 +32,8 @@
         "fabricloader": ">=$fabric_loader",
         "minecraft": "$minecraft",
         "java": ">=$java",
-        "fabric-language-kotlin": ">=$fabric_language_kotlin"
+        "fabric-language-kotlin": ">=$fabric_language_kotlin",
+        "geckolib": "$geckolib",
+        "fabric-api": ">=$fabric_api"
     }
 }

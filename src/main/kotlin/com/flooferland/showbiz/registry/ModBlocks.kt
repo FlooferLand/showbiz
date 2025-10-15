@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.blocks.TestStageBlock
-import com.flooferland.showbiz.blocks.entities.TestStageBlockEntity
+import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.utils.rl
@@ -21,13 +21,14 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.state.BlockState
 
 enum class ModBlocks {
-    TestStage(
-        "test_stage", ::TestStageBlock,
+    StagedBot(
+        "staged_bot", ::StagedBotBlock,
         Properties.of()
                 .strength(5.0f)
                 .requiresCorrectToolForDrops()
-                .sound(SoundType.METAL),
-        entity = ::TestStageBlockEntity
+                .sound(SoundType.METAL)
+                .noOcclusion(),
+        entity = ::StagedBotBlockEntity
     );
 
     val id: ResourceLocation

@@ -28,12 +28,18 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
-
-    // Dev Auth
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://maven.parchmentmc.org") {
+        name = "ParchmentMC"
+    }
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") {
+        name = "DevAuth"
+    }
+    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") {
+        name = "GeckoLib"
+    }
 }
 
+fun vers(name: String): String = property("vers.${name}") as String
 fun dep(name: String): String = property("deps.${name}") as String
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft}")
@@ -53,6 +59,9 @@ dependencies {
         modImplementation("net.fabricmc.fabric-api:fabric-api:${dep("fabric_api")}")
         modImplementation("net.fabricmc:fabric-language-kotlin:${dep("fabric_language_kotlin")}")
     }
+
+    // GeckoLib
+    modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
     // Useful dev tools
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
@@ -87,12 +96,14 @@ tasks.withType<ProcessResources>().configureEach {
 
     val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
     val properties = mapOf(
-        "minecraft" to dep("minecraft"),
+        "minecraft" to vers("minecraft"),
         "version" to version as String,
         "java" to java.toString(),
         "kotlin" to kotlinVersion,
         "fabric_loader" to dep("fabric_loader"),
         "fabric_language_kotlin" to fabricLanguageKotlin,
+        "fabric_api" to dep("fabric_api"),
+        "geckolib" to vers("geckolib"),
         "archivesName" to modId,
         "archivesBaseName" to modId
     )
