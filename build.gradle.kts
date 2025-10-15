@@ -37,9 +37,6 @@ repositories {
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") {
         name = "GeckoLib"
     }
-    maven("https://maven.pkg.github.com/FlooferLand/bizlib") {
-        name = "bizlib"
-    }
     maven("https://www.jitpack.io") {
         name = "Jitpack"
     }
