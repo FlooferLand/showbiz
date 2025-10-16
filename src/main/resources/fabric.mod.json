@@ -27,7 +27,6 @@
             }
         ]
     },
-    "mixins": [],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "minecraft": "$minecraft",

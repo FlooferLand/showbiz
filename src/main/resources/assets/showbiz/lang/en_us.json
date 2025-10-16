@@ -2,5 +2,7 @@
     "itemGroup.showbiz.main": "Showbiz",
 
     "block.showbiz.staged_bot": "Staged Bot",
+    "block.showbiz.playback_controller": "Playback Controller",
+
     "item.showbiz.wand": "Wand"
 }

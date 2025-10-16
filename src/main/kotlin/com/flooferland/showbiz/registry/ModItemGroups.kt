@@ -1,15 +1,19 @@
 package com.flooferland.showbiz.registry
 
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.Registry
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.network.chat.Component
-import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.core.*
+import net.minecraft.core.registries.*
+import net.minecraft.network.chat.*
+import net.minecraft.world.item.*
 
 enum class ModItemGroups {
     Main("main", { params, out ->
-        out.accept(ModBlocks.StagedBot.item)
-        out.accept(ModItems.Wand.item)
+        for (block in ModBlocks.entries) {
+            out.accept(block.item)
+        }
+        for (item in ModItems.entries) {
+            out.accept(item.item)
+        }
     });
 
     constructor(name: String, generator: CreativeModeTab.DisplayItemsGenerator) {

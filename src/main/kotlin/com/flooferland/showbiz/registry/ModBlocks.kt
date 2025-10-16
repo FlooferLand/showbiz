@@ -1,34 +1,39 @@
 package com.flooferland.showbiz.registry
 
+import com.flooferland.showbiz.blocks.PlaybackControllerBlock
 import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.BlockPos
-import net.minecraft.core.Registry
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.item.BlockItem
-import net.minecraft.world.item.Items
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.SoundType
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.core.*
+import net.minecraft.core.registries.*
+import net.minecraft.resources.*
+import net.minecraft.world.item.*
+import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.level.block.state.BlockBehaviour.*
 
 enum class ModBlocks {
     StagedBot(
         "staged_bot", ::StagedBotBlock,
         Properties.of()
-                .strength(5.0f)
-                .requiresCorrectToolForDrops()
-                .sound(SoundType.METAL)
-                .noOcclusion(),
+            .strength(5.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.METAL)
+            .noOcclusion(),
         entity = ::StagedBotBlockEntity
+    ),
+    PlaybackController(
+        "playback_controller", ::PlaybackControllerBlock,
+        Properties.of()
+            .strength(5.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        entity = ::PlaybackControllerBlockEntity
     );
 
     val id: ResourceLocation
@@ -36,10 +41,9 @@ enum class ModBlocks {
     lateinit var item: BlockItem
     var model: BlockModelId? = null
     var entity: BlockEntityType<*>? = null
-    constructor(name: String, constructor: (Properties) -> Block, props: Properties, model: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null) {
+    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null) {
         this.id = rl(name)
-        this.model = model;
-        if (DataGenerator.engaged) return
+        this.model = modelPreset;
 
         this.block = Blocks.register(
             ResourceKey.create(BuiltInRegistries.BLOCK.key(), this.id),
@@ -51,7 +55,7 @@ enum class ModBlocks {
         )
         this.item = Items.registerBlock(this.block) as BlockItem
 
-        if (entity != null) {
+        if (entity != null && !DataGenerator.engaged) {
             this.entity = BlockEntityType.Builder.of(entity, this.block).build()
             Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entity!!)
         }

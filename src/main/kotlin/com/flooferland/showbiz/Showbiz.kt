@@ -1,8 +1,6 @@
 package com.flooferland.showbiz
 
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModItemGroups
-import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.registry.*
 import net.fabricmc.api.ModInitializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,8 +15,14 @@ object Showbiz : ModInitializer {
             ModBlocks.entries
             ModItems.entries
             ModItemGroups.entries
+            ModSounds.entries
+            ModComponents.WandBind
         }
 
+        // Networking
+        ModPackets.registerS2C()
+
+        // Finished
         log.info("Enjoy the show!")
     }
 }

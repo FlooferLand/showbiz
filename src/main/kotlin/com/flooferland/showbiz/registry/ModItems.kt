@@ -1,19 +1,19 @@
 package com.flooferland.showbiz.registry
 
+import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
+import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
-import net.minecraft.world.item.Items
+import net.minecraft.core.registries.*
+import net.minecraft.resources.*
+import net.minecraft.world.item.*
+import net.minecraft.world.item.Item.*
 
 enum class ModItems {
     Wand(
-        "wand", ::Item,
-        Properties()
+        "wand", ::WandItem,
+        Properties().stacksTo(1).component(ModComponents.WandBind.type, OptionBlockPos.EMPTY)
     );
 
     val id: ResourceLocation

@@ -1,7 +1,9 @@
 package com.flooferland.showbiz.datagen.providers
 
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.blockPath
+import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlVanilla
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -12,21 +14,19 @@ object BlockProvider {
     enum class BlockModelId {
         CubeAll,
         BlockEntity,
-        Custom;
-
-        var data: JsonObject? = null
-        companion object {
-            fun withData(data: JsonObject): BlockModelId =
-                BlockModelId.Custom.also { it.data = data }
-        }
+        Custom
     }
 
-    fun generateBlockModel(block: ModBlocks): JsonObject? {
+    fun generateBlockModel(block: ModBlocks, model: CustomBlockModel.Model): JsonObject? {
+        val customModel = (block.block as? CustomBlockModel)?.modelData()
+        customModel?.let { return@generateBlockModel customModel }
+
         return when (block.model!!) {
             BlockModelId.CubeAll -> buildJsonObject {
                 put("parent", rlVanilla("cube_all").blockPath().toString())
                 putJsonObject("textures") {
-                    put("all", block.id.blockPath().toString())
+                    val texName = if (model.textures.isEmpty()) block.id.blockPath() else model.textures.first()
+                    put("all", texName.toString())
                 }
             }
             BlockModelId.BlockEntity -> null
@@ -34,22 +34,25 @@ object BlockProvider {
         }
     }
 
-    fun generateBlockItemModel(block: ModBlocks): JsonObject? {
+    fun generateStates(block: ModBlocks, states: List<CustomBlockModel.Variation>): JsonObject? {
         return buildJsonObject {
-            put("parent", block.id.blockPath().toString())
-        }
-    }
-
-    fun generateState(block: ModBlocks): JsonObject? {
-        return when (block.model!!) {
-            BlockModelId.BlockEntity, BlockModelId.CubeAll -> buildJsonObject {
-                putJsonObject("variants") {
+            putJsonObject("variants") {
+                if (states.isEmpty()) {
                     putJsonObject("") {
                         put("model", block.id.blockPath().toString())
                     }
+                } else for (state in states) {
+                    putJsonObject("${state.prop.name}=${state.expected}") {
+                        put("model", rl(state.name.name!!).blockPath().toString())
+                    }
                 }
             }
-            BlockModelId.Custom -> null
+        }
+    }
+
+    fun generateBlockItemModel(block: ModBlocks, state: CustomBlockModel.StateModel): JsonObject? {
+        return buildJsonObject {
+            put("parent", rl(state.name.toString()).blockPath().toString())
         }
     }
 }
