@@ -63,8 +63,6 @@ interface CustomBlockModel {
         //       Only supports one block state rn
         fun getDefaultState(): StateModel {
             if (!buildFinished) finish()
-            println(states.size)
-            println(defaultStateProp?.name)
             val found = states.firstOrNull({ state -> state.prop.name == defaultStateProp?.name })
             return found?.state ?: states.firstOrNull()!!.state
         }

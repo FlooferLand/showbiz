@@ -6,6 +6,7 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.registry.blocks.CustomBlockModel
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.network.chat.*
@@ -42,6 +43,7 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
     }
 
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
+        // -- Only broadcasted when level.isClientSide is true, so server-client communication doesn't work
         if (level.isClientSide) return ItemInteractionResult.CONSUME
         if (stack.item is WandItem) {
             return ItemInteractionResult.FAIL
@@ -58,9 +60,7 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
                 val botEntity = entity.boundBot?.let { level.getBlockEntity(it) }
                 if (botEntity is StagedBotBlockEntity) {
                     botEntity.playing = isOn
-                    entity.boundBot?.let { level.blockEntityChanged(it) }
-                    botEntity.setChanged()
-                    // TODO: For some reason teh block entity doesn't actually get updated.. Networking issue? I know its not GeckoLib related
+                    botEntity.markDirtyNotifyAll()
                 }
             } else {
                 player.displayClientMessage(Component.literal("Not bound to any bot"), true)

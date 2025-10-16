@@ -2,6 +2,8 @@ package com.flooferland.showbiz.models
 
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.client.*
+import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
@@ -19,7 +21,9 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         // Test animation
         // TODO: Remove constant query to the world once the BlockEntity desync bug is fixed
         val be = animatable.level?.getBlockEntity(animatable.blockPos) as? StagedBotBlockEntity
-        println("${be?.playing}")
+        Minecraft.getInstance().player?.let {
+            it.displayClientMessage(Component.literal("${be?.playing}"), true)
+        }
         if (be != null && be.playing) {
             val upperBody = animationProcessor.getBone("upper_body")
             upperBody.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.1f

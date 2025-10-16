@@ -1,8 +1,10 @@
 package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import net.minecraft.core.*
 import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 
@@ -17,12 +19,21 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        val data = tag.getIntArray("boundBot")
-        if (data.isNotEmpty() && data.size == 3) {
+        val data = tag.getIntArrayOrNull("boundBot")
+        if (data != null && data.isNotEmpty() && data.size == 3) {
             boundBot = BlockPos(data[0], data[1], data[2])
         } else {
             boundBot = null
         }
         super.loadAdditional(tag, registries)
     }
+
+    override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
+        val tag = CompoundTag()
+        saveAdditional(tag, registries)
+        return tag
+    }
+
+    override fun getUpdatePacket() =
+        ClientboundBlockEntityDataPacket.create(this)!!
 }
