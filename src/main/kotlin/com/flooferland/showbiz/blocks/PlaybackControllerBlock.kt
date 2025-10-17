@@ -72,7 +72,7 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
     }
 
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
-        builder.defaultState(playing, false)
+        builder.defaultState(playing, true)
         builder.bool(playing) {
             trueState(postfix = "on") {
                 model { endTextureWith(name.postfix) }

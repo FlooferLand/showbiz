@@ -16,6 +16,9 @@ interface CustomBlockModel {
     fun modelBlockStates(builder: BlockStateBuilder, blockId: ResourceLocation) {}
     fun modelBlockStates(builder: BlockStateBuilder) {}
 
+    @DslMarker
+    annotation class CustomBlockModelDsl
+
     class NameBuilder(ctx: BlockStateBuilder, name: String?, val postfix: String?) {
         var name: String? = null
         override fun toString(): String = name ?: ""
@@ -28,6 +31,7 @@ interface CustomBlockModel {
         }
     }
 
+    @CustomBlockModelDsl
     class BlockStateBuilder(val blockId: ResourceLocation, val block: Block) {
         constructor(block: ModBlocks) : this(block.id, block.block)
 
@@ -36,7 +40,6 @@ interface CustomBlockModel {
         private var defaultStateProp: StrippedProperty? = null
         private var buildFinished = false
 
-        // TODO: Clean this up, funky code I'm writing while sleepy.
         fun finish() {
             if (buildFinished) return
             if (states.isEmpty()) {
@@ -74,6 +77,7 @@ interface CustomBlockModel {
         }
 
         // Bool
+        @CustomBlockModelDsl
         class BoolStateScope(val ctx: BlockStateBuilder, val prop: BooleanProperty) {
             public fun trueState(name: String? = null, postfix: String? = null, block: StateModel.() -> Unit) {
                 val name = NameBuilder(ctx, name = name, postfix = postfix)
@@ -102,11 +106,13 @@ interface CustomBlockModel {
     }
 
     /** Type erasure for the normal *Property classes */
+    @CustomBlockModelDsl
     class StrippedProperty(val name: String, val default: Any) {
         constructor(block: Block, prop: Property<*>) : this(prop.name, block.defaultBlockState().getValue(prop))
     }
 
     /** A block state variation. Stores a name, a value, and the block state */
+    @CustomBlockModelDsl
     data class Variation(
         public val ctx: BlockStateBuilder,
         public val prop: StrippedProperty,
@@ -114,10 +120,13 @@ interface CustomBlockModel {
         public val state: StateModel,
         public val name: NameBuilder
     )
+
     class StateModel(val ctx: BlockStateBuilder, val name: NameBuilder) {
         var model: Model? = null
         fun model(block: Model.() -> Unit) = apply { this.model = Model(ctx).apply(block) }
     }
+
+    @CustomBlockModelDsl
     class Model(val ctx: BlockStateBuilder) {
         public val textures = mutableListOf<ResourceLocation>()
         private fun addTex(tex: ResourceLocation) = textures.add(tex.blockPath())
