@@ -9,11 +9,11 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
-import software.bernie.geckolib.animatable.instance.InstancedAnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
+import software.bernie.geckolib.util.GeckoLibUtil
 
 class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity {
-    val cache = InstancedAnimatableInstanceCache(this)
+    val cache = GeckoLibUtil.createInstanceCache(this)!!
 
     public var playing = false
 
