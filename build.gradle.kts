@@ -40,6 +40,13 @@ repositories {
     maven("https://www.jitpack.io") {
         name = "Jitpack"
     }
+    exclusiveContent {
+        forRepository {
+            maven("https://api.modrinth.com/maven") {
+                name = "Modrinth"
+            }
+        }; filter { includeGroup("maven.modrinth") }
+    }
 }
 
 fun vers(name: String): String = property("vers.${name}") as String
@@ -73,6 +80,9 @@ dependencies {
 
     // Useful dev tools
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
+    modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("dev.sodium")}-$loader")
+    modRuntimeOnly("maven.modrinth:sodium-extra:mc$minecraft-${dep("dev.sodium_extra")}+$loader")
+    modRuntimeOnly("maven.modrinth:iris:${dep("dev.iris")}+$minecraft-$loader")
 }
 
 // Mappings
