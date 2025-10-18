@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.items
 
-import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.flooferland.showbiz.blocks.PlaybackControllerBlock
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.network.chat.*
 import net.minecraft.sounds.*
@@ -25,29 +26,24 @@ class WandItem(properties: Properties) : Item(properties) {
         val comp = ctx.itemInHand.components.get(ModComponents.WandBind.type)!!
         val compBlockEntity: BlockEntity? = comp.pos.getOrNull()?.let { level.getBlockEntity(it) }
         val blockEntity = level.getBlockEntity(ctx.clickedPos)
-        if (state.block is StagedBotBlock) {
-            player.displayClientMessage(Component.literal("Right click on a playback control block next"), true)
+        if (state.block is PlaybackControllerBlock) {
+            player.displayClientMessage(Component.literal("Right click on a bot block next"), true)
             comp.pos = Optional.of(ctx.clickedPos)
             ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
-            player.displayClientMessage(Component.literal("Wawa '${comp.pos.getOrNull()}'!"), false)
             player.playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 1.0f, 1.0f)
-            return InteractionResult.CONSUME
-        } else if (blockEntity is PlaybackControllerBlockEntity && compBlockEntity is StagedBotBlockEntity) {
-            // Binding the previous block to the current one
-            comp.pos.ifPresent { blockEntity.boundBot = it }
-
-            // Binding the current block to the previous one
-            // ..
-
+            return InteractionResult.SUCCESS
+        } else if (blockEntity is StagedBotBlockEntity && compBlockEntity is PlaybackControllerBlockEntity) {
+            // Setting the StagedBotBlockEntity's reference to the controller
+            comp.pos.ifPresent { blockEntity.applyChange(true) { controllerPos = it } }
             comp.pos = Optional.empty()
             ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
             player.playNotifySound(ModSounds.End.event, SoundSource.PLAYERS, 1.0f, 1.0f)
-            return InteractionResult.CONSUME
+            return InteractionResult.SUCCESS
         }
 
         comp.pos = Optional.empty()
         ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
         player.playNotifySound(ModSounds.Deselect.event, SoundSource.PLAYERS, 1.0f, 0.8f)
-        return InteractionResult.CONSUME
+        return InteractionResult.SUCCESS
     }
 }

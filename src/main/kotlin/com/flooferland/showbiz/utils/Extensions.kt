@@ -24,6 +24,13 @@ object Extensions {
         level?.sendBlockUpdated(this.blockPos, blockState, blockState, 0)
     }
 
+    @DslMarker annotation class BlockEntityApplyDsl;
+    @BlockEntityApplyDsl
+    fun <T: BlockEntity> T.applyChange(rerender: Boolean, change: T.() -> Unit) {
+        change(this)
+        markDirtyNotifyAll()
+    }
+
     //region Compound get functions, since these change for 1.21.5+
     fun CompoundTag.getBooleanOrNull(string: String): Boolean? =
         if (contains(string)) getBoolean(string) else null
@@ -31,7 +38,7 @@ object Extensions {
         if (contains(string)) getInt(string) else null
     fun CompoundTag.getFloatOrNull(string: String): Float? =
         if (contains(string)) getFloat(string) else null
-    fun CompoundTag.getDoublerNull(string: String): Double? =
+    fun CompoundTag.getDoubleOrNull(string: String): Double? =
         if (contains(string)) getDouble(string) else null
     fun CompoundTag.getStringOrNull(string: String): String? =
         if (contains(string)) getString(string) else null

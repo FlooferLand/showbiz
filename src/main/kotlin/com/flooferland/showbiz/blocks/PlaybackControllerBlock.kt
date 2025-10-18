@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.blocks
 
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
@@ -9,7 +8,6 @@ import com.flooferland.showbiz.registry.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
-import net.minecraft.network.chat.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
@@ -30,6 +28,9 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
     init {
         registerDefaultState(stateDefinition.any().setValue(playing, false))
     }
+
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
+        BlockEntityTicker({ _, _, _, entity -> (entity as? PlaybackControllerBlockEntity)?.tick() })
 
     override fun codec(): MapCodec<out BaseEntityBlock> = codec
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
@@ -56,15 +57,9 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
         // Updating the block entity
         val entity = level.getBlockEntity(pos)
         if (entity is PlaybackControllerBlockEntity) {
-            if (entity.boundBot != null) {
-                val botEntity = entity.boundBot?.let { level.getBlockEntity(it) }
-                if (botEntity is StagedBotBlockEntity) {
-                    botEntity.playing = isOn
-                    botEntity.markDirtyNotifyAll()
-                }
-            } else {
-                player.displayClientMessage(Component.literal("Not bound to any bot"), true)
-            }
+            entity.playing = isOn
+            if (!isOn) entity.seek = 0.0
+            entity.markDirtyNotifyAll()
         }
 
         level.setBlockAndUpdate(pos, state.setValue(playing, isOn))
