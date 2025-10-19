@@ -34,6 +34,8 @@ object Extensions {
     //region Compound get functions, since these change for 1.21.5+
     fun CompoundTag.getBooleanOrNull(string: String): Boolean? =
         if (contains(string)) getBoolean(string) else null
+    fun CompoundTag.getByteOrNull(string: String): Byte? =
+        if (contains(string)) getByte(string) else null
     fun CompoundTag.getIntOrNull(string: String): Int? =
         if (contains(string)) getInt(string) else null
     fun CompoundTag.getFloatOrNull(string: String): Float? =
@@ -44,5 +46,7 @@ object Extensions {
         if (contains(string)) getString(string) else null
     fun CompoundTag.getIntArrayOrNull(string: String): IntArray? =
         if (contains(string)) getIntArray(string) else null
+    fun CompoundTag.getByteArrayOrNull(string: String): ByteArray? =
+        if (contains(string)) getByteArray(string) else null
     //endregion
 }

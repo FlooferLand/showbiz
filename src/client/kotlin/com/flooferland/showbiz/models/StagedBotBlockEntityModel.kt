@@ -2,19 +2,74 @@ package com.flooferland.showbiz.models
 
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.show.Drawer
+import com.flooferland.showbiz.show.SignalFrame
+import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.*
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
 import kotlin.math.sin
 
 class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("conner")) {
+    class CachedController(val controller: PlaybackControllerBlockEntity, val position: BlockPos?)
+    var cachedController: CachedController? = null
+    var lastTickTime: Double = 0.0
+    val testBitmap = TestBitmap()
+
     override fun subtype(): String = "block"
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? = null
 
+    data class MappedBit(val bit: Int, val drawer: Drawer, var value: Boolean = false, var valueSmooth: Float = 0f)
+
+    @Suppress("unused")
+    class TestBitmap {  // Modeled on Beach Bear
+        val bits = mutableListOf<MappedBit>()
+
+        val none = mapped(0, Drawer.Top)
+        val headLeft = mapped(6, Drawer.Bottom)
+        val headRight = mapped(7, Drawer.Bottom)
+        val headUp = mapped(8, Drawer.Bottom)
+        val body = mapped(15, Drawer.Bottom)
+        val mouth = mapped(16, Drawer.Bottom)
+
+        fun mapped(bit: Int, drawer: Drawer): MappedBit {
+            val bit = if (drawer == Drawer.Bottom) bit + SignalFrame.NEXT_DRAWER else bit
+            val mapped = MappedBit(bit, drawer)
+            bits.add(mapped)
+            return mapped
+        }
+
+        fun update(frame: SignalFrame, delta: Float) {
+            for (bit in bits) {
+                bit.value = frame.anyDrawerHas(bit.bit) /*when (bit.drawer) {
+                    Drawer.Top -> frame.highDrawerHas(bit.bit)
+                    Drawer.Bottom -> frame.lowDrawerHas(bit.bit)
+                }*/
+                // if (bit.value && bit.bit != 0) println("Bit: ${bit.bit}")
+                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, 1.2f * delta)
+            }
+        }
+    }
+
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
+        // Delta-time
+        val deltaTime = state.animationTick - lastTickTime
+        lastTickTime = state.animationTick
+
         // Getting the animation controller
-        val controller = animatable.controllerPos?.let { animatable.level?.getBlockEntity(it) } as? PlaybackControllerBlockEntity
+        if (cachedController == null || animatable.controllerPos != cachedController?.position) {
+            animatable.controllerPos?.let {
+                val controller = animatable.level?.getBlockEntity(it) as? PlaybackControllerBlockEntity
+                if (controller != null) {
+                    cachedController = CachedController(position = animatable.controllerPos, controller = controller)
+                } else {
+                    cachedController = null
+                }
+            }
+        }
+        if (cachedController == null) return
 
         // Getting bones
         val base = animationProcessor.getBone("animatronic")
@@ -41,15 +96,20 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         base.posY = 16.0f
 
         // Test animation
-        if (controller != null && controller.playing) {
-            upperBody.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.1f
-            lowerBody.rotX = sin(state.animationTick * 0.8f).toFloat() * 0.05f
-            upperArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
-            lowerArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
-            upperArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
-            lowerArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
-            head.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.2f
-            jaw.rotZ = if (controller.signal != 0) 20f else 0f
+        val controller = cachedController!!.controller
+        testBitmap.update(controller.signal, deltaTime.toFloat())
+        if (controller.playing) {
+            upperBody.rotX = sin(state.animationTick * 0.1f).toFloat() * 0.03f
+            lowerBody.rotX = sin(state.animationTick * 0.2f).toFloat() * 0.02f
+            //upperArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
+            //lowerArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
+            //upperArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
+            //lowerArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
+            head.rotX = sin(state.animationTick * 0.3f).toFloat() * 0.04f
+
+            head.rotX += (Math.toRadians(15.0) * testBitmap.headUp.valueSmooth).toFloat()
+            head.rotY = (Math.toRadians(15.0) * (testBitmap.headRight.valueSmooth - testBitmap.headLeft.valueSmooth)).toFloat()
+            jaw.rotX = (Math.toRadians(-25.0) * testBitmap.mouth.valueSmooth).toFloat()
         }
     }
 }

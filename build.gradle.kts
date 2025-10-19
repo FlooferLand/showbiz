@@ -82,7 +82,6 @@ dependencies {
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
     modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("dev.sodium")}-$loader")
     modRuntimeOnly("maven.modrinth:sodium-extra:mc$minecraft-${dep("dev.sodium_extra")}+$loader")
-    modRuntimeOnly("maven.modrinth:iris:${dep("dev.iris")}+$minecraft-$loader")
 }
 
 // Mappings
