@@ -1,11 +1,11 @@
 package com.flooferland.showbiz.blocks.entities
 
-import com.flooferland.bizlib.RawShowData
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getByteArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.ShowbizUtils
 import net.minecraft.core.*
@@ -19,11 +19,13 @@ import kotlin.io.path.Path
 import kotlin.math.roundToInt
 
 class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.PlaybackController.entity!!, pos, blockState) {
-    public var show: RawShowData? = null
+    public var show: ShowData = ShowData()
     public var playing = false
     public var seek = 0.0
     public val signal = SignalFrame()
-    public val audio = byteArrayOf()
+
+    private val tickDelta = (50 * 0.001) // ms
+    private val fps = 60  // Tied to rshw
 
     // -- Each song's metadata should be extracted manually for now (I like using foobar2000 for this)
     private val aSampleRate = 44100
@@ -33,6 +35,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
     private val aBufferSize = (aSampleRate * aFrameMs) / 1_000
     private var aFormat: AudioFormat? = null
     private var audioLine: SourceDataLine? = null
+
     private var bytesWritten: Int = 0
 
     companion object {
@@ -43,26 +46,21 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
     }
 
     fun tick() {
-        if (!playing || show == null) return
-        seek += 1
-        val seekInt = seek.roundToInt()
+        if (!playing || show.isEmpty()) return
         var shouldUpdate = false
+
+        seek += tickDelta
+        val seekInt = (seek * fps).roundToInt()
 
         // Signal
         run {
-            // TODO: Fix signal playback, not working currently
-            // Split (idk if this works)
-            /*val start = seekInt * 2
-            val end = (start + 2).coerceAtMost(show?.signal?.size ?: 0)
-            val sig = show?.signal?.sliceArray(start until end) ?: intArrayOf()
-            signal.setFrom(sig)*/
+            // TODO: Figure out how rshw playback works and write signal playback
 
-            // Combined
-            /*val sig = show?.signal[seekInt]
-            sig?.let { signal.setFromOne(it) }*/
-
-            shouldUpdate = true
-            println("bit: ${signal.arr()[0]} ${signal.arr()[1]}")
+            val entry = show.signal.getOrNull(seekInt)
+            entry?.let {
+                signal.load(entry)
+                shouldUpdate = true
+            }
         }
 
         // Initializing audio
@@ -72,16 +70,16 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         }
 
         // Playing back audio
-        if (bytesWritten < (show?.audio?.size ?: 0)) {
+        if (bytesWritten < show.audio.size) {
             var toWrite = aBufferSize
             toWrite -= toWrite % aFormat!!.frameSize // align to frame
 
-            val remain = (show?.audio?.size ?: 0) - bytesWritten
+            val remain = show.audio.size - bytesWritten
             if (toWrite > remain) toWrite = remain
 
             if (toWrite > 0) {
-                val chunk = show?.audio?.copyOfRange(bytesWritten, bytesWritten + toWrite)
-                audioLine?.write(chunk, 0, chunk?.size ?: 0)
+                val chunk = show.audio.copyOfRange(bytesWritten, bytesWritten + toWrite)
+                audioLine?.write(chunk, 0, chunk.size)
                 bytesWritten += toWrite
                 shouldUpdate = true
             }
@@ -97,8 +95,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         // Save other
         tag.putBoolean("playing", playing)
         tag.putDouble("seek", seek)
-        tag.putIntArray("signalFrame", signal.arr())
-        //tag.putByteArray("audioChunk", audio)
+        tag.putByteArray("signalFrame", signal.save())
         if (!playing) {
             audioLine?.close()
             audioLine = null
@@ -111,8 +108,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         // Load other
         playing = tag.getBooleanOrNull("playing") ?: false
         seek = tag.getDoubleOrNull("seek") ?: 0.0
-        signal.setFrom(tag.getIntArrayOrNull("signalFrame"))
-        //audio = tag.getByteArrayOrNull("audioChunk") ?: byteArrayOf()
+        signal.load(tag.getByteArrayOrNull("signalFrame"))
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
@@ -125,7 +121,6 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         ClientboundBlockEntityDataPacket.create(this) { _, registries ->
             val tag = CompoundTag()
             saveAdditional(tag, registries)
-            // tag.putInt("signal", signal)
             tag
         }
 }

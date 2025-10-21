@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.blocks
 
-import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.items.WandItem
@@ -63,12 +62,10 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
                 entity.applyChange(true) {
                     playing = isOn
                     if (!isOn) entity.seek = 0.0
-                    if (show == null) {
-                        val format = RshowFormat()
+                    if (show.isEmpty()) {
                         val stream = Files.newInputStream(PlaybackControllerBlockEntity.TEST_FILE)
                         Showbiz.log.info("Loading show '${PlaybackControllerBlockEntity.TEST_FILE.fileName}'")
-                        show = runCatching { format.read(stream) }.getOrNull()
-                        Showbiz.log.info("Show loaded! (audioData=${show?.audio?.size}, signalData=${show?.signal?.size})")
+                        show.load(stream)
                         stream.close()
                     }
                 }

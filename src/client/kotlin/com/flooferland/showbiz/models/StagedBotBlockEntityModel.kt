@@ -21,7 +21,7 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
     override fun subtype(): String = "block"
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? = null
 
-    data class MappedBit(val bit: Int, val drawer: Drawer, var value: Boolean = false, var valueSmooth: Float = 0f)
+    data class MappedBit(val bitId: Byte, val drawer: Drawer, var value: Boolean = false, var valueSmooth: Float = 0f)
 
     @Suppress("unused")
     class TestBitmap {  // Modeled on Beach Bear
@@ -34,8 +34,8 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         val body = mapped(15, Drawer.Bottom)
         val mouth = mapped(16, Drawer.Bottom)
 
-        fun mapped(bit: Int, drawer: Drawer): MappedBit {
-            val bit = if (drawer == Drawer.Bottom) bit + SignalFrame.NEXT_DRAWER else bit
+        fun mapped(bitId: Byte, drawer: Drawer): MappedBit {
+            val bit: Byte = if (drawer == Drawer.Bottom) (bitId + SignalFrame.NEXT_DRAWER).toByte() else bitId
             val mapped = MappedBit(bit, drawer)
             bits.add(mapped)
             return mapped
@@ -43,12 +43,9 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
 
         fun update(frame: SignalFrame, delta: Float) {
             for (bit in bits) {
-                bit.value = frame.anyDrawerHas(bit.bit) /*when (bit.drawer) {
-                    Drawer.Top -> frame.highDrawerHas(bit.bit)
-                    Drawer.Bottom -> frame.lowDrawerHas(bit.bit)
-                }*/
+                bit.value = frame.frameHas(bit.bitId)
                 // if (bit.value && bit.bit != 0) println("Bit: ${bit.bit}")
-                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, 1.2f * delta)
+                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, 0.8f * delta)
             }
         }
     }
