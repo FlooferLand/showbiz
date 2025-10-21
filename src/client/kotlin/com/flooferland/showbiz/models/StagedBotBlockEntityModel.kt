@@ -10,7 +10,6 @@ import net.minecraft.core.*
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
-import kotlin.math.sin
 
 class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("conner")) {
     class CachedController(val controller: PlaybackControllerBlockEntity, val position: BlockPos?)
@@ -21,22 +20,22 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
     override fun subtype(): String = "block"
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? = null
 
-    data class MappedBit(val bitId: Byte, val drawer: Drawer, var value: Boolean = false, var valueSmooth: Float = 0f)
+    data class MappedBit(val bitId: Byte, val drawer: Drawer, val flowSpeed: Double, var value: Boolean = false, var valueSmooth: Float = 0f)
 
     @Suppress("unused")
     class TestBitmap {  // Modeled on Beach Bear
         val bits = mutableListOf<MappedBit>()
 
-        val none = mapped(0, Drawer.Top)
-        val headLeft = mapped(6, Drawer.Bottom)
-        val headRight = mapped(7, Drawer.Bottom)
-        val headUp = mapped(8, Drawer.Bottom)
-        val body = mapped(15, Drawer.Bottom)
-        val mouth = mapped(16, Drawer.Bottom)
+        val none = mapped(0, Drawer.Top, 1.0)
+        val headLeft = mapped(6, Drawer.Bottom, 1.0)
+        val headRight = mapped(7, Drawer.Bottom, 1.0)
+        val headUp = mapped(8, Drawer.Bottom, 1.0)
+        val body = mapped(15, Drawer.Bottom, 0.3)
+        val mouth = mapped(16, Drawer.Bottom, 1.5)
 
-        fun mapped(bitId: Byte, drawer: Drawer): MappedBit {
+        fun mapped(bitId: Byte, drawer: Drawer, flowSpeed: Double): MappedBit {
             val bit: Byte = if (drawer == Drawer.Bottom) (bitId + SignalFrame.NEXT_DRAWER).toByte() else bitId
-            val mapped = MappedBit(bit, drawer)
+            val mapped = MappedBit(bit, drawer, flowSpeed)
             bits.add(mapped)
             return mapped
         }
@@ -45,7 +44,7 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
             for (bit in bits) {
                 bit.value = frame.frameHas(bit.bitId)
                 // if (bit.value && bit.bit != 0) println("Bit: ${bit.bit}")
-                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, 0.8f * delta)
+                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, (bit.flowSpeed.toFloat() * 0.2f) * delta)
             }
         }
     }
@@ -96,13 +95,8 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         val controller = cachedController!!.controller
         testBitmap.update(controller.signal, deltaTime.toFloat())
         if (controller.playing) {
-            upperBody.rotX = sin(state.animationTick * 0.1f).toFloat() * 0.03f
-            lowerBody.rotX = sin(state.animationTick * 0.2f).toFloat() * 0.02f
-            //upperArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
-            //lowerArmRight.rotX = sin(state.animationTick * 0.4f).toFloat() * 0.15f
-            //upperArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
-            //lowerArmLeft.rotX = sin(state.animationTick * 0.5f).toFloat() * 0.15f
-            head.rotX = sin(state.animationTick * 0.3f).toFloat() * 0.04f
+            upperBody.rotX = (Math.toRadians(-4.0) * testBitmap.body.valueSmooth).toFloat()
+            lowerBody.rotX = (Math.toRadians(-6.0) * testBitmap.body.valueSmooth).toFloat()
 
             head.rotX += (Math.toRadians(15.0) * testBitmap.headUp.valueSmooth).toFloat()
             head.rotY = (Math.toRadians(15.0) * (testBitmap.headRight.valueSmooth - testBitmap.headLeft.valueSmooth)).toFloat()
