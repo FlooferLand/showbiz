@@ -1,9 +1,18 @@
 package com.flooferland.showbiz.show
 
 import com.flooferland.bizlib.formats.RshowFormat
+import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
-import java.io.InputStream
+import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.utils.Extensions.getStringOrNull
+import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import net.minecraft.nbt.*
+import java.nio.file.Files
 import java.util.UUID
+import kotlin.io.path.Path
 
 // Should probably use UByte, but its experimental since JVM doesn't really support unsignedness
 
@@ -11,33 +20,75 @@ import java.util.UUID
  * Abstraction class to work with rshw.
  * Every rshw frame is a list of currently played bits, collecting that at load time is way nicer.
  */
-class ShowData {
+class ShowData(val owner: PlaybackControllerBlockEntity) {
     // TODO: Convert signal to a list of longs and pack bit ids using bitwise operations
     val signal: MutableList<ByteArray> = ArrayList()
     var audio: ByteArray = ByteArray(0)
     var id: UUID? = null
+    var name: String? = null
 
-    fun isEmpty() = signal.isEmpty() || audio.isEmpty()
+    var loading = false
 
-    fun load(toLoad: InputStream) {
-        signal.clear()
-        id = UUID.randomUUID()
+    fun isEmpty() = signal.isEmpty() || audio.isEmpty() || name == null
 
-        val loaded = RshowFormat().read(toLoad)
-        audio = loaded.audio
+    fun load(filename: String, playOnLoad: Boolean = false) {
+        reset()
+        loading = true
 
-        // Parsing signal data
-        val current = mutableListOf<Byte>()
-        for (s in loaded.signal) {
-            if (s == 0) {
-                signal.add(current.toByteArray())
-                current.clear()
-            } else {
-                current.add(s.toByte())
+        val coro = CoroutineScope(Dispatchers.IO).launch {
+            val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))
+            val loaded = RshowFormat().read(stream)
+            audio = loaded.audio
+            name = filename
+            id = UUID.randomUUID()
+
+            // Parsing signal data
+            val current = mutableListOf<Byte>()
+            for (s in loaded.signal) {
+                if (s == 0) {
+                    signal.add(current.toByteArray())
+                    current.clear()
+                } else {
+                    current.add(s.toByte())
+                }
             }
         }
 
-        // Notification
-        Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
+        coro.invokeOnCompletion { err ->
+            loading = false
+            if (err == null) {
+                Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
+                if (playOnLoad) owner.playing = true
+            } else {
+                Showbiz.log.error(err.toString())
+            }
+        }
+    }
+
+    fun loadNBT(tag: CompoundTag?) {
+        if (tag == null) return
+        val showId = tag.getUUIDOrNull("Show-Id") ?: return
+        val showName = tag.getStringOrNull("Show-Name") ?: return
+
+        // TODO: Load the show from metadata. Currently VERY buggy
+        val notUseless = (showName != name && !owner.playing)
+        if (notUseless || isEmpty() && !loading && !owner.playing) {  // TODO: Figure out a way to bind IDs to shows
+            println("Reloading from ${ShowData::loadNBT.name} ($showId != $id || $showName != $name)")
+            load(showName)
+        }
+
+        id = showId
+        name = showName
+    }
+    fun saveNBT(tag: CompoundTag) {
+        id?.let { tag.putUUID("Show-Id", it) }
+        name?.let { tag.putString("Show-Name", it) }
+    }
+
+    fun reset() {
+        signal.clear()
+        audio = ByteArray(0)
+        id = null
+        name = null
     }
 }

@@ -5,6 +5,7 @@ import net.minecraft.nbt.*
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
+import java.util.UUID
 
 @Suppress("unused")
 object Extensions {
@@ -32,6 +33,10 @@ object Extensions {
     }
 
     //region Compound get functions, since these change for 1.21.5+
+    fun CompoundTag.getOrNull(string: String): Tag? =
+        if (contains(string)) get(string) else null
+    fun CompoundTag.getCompoundOrNull(string: String): CompoundTag? =
+        if (contains(string)) getCompound(string) else null
     fun CompoundTag.getBooleanOrNull(string: String): Boolean? =
         if (contains(string)) getBoolean(string) else null
     fun CompoundTag.getByteOrNull(string: String): Byte? =
@@ -48,5 +53,7 @@ object Extensions {
         if (contains(string)) getIntArray(string) else null
     fun CompoundTag.getByteArrayOrNull(string: String): ByteArray? =
         if (contains(string)) getByteArray(string) else null
+    fun CompoundTag.getUUIDOrNull(string: String): UUID? =
+        if (contains(string)) getUUID(string) else null
     //endregion
 }

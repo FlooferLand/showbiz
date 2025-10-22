@@ -121,7 +121,7 @@ object DataGenerator {
         for (item in ModItems.entries) {
             // Model
             val modelJson = ItemProvider.generateModel(item) ?: run {
-                print("Skipped item '${item.id}'")
+                println("Skipped item '${item.id}'")
                 continue
             }
             val modelPath = assetsRoot / "models" / "item" / "${item.id.path}.json"

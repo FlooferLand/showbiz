@@ -1,12 +1,15 @@
 package com.flooferland.showbiz.blocks
 
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModComponents
+import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.registry.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.applyComponent
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.sounds.*
@@ -18,8 +21,9 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
+import net.minecraft.world.level.storage.loot.*
+import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
-import java.nio.file.Files
 
 class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
     companion object {
@@ -51,29 +55,65 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
             return ItemInteractionResult.FAIL
         }
 
-        if (stack.isEmpty) {
-            // Changing the state by hand
-            val isOn = state.getValue(playing).not()
-            player.playNotifySound((if (isOn) ModSounds.Select else ModSounds.Deselect).event, SoundSource.PLAYERS, 1.0f, 1.0f)
+        // Hand stack
+        if (player.getItemInHand(hand) != stack) return ItemInteractionResult.FAIL
 
-            // Updating the block entity
-            val entity = level.getBlockEntity(pos)
-            if (entity is PlaybackControllerBlockEntity)
-                entity.applyChange(true) {
-                    playing = isOn
-                    if (!isOn) entity.seek = 0.0
-                    if (show.isEmpty()) {
-                        val stream = Files.newInputStream(PlaybackControllerBlockEntity.TEST_FILE)
-                        Showbiz.log.info("Loading show '${PlaybackControllerBlockEntity.TEST_FILE.fileName}'")
-                        show.load(stream)
-                        stream.close()
-                    }
-                }
+        // Finding the BE
+        val entity = level.getBlockEntity(pos)
+        if (entity !is PlaybackControllerBlockEntity) return ItemInteractionResult.FAIL
+
+        if (!entity.show.isEmpty() && !player.isCrouching) {
+            val isOn = !entity.playing
+            entity.applyChange(true) {
+                entity.playing = isOn
+            }
             level.setBlockAndUpdate(pos, state.setValue(playing, isOn))
             return ItemInteractionResult.SUCCESS
         }
 
-        return ItemInteractionResult.FAIL
+        // Adding / removing
+        var sound = ModSounds.Deselect
+        if (stack.item is ReelItem) {
+            val filename = stack.components.get(ModComponents.FileName.type)
+            if (filename != null) {
+                player.setItemInHand(hand, Items.AIR.defaultInstance)
+
+                // Playback
+                entity.applyChange(true) {
+                    entity.resetPlayback()
+                    entity.show.load(filename)
+                }
+                sound = ModSounds.Select
+            }
+        } else if (stack.isEmpty) {
+            val showName = entity.show.name
+            showName?.let {
+                val reelStack = ItemStack(ModItems.Reel.item)
+                reelStack.applyComponent(ModComponents.FileName.type, it)
+                player.setItemInHand(hand, reelStack)
+            }
+            entity.applyChange(true) {
+                entity.resetPlayback()
+            }
+            sound = ModSounds.Deselect
+        }
+        level.setBlockAndUpdate(pos, state.setValue(playing, false))
+        player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
+        return ItemInteractionResult.SUCCESS
+    }
+
+    // TODO: Make drops work
+    override fun getDrops(state: BlockState, params: LootParams.Builder): List<ItemStack> {
+        val entity = (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) as? PlaybackControllerBlockEntity) ?: return super.getDrops(state, params)
+
+        val name = entity.show.name
+        if (name != null && !entity.show.isEmpty()) {
+            val reelStack = ItemStack(ModItems.Reel.item)
+            reelStack.applyComponent(ModComponents.FileName.type, name)
+            return mutableListOf(reelStack)
+        }
+
+        return super.getDrops(state, params)
     }
 
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {

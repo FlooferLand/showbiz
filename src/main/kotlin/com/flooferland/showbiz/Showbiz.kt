@@ -11,12 +11,14 @@ object Showbiz : ModInitializer {
 
     override fun onInitialize() {
         // Making sure the JVM compiles these
+        @Suppress("UnusedExpression")
         run {
             ModBlocks.entries
             ModItems.entries
             ModItemGroups.entries
             ModSounds.entries
             ModComponents.WandBind
+            ModCommands
         }
 
         // Networking

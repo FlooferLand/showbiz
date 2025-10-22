@@ -1,8 +1,11 @@
 {
+    "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand!",
+
     "itemGroup.showbiz.main": "Showbiz",
 
     "block.showbiz.staged_bot": "Staged Bot",
     "block.showbiz.playback_controller": "Playback Controller",
 
-    "item.showbiz.wand": "Wand"
+    "item.showbiz.wand": "Wand",
+    "item.showbiz.reel": "Reel"
 }

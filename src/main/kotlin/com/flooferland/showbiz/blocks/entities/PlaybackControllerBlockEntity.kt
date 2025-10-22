@@ -15,11 +15,10 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.SourceDataLine
-import kotlin.io.path.Path
 import kotlin.math.roundToInt
 
 class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.PlaybackController.entity!!, pos, blockState) {
-    public var show: ShowData = ShowData()
+    public var show: ShowData = ShowData(this)
     public var playing = false
     public var seek = 0.0
     public val signal = SignalFrame()
@@ -38,13 +37,6 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
 
     private var bytesWritten: Int = 0
 
-    companion object {
-        val TEST_FILE = run {
-        //  Path("${Showbiz.MOD_ID}/shows/1 - Mouth.rshw")
-            Path("D:/Animatronics/Creative Engineering/Show tapes/Catch a Wave.rshw")
-        }
-    }
-
     fun tick() {
         if (!playing || show.isEmpty()) return
         var shouldUpdate = false
@@ -54,17 +46,14 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
 
         // Signal
         run {
-            // TODO: Figure out how rshw playback works and write signal playback
-
-            val entry = show.signal.getOrNull(seekInt)
-            entry?.let {
-                signal.load(entry)
-                shouldUpdate = true
-            }
+            val entry = show.signal.getOrNull(seekInt) ?: byteArrayOf()
+            signal.load(entry)
+            shouldUpdate = entry.isNotEmpty()
         }
 
         // Initializing audio
         if (audioLine == null || audioLine?.isOpen != true) {
+            audioLine?.close()
             aFormat = AudioFormat(aSampleRate.toFloat(), aSampleBits, aChannels, true, false)
             audioLine = ShowbizUtils.startAudioDevice(aFormat!!, aBufferSize).getOrNull()
         }
@@ -93,22 +82,20 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         super.saveAdditional(tag, registries)
 
         // Save other
-        tag.putBoolean("playing", playing)
-        tag.putDouble("seek", seek)
-        tag.putByteArray("signalFrame", signal.save())
-        if (!playing) {
-            audioLine?.close()
-            audioLine = null
-        }
+        tag.putBoolean("Playing", playing)
+        tag.putDouble("Seek", seek)
+        tag.putByteArray("Signal-Frame", signal.save())
+        show.saveNBT(tag)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
 
         // Load other
-        playing = tag.getBooleanOrNull("playing") ?: false
-        seek = tag.getDoubleOrNull("seek") ?: 0.0
-        signal.load(tag.getByteArrayOrNull("signalFrame"))
+        playing = tag.getBooleanOrNull("Playing") ?: false
+        seek = tag.getDoubleOrNull("Seek") ?: 0.0
+        signal.load(tag.getByteArrayOrNull("Signal-Frame"))
+        show.loadNBT(tag)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
@@ -123,4 +110,15 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
             saveAdditional(tag, registries)
             tag
         }
+
+    fun resetPlayback() {
+        seek = 0.0
+        bytesWritten = 0
+        playing = false
+        show.reset()
+        if (audioLine != null) {
+            audioLine?.runCatching { close() }
+            audioLine = null
+        }
+    }
 }
