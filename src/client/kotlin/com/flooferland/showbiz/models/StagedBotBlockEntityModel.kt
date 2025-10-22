@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.models
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.Drawer
@@ -10,12 +11,21 @@ import net.minecraft.core.*
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
+import software.bernie.geckolib.renderer.GeoRenderer
 
 class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("conner")) {
     class CachedController(val controller: PlaybackControllerBlockEntity, val position: BlockPos?)
     var cachedController: CachedController? = null
     var lastTickTime: Double = 0.0
     val testBitmap = TestBitmap()
+
+    override fun getTextureResource(animatable: StagedBotBlockEntity, renderer: GeoRenderer<StagedBotBlockEntity>?): ResourceLocation? {
+        val entity = renderer?.animatable ?: return super.getTextureResource(animatable, renderer)
+        return when (entity.modelId) {
+            1 -> rl("textures/block/conner_mitzi.png")
+            else -> super.getTextureResource(animatable, renderer)
+        }
+    }
 
     override fun subtype(): String = "block"
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? = null
@@ -32,6 +42,7 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         val headUp = mapped(8, Drawer.Bottom, 1.0)
         val body = mapped(15, Drawer.Bottom, 0.3)
         val mouth = mapped(16, Drawer.Bottom, 1.5)
+        val mouth2 = mapped(35, Drawer.Bottom, 1.5)
 
         fun mapped(bitId: Byte, drawer: Drawer, flowSpeed: Double): MappedBit {
             val bit: Byte = if (drawer == Drawer.Bottom) (bitId + SignalFrame.NEXT_DRAWER).toByte() else bitId
@@ -88,7 +99,9 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
                 }
             }
         }
-        if (cachedController == null) return
+        if (cachedController == null) {
+            Showbiz.log.debug("No cached controller on BlockEntity!")
+        }
 
         // Test animation
         val controller = cachedController!!.controller
@@ -99,7 +112,9 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
 
             head.rotX += (Math.toRadians(15.0) * testBitmap.headUp.valueSmooth).toFloat()
             head.rotY = (Math.toRadians(15.0) * (testBitmap.headRight.valueSmooth - testBitmap.headLeft.valueSmooth)).toFloat()
-            jaw.rotX = (Math.toRadians(-25.0) * testBitmap.mouth.valueSmooth).toFloat()
+
+            val mouth = if (animatable.modelId == 0) testBitmap.mouth else testBitmap.mouth2
+            jaw.rotX = (Math.toRadians(-25.0) * mouth.valueSmooth).toFloat()
         }
     }
 }

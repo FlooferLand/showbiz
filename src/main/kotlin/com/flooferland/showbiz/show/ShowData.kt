@@ -29,18 +29,18 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
 
     var loading = false
 
-    fun isEmpty() = signal.isEmpty() || audio.isEmpty() || name == null
+    fun isEmpty() = signal.isEmpty() || audio.isEmpty()
 
     fun load(filename: String, playOnLoad: Boolean = false) {
         reset()
         loading = true
+        name = filename
+        id = UUID.randomUUID()
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
             val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))
             val loaded = RshowFormat().read(stream)
             audio = loaded.audio
-            name = filename
-            id = UUID.randomUUID()
 
             // Parsing signal data
             val current = mutableListOf<Byte>()
@@ -67,18 +67,20 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
 
     fun loadNBT(tag: CompoundTag?) {
         if (tag == null) return
-        val showId = tag.getUUIDOrNull("Show-Id") ?: return
-        val showName = tag.getStringOrNull("Show-Name") ?: return
-
-        // TODO: Load the show from metadata. Currently VERY buggy
-        val notUseless = (showName != name && !owner.playing)
-        if (notUseless || isEmpty() && !loading && !owner.playing) {  // TODO: Figure out a way to bind IDs to shows
-            println("Reloading from ${ShowData::loadNBT.name} ($showId != $id || $showName != $name)")
-            load(showName)
+        val oldName = name
+        id = tag.getUUIDOrNull("Show-Id")
+        name = tag.getStringOrNull("Show-Name")
+        /*if (id == null || name == null) {
+            Showbiz.log.error("Missing one of: id=$id, name=$name")
+            return
         }
 
-        id = showId
-        name = showName
+        // TODO: Load the show from metadata. Currently VERY buggy
+        val notUseless = (oldName != name && !owner.playing)
+        if (notUseless || isEmpty() && !loading && !owner.playing) {  // TODO: Figure out a way to bind IDs to shows
+            println("Reloading from ${ShowData::loadNBT.name} ($oldName != $name)")
+            load(name!!)
+        }*/
     }
     fun saveNBT(tag: CompoundTag) {
         id?.let { tag.putUUID("Show-Id", it) }

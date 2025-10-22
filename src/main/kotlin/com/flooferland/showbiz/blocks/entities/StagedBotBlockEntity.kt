@@ -2,6 +2,7 @@ package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
+import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.protocol.game.*
@@ -16,6 +17,11 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     val cache = GeckoLibUtil.createInstanceCache(this)!!
 
     var controllerPos: BlockPos? = null
+    var modelId: Int = 0
+
+    companion object {
+        val MODEL_ID_MAX = 1
+    }
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
@@ -23,18 +29,20 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
 
+        tag.putInt("Model-Id", modelId)
         run {  // Save controller
             val pos = controllerPos
             val data = if (pos != null) intArrayOf(pos.x, pos.y, pos.z) else intArrayOf()
-            tag.putIntArray("boundController", data)
+            tag.putIntArray("Bound-Controller", data)
         }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
 
+        modelId = tag.getIntOrNull("Model-Id") ?: 0
         run {  // Load controller
-            val data = tag.getIntArrayOrNull("boundController")
+            val data = tag.getIntArrayOrNull("Bound-Controller")
             controllerPos = if (data != null && data.isNotEmpty() && data.size == 3) {
                 BlockPos(data[0], data[1], data[2])
             } else null
