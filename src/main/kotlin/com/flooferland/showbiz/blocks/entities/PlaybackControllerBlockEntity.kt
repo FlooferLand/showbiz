@@ -38,6 +38,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
     private var bytesWritten: Int = 0
 
     fun tick() {
+        if (level?.isClientSide ?: true) return
         if (!playing || show.isEmpty()) return
         var shouldUpdate = false
 
@@ -112,9 +113,11 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         }
 
     fun resetPlayback() {
+        println("Playback reset")
         seek = 0.0
         bytesWritten = 0
         playing = false
+        signal.reset()
         show.reset()
         if (audioLine != null) {
             audioLine?.runCatching { close() }

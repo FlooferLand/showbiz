@@ -11,6 +11,9 @@ class SignalFrame {
     fun frameHas(bitId: Byte): Boolean =
         raw.contains(bitId)
 
+    fun reset() {
+        raw = byteArrayOf()
+    }
     fun save(): ByteArray = raw
     fun load(array: ByteArray?) {
         array?.let { raw = it }

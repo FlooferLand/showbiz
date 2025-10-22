@@ -4,6 +4,7 @@ import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
 import kotlinx.coroutines.CoroutineScope
@@ -28,10 +29,11 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
     var name: String? = null
 
     var loading = false
+    var isLoaded = false
 
-    fun isEmpty() = signal.isEmpty() || audio.isEmpty()
+    fun isEmpty() = !isLoaded
 
-    fun load(filename: String, playOnLoad: Boolean = false) {
+    fun load(filename: String, onLoad: (() -> Unit)? = null) {
         reset()
         loading = true
         name = filename
@@ -56,9 +58,14 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
 
         coro.invokeOnCompletion { err ->
             loading = false
+            isLoaded = (audio.isNotEmpty() && signal.isNotEmpty())
+            if (!isLoaded) {
+                Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size})")
+                return@invokeOnCompletion
+            }
             if (err == null) {
                 Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
-                if (playOnLoad) owner.playing = true
+                onLoad?.invoke()
             } else {
                 Showbiz.log.error(err.toString())
             }
@@ -70,6 +77,7 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
         val oldName = name
         id = tag.getUUIDOrNull("Show-Id")
         name = tag.getStringOrNull("Show-Name")
+        isLoaded = tag.getBooleanOrNull("Is-Loaded") ?: false
         /*if (id == null || name == null) {
             Showbiz.log.error("Missing one of: id=$id, name=$name")
             return
@@ -85,11 +93,13 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
     fun saveNBT(tag: CompoundTag) {
         id?.let { tag.putUUID("Show-Id", it) }
         name?.let { tag.putString("Show-Name", it) }
+        tag.putBoolean("Is-Loaded", isLoaded)
     }
 
     fun reset() {
         signal.clear()
         audio = ByteArray(0)
+        isLoaded = false
         id = null
         name = null
     }

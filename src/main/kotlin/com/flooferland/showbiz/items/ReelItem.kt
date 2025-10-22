@@ -2,6 +2,8 @@ package com.flooferland.showbiz.items
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModComponents
+import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
@@ -32,5 +34,13 @@ class ReelItem(properties: Properties) : Item(properties) {
         }
 
         tooltip.add(Component.literal("File: $boundFile").withStyle(ChatFormatting.GRAY))
+    }
+
+    companion object {
+        fun makeItem(filename: String): ItemStack {
+            val reelStack = ItemStack(ModItems.Reel.item)
+            reelStack.applyComponent(ModComponents.FileName.type, filename)
+            return reelStack
+        }
     }
 }

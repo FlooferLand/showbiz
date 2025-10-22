@@ -1,21 +1,17 @@
 package com.flooferland.showbiz.models
 
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.*
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
 import software.bernie.geckolib.renderer.GeoRenderer
 
 class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("conner")) {
-    class CachedController(val controller: PlaybackControllerBlockEntity, val position: BlockPos?)
-    var cachedController: CachedController? = null
     var lastTickTime: Double = 0.0
     val testBitmap = TestBitmap()
 
@@ -89,22 +85,15 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         jaw.rotZ = 0f
 
         // Getting the animation controller
-        if (cachedController == null || animatable.controllerPos != cachedController?.position) {
-            animatable.controllerPos?.let {
-                val controller = animatable.level?.getBlockEntity(it) as? PlaybackControllerBlockEntity
-                if (controller != null) {
-                    cachedController = CachedController(position = animatable.controllerPos, controller = controller)
-                } else {
-                    cachedController = null
-                }
-            }
+        // TODO: Figure out why caching the block entity didn't work
+        val controller = animatable.controllerPos?.let {
+            animatable.level?.getBlockEntity(it) as? PlaybackControllerBlockEntity
         }
-        if (cachedController == null) {
-            Showbiz.log.debug("No cached controller on BlockEntity!")
+        if (controller == null) {
+            return
         }
 
         // Test animation
-        val controller = cachedController!!.controller
         testBitmap.update(controller.signal, deltaTime.toFloat())
         if (controller.playing) {
             upperBody.rotX = (Math.toRadians(-4.0) * testBitmap.body.valueSmooth).toFloat()

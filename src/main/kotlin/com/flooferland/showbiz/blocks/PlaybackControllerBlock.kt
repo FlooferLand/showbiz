@@ -5,11 +5,10 @@ import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.registry.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.applyChange
-import com.flooferland.showbiz.utils.Extensions.applyComponent
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.sounds.*
@@ -79,19 +78,17 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
                 player.setItemInHand(hand, Items.AIR.defaultInstance)
 
                 // Playback
-                entity.applyChange(true) {
-                    entity.resetPlayback()
-                    entity.show.load(filename)
+                entity.resetPlayback()
+                entity.show.load(filename) {
+                    entity.markDirtyNotifyAll()
                 }
                 sound = ModSounds.Select
             }
-        } else if (stack.isEmpty) {
+        } else if (stack.isEmpty && !entity.show.isEmpty()) {
             val showName = entity.show.name
-            showName?.let {
-                val reelStack = ItemStack(ModItems.Reel.item)
-                reelStack.applyComponent(ModComponents.FileName.type, it)
-                player.setItemInHand(hand, reelStack)
-            }
+            showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+
+            // Playback
             entity.applyChange(true) {
                 entity.resetPlayback()
             }
@@ -108,9 +105,7 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
 
         val name = entity.show.name
         if (name != null && !entity.show.isEmpty()) {
-            val reelStack = ItemStack(ModItems.Reel.item)
-            reelStack.applyComponent(ModComponents.FileName.type, name)
-            return mutableListOf(reelStack)
+            return mutableListOf(ReelItem.makeItem(filename = name))
         }
 
         return super.getDrops(state, params)
