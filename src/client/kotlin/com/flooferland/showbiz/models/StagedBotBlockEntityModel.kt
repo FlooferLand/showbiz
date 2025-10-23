@@ -57,9 +57,6 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
                     lerp(bit.valueSmooth, if (bit.value) 1.0 else 0.0, clamp(flowSpeed * delta, 0.01, 10.0)),
                     0.0, 1.0
                 )
-                if (bit.bitId == 165.toByte()) {
-                    println(bit.valueSmooth)
-                }
             }
         }
 

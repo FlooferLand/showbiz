@@ -113,7 +113,6 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         }
 
     fun resetPlayback() {
-        println("Playback reset")
         seek = 0.0
         bytesWritten = 0
         playing = false
