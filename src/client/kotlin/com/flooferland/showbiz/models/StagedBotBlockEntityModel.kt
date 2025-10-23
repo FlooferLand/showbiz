@@ -10,9 +10,9 @@ import net.minecraft.resources.*
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedGeoModel
 import software.bernie.geckolib.renderer.GeoRenderer
+import java.lang.Math.clamp
 
 class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("conner")) {
-    var lastTickTime: Double = 0.0
     val testBitmap = TestBitmap()
 
     override fun getTextureResource(animatable: StagedBotBlockEntity, renderer: GeoRenderer<StagedBotBlockEntity>?): ResourceLocation? {
@@ -26,7 +26,7 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
     override fun subtype(): String = "block"
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? = null
 
-    data class MappedBit(val bitId: Byte, val drawer: Drawer, val flowSpeed: Double, var value: Boolean = false, var valueSmooth: Float = 0f)
+    data class MappedBit(val bitId: Byte, val drawer: Drawer, val flowSpeed: Double, var value: Boolean = false, var valueSmooth: Double = 0.0)
 
     @Suppress("unused")
     class TestBitmap {  // Modeled on Beach Bear
@@ -47,45 +47,45 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
             return mapped
         }
 
-        fun update(frame: SignalFrame, delta: Float) {
+        fun update(frame: SignalFrame) {
+            val delta = nextDelta()
+
             for (bit in bits) {
+                val flowSpeed = (bit.flowSpeed.toFloat() * 3.5f)
                 bit.value = frame.frameHas(bit.bitId)
-                bit.valueSmooth = lerp(bit.valueSmooth, if (bit.value) 1.0f else 0.0f, (bit.flowSpeed.toFloat() * 0.2f) * delta)
+                bit.valueSmooth = clamp(
+                    lerp(bit.valueSmooth, if (bit.value) 1.0 else 0.0, clamp(flowSpeed * delta, 0.01, 10.0)),
+                    0.0, 1.0
+                )
+                if (bit.bitId == 165.toByte()) {
+                    println(bit.valueSmooth)
+                }
             }
+        }
+
+        private var lastTime = System.nanoTime()
+        private fun nextDelta(): Double {
+            val now = System.nanoTime()
+            val delta = ((now - lastTime) / 1_000_000_000.0)  // To secs (there's no function for this I checked)
+                        .coerceIn(0.005, 0.3)
+            lastTime = now
+            return delta
         }
     }
 
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
-        // Delta-time
-        val deltaTime = state.animationTick - lastTickTime
-        lastTickTime = state.animationTick
-
         // Getting bones
         val base = animationProcessor.getBone("animatronic")
         val upperBody = animationProcessor.getBone("upper_body")
         val lowerBody = animationProcessor.getBone("lower_body")
-        val upperArmRight = animationProcessor.getBone("upper_arm_r")
-        val lowerArmRight = animationProcessor.getBone("lower_arm_r")
-        val upperArmLeft = animationProcessor.getBone("upper_arm_l")
-        val lowerArmLeft = animationProcessor.getBone("lower_arm_l")
         val head = animationProcessor.getBone("head")
         val jaw = animationProcessor.getBone("jaw")
 
         // Base offset
         base.posY = 16.0f
 
-        // Reset
-        upperBody.rotX = 0f
-        lowerBody.rotX = 0f
-        upperArmRight.rotX = 0f
-        lowerArmRight.rotX = 0f
-        upperArmLeft.rotX = 0f
-        lowerArmLeft.rotX = 0f
-        head.rotX = 0f
-        jaw.rotZ = 0f
-
         // Getting the animation controller
-        // TODO: Figure out why caching the block entity didn't work
+        // TODO: Figure out why caching the block entity doesn't work
         val controller = animatable.controllerPos?.let {
             animatable.level?.getBlockEntity(it) as? PlaybackControllerBlockEntity
         }
@@ -94,7 +94,7 @@ class StagedBotBlockEntityModel : DefaultedGeoModel<StagedBotBlockEntity>(rl("co
         }
 
         // Test animation
-        testBitmap.update(controller.signal, deltaTime.toFloat())
+        testBitmap.update(controller.signal)
         if (controller.playing) {
             upperBody.rotX = (Math.toRadians(-4.0) * testBitmap.body.valueSmooth).toFloat()
             lowerBody.rotX = (Math.toRadians(-6.0) * testBitmap.body.valueSmooth).toFloat()
