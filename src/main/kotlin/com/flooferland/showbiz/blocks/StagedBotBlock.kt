@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.blocks
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
@@ -37,15 +38,15 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
         val entity = level.getBlockEntity(pos) as? StagedBotBlockEntity
         if (entity != null) {
-            val increment = !player.isCrouching
+            val oldId = entity.botId
             entity.applyChange(true) {
-                var newId = entity.modelId
-                newId += if (increment) 1 else -1
-                newId = if (newId < 0) StagedBotBlockEntity.MODEL_ID_MAX else if (newId > StagedBotBlockEntity.MODEL_ID_MAX) 0 else newId
-                entity.modelId = newId
+                val ids = Showbiz.bots.keys.sorted()
+                val index = ids.indexOf(oldId)
+                val newId = if (index == -1 || index == ids.lastIndex) ids.firstOrNull() else ids[index + 1]
+                newId?.let { entity.botId = newId }
             }
             player.playNotifySound(SoundEvents.NOTE_BLOCK_HARP.value(), SoundSource.PLAYERS, 1.0f, 1.0f)
-            player.displayClientMessage(Component.literal("Switched to animatronic ${entity.modelId}!"), true)
+            player.displayClientMessage(Component.literal("Switched to animatronic ${entity.botId}!"), true)
             return InteractionResult.SUCCESS
         }
         return super.useWithoutItem(state, level, pos, player, hitResult)

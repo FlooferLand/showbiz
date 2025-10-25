@@ -15,7 +15,6 @@ import java.nio.file.Files
 import java.util.UUID
 import kotlin.io.path.Path
 
-// Should probably use UByte, but its experimental since JVM doesn't really support unsignedness
 
 /**
  * Abstraction class to work with rshw.
@@ -23,7 +22,7 @@ import kotlin.io.path.Path
  */
 class ShowData(val owner: PlaybackControllerBlockEntity) {
     // TODO: Convert signal to a list of longs and pack bit ids using bitwise operations
-    val signal: MutableList<ByteArray> = ArrayList()
+    val signal: MutableList<BitIdArray> = ArrayList()
     var audio: ByteArray = ByteArray(0)
     var id: UUID? = null
     var name: String? = null
@@ -45,13 +44,13 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
             audio = loaded.audio
 
             // Parsing signal data
-            val current = mutableListOf<Byte>()
+            val current = mutableListOf<BitId>()
             for (s in loaded.signal) {
                 if (s == 0) {
-                    signal.add(current.toByteArray())
+                    signal.add(current.toBitIdArray())
                     current.clear()
                 } else {
-                    current.add(s.toByte())
+                    current.add(s.toBitId())
                 }
             }
         }

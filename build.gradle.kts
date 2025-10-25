@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
     JavaVersion.VERSION_21 else JavaVersion.VERSION_17
 val kotlinVersion = "2.2.20"
@@ -75,6 +77,9 @@ dependencies {
     implementation("com.flooferland:bizlib:${dep("bizlib")}")
     include("com.flooferland:bizlib:${dep("bizlib")}")
 
+    // ktoml
+    implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
@@ -107,14 +112,17 @@ tasks.jar {
     }
 }
 
-// Inserting strings into what-not
 tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.WARN
+    exclude("**/*.lnk", "**/*.exe", "**/*.dll", "**/*.so", "**/*.jar")
+    exclude("projects")
 
+    // Inserting strings into what-not
     val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
     val properties = mapOf(
         "minecraft" to vers("minecraft"),
-        "version" to version as String,
+        "version" to modVersion,
+        "versionFull" to version as String,
         "java" to java.toString(),
         "kotlin" to kotlinVersion,
         "fabric_loader" to dep("fabric_loader"),
@@ -127,14 +135,9 @@ tasks.withType<ProcessResources>().configureEach {
     properties.forEach() { (k, v) ->
         inputs.property(k, v)
     }
-
-    exclude("**/*.lnk")
-    filesMatching("fabric.mod.json") {
-        expand(properties)
-    }
-    filesMatching("$modId.client.mixins.json") {
-        expand(properties)
-    }
+    filesMatching("fabric.mod.json") { expand(properties) }
+    filesMatching("$modId.client.mixins.json") { expand(properties) }
+    filesMatching("data/showbiz/showbiz.addon.toml")  { expand(properties) }
 }
 
 // Datagen
@@ -163,4 +166,9 @@ tasks.remapSourcesJar {
 }
 kotlin {
     jvmToolchain(java.ordinal + 1)
+}
+tasks.withType<KotlinCompile>() {
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
 }

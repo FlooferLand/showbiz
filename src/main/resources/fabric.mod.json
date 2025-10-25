@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "showbiz",
-    "version": "${version}",
+    "version": "${versionFull}",
     "name": "Showbiz",
     "description": "Unofficial Rock-afire Explosion simulator for Minecraft!\nNot affiliated to Aaron Fechter and/or his works. Rock-afire Explosion is owned property by Aaron Fechter.\n\nBuilt for $minecraft (Java $java, Kotlin $kotlin)",
     "authors": ["FlooferLand"],
@@ -27,6 +27,7 @@
             }
         ]
     },
+    "mixins": ["showbiz.main.mixins.json"],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "minecraft": "$minecraft",

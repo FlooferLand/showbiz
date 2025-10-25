@@ -1,0 +1,31 @@
+settings.dynamic = true
+
+[bits.156]
+flow = 1.0
+name = "Head left"
+rotate.bone = "head"
+rotate.target.y = 15
+
+[bits.157]
+flow = 1.0
+name = "Head right"
+rotate.bone = "head"
+rotate.target.y = -15
+
+[bits.158]
+flow = 1.0
+name = "Head up"
+rotate.bone = "head"
+rotate.target.x = 15
+
+[bits.165]
+flow = 0.3
+name = "Body"
+anim.on = "body_tilt"
+anim.off = "body_tilt"
+
+[bits.166]
+flow = 1.5
+name = "Mouth"
+rotate.bone = "jaw"
+rotate.target.x = -25

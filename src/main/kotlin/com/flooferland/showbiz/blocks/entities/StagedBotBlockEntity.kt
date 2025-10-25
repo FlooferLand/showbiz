@@ -1,8 +1,9 @@
 package com.flooferland.showbiz.blocks.entities
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
-import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.protocol.game.*
@@ -17,7 +18,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     val cache = GeckoLibUtil.createInstanceCache(this)!!
 
     var controllerPos: BlockPos? = null
-    var modelId: Int = 0
+    var botId: String = findFirstBot()
 
     companion object {
         val MODEL_ID_MAX = 1
@@ -29,7 +30,10 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
 
-        tag.putInt("Model-Id", modelId)
+        if (level?.isClientSide == false) {
+            tag.putString("Bot-Id", botId)
+        }
+
         run {  // Save controller
             val pos = controllerPos
             val data = if (pos != null) intArrayOf(pos.x, pos.y, pos.z) else intArrayOf()
@@ -40,7 +44,12 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
 
-        modelId = tag.getIntOrNull("Model-Id") ?: 0
+        var botId = tag.getStringOrNull("Bot-Id")
+        if (botId == null && level?.isClientSide == false) {
+            botId = findFirstBot()
+        }
+        botId?.let { this.botId = it }
+
         run {  // Load controller
             val data = tag.getIntArrayOrNull("Bound-Controller")
             controllerPos = if (data != null && data.isNotEmpty() && data.size == 3) {
@@ -48,6 +57,8 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
             } else null
         }
     }
+
+    fun findFirstBot() = Showbiz.addons.first().bots.entries.first().key
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
         val tag = CompoundTag()

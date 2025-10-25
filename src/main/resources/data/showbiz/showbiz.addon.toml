@@ -1,0 +1,10 @@
+[addon]
+id = "showbiz"
+name = "Showbiz Core"
+authors = ["FlooferLand"]
+version = "$version" # Filled by build.gradle.kts
+description = '''
+    The core content of the Showbiz mod.
+    Remove this if you want the mod to explode.
+'''
+format = 1

@@ -1,5 +1,8 @@
 package com.flooferland.showbiz
 
+import com.flooferland.showbiz.addons.assets.AddonAssets
+import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
+import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
@@ -7,14 +10,33 @@ import com.flooferland.showbiz.registry.ModPackets
 import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
 import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
 import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.resources.*
+import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
+import software.bernie.geckolib.loading.json.raw.Model
 
-class ShowbizClient : ClientModInitializer {
+object ShowbizClient : ClientModInitializer {
+    var addons: List<AddonAssets> = listOf()
+    var bots: Map<String, AddonBot> = hashMapOf()
+    var models: Map<ResourceLocation, Model> = hashMapOf()
+
     override fun onInitializeClient() {
         ModPackets.registerC2S()
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
 
-        BlockEntityRenderers.register(ModBlocks.StagedBot.entity!! as BlockEntityType<StagedBotBlockEntity>, ::StagedBotBlockEntityRenderer)
-        BlockEntityRenderers.register(ModBlocks.PlaybackController.entity!! as BlockEntityType<PlaybackControllerBlockEntity>, ::PlaybackBlockEntityRenderer)
+        // Block entity renderers (should find a nicer way to register these)
+        @Suppress("UNCHECKED_CAST")
+        run {
+            BlockEntityRenderers.register(
+                ModBlocks.StagedBot.entity!! as BlockEntityType<StagedBotBlockEntity>,
+                ::StagedBotBlockEntityRenderer
+            )
+            BlockEntityRenderers.register(
+                ModBlocks.PlaybackController.entity!! as BlockEntityType<PlaybackControllerBlockEntity>,
+                ::PlaybackBlockEntityRenderer
+            )
+        }
     }
 }

@@ -2,20 +2,25 @@ package com.flooferland.showbiz.show
 
 /** One frame of signal data, split per drawer */
 class SignalFrame {
-    var raw: ByteArray = ByteArray(0)
+    var raw: BitIdArray = bitIdArrayOf(0)
 
     companion object {
-        const val NEXT_DRAWER: Byte = 150.toByte()  // To convert from/to bottom and top drawer bits, this is added to them
+        val NEXT_DRAWER: BitId = 150.toBitId()  // To convert from/to bottom and top drawer bits, this is added to them
     }
 
-    fun frameHas(bitId: Byte): Boolean =
-        raw.contains(bitId)
+    fun frameHas(id: BitId): Boolean =
+        raw.contains(id)
 
     fun reset() {
-        raw = byteArrayOf()
+        raw = bitIdArrayOf()
     }
-    fun save(): ByteArray = raw
-    fun load(array: ByteArray?) {
-        array?.let { raw = it }
+    fun set(array: BitIdArray?) {
+        array?.let { raw = array }
+    }
+    fun save(): IntArray = raw.map { it.toInt() }.toIntArray()
+    fun load(array: IntArray?) {
+        array?.let {
+            raw = array.map { it.toBitId() }.toBitIdArray()
+        }
     }
 }

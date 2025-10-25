@@ -3,10 +3,9 @@ package com.flooferland.showbiz.renderers
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
 import com.mojang.blaze3d.vertex.PoseStack
-import net.minecraft.client.renderer.LightTexture
-import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
-import net.minecraft.world.level.LightLayer
+import net.minecraft.client.renderer.*
+import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.world.level.*
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
@@ -20,6 +19,10 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         } else {
             LightTexture.FULL_BRIGHT
         }
+
+        poseStack.pushPose()
+        poseStack.translate(0.0, 1.0, 0.0)
         super.render(animatable, partialTick, poseStack, bufferSource, sampled, packedOverlay)
+        poseStack.popPose()
     }
 }

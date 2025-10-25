@@ -3,9 +3,10 @@ package com.flooferland.showbiz.blocks.entities
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
+import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
-import com.flooferland.showbiz.utils.Extensions.getByteArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
+import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.ShowbizUtils
 import net.minecraft.core.*
@@ -47,8 +48,8 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
 
         // Signal
         run {
-            val entry = show.signal.getOrNull(seekInt) ?: byteArrayOf()
-            signal.load(entry)
+            val entry = show.signal.getOrNull(seekInt) ?: bitIdArrayOf()
+            signal.set(entry)
             shouldUpdate = entry.isNotEmpty()
         }
 
@@ -85,7 +86,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         // Save other
         tag.putBoolean("Playing", playing)
         tag.putDouble("Seek", seek)
-        tag.putByteArray("Signal-Frame", signal.save())
+        tag.putIntArray("Signal-Frame", signal.save())
         show.saveNBT(tag)
     }
 
@@ -95,7 +96,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         // Load other
         playing = tag.getBooleanOrNull("Playing") ?: false
         seek = tag.getDoubleOrNull("Seek") ?: 0.0
-        signal.load(tag.getByteArrayOrNull("Signal-Frame"))
+        signal.load(tag.getIntArrayOrNull("Signal-Frame"))
         show.loadNBT(tag)
     }
 
