@@ -1,9 +1,30 @@
 [conner]
 name = "Conner The Cow"
 authors = ["Saloon Devs"]
-formats = ["rshw"]
+accepts.rockafire = true
 
 [conner_gray]
 name = "Conner The Gray Cow"
 authors = ["Saloon Devs"]
-formats = ["rshw"]
+accepts.rockafire = true
+
+[diner_freddy]
+name = "Diner Freddy"
+authors = ["Development Multiverse"]
+accepts.rockafire = true
+accepts.fnaf1 = true
+allow_missing = true
+
+[diner_chica]
+name = "Diner Chica"
+authors = ["Development Multiverse"]
+accepts.rockafire = true
+accepts.fnaf1 = true
+allow_missing = true
+
+[diner_bonnie]
+name = "Diner Bonnie"
+authors = ["Development Multiverse"]
+accepts.rockafire = true
+accepts.fnaf1 = true
+allow_missing = true
