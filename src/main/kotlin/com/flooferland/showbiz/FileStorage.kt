@@ -3,9 +3,11 @@ package com.flooferland.showbiz
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.div
+import kotlin.io.path.extension
 
 /** NOTE: This should only be called on the server */
 object FileStorage {
+    val SUPPORTED_FORMATS = listOf("rshw", "fshw")
     val SHOWBIZ_DIR = Path(Showbiz.MOD_ID)
     val SHOWS_DIR = SHOWBIZ_DIR / "shows"
 
@@ -17,7 +19,7 @@ object FileStorage {
             if (!dir.exists()) runCatching { dir.createNewFile() }
             val list = runCatching { dir.list() }
             for (path in list.getOrNull() ?: arrayOf()) {
-                if (!path.endsWith(".rshw")) continue
+                if (!SUPPORTED_FORMATS.contains(Path(path).extension)) continue
                 shows.add(path)
             }
         }

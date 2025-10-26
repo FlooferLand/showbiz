@@ -1,7 +1,9 @@
 [conner]
 name = "Conner The Cow"
 authors = ["Saloon Devs"]
+formats = ["rshw"]
 
 [conner_gray]
 name = "Conner The Gray Cow"
 authors = ["Saloon Devs"]
+formats = ["rshw"]

@@ -7,6 +7,8 @@ import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
+import kotlin.io.path.Path
+import kotlin.io.path.nameWithoutExtension
 
 class ReelItem(properties: Properties) : Item(properties) {
     override fun getName(stack: ItemStack): Component? {
@@ -14,7 +16,7 @@ class ReelItem(properties: Properties) : Item(properties) {
         var boundFile = stack.components.get(ModComponents.FileName.type) ?: return item
         if (boundFile.isEmpty()) boundFile = "Empty"
         return item.copy().append(
-            Component.literal(" (${boundFile.replace(".rshw", "")})")
+            Component.literal(" (${Path(boundFile).nameWithoutExtension})")
                 .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC)
         )
     }

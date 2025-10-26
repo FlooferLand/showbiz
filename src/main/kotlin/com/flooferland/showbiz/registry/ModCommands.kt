@@ -11,6 +11,8 @@ import net.minecraft.commands.*
 import net.minecraft.commands.Commands.*
 import net.minecraft.core.component.*
 import net.minecraft.network.chat.*
+import kotlin.io.path.Path
+import kotlin.io.path.extension
 
 object ModCommands {
     private fun registerCommands(dispatcher: CommandDispatcher<CommandSourceStack>, registry: CommandBuildContext, environment: Commands.CommandSelection): Array<CommandNode<CommandSourceStack>> {
@@ -45,8 +47,8 @@ object ModCommands {
 
                         // Validating the file
                         val filename = StringArgumentType.getString(ctx, "file") ?: return@executes err("Failed to find parameter")
-                        if (!filename.endsWith(".rshw")) {
-                            return@executes err("File name must end with the \"rshw\" file extension")
+                        if (!FileStorage.SUPPORTED_FORMATS.contains(Path(filename).extension)) {
+                            return@executes err("File name must end with the supported formats: [${FileStorage.SUPPORTED_FORMATS.joinToString(", ") }]")
                         }
 
                         val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
