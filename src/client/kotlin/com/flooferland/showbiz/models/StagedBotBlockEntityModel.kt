@@ -84,7 +84,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 animManager?.let {
                     if (!animManager.animationControllers.contains(controllerKey)) {
                         val controller = StatelessAnimationController(animatable, controllerKey)
-                        controller.transitionLength(10)
+                        controller.transitionLength(5 + (mapping.flow * 5f).toInt())
                         animManager.addController(controller)
                     }
                 }
@@ -95,7 +95,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 if (controller != null && controller.currentAnimation?.animation?.name != animId) {
                     // Checking if the animation exists
                     val playback = runCatching {
-                        controller.transitionLength(10)
                         val animation = getAnimation(animatable, animId)
                         if (animation == null) {
                             if (!triggeredBadAnimationError)

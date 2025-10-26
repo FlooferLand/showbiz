@@ -19,7 +19,7 @@ rotate.bone = "head"
 rotate.target.y = -15
 
 [bits.158]
-flow = 1.0
+flow = 0.7
 name = "Head up"
 rotate.bone = "head"
 rotate.target.x = 15
@@ -36,7 +36,7 @@ name = "Body"
 anim.id = "body_tilt"
 
 [bits.166]
-flow = 1.5
+flow = 1.7
 name = "Mouth"
 rotate.bone = "jaw"
 rotate.target.x = -25
