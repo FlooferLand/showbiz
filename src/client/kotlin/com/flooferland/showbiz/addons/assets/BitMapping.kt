@@ -11,8 +11,9 @@ data class BitMapping(
 
 @Serializable
 data class AnimCommand(
-    val on: String,
-    val off: String
+    val id: String? = null,
+    val on: String? = null,
+    val off: String? = null
 )
 
 @Serializable

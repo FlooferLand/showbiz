@@ -20,10 +20,6 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var controllerPos: BlockPos? = null
     var botId: String = findFirstBot()
 
-    companion object {
-        val MODEL_ID_MAX = 1
-    }
-
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
 

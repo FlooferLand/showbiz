@@ -7,7 +7,7 @@ import com.flooferland.showbiz.utils.rlCustom
 import kotlinx.serialization.Serializable
 import net.minecraft.resources.*
 
-data class AddonBot(val assets: BotAssetsFile, val bitmap: BotBitmapFile, val resPath: ResourcePath, val model: ResourceLocation) {
+data class AddonBot(val assets: BotAssetsFile, val bitmap: BotBitmapFile, val resPath: ResourcePath, val model: ResourceLocation, val animations: ResourceLocation?) {
     fun resPath(path: String) = rlCustom(this.resPath.name, path)
 
     fun getNamespace() = this.resPath.namespace

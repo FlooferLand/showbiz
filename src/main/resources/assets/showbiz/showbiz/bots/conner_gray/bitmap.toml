@@ -1,0 +1,69 @@
+settings.dynamic = true
+
+[bits.178]
+flow = 1.0
+name = "Head left"
+rotate.bone = "head"
+rotate.target.y = 15
+
+[bits.179]
+flow = 1.0
+name = "Head right"
+rotate.bone = "head"
+rotate.target.y = -15
+
+[bits.180]
+flow = 1.0
+name = "Head up"
+rotate.bone = "head"
+rotate.target.x = 15
+
+[bits.168]
+flow = 0.3
+name = "Right arm up"
+rotate.bone = "upper_arm_r"
+rotate.target.z = 15
+
+[bits.169]
+flow = 0.3
+name = "Right elbow up"
+rotate.bone = "lower_arm_r"
+rotate.target.z = 15
+
+[bits.174]
+flow = 0.3
+name = "Left arm up"
+rotate.bone = "upper_arm_r"
+rotate.target.z = 15
+
+[bits.174]
+flow = 0.3
+name = "Left elbow up"
+rotate.bone = "lower_arm_r"
+rotate.target.z = -15
+
+[bits.188]
+flow = 0.3
+name = "Body"
+rotate.bone = "lower_body"
+rotate.target.x = -13
+#anim.on = "body_tilt"
+#anim.off = "body_tilt:reversed"
+
+[bits.186]
+flow = 0.3
+name = "Body turn left"
+rotate.bone = "lower_body"
+rotate.target.y = -10
+
+[bits.187]
+flow = 0.3
+name = "Body turn right"
+rotate.bone = "lower_body"
+rotate.target.y = 10
+
+[bits.185]
+flow = 1.5
+name = "Mouth"
+rotate.bone = "jaw"
+rotate.target.x = -25

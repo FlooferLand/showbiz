@@ -15,12 +15,14 @@ import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
-import software.bernie.geckolib.loading.json.raw.Model
+import software.bernie.geckolib.cache.`object`.BakedGeoModel
+import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
-    var bots: Map<String, AddonBot> = hashMapOf()
-    var models: Map<ResourceLocation, Model> = hashMapOf()
+    var bots: Map<String, AddonBot> = mapOf()
+    var models: Map<ResourceLocation, BakedGeoModel> = mapOf()
+    var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
 
     override fun onInitializeClient() {
         ModPackets.registerC2S()
