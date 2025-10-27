@@ -35,6 +35,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (level.isClientSide) return InteractionResult.PASS
         if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
+        if (player.isHolding({ s -> !s.isEmpty })) return InteractionResult.PASS
 
         val entity = level.getBlockEntity(pos) as? StagedBotBlockEntity
         if (entity != null) {

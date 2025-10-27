@@ -7,6 +7,7 @@ accepts.rockafire = true
 name = "Conner The Gray Cow"
 authors = ["Saloon Devs"]
 accepts.rockafire = true
+allow_missing = true
 
 [diner_freddy]
 name = "Diner Freddy"

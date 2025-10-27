@@ -18,7 +18,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     val cache = GeckoLibUtil.createInstanceCache(this)!!
 
     var controllerPos: BlockPos? = null
-    var botId: String = findFirstBot()
+    var botId: String? = findFirstBot()
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
@@ -27,7 +27,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         super.saveAdditional(tag, registries)
 
         if (level?.isClientSide == false) {
-            tag.putString("Bot-Id", botId)
+            botId?.let { tag.putString("Bot-Id", it) }
         }
 
         run {  // Save controller
@@ -54,7 +54,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         }
     }
 
-    fun findFirstBot() = Showbiz.addons.first().bots.entries.first().key
+    fun findFirstBot() = Showbiz.addons.firstOrNull()?.bots?.entries?.firstOrNull()?.key
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
         val tag = CompoundTag()

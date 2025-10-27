@@ -3,7 +3,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BitMapping(
     val flow: Double,
-    val name: String,
+    val name: String? = null,
 
     val rotate: RotateCommand? = null,
     val anim: AnimCommand? = null

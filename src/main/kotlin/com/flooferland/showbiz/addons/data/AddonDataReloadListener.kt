@@ -33,7 +33,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
             fun warn(msg: String) =
                 Showbiz.log.warn("Addon '$packId' (datapack): $msg")
             fun getRes(path: String): IoSupplier<InputStream>? =
-                pack.getResource(PackType.SERVER_DATA, rlCustom(packId, path))
+                pack.getResource(PackType.SERVER_DATA, rlCustom(packId.replace("file/", ""), path))
 
             // Reading all the manifest data, and skipping irrelevant packs
             val manifestString = getRes(MANIFEST_NAME)

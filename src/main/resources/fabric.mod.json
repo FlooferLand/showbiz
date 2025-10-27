@@ -27,7 +27,9 @@
             }
         ]
     },
-    "mixins": ["showbiz.main.mixins.json"],
+    "mixins": [
+        "showbiz.client.mixins.json"
+    ],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "minecraft": "$minecraft",
