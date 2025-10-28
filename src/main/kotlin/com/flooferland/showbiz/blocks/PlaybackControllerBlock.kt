@@ -64,7 +64,7 @@ class PlaybackControllerBlock(props: Properties) : BaseEntityBlock(props), Custo
         if (!entity.show.isEmpty() && !player.isCrouching) {
             val isOn = !entity.playing
             entity.applyChange(true) {
-                entity.playing = isOn
+                entity.setPlaying(isOn)
             }
             level.setBlockAndUpdate(pos, state.setValue(playing, isOn))
             return ItemInteractionResult.SUCCESS

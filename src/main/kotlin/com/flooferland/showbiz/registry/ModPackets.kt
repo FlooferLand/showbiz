@@ -1,23 +1,19 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.utils.rl
+import com.flooferland.showbiz.network.base.PlaybackChunkPacket
+import com.flooferland.showbiz.network.base.PlaybackStatePacket
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.resources.*
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 
-enum class ModPackets(name: String) {
-    ;
+object ModPackets {
+    fun registerS2C() {
+        PayloadTypeRegistry.playS2C().register(PlaybackChunkPacket.type, PlaybackChunkPacket.codec)
+        PayloadTypeRegistry.playS2C().register(PlaybackStatePacket.type, PlaybackStatePacket.codec)
+    }
 
-    val id: ResourceLocation = rl(name)
+    @Environment(EnvType.CLIENT)
+    fun registerC2S() {
 
-    companion object {
-        fun registerS2C() {
-
-        }
-
-        @Environment(EnvType.CLIENT)
-        fun registerC2S() {
-
-        }
     }
 }

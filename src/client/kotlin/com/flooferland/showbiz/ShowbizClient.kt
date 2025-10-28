@@ -25,8 +25,9 @@ object ShowbizClient : ClientModInitializer {
     var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
 
     override fun onInitializeClient() {
-        ModPackets.registerC2S()
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
+        ModPackets.registerC2S()
+        ShowbizShowAudio.init()
 
         // Block entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
