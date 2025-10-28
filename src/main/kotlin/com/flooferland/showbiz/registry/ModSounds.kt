@@ -13,11 +13,12 @@ enum class ModSounds {
     End("end", folder = "interface"),
     ;
 
-    constructor(name: String, folder: String = "", sounds: Array<String> = arrayOf(name)) {
+    constructor(name: String, folder: String = "", sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {
         this.id = rl(if (folder.isEmpty()) name else "$folder.$name")
         this.event = SoundEvent.createVariableRangeEvent(this.id)
         this.sounds = sounds
         this.folder = folder
+        this.procedural = procedural
         if (!DataGenerator.engaged) {
             Registry.register(BuiltInRegistries.SOUND_EVENT, this.id, this.event)
         }
@@ -27,4 +28,5 @@ enum class ModSounds {
     val event: SoundEvent
     val sounds: Array<String>
     val folder: String
+    val procedural: Boolean
 }
