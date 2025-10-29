@@ -6,7 +6,6 @@ import net.minecraft.client.*
 import net.minecraft.world.phys.*
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
-import org.lwjgl.openal.ALC10.alcGetCurrentContext
 import javax.sound.sampled.AudioFormat
 
 // TODO: Should probably avoid sending stereo audio to this cuz an extra channel means extra network bandwidth
@@ -28,7 +27,6 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
     val maxDistance = 16f
     var source = 0
     var nextBufIndex = 0
-    var context = alcGetCurrentContext()
 
     private fun getState(): Int {
         if (!isValidSource()) return -1
@@ -40,7 +38,6 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
 
     fun open() {
         if (isValidSource()) close()
-        context = handleAL { alcGetCurrentContext() }
         source = handleAL { alGenSources() }
         handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
@@ -59,7 +56,7 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
         source = 0
     }
     fun write(chunk: ByteArray, sampleRate: Int) {
-        if (!isValidSource() || !isValidContext()) return
+        if (!isValidSource()) return
         updateAttenuation()
         updatePosition()
 
@@ -90,7 +87,16 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
         val buf = BufferUtils.createByteBuffer(chunk.size)
         buf.put(chunk)
         buf.flip()
-        handleAL { alBufferData(bufId, format, buf, sampleRate) }
+
+        // Sets the buffer
+        // !! Will fail if the window is resized, for whatever reason, so manual error handling re-creates the source and everything.
+        alBufferData(bufId, format, buf, sampleRate)
+        if (alGetError() != AL_NO_ERROR) {
+            close()
+            open()
+            return
+        }
+
         handleAL { alSourceQueueBuffers(source, bufId) }
         if (getState() != AL_PLAYING) {
             handleAL { alSourcePlay(source) }
@@ -124,21 +130,6 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
         handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
     }
 
-    private fun isValidContext(): Boolean {
-        val current = alcGetCurrentContext()
-        if (current == 0L) return false
-        if (current != context) {
-            context = current
-
-            // Re-opening in case the context changed
-            if (source != 0) {
-                close()
-                open()
-            }
-        }
-        return true
-    }
-
     private fun <T> handleAL(block: () -> T): T {
         val res = block()
         checkAlError()
@@ -156,6 +147,7 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
     }
 
     private fun formatAlError(error: Int) = when (error) {
+        AL_NO_ERROR -> "No error"
         AL_INVALID -> "Invalid"
         AL_INVALID_OPERATION -> "Invalid operation"
         AL_INVALID_ENUM -> "Invalid enum"

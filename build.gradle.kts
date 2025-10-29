@@ -79,6 +79,7 @@ dependencies {
 
     // ktoml
     implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+    include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
