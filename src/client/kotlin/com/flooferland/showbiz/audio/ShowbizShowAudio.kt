@@ -1,67 +1,37 @@
-package com.flooferland.showbiz
+package com.flooferland.showbiz.audio
 
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.network.base.PlaybackChunkPacket
 import com.flooferland.showbiz.network.base.PlaybackStatePacket
-import com.flooferland.showbiz.utils.ShowbizUtils
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.core.*
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.SourceDataLine
 
 @Environment(EnvType.CLIENT)
 object ShowbizShowAudio {
-    val states = mutableMapOf<BlockPos, State>()
-    data class State(
-        var aFormat: AudioFormat? = null,
-        var audioLine: SourceDataLine? = null,
-        var lastFramePlaying: Boolean = false
-    ) {
-        fun isOpen() = audioLine != null && audioLine?.isOpen == true
-        fun open(entity: PlaybackControllerBlockEntity) {
-            audioLine?.close()
-            aFormat = entity.getFormat()
-            audioLine = ShowbizUtils.startAudioDevice(aFormat!!, entity.aBufferSize).getOrNull()
-            println("Started device: open=${audioLine?.isOpen}")
-        }
-        fun close() {
-            audioLine?.runCatching { stop(); flush(); close() }
-            audioLine = null
-            println("Closed device")
-        }
-        fun write(chunk: ByteArray) {
-            if (!isOpen()) return
-            val available = audioLine?.available() ?: 0
-            if (available >= chunk.size) {
-                val res = runCatching { audioLine?.write(chunk, 0, chunk.size) }
-                res.onFailure { it.printStackTrace() }
-            }
-        }
-    }
+    val sources = mutableMapOf<BlockPos, Source>()
 
     fun init() {
         ClientPlayNetworking.registerGlobalReceiver(PlaybackChunkPacket.type) { payload, context ->
             val level = context.player().level() ?: return@registerGlobalReceiver
             val entity = level.getBlockEntity(payload.blockPos) as? PlaybackControllerBlockEntity ?: return@registerGlobalReceiver
 
-            val state = states.getOrPut(payload.blockPos) { State() }
+            val source = sources.getOrPut(payload.blockPos) { Source(entity.getFormat(), entity.blockPos.center) }
             if (entity.playing) {
-                if (!state.isOpen())
-                    state.open(entity)
-                state.write(payload.audioChunk)
+                if (!source.isOpen()) source.open()
+                source.write(payload.audioChunk, entity.aSampleRate)
             }
         }
         ClientPlayNetworking.registerGlobalReceiver(PlaybackStatePacket.type) { payload, context ->
             val level = context.player().level() ?: return@registerGlobalReceiver
             val entity = level.getBlockEntity(payload.blockPos) as? PlaybackControllerBlockEntity ?: return@registerGlobalReceiver
-            val state = states[payload.blockPos] ?: return@registerGlobalReceiver
+            val state = sources[payload.blockPos] ?: return@registerGlobalReceiver
             when (payload.playing) {
-                true -> if (!state.isOpen()) state.open(entity)
-                false -> if (state.isOpen()) state.close()
+                true -> state.open()
+                false -> state.close()
             }
         }
 
@@ -72,11 +42,11 @@ object ShowbizShowAudio {
 
                 println("LOADED: playing=${entity.playing}")
                 if (entity.playing) {
-                    states[blockPos]?.close()
-                    states.remove(entity.blockPos)
+                    sources[blockPos]?.close()
+                    sources.remove(entity.blockPos)
 
-                    val state = states.getOrPut(blockPos) { State() }
-                    state.open(entity)
+                    val source = sources.getOrPut(blockPos) { Source(entity.getFormat(), entity.blockPos.center) }
+                    source.open()
                 }
             }
         }
@@ -86,10 +56,10 @@ object ShowbizShowAudio {
             if (entity !is PlaybackControllerBlockEntity) return@register
             println("UNLOADED")
              run {
-                 val state = states[entity.blockPos] ?: return@register
+                 val state = sources[entity.blockPos] ?: return@register
                  state.close()
              }
-            states.remove(entity.blockPos)
+            sources.remove(entity.blockPos)
         }
     }
 }

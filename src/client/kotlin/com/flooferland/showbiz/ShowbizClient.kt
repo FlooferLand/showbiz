@@ -3,6 +3,7 @@ package com.flooferland.showbiz
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
+import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
