@@ -22,7 +22,7 @@ object ShowbizShowAudio {
             val source = sources.getOrPut(payload.blockPos) { Source(entity.getFormat(), entity.blockPos.center) }
             if (entity.playing) {
                 if (!source.isOpen()) source.open()
-                source.write(payload.audioChunk, entity.aSampleRate)
+                source.write(payload.audioChunk, entity.getFormat().sampleRate.toInt())
             }
         }
         ClientPlayNetworking.registerGlobalReceiver(PlaybackStatePacket.type) { payload, context ->

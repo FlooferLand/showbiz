@@ -11,8 +11,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.nbt.*
+import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.util.UUID
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
 import kotlin.io.path.Path
 
 
@@ -26,6 +29,15 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
     var audio: ByteArray = ByteArray(0)
     var id: UUID? = null
     var name: String? = null
+    var format: AudioFormat? = null
+
+    val targetFormat = AudioFormat(
+        44100f,
+        16,
+        1,
+        true,
+        false
+    )
 
     var loading = false
     var isLoaded = false
@@ -39,9 +51,27 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
         id = UUID.randomUUID()
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
-            val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))
-            val loaded = RshowFormat().read(stream)
-            audio = loaded.audio
+            val loaded = run {
+                val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))
+                val out = RshowFormat().read(stream)
+                stream.close()
+                out
+            }
+
+            // Audio and conversion
+            run {
+                val source = AudioSystem.getAudioInputStream(ByteArrayInputStream(loaded.audio))
+                if (AudioSystem.isConversionSupported(targetFormat, source.format)) {
+                    val stream = AudioSystem.getAudioInputStream(targetFormat, source)
+                    format = targetFormat
+                    audio = stream.readAllBytes()
+                    stream.close()
+                } else {
+                    Showbiz.log.warn("Unsupported audio format for the show '$filename'. It might appear broken")
+                    format = source.format
+                    audio = loaded.audio
+                }
+            }
 
             // Parsing signal data
             val current = mutableListOf<BitId>()

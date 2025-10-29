@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.audio
 
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.utils.ShowbizUtils
 import net.minecraft.client.*
 import net.minecraft.world.phys.*
 import org.lwjgl.BufferUtils
@@ -65,22 +64,6 @@ class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
         if (processed > 0) {
             val buf = BufferUtils.createIntBuffer(processed)
             handleAL { alSourceUnqueueBuffers(source, buf) }
-        }
-
-        val targetFormat = javaFormat.let {
-            AudioFormat(
-                it.sampleRate,
-                it.sampleSizeInBits,
-                1,
-                true,
-                it.isBigEndian
-            )
-        }
-        val chunk = if (javaFormat.channels == 2) ShowbizUtils.convertAudio(chunk, javaFormat, targetFormat) else chunk
-        val format = when (format) {
-            AL_FORMAT_STEREO16 -> AL_FORMAT_MONO16
-            AL_FORMAT_STEREO8 -> AL_FORMAT_MONO8
-            else -> format
         }
 
         val bufId = buffers[nextBufIndex++ and (buffers.size - 1)]

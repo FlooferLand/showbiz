@@ -17,16 +17,13 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import javax.sound.sampled.AudioFormat
 import kotlin.math.roundToInt
 
 class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.PlaybackController.entity!!, pos, blockState) {
-    // -- Each song's metadata needs to be extracted manually.. Ughh
-    val aSampleRate = 44100
-    val aSampleBits = 16
-    val aChannels = 2
-    val aFrameMs = 50 * 4
-    val aBufferSize = (aSampleRate * aFrameMs) / 1_000
+    val aFrameMs: Int
+        get() =  50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
+    val aBufferSize: Int
+        get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
 
     public var show: ShowData = ShowData(this)
     public var seek = 0.0
@@ -56,16 +53,17 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         }
 
         // Audio
-        if (audioBytesWritten < show.audio.size) {
+        val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
+        if (audioBytesWritten < targetBytes && audioBytesWritten < show.audio.size) {
             var toWrite = aBufferSize
-            toWrite -= toWrite % getFormat().frameSize // align to frame
+            toWrite -= toWrite % getFormat().frameSize
 
             val remain = show.audio.size - audioBytesWritten
             if (toWrite > remain) toWrite = remain
 
             if (toWrite > 0) {
                 val chunk = show.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
-                sendChunk(chunk, audioBytesWritten - toWrite)
+                sendChunk(chunk, audioBytesWritten)
                 audioBytesWritten += toWrite
             }
         }
@@ -96,7 +94,7 @@ class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Blo
         }
     }
 
-    fun getFormat() = AudioFormat(aSampleRate.toFloat(), aSampleBits, aChannels, true, false)
+    fun getFormat() = show.format ?: show.targetFormat
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
