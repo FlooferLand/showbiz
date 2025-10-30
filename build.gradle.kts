@@ -92,6 +92,8 @@ dependencies {
 }
 
 tasks.shadowJar {
+    from(sourceSets.named("client").get().output)
+    dependsOn(tasks.processResources)
     configurations.add(project.configurations.shadow)
     minimize()
 }
@@ -118,7 +120,10 @@ tasks.jar {
         rename { "${it}_${base.archivesName}" }
     }
 }
-
+tasks.remapJar {
+    inputFile.set(tasks.shadowJar.flatMap { it.archiveFile })
+    dependsOn(tasks.shadowJar)
+}
 tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.WARN
     exclude("**/*.lnk", "**/*.exe", "**/*.dll", "**/*.so", "**/*.jar")
