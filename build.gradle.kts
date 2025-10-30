@@ -26,6 +26,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.2.20-2.0.2"
     id("dev.kikugie.stonecutter")
     id("fabric-loom") version "1.11-SNAPSHOT"
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 repositories {
@@ -79,7 +80,7 @@ dependencies {
 
     // ktoml
     implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
-    include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+    shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
@@ -88,6 +89,11 @@ dependencies {
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
     //modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("dev.sodium")}-$loader")
     //modRuntimeOnly("maven.modrinth:sodium-extra:mc$minecraft-${dep("dev.sodium_extra")}+$loader")
+}
+
+tasks.shadowJar {
+    configurations.add(project.configurations.shadow)
+    minimize()
 }
 
 // Mappings
