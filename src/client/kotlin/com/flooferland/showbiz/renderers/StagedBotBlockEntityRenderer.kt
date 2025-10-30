@@ -39,32 +39,33 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             this.animatable = animatable
 
             poseStack.pushPose()
-            val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
-            val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
-            val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
-            val renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick)
-            if (model == null || renderType == null) {
+            try {
+                val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
+                val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
+                val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
+                val renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick)
+                if (model == null || renderType == null) {
+                    return@runCatching
+                }
+
+                val buffer = bufferSource.getBuffer(renderType)
+                preRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
+                if (firePreRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)) {
+                    preApplyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, packedLight.toFloat(), packedLight, packedOverlay)
+                    actuallyRender(
+                        poseStack, animatable, model, renderType,
+                        bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor
+                    )
+                    applyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
+                    postRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
+                    firePostRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)
+                }
+                renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, renderColor)
+                doPostRenderCleanup()
+                MolangQueries.clearActor()
+            } finally {
                 poseStack.popPose()
-                return@runCatching
             }
-
-            val buffer = bufferSource.getBuffer(renderType)
-            preRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
-            if (firePreRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)) {
-                preApplyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, packedLight.toFloat(), packedLight, packedOverlay)
-                actuallyRender(
-                    poseStack, animatable, model, renderType,
-                    bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor
-                )
-                applyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
-                postRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
-                firePostRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)
-            }
-            poseStack.popPose()
-
-            renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, renderColor)
-            doPostRenderCleanup()
-            MolangQueries.clearActor()
         }
         render.onFailure { throwable ->
             Showbiz.log.error("RENDER EXCEPTION FOR '${animatable.botId}': ", throwable)
