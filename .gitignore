@@ -1,4 +1,5 @@
 # Diner FNaF bots & FNaF addon (private)
+src/main/resources/.gitignore
 src/main/resources/pack.png
 src/main/resources/pack.mcmeta
 src/main/resources/assets/showbiz-fnaf
