@@ -1,5 +1,2 @@
 [variants.default]
 texture = "conner"
-
-[variants.gray]
-texture = "conner_gray"

@@ -40,7 +40,6 @@ object ShowbizShowAudio {
             chunk.blockEntities.forEach { (blockPos, entity) ->
                 if (entity !is PlaybackControllerBlockEntity) return@forEach
 
-                println("LOADED: playing=${entity.playing}")
                 if (entity.playing) {
                     sources[blockPos]?.close()
                     sources.remove(entity.blockPos)
@@ -54,7 +53,6 @@ object ShowbizShowAudio {
         // Cleanup in case the chunk unloads
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
             if (entity !is PlaybackControllerBlockEntity) return@register
-            println("UNLOADED")
              run {
                  val state = sources[entity.blockPos] ?: return@register
                  state.close()

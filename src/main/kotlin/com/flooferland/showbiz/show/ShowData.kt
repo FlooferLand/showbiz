@@ -18,7 +18,6 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import kotlin.io.path.Path
 
-
 /**
  * Abstraction class to work with rshw.
  * Every rshw frame is a list of currently played bits, collecting that at load time is way nicer.
@@ -30,6 +29,7 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
     var id: UUID? = null
     var name: String? = null
     var format: AudioFormat? = null
+    var mapping: String? = null
 
     val targetFormat = AudioFormat(
         44100f,
@@ -49,6 +49,20 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
         loading = true
         name = filename
         id = UUID.randomUUID()
+        mapping = run {  // TODO: Clean up the code for mappings
+            val format = name?.split('.', limit = 2)?.last() ?: run {
+                Showbiz.log.error("Error loading show '${filename}'. Format is missing a file extension")
+                return
+            }
+            when (format) {  // TODO: Move mapping file names to file types to its own thingy
+                "fshw" -> "faz"
+                "rshw" -> "rae"
+                else -> {
+                    Showbiz.log.error("Error loading show '${filename}'. Format '${format}' is not supported")
+                    return
+                }
+            }
+        }
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
             val loaded = run {
@@ -107,6 +121,7 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
         id = tag.getUUIDOrNull("Show-Id")
         name = tag.getStringOrNull("Show-Name")
         isLoaded = tag.getBooleanOrNull("Is-Loaded") ?: false
+        mapping = tag.getStringOrNull("Show-Mapping")
         /*if (id == null || name == null) {
             Showbiz.log.error("Missing one of: id=$id, name=$name")
             return
@@ -122,6 +137,7 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
     fun saveNBT(tag: CompoundTag) {
         id?.let { tag.putUUID("Show-Id", it) }
         name?.let { tag.putString("Show-Name", it) }
+        mapping?.let { tag.putString("Show-Mapping", it) }
         tag.putBoolean("Is-Loaded", isLoaded)
     }
 
@@ -131,5 +147,6 @@ class ShowData(val owner: PlaybackControllerBlockEntity) {
         isLoaded = false
         id = null
         name = null
+        mapping = null
     }
 }

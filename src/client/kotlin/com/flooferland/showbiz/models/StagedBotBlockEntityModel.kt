@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.models
 
-import AnimCommand
+import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
@@ -47,12 +47,13 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (controller == null) {
             return
         }
+        val bitmapBits = bot.bitmap.bits[controller.show.mapping] ?: return
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
-        for (mapping in bot.bitmap.bits.values) {
-            mapping.rotate?.let { rotate ->
+        for ((bit, data) in bitmapBits) {
+            data.rotate?.let { rotate ->
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
                 bone.rotX = 0f
                 bone.rotY = 0f
@@ -60,7 +61,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
 
             if (!controller.playing) {
-                mapping.anim?.let { anim ->
+                data.anim?.let { anim ->
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
@@ -69,22 +70,22 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (!controller.playing) return
 
         // Driving animation
-        for ((bit, mapping) in bot.bitmap.bits) {
+        for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = controller.signal
-            val flowSpeed = (mapping.flow.toFloat() * 10.0f)
+            val flowSpeed = (data.flow.toFloat() * 10.0f)
             val bitOn = frame.frameHas(bit)
             val delta = nextDelta()
 
             // Animation
-            mapping.anim?.let { anim ->
-                val controllerKey = "ctrl_${bit}"
+            data.anim?.let { anim ->
+                val controllerKey = "ctrl_$bit"
 
                 // Adding controllers
                 animManager?.let {
                     if (!animManager.animationControllers.contains(controllerKey)) {
                         val controller = StatelessAnimationController(animatable, controllerKey)
-                        controller.transitionLength(5 + (mapping.flow * 5f).toInt())
+                        controller.transitionLength(5 + (data.flow * 5f).toInt())
                         animManager.addController(controller)
                     }
                 }
@@ -114,7 +115,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
 
             // Manual rotation
-            mapping.rotate?.let { rotate ->
+            data.rotate?.let { rotate ->
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Smoothing

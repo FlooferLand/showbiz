@@ -1,6 +1,8 @@
 package com.flooferland.showbiz.addons.assets
 
 import com.akuleshov7.ktoml.Toml
+import com.flooferland.bizlib.bits.BitsMap
+import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.utils.ResourcePath
@@ -36,8 +38,8 @@ data class LoadedAssets(
 
 @Environment(EnvType.CLIENT)
 object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(), IdentifiableResourceReloadListener {
-    const val ASSETS_NAME = "assets.toml"
-    const val BITMAP_NAME = "bitmap.toml"
+    const val ASSETS_TOML_NAME = "assets.toml"
+    const val BITMAP_BITS_NAME = "bitmap.bits"
 
     override fun getFabricId(): ResourceLocation = rl("assets")
 
@@ -87,7 +89,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 }
 
                 // assets.toml
-                if (location.path.endsWith("/$ASSETS_NAME")) {
+                if (location.path.endsWith("/$ASSETS_TOML_NAME")) {
                     val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
                     assets.rootPath = location.toPath().parent
                 }
@@ -97,6 +99,11 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
             // Finding toml def files
             val bots = mutableMapOf<String, AddonBot>()
             for ((id, bot) in botAssets) {
+                if (bot.rootPath == null || bot.model == null) {
+                    err("INTERNAL: Failed to load root path or model for '${id}'")
+                    continue
+                }
+
                 fun <T> getToml(filename: String, fetchToml: (String) -> T?): T? {
                     val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
                     val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
@@ -104,15 +111,16 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     toml.exceptionOrNull()?.let { throwable -> err("Failed to parse TOML '$path'", throwable) }
                     return toml.getOrNull()
                 }
-                if (bot.rootPath == null || bot.model == null) {
-                    err("INTERNAL: Failed to load root path or model for '${id}'")
-                    continue
+                fun getBits(filename: String): BotBitmapFile? {
+                    val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
+                    val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
+                    val bits = runCatching { BitsMap().load(res.byteInputStream()) }
+                    bits.exceptionOrNull()?.let { throwable -> err("Failed to load $filename on '$path'", throwable) }
+                    return bits.getOrNull()
                 }
 
-                val assets = getToml(ASSETS_NAME)
-                    { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
-                val bitmap = getToml(BITMAP_NAME)
-                    { Toml.decodeFromString<BotBitmapFile>(it) } ?: continue
+                val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
+                val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
                 bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations)
             }
 
