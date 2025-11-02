@@ -3,7 +3,6 @@ package com.flooferland.showbiz.renderers
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
-import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.*
@@ -15,6 +14,7 @@ import net.minecraft.world.level.*
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
+import java.lang.Math.clamp
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
     override fun render(animatable: StagedBotBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
@@ -85,9 +85,9 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             val level = animatable?.level ?: return@run
             val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
             if (above.isAir) return@run
-            if (above.tags.anyMatch { t -> t.location == rlVanilla("wool_carpets") }) {
-                poseStack.translate(0.0, 0.1, 0.0)
-            }
+            val shape = above.getCollisionShape(level, animatable.blockPos.above())
+            val top = clamp(shape.bounds().maxY, 0.0, 1.0)
+            poseStack.translate(0.0, top, 0.0)
         }
 
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
