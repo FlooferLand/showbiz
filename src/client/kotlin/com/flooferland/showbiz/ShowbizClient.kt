@@ -47,6 +47,12 @@ object ShowbizClient : ClientModInitializer {
             )
         }
 
+        // Block properties / render layers
+        for (block in ModBlocks.entries) {
+            if (block.model?.transparent != true) continue
+            BlockRenderLayerMap.INSTANCE.putBlock(block.block, RenderType.cutout())
+        }
+
         // GeckoLib renderers
         (ModItems.Wand.item as WandItem).renderProviderHolder.value = object : GeoRenderProvider {
             var renderer: WandItemRenderer? = null

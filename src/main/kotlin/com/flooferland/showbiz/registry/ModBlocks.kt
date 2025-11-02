@@ -44,7 +44,7 @@ enum class ModBlocks {
             .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
-        modelPreset = BlockModelId.Custom,
+        modelPreset = BlockModelId.Custom.transparent(),
         entity = ::GreyboxBlockEntity
     );
 
