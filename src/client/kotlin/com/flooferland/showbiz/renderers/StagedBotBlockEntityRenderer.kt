@@ -3,6 +3,7 @@ package com.flooferland.showbiz.renderers
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
+import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.*
@@ -76,8 +77,19 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         }
     }
 
-    override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity?, model: BakedGeoModel?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+    override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity?, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         poseStack.translate(0.0, 1.0, 0.0)
+
+        // Handling carpets
+        run {
+            val level = animatable?.level ?: return@run
+            val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
+            if (above.isAir) return@run
+            if (above.tags.anyMatch { t -> t.location == rlVanilla("wool_carpets") }) {
+                poseStack.translate(0.0, 0.1, 0.0)
+            }
+        }
+
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
 }
