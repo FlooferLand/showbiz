@@ -2,9 +2,9 @@
 src/main/resources/.gitignore
 src/main/resources/pack.png
 src/main/resources/pack.mcmeta
-src/main/resources/assets/showbiz-fnaf
-src/main/resources/data/showbiz-fnaf
-src/main/resources/projects-fnaf
+src/main/resources/assets/showbiz-fnaf/
+src/main/resources/data/showbiz-fnaf/
+src/main/resources/projects-fnaf/
 **/Diner *
 **/Diner */
 **/diner_*
