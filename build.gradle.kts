@@ -163,7 +163,7 @@ sourceSets {
     main {
         resources {
             srcDir("src/main/generated/resources")
-            srcDir("src/main/resources-addons")
+            srcDir("src/main/resources-fnaf")
         }
     }
 }
