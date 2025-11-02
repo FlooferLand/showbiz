@@ -1,18 +1,15 @@
 package com.flooferland.showbiz.blocks
 
-import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
-import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
@@ -25,7 +22,7 @@ import net.minecraft.world.level.storage.loot.*
 import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
 
-class ReelToReelBlock(props: Properties) : FacingEntityBlock(props) {
+class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
     val codec: MapCodec<ReelToReelBlock> = simpleCodec(::ReelToReelBlock)
     override fun codec() = codec
 
@@ -69,7 +66,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props) {
         }
 
         // Adding / removing
-        var sound = ModSounds.Deselect
         if (stack.item is ReelItem) {
             val filename = stack.components.get(ModComponents.FileName.type)
             if (filename != null) {
@@ -80,7 +76,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props) {
                 entity.show.load(filename) {
                     entity.markDirtyNotifyAll()
                 }
-                sound = ModSounds.Select
             }
         } else if (stack.isEmpty && !entity.show.isEmpty()) {
             val showName = entity.show.name
@@ -90,10 +85,8 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props) {
             entity.applyChange(true) {
                 entity.resetPlayback()
             }
-            sound = ModSounds.Deselect
         }
         level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
-        player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
         return ItemInteractionResult.SUCCESS
     }
 

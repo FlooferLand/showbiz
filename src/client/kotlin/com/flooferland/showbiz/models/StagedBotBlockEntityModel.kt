@@ -3,7 +3,8 @@ package com.flooferland.showbiz.models
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.utils.lerp
@@ -16,6 +17,9 @@ import java.lang.Math.clamp
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
     val bitSmooths = mutableMapOf<BitId, Double>()
+
+    // var reelToReel: ReelToReelBlockEntity? = null
+    // var greybox: GreyboxBlockEntity? = null
 
     var lastTime = System.nanoTime()
     var triggeredBadAnimationError = false
@@ -39,20 +43,31 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: return
 
-        // Getting the animation controller
-        // TODO: Figure out why caching the block entity doesn't work
-        val controller = animatable.controllerPos?.let {
-            animatable.level?.getBlockEntity(it) as? PlaybackControllerBlockEntity
+        // Getting the animation controller/state
+        // TODO: Figure out why caching these won't work
+        /*val greybox = this.greybox ?: animatable.greyboxPos?.let {
+            animatable.level?.getBlockEntity(it) as? GreyboxBlockEntity
         }
-        if (controller == null) {
-            return
+        val reelToReel = this.reelToReel ?: greybox?.reelToReelPos?.let {
+            animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
         }
-        val bitmapBits = bot.bitmap.bits[controller.show.mapping] ?: return
+        if (this.greybox == null || this.reelToReel == null) {
+            this.greybox = greybox
+            this.reelToReel = reelToReel
+        }*/
+        val greybox = animatable.greyboxPos?.let {
+            animatable.level?.getBlockEntity(it) as? GreyboxBlockEntity
+        }
+        val reelToReel = greybox?.reelToReelPos?.let {
+            animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
+        }
+        if (greybox == null || reelToReel == null) return
+        val bitmapBits = bot.bitmap.bits[reelToReel.show.mapping] ?: return
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
-        for ((bit, data) in bitmapBits) {
+        for ((_, data) in bitmapBits) {
             data.rotate?.let { rotate ->
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
                 bone.rotX = 0f
@@ -60,19 +75,19 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ = 0f
             }
 
-            if (!controller.playing) {
+            if (!reelToReel.playing) {
                 data.anim?.let { anim ->
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
             }
         }
-        if (!controller.playing) return
+        if (!reelToReel.playing) return
 
         // Driving animation
         for ((bit, data) in bitmapBits) {
             // Getting things
-            val frame = controller.signal
+            val frame = reelToReel.signal
             val flowSpeed = (data.flow.toFloat() * 10.0f)
             val bitOn = frame.frameHas(bit)
             val delta = nextDelta()

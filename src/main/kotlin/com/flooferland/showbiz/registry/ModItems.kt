@@ -15,7 +15,8 @@ enum class ModItems {
     Wand(
         "wand", ::WandItem,
         Properties().stacksTo(1)
-            .component(ModComponents.WandBind.type, OptionBlockPos.EMPTY)
+            .component(ModComponents.WandBind.type, OptionBlockPos.EMPTY),
+        model = ItemModelId.Custom
     ),
     Reel(
         "reel", ::ReelItem,

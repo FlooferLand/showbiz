@@ -17,7 +17,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
 class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity {
     val cache = GeckoLibUtil.createInstanceCache(this)!!
 
-    var controllerPos: BlockPos? = null
+    var greyboxPos: BlockPos? = null
     var botId: String? = findFirstBot()
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
@@ -30,10 +30,8 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
             botId?.let { tag.putString("Bot-Id", it) }
         }
 
-        run {  // Save controller
-            val pos = controllerPos
-            val data = if (pos != null) intArrayOf(pos.x, pos.y, pos.z) else intArrayOf()
-            tag.putIntArray("Bound-Controller", data)
+        greyboxPos?.let {
+            tag.putIntArray("Bound-Greybox", intArrayOf(it.x, it.y, it.z))
         }
     }
 
@@ -46,11 +44,9 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         }
         botId?.let { this.botId = it }
 
-        run {  // Load controller
-            val data = tag.getIntArrayOrNull("Bound-Controller")
-            controllerPos = if (data != null && data.isNotEmpty() && data.size == 3) {
-                BlockPos(data[0], data[1], data[2])
-            } else null
+        greyboxPos = tag.getIntArrayOrNull("Bound-Greybox")?.let {
+            if (it.size < 3) return@let null
+            BlockPos(it[0], it[1], it[2])
         }
     }
 

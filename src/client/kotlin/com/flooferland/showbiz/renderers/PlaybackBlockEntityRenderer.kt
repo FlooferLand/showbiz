@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.renderers
 
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.registry.ModItems
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.*
@@ -11,8 +11,8 @@ import net.minecraft.world.item.*
 import org.joml.Quaternionf
 import org.joml.Vector3f
 
-class PlaybackBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<PlaybackControllerBlockEntity> {
-    override fun render(entity: PlaybackControllerBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+class PlaybackBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
+    override fun render(entity: ReelToReelBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val itemStack = ModItems.Reel.item.defaultInstance
         val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return
 

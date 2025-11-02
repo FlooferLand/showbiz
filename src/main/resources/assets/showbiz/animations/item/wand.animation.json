@@ -1,0 +1,114 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.wand.fire": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"wand": {
+					"rotation": {
+						"0.1667": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, -15, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.0833": {
+							"vector": [0, 0, -0.92]
+						},
+						"0.25": {
+							"vector": [0, 0, 0.25]
+						}
+					}
+				},
+				"cylinder": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.0833": {
+							"vector": [0, 0, -0.33]
+						},
+						"0.1667": {
+							"vector": [0, 0, 1.83]
+						},
+						"0.25": {
+							"vector": [0, 0, 2]
+						}
+					}
+				}
+			}
+		},
+		"animation.wand.shake": {
+			"loop": true,
+			"animation_length": 0.25,
+			"bones": {
+				"cylinder": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -2, 0]
+						},
+						"0.125": {
+							"vector": [0, 2, 0]
+						},
+						"0.25": {
+							"vector": [0, -2, 0]
+						}
+					},
+					"position": {
+						"vector": [0, 0, 2]
+					}
+				}
+			}
+		},
+		"animation.wand.retract": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.3333,
+			"bones": {
+				"wand": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -15, 0]
+						},
+						"0.0833": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0.25]
+						},
+						"0.1667": {
+							"vector": [0, 0, -0.92]
+						},
+						"0.25": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cylinder": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 2]
+						},
+						"0.0833": {
+							"vector": [0, 0, 1.83]
+						},
+						"0.1667": {
+							"vector": [0, 0, -0.33]
+						},
+						"0.25": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

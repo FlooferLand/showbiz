@@ -2,14 +2,14 @@ package com.flooferland.showbiz.datagen
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel.Model
 import com.flooferland.showbiz.datagen.providers.BlockProvider
 import com.flooferland.showbiz.datagen.providers.ItemProvider
 import com.flooferland.showbiz.datagen.providers.SoundProvider
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.registry.blocks.CustomBlockModel
-import com.flooferland.showbiz.registry.blocks.CustomBlockModel.Model
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.Extensions.itemPath
 import com.flooferland.showbiz.utils.rl

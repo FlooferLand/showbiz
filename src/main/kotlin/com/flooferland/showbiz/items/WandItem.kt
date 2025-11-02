@@ -1,49 +1,96 @@
 package com.flooferland.showbiz.items
 
-import com.flooferland.showbiz.blocks.PlaybackControllerBlock
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.network.chat.*
+import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
-import net.minecraft.world.level.block.entity.*
+import org.apache.commons.lang3.mutable.MutableObject
+import software.bernie.geckolib.animatable.GeoItem
+import software.bernie.geckolib.animatable.SingletonGeoAnimatable
+import software.bernie.geckolib.animatable.client.GeoRenderProvider
+import software.bernie.geckolib.animation.*
+import software.bernie.geckolib.util.GeckoLibUtil
 import java.util.Optional
-import kotlin.jvm.optionals.getOrNull
+import java.util.function.Consumer
 
-class WandItem(properties: Properties) : Item(properties) {
+class WandItem(properties: Properties) : Item(properties), GeoItem {
+    val renderProviderHolder = MutableObject<GeoRenderProvider>()
+    val cache = GeckoLibUtil.createInstanceCache(this)!!
+    override fun createGeoRenderer(consumer: Consumer<GeoRenderProvider>) = consumer.accept(renderProviderHolder.value)
+    override fun getAnimatableInstanceCache() = cache
+
+    init {
+        SingletonGeoAnimatable.registerSyncedAnimatable(this)
+    }
+
+    val fireAnim = RawAnimation.begin().thenPlay("animation.wand.fire")?.then("animation.wand.shake", Animation.LoopType.LOOP)!!
+    val retractAnim = RawAnimation.begin().thenPlayAndHold("animation.wand.retract")!!
+
     override fun useOn(ctx: UseOnContext): InteractionResult {
         if (ctx.level.isClientSide) return super.useOn(ctx)
-        val player = ctx.player ?: return super.useOn(ctx)
-        val level = ctx.level
+        val player = ctx.player ?: return InteractionResult.CONSUME
+        val level = ctx.level as? ServerLevel ?: return InteractionResult.CONSUME
 
-        val state = level.getBlockState(ctx.clickedPos)
-        val comp = ctx.itemInHand.components.get(ModComponents.WandBind.type)!!
-        val compBlockEntity: BlockEntity? = comp.pos.getOrNull()?.let { level.getBlockEntity(it) }
-        val blockEntity = level.getBlockEntity(ctx.clickedPos)
-        if (state.block is PlaybackControllerBlock) {
-            player.displayClientMessage(Component.literal("Right click on a bot block next"), true)
-            comp.pos = Optional.of(ctx.clickedPos)
-            ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
-            player.playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 1.0f, 1.0f)
-            return InteractionResult.SUCCESS
-        } else if (blockEntity is StagedBotBlockEntity && compBlockEntity is PlaybackControllerBlockEntity) {
-            // Setting the StagedBotBlockEntity's reference to the controller
-            comp.pos.ifPresent { blockEntity.applyChange(true) { controllerPos = it } }
-            comp.pos = Optional.empty()
-            ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
-            player.playNotifySound(ModSounds.End.event, SoundSource.PLAYERS, 1.0f, 1.0f)
-            return InteractionResult.SUCCESS
+        val first = ctx.itemInHand.components.get(ModComponents.WandBind.type)!!
+        val lastEntity = level.getBlockEntity(ctx.clickedPos) ?: return InteractionResult.CONSUME
+
+        fun finish(sound: ModSounds, anim: String, message: String? = null) {
+            ctx.itemInHand.applyComponent(ModComponents.WandBind.type, first)
+            triggerAnim<WandItem>(player, GeoItem.getOrAssignId(ctx.itemInHand, level), "main", anim)
+            player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
+            message?.let {
+                player.displayClientMessage(Component.literal(it), true)
+            }
         }
 
-        comp.pos = Optional.empty()
-        ctx.itemInHand.applyComponent(ModComponents.WandBind.type, comp)
-        player.playNotifySound(ModSounds.Deselect.event, SoundSource.PLAYERS, 1.0f, 0.8f)
-        return InteractionResult.SUCCESS
+        fun reset(error: String? = null) {
+            first.pos = Optional.empty()
+            finish(sound = ModSounds.Deselect, anim = "retract", message = "Deselected" + (error?.let { "; $it" } ?: ""))
+        }
+
+        if (first.pos.isEmpty) {
+            when (lastEntity) {
+                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity -> {
+                    first.pos = Optional.of(lastEntity.blockPos)
+                    finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
+                    return InteractionResult.SUCCESS
+                }
+                else -> { reset(); return InteractionResult.CONSUME }
+            }
+        } else {
+            val firstEntity = level.getBlockEntity(first.pos.get())
+            when (lastEntity) {
+                is GreyboxBlockEntity if firstEntity is StagedBotBlockEntity -> {
+                    firstEntity.applyChange(true) { greyboxPos = lastEntity.blockPos }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Bot added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is ReelToReelBlockEntity -> {
+                    lastEntity.applyChange(true) { reelToReelPos = firstEntity.blockPos }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
+                    return InteractionResult.SUCCESS
+                }
+                else -> { reset(error = "Unknown order"); return InteractionResult.CONSUME }
+            }
+        }
+    }
+
+    override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) {
+        controllers.add(
+            AnimationController(this, "main") { PlayState.CONTINUE }
+                .triggerableAnim("fire", fireAnim)
+                .triggerableAnim("retract", retractAnim)
+        )
     }
 }

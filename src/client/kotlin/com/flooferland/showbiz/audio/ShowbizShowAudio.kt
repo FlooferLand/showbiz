@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.audio
 
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.network.base.PlaybackChunkPacket
 import com.flooferland.showbiz.network.base.PlaybackStatePacket
 import net.fabricmc.api.EnvType
@@ -17,7 +17,7 @@ object ShowbizShowAudio {
     fun init() {
         ClientPlayNetworking.registerGlobalReceiver(PlaybackChunkPacket.type) { payload, context ->
             val level = context.player().level() ?: return@registerGlobalReceiver
-            val entity = level.getBlockEntity(payload.blockPos) as? PlaybackControllerBlockEntity ?: return@registerGlobalReceiver
+            val entity = level.getBlockEntity(payload.blockPos) as? ReelToReelBlockEntity ?: return@registerGlobalReceiver
 
             val source = sources.getOrPut(payload.blockPos) { Source(entity.getFormat(), entity.blockPos.center) }
             if (entity.playing) {
@@ -27,7 +27,7 @@ object ShowbizShowAudio {
         }
         ClientPlayNetworking.registerGlobalReceiver(PlaybackStatePacket.type) { payload, context ->
             val level = context.player().level() ?: return@registerGlobalReceiver
-            val entity = level.getBlockEntity(payload.blockPos) as? PlaybackControllerBlockEntity ?: return@registerGlobalReceiver
+            val entity = level.getBlockEntity(payload.blockPos) as? ReelToReelBlockEntity ?: return@registerGlobalReceiver
             val state = sources[payload.blockPos] ?: return@registerGlobalReceiver
             when (payload.playing) {
                 true -> state.open()
@@ -38,7 +38,7 @@ object ShowbizShowAudio {
         // In case a chunk loads
         ClientChunkEvents.CHUNK_LOAD.register { level, chunk ->
             chunk.blockEntities.forEach { (blockPos, entity) ->
-                if (entity !is PlaybackControllerBlockEntity) return@forEach
+                if (entity !is ReelToReelBlockEntity) return@forEach
 
                 if (entity.playing) {
                     sources[blockPos]?.close()
@@ -52,7 +52,7 @@ object ShowbizShowAudio {
 
         // Cleanup in case the chunk unloads
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
-            if (entity !is PlaybackControllerBlockEntity) return@register
+            if (entity !is ReelToReelBlockEntity) return@register
              run {
                  val state = sources[entity.blockPos] ?: return@register
                  state.close()

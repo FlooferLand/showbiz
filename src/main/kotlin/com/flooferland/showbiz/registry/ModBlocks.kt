@@ -1,8 +1,10 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.blocks.PlaybackControllerBlock
+import com.flooferland.showbiz.blocks.GreyboxBlock
+import com.flooferland.showbiz.blocks.ReelToReelBlock
 import com.flooferland.showbiz.blocks.StagedBotBlock
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
@@ -26,19 +28,29 @@ enum class ModBlocks {
             .noOcclusion(),
         entity = ::StagedBotBlockEntity
     ),
-    PlaybackController(
-        "playback_controller", ::PlaybackControllerBlock,
+    ReelToReel(
+        "reel_to_reel", ::ReelToReelBlock,
         Properties.of()
             .strength(5.0f)
             .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
-        entity = ::PlaybackControllerBlockEntity
+        entity = ::ReelToReelBlockEntity
+    ),
+    Greybox(
+        "greybox", ::GreyboxBlock,
+        Properties.of()
+            .strength(3.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::GreyboxBlockEntity
     );
 
     val id: ResourceLocation
-    lateinit var block: Block
-    lateinit var item: BlockItem
+    val block: Block
+    val item: BlockItem
     var model: BlockModelId? = null
     var entity: BlockEntityType<*>? = null
     constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null) {

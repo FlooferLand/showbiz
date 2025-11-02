@@ -3,7 +3,7 @@ package com.flooferland.showbiz.show
 import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.blocks.entities.PlaybackControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -22,7 +22,7 @@ import kotlin.io.path.Path
  * Abstraction class to work with rshw.
  * Every rshw frame is a list of currently played bits, collecting that at load time is way nicer.
  */
-class ShowData(val owner: PlaybackControllerBlockEntity) {
+class ShowData(val owner: ReelToReelBlockEntity) {
     // TODO: Convert signal to a list of longs and pack bit ids using bitwise operations
     val signal: MutableList<BitIdArray> = ArrayList()
     var audio: ByteArray = ByteArray(0)

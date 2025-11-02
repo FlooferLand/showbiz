@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.datagen.providers
 
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.blocks.CustomBlockModel
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlVanilla
@@ -34,16 +34,19 @@ object BlockProvider {
         }
     }
 
-    fun generateStates(block: ModBlocks, states: List<CustomBlockModel.Variation>): JsonObject? {
+    // TODO: Accumulate every separate variant together so every state include severy variant as the string
+    fun generateStates(block: ModBlocks, variations: List<CustomBlockModel.Variation>): JsonObject? {
         return buildJsonObject {
             putJsonObject("variants") {
-                if (states.isEmpty()) {
+                if (variations.isEmpty()) {
                     putJsonObject("") {
                         put("model", block.id.blockPath().toString())
                     }
-                } else for (state in states) {
-                    putJsonObject("${state.prop.name}=${state.expected}") {
-                        put("model", rl(state.name.name!!).blockPath().toString())
+                } else for (variation in variations) {
+                    putJsonObject("${variation.prop.name}=${variation.expected}") {
+                        put("model", rl(variation.name.name!!).blockPath().toString())
+                        if (variation.state.x != 0) put("x", variation.state.x)
+                        if (variation.state.y != 0) put("y", variation.state.y)
                     }
                 }
             }
