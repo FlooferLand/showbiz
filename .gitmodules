@@ -1,3 +1,4 @@
 [submodule "src/main/resources-fnaf"]
 	path = src/main/resources-fnaf
 	url = https://github.com/FlooferLand/showbiz-fnaf
+	branch = main
