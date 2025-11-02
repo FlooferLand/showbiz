@@ -68,11 +68,18 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
         for ((_, data) in bitmapBits) {
-            data.rotate?.let { rotate ->
+            for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
                 bone.rotX = 0f
                 bone.rotY = 0f
                 bone.rotZ = 0f
+            }
+
+            for (move in data.moves) {
+                val bone = animationProcessor.getBone(move.bone) ?: continue
+                bone.posX = 0f
+                bone.posY = 0f
+                bone.posZ = 0f
             }
 
             if (!reelToReel.playing) {
@@ -129,22 +136,32 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 }
             }
 
-            // Manual rotation
-            data.rotate?.let { rotate ->
-                val bone = animationProcessor.getBone(rotate.bone) ?: continue
+            // Manual smoothing
+            val oldSmooth = bitSmooths.putIfAbsent(bit, 0.0) ?: 0.0
+            val bitSmooth = clamp(
+                lerp(oldSmooth, if (bitOn) 1.0 else 0.0, clamp(flowSpeed * delta, 0.01, 10.0)),
+                0.0, 1.0
+            )
+            bitSmooths[bit] = bitSmooth
 
-                // Smoothing
-                val oldSmooth = bitSmooths.putIfAbsent(bit, 0.0) ?: 0.0
-                val bitSmooth = clamp(
-                    lerp(oldSmooth, if (bitOn) 1.0 else 0.0, clamp(flowSpeed * delta, 0.01, 10.0)),
-                    0.0, 1.0
-                )
-                bitSmooths[bit] = bitSmooth
+            // Manual rotation
+            for (rotate in data.rotates) {
+                val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying
                 bone.rotX += (Math.toRadians(rotate.target.x.toDouble()) * bitSmooth).toFloat()
                 bone.rotY += (Math.toRadians(rotate.target.y.toDouble()) * bitSmooth).toFloat()
                 bone.rotZ += (Math.toRadians(rotate.target.z.toDouble()) * bitSmooth).toFloat()
+            }
+
+            // Manual position
+            for (move in data.moves) {
+                val bone = animationProcessor.getBone(move.bone) ?: continue
+
+                // Applying
+                bone.posX += (move.target.x.toDouble() * bitSmooth).toFloat()
+                bone.posY += (move.target.y.toDouble() * bitSmooth).toFloat()
+                bone.posZ += (move.target.z.toDouble() * bitSmooth).toFloat()
             }
         }
     }
