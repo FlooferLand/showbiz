@@ -26,53 +26,54 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
         val deserializer = serializer<AddonManifest>()
         val addons = mutableListOf<AddonData>()
         for (pack in manager.listPacks()) {
-            val packId = pack.packId()
-            if (packId.startsWith("fabric-")) continue
-            fun err(msg: String, throwable: Throwable? = null) =
-                Showbiz.log.error("Addon '$packId' (datapack): $msg", throwable)
-            fun warn(msg: String) =
-                Showbiz.log.warn("Addon '$packId' (datapack): $msg")
-            fun getRes(path: String): IoSupplier<InputStream>? =
-                pack.getResource(PackType.SERVER_DATA, rlCustom(packId.replace("file/", ""), path))
+            if (pack.packId().startsWith("fabric-")) continue
+            for (namespace in pack.getNamespaces(PackType.SERVER_DATA)) {
+                fun err(msg: String, throwable: Throwable? = null) =
+                    Showbiz.log.error("Addon '$namespace' (datapack): $msg", throwable)
+                fun warn(msg: String) =
+                    Showbiz.log.warn("Addon '$namespace' (datapack): $msg")
+                fun getRes(path: String): IoSupplier<InputStream>? =
+                    pack.getResource(PackType.SERVER_DATA, rlCustom(namespace.replace("file/", ""), path))
 
-            // Reading all the manifest data, and skipping irrelevant packs
-            val manifestString = getRes(MANIFEST_NAME)
-                ?.get()?.readAllBytes()?.decodeToString()
-                ?: continue
-            val manifest = runCatching { Toml.partiallyDecodeFromString(deserializer, manifestString, "addon") }
-                .getOrElse { err ->
-                    err("Failed to parse $MANIFEST_NAME for addon '$packId'", err)
-                    continue
-                }
-
-            // Validating ID
-            val isShowbizMod = (packId == Showbiz.MOD_ID)
-                    && (pack.knownPackInfo().getOrNull()?.let { !it.isVanilla && it.id == Showbiz.MOD_ID } ?: false)
-            if (isShowbizMod) {
-                Showbiz.log.info("Found Showbiz built-in '${packId}'")
-            } else {
-                if (!AddonId.checkValid(packId, manifest, ::err, ::warn))
-                    continue
-            }
-
-            // Reading pack data
-            val bots = run {
-                val e = getRes("${Showbiz.MOD_ID}/bots.toml")
+                // Reading all the manifest data, and skipping irrelevant packs
+                val manifestString = getRes(MANIFEST_NAME)
                     ?.get()?.readAllBytes()?.decodeToString()
-                    ?: run { err("Failed to find bots.toml"); continue }
-                runCatching { Toml.decodeFromString<HashMap<String, AddonBotEntry>>(e) }
+                    ?: continue
+                val manifest = runCatching { Toml.partiallyDecodeFromString(deserializer, manifestString, "addon") }
                     .getOrElse { err ->
-                        err("Failed to parse $MANIFEST_NAME for addon '$packId'", err)
+                        err("Failed to parse $MANIFEST_NAME for addon '$namespace'", err)
                         continue
                     }
-            }
 
-            // Adding the addon to the addon adding adder
-            val addon = AddonData(
-                manifest,
-                bots
-            )
-            addons.add(addon)
+                // Validating ID
+                val isShowbizMod = (namespace == Showbiz.MOD_ID)
+                        && (pack.knownPackInfo().getOrNull()?.let { !it.isVanilla && it.id == Showbiz.MOD_ID } ?: false)
+                if (isShowbizMod) {
+                    Showbiz.log.info("Found Showbiz built-in '$namespace'")
+                } else {
+                    if (!AddonId.checkValid(namespace, manifest, ::err, ::warn))
+                        continue
+                }
+
+                // Reading pack data
+                val bots = run {
+                    val e = getRes("${Showbiz.MOD_ID}/bots.toml")
+                        ?.get()?.readAllBytes()?.decodeToString()
+                        ?: run { err("Failed to find bots.toml"); continue }
+                    runCatching { Toml.decodeFromString<HashMap<String, AddonBotEntry>>(e) }
+                        .getOrElse { err ->
+                            err("Failed to parse $MANIFEST_NAME for addon '$namespace'", err)
+                            continue
+                        }
+                }
+
+                // Adding the addon to the addon adding adder
+                val addon = AddonData(
+                    manifest,
+                    bots
+                )
+                addons.add(addon)
+            }
         }
         return addons
     }

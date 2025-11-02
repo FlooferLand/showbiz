@@ -47,89 +47,96 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         val out = LoadedAssets()
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
-            val packId = pack.packId()
-            if (packId.startsWith("fabric-")) continue
-            fun err(msg: String, throwable: Throwable? = null) =
-                Showbiz.log.error("Addon '$packId' (resource pack): $msg\n", throwable)
-            fun getResAsString(location: ResourceLocation) =
-                pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
-            fun getResAsString(path: String) =
-                getResAsString(rlCustom(packId, path))
+            if (pack.packId().startsWith("fabric-")) continue
+            for (namespace in pack.getNamespaces(PackType.SERVER_DATA)) {
+                fun err(msg: String, throwable: Throwable? = null) =
+                    Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
+                fun getResAsString(location: ResourceLocation) =
+                    pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
+                fun getResAsString(path: String) =
+                    getResAsString(rlCustom(namespace, path))
 
-            // Finding assets
-            data class BotLoadAssets(var rootPath: ResourcePath? = null, var model: ResourceLocation? = null, var animations: ResourceLocation? = null)
-            val botAssets = mutableMapOf<String, BotLoadAssets>()
-            val onList = PackResources.ResourceOutput() { location, stream ->
-                val botsIntro = "${Showbiz.MOD_ID}/bots/"
-                if (!location.path.startsWith(botsIntro)) return@ResourceOutput
-                val botId = location.path.replace(botsIntro, "").split('/').firstOrNull() ?: return@ResourceOutput
-
-                // Models
-                if (location.path.endsWith(".geo.json")) {
-                    val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
-                    assets.model = location
-                    runCatching {
-                        out.models.put(
-                            location,
-                            loadBakedModel(location, stream.get()!!.readAllBytes()!!.decodeToString())
-                        )
-                    }
-                }
-
-                // Animations
-                if (location.path.endsWith(".animation.json")) {
-                    val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
-                    assets.animations = location
-                    runCatching {
-                        out.animations.put(
-                            location,
-                            loadBakedAnimation(stream.get()!!.readAllBytes()!!.decodeToString())
-                        )
-                    }
-                }
-
-                // assets.toml
-                if (location.path.endsWith("/$ASSETS_TOML_NAME")) {
-                    val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
-                    assets.rootPath = location.toPath().parent
-                }
-            }
-            pack.listResources(PackType.CLIENT_RESOURCES, packId, Showbiz.MOD_ID, onList)
-
-            // Finding toml def files
-            val bots = mutableMapOf<String, AddonBot>()
-            for ((id, bot) in botAssets) {
-                if (bot.rootPath == null || bot.model == null) {
-                    err("INTERNAL: Failed to load root path or model for '${id}'")
-                    continue
-                }
-
-                fun <T> getToml(filename: String, fetchToml: (String) -> T?): T? {
-                    val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                    val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
-                    val toml = runCatching { fetchToml(res) }
-                    toml.exceptionOrNull()?.let { throwable -> err("Failed to parse TOML '$path'", throwable) }
-                    return toml.getOrNull()
-                }
-                fun getBits(filename: String): BotBitmapFile? {
-                    val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                    val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
-                    val bits = runCatching { BitsMap().load(res.byteInputStream()) }
-                    bits.exceptionOrNull()?.let { throwable -> err("Failed to load $filename on '$path'", throwable) }
-                    return bits.getOrNull()
-                }
-
-                val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
-                val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
-                bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations)
-            }
-
-            if (bots.isNotEmpty()) {
-                val assets = AddonAssets(
-                    id = packId,
-                    bots = bots
+                // Finding assets
+                data class BotLoadAssets(
+                    var rootPath: ResourcePath? = null,
+                    var model: ResourceLocation? = null,
+                    var animations: ResourceLocation? = null
                 )
-                addons.add(assets)
+
+                val botAssets = mutableMapOf<String, BotLoadAssets>()
+                val onList = PackResources.ResourceOutput() { location, stream ->
+                    val botsIntro = "${Showbiz.MOD_ID}/bots/"
+                    if (!location.path.startsWith(botsIntro)) return@ResourceOutput
+                    val botId = location.path.replace(botsIntro, "").split('/').firstOrNull() ?: return@ResourceOutput
+
+                    // Models
+                    if (location.path.endsWith(".geo.json")) {
+                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        assets.model = location
+                        runCatching {
+                            out.models.put(
+                                location,
+                                loadBakedModel(location, stream.get()!!.readAllBytes()!!.decodeToString())
+                            )
+                        }
+                    }
+
+                    // Animations
+                    if (location.path.endsWith(".animation.json")) {
+                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        assets.animations = location
+                        runCatching {
+                            out.animations.put(
+                                location,
+                                loadBakedAnimation(stream.get()!!.readAllBytes()!!.decodeToString())
+                            )
+                        }
+                    }
+
+                    // assets.toml
+                    if (location.path.endsWith("/$ASSETS_TOML_NAME")) {
+                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        assets.rootPath = location.toPath().parent
+                    }
+                }
+                pack.listResources(PackType.CLIENT_RESOURCES, namespace, Showbiz.MOD_ID, onList)
+
+                // Finding toml def files
+                val bots = mutableMapOf<String, AddonBot>()
+                for ((id, bot) in botAssets) {
+                    if (bot.rootPath == null || bot.model == null) {
+                        err("INTERNAL: Failed to load root path or model for '${id}'")
+                        continue
+                    }
+
+                    fun <T> getToml(filename: String, fetchToml: (String) -> T?): T? {
+                        val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
+                        val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
+                        val toml = runCatching { fetchToml(res) }
+                        toml.exceptionOrNull()?.let { throwable -> err("Failed to parse TOML '$path'", throwable) }
+                        return toml.getOrNull()
+                    }
+
+                    fun getBits(filename: String): BotBitmapFile? {
+                        val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
+                        val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
+                        val bits = runCatching { BitsMap().load(res.byteInputStream()) }
+                        bits.exceptionOrNull()?.let { throwable -> err("Failed to load $filename on '$path'", throwable) }
+                        return bits.getOrNull()
+                    }
+
+                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
+                    val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
+                    bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations)
+                }
+
+                if (bots.isNotEmpty()) {
+                    val assets = AddonAssets(
+                        id = namespace,
+                        bots = bots
+                    )
+                    addons.add(assets)
+                }
             }
         }
         out.addons = addons
