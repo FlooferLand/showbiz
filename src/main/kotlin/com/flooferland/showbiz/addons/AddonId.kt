@@ -1,14 +1,9 @@
 package com.flooferland.showbiz.addons
 
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.addons.data.AddonManifest
 
 object AddonId {
     private val tooGeneric = setOf("fnaf", "rae", "cec", "cei", "cyber", "cybers")
-
-    fun isInternal(id: String): Boolean {
-        return id.startsWith(Showbiz.MOD_ID)
-    }
 
     fun isTooGeneric(id: String): Boolean {
         return (id in tooGeneric) || id.length < 5
@@ -25,14 +20,6 @@ object AddonId {
         val id = manifest.id.lowercase()
         if (id != manifest.id) {
             err("Manifest ID must be lowercase")
-            return false
-        }
-        if (id != packId) {
-            err("Addon manifest ID '$id' does not match it's pack ID ('$packId')")
-            return false
-        }
-        if (AddonId.isInternal(id)) {
-            err("Addon manifest ID '$id' might be internally used by Showbiz Mod later, so it cannot be used.")
             return false
         }
         if (AddonId.isTooGeneric(id)) {
