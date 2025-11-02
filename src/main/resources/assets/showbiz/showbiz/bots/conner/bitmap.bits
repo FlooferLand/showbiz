@@ -35,3 +35,15 @@ any jaw {
     flow 1.5
     rotate "jaw" x:-30
 }
+
+faz eyes_left, rae left_eyelid {
+    flow 0.6
+    move "left_eye" x:1
+    move "right_eye" x:1
+}
+
+faz eyes_right, rae right_eyelid {
+    flow 0.6
+    move "left_eye" x:-1
+    move "right_eye" x:-1
+}
