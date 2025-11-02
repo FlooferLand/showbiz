@@ -1,3 +1,3 @@
-[submodule "src/main/resources-addons"]
-	path = src/main/resources-addons
+[submodule "src/main/resources-fnaf"]
+	path = src/main/resources-fnaf
 	url = https://github.com/FlooferLand/showbiz-fnaf

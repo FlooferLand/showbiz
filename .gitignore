@@ -1,5 +1,5 @@
-# Diner FNaF bots & FNaF addon (private)
-src/main/resources-addons/**
+# FNaF bots & addon (private)
+src/main/resources-fnaf/
 
 # Stonecutter
 versions/**/logs/
