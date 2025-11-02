@@ -14,7 +14,9 @@ object BlockProvider {
     enum class BlockModelId {
         CubeAll,
         BlockEntity,
-        Custom
+        Custom;
+        var transparent = false
+        fun transparent(): BlockModelId { transparent = true; return this }
     }
 
     fun generateBlockModel(block: ModBlocks, model: CustomBlockModel.Model): JsonObject? {
