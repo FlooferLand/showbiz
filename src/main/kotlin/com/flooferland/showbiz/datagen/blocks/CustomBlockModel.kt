@@ -1,8 +1,9 @@
-package com.flooferland.showbiz.registry.blocks
+package com.flooferland.showbiz.datagen.blocks
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.blockPath
+import com.flooferland.showbiz.utils.rl
 import kotlinx.serialization.json.JsonObject
 import net.minecraft.resources.*
 import net.minecraft.world.level.block.*
@@ -103,6 +104,23 @@ interface CustomBlockModel {
         fun bool(prop: BooleanProperty, block: BoolStateScope.() -> Unit) {
             BoolStateScope(this, prop).apply(block)
         }
+
+        // Facing / Horizontal direction
+        fun facing(prop: DirectionProperty) {
+            for (value in prop.allValues) {
+                val direction = value.value
+                val name = NameBuilder(this, name = this.blockId.path, postfix = null)
+                val built = StateModel(this, name)
+                built.y = ((direction.get2DDataValue() and 3) * 90) - 180
+                built.model = Model(this).also { it.texture(this.blockId) }
+                this.states.add(Variation(
+                    this, StrippedProperty(this.block, prop),
+                    expected = direction.serializedName,
+                    state = built,
+                    name = name
+                ))
+            }
+        }
     }
 
     /** Type erasure for the normal *Property classes */
@@ -124,6 +142,12 @@ interface CustomBlockModel {
     class StateModel(val ctx: BlockStateBuilder, val name: NameBuilder) {
         var model: Model? = null
         fun model(block: Model.() -> Unit) = apply { this.model = Model(ctx).apply(block) }
+
+        var x: Int = 0
+        fun x(block: Int.() -> Unit) = apply { this.x = x.apply(block) }
+
+        var y: Int = 0
+        fun y(block: Int.() -> Unit) = apply { this.y = y.apply(block) }
     }
 
     @CustomBlockModelDsl

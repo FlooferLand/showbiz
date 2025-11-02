@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import kotlin.math.roundToInt
 
-class PlaybackControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.PlaybackController.entity!!, pos, blockState) {
+class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState) {
     val aFrameMs: Int
         get() =  50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
     val aBufferSize: Int
