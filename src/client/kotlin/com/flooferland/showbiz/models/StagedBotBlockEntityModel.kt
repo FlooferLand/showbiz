@@ -70,16 +70,18 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
-                bone.rotX = 0f
-                bone.rotY = 0f
-                bone.rotZ = 0f
+                val initRot = initBoneRots[bone.name]
+                bone.rotX = initRot?.x ?: 0f
+                bone.rotY = initRot?.y ?: 0f
+                bone.rotZ = initRot?.z ?: 0f
             }
 
             for (move in data.moves) {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
-                bone.posX = 0f
-                bone.posY = 0f
-                bone.posZ = 0f
+                val initMove = initBoneMoves[bone.name]
+                bone.posX = initMove?.x ?: 0f
+                bone.posY = initMove?.y ?: 0f
+                bone.posZ = initMove?.z ?: 0f
             }
 
             if (!reelToReel.playing) {
@@ -161,9 +163,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying
-                bone.posX += (move.target.x.toDouble() * bitSmooth).toFloat()
-                bone.posY += (move.target.y.toDouble() * bitSmooth).toFloat()
-                bone.posZ += (move.target.z.toDouble() * bitSmooth).toFloat()
+                bone.posX = (move.target.x.toDouble() * bitSmooth).toFloat()
+                bone.posY = (move.target.y.toDouble() * bitSmooth).toFloat()
+                bone.posZ = (move.target.z.toDouble() * bitSmooth).toFloat()
             }
         }
     }

@@ -3,6 +3,7 @@ package com.flooferland.showbiz.models
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.utils.Vec3f
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -12,7 +13,13 @@ import software.bernie.geckolib.model.GeoModel
  * Handles lower-level stuff, separated so it doesn't bloat up the main model file.
  */
 open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
-    var currentModel: BakedGeoModel? = null
+    protected var currentModel: BakedGeoModel? = null
+    protected val initBoneRots = mutableMapOf<String, Vec3f>()
+    protected val initBoneMoves = mutableMapOf<String, Vec3f>()
+
+    companion object {
+        var modelBaked = false
+    }
 
     override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
         val botId = animatable.botId
@@ -44,6 +51,21 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
         if (bakedModel != currentModel) {
             animationProcessor.setActiveModel(bakedModel)
             currentModel = bakedModel
+            initBoneRots.clear()
+            initBoneMoves.clear()
+            for (bone in animationProcessor.registeredBones) {
+                if (bone == null) continue
+                initBoneRots[bone.name] = Vec3f(
+                    bone.rotX,
+                    bone.rotY,
+                    bone.rotZ
+                )
+                initBoneMoves[bone.name] = Vec3f(
+                    bone.posX,
+                    bone.posY,
+                    bone.posZ
+                )
+            }
         }
         return currentModel
     }

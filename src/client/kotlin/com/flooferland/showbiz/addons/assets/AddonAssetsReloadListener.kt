@@ -5,6 +5,7 @@ import com.flooferland.bizlib.bits.BitsMap
 import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.utils.ResourcePath
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
@@ -159,6 +160,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         // TODO: Add these to GeckoLib cache, and compare the existing assets with the loaded ones to tell what to remove/add to the Gecko cache
         ShowbizClient.models = loaded.models
         ShowbizClient.animations = loaded.animations
+        BaseBotModel.modelBaked = false
     }
 
     fun loadBakedModel(location: ResourceLocation, json: String): BakedGeoModel {
