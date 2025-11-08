@@ -2,9 +2,11 @@ package com.flooferland.showbiz.registry
 
 import com.flooferland.showbiz.blocks.GreyboxBlock
 import com.flooferland.showbiz.blocks.ReelToReelBlock
+import com.flooferland.showbiz.blocks.SpeakerBlock
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
@@ -46,6 +48,16 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
         entity = ::GreyboxBlockEntity
+    ),
+    Speaker(
+        "speaker", ::SpeakerBlock,
+        Properties.of()
+            .strength(3.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.WOOD)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::SpeakerBlockEntity
     );
 
     val id: ResourceLocation

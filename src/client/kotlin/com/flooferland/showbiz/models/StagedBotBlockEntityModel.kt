@@ -92,14 +92,16 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (!reelToReel.playing) return
 
         // Driving animation
+        val delta = nextDelta()
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = reelToReel.signal
             val flowSpeed = (data.flow.toFloat() * 10.0f)
             val bitOn = frame.frameHas(bit)
-            val delta = nextDelta()
 
             // Animation
+            // TODO: Fix animations sometimes snapping
+            // TODO: Fix animations sometimes holding for no reason
             data.anim?.let { anim ->
                 val controllerKey = "ctrl_$bit"
 

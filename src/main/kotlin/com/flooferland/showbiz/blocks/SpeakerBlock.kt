@@ -6,10 +6,10 @@ import net.minecraft.core.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 
-class GreyboxBlock(props: Properties) : FacingEntityBlock(props) {
-    val codec = simpleCodec(::GreyboxBlock)!!
+class SpeakerBlock(props: Properties) : FacingEntityBlock(props) {
+    val codec = simpleCodec(::SpeakerBlock)!!
     override fun codec() = codec
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.Greybox.entity!!.create(pos, state)!!
+        ModBlocks.Speaker.entity!!.create(pos, state)!!
 }

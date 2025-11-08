@@ -13,7 +13,7 @@
 	"variable_placeholders": "",
 	"variable_placeholder_buttons": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 276,
+	"activity_tracker": 312,
 	"resolution": {
 		"width": 64,
 		"height": 64
@@ -1837,7 +1837,7 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false
+			"isOpen": true
 		}
 	],
 	"outliner": [
@@ -1847,7 +1847,7 @@
 			"children": [
 				{
 					"uuid": "e2a19950-77f2-b1fa-e341-c66449762b73",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						"ae339342-0664-486b-6645-3bc1519271db",
 						"f6cb3235-c0a2-eb53-2de9-3575710afe3b",
