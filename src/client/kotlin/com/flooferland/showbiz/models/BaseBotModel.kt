@@ -2,8 +2,8 @@ package com.flooferland.showbiz.models
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.utils.Vec3f
 import net.minecraft.resources.*
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -13,9 +13,7 @@ import software.bernie.geckolib.model.GeoModel
  * Handles lower-level stuff, separated so it doesn't bloat up the main model file.
  */
 open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
-    protected var currentModel: BakedGeoModel? = null
-    protected val initBoneRots = mutableMapOf<String, Vec3f>()
-    protected val initBoneMoves = mutableMapOf<String, Vec3f>()
+    protected var currentModel: BotModelData? = null
 
     companion object {
         var modelBaked = false
@@ -47,27 +45,13 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel? {
         if (location == null) error("Couldn't get baked model (null)")
-        val bakedModel = ShowbizClient.models[location] ?: error("Couldn't find bot model for $location");
-        if (bakedModel != currentModel) {
-            animationProcessor.setActiveModel(bakedModel)
-            currentModel = bakedModel
-            initBoneRots.clear()
-            initBoneMoves.clear()
-            for (bone in animationProcessor.registeredBones) {
-                if (bone == null) continue
-                initBoneRots[bone.name] = Vec3f(
-                    bone.rotX,
-                    bone.rotY,
-                    bone.rotZ
-                )
-                initBoneMoves[bone.name] = Vec3f(
-                    bone.posX,
-                    bone.posY,
-                    bone.posZ
-                )
-            }
+        val model = ShowbizClient.botModels[location] ?: error("Couldn't find bot model for $location");
+        if (!modelBaked) {
+            currentModel = model
+            animationProcessor.setActiveModel(model.bakedModel)
+            modelBaked = true
         }
-        return currentModel
+        return model.bakedModel
     }
 
     override fun getAnimation(animatable: StagedBotBlockEntity, name: String): Animation? {

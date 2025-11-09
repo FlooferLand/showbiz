@@ -3,6 +3,7 @@ package com.flooferland.showbiz
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
+import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -22,13 +23,12 @@ import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
-import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
     var bots: Map<String, AddonBot> = mapOf()
-    var models: Map<ResourceLocation, BakedGeoModel> = mapOf()
+    var botModels: Map<ResourceLocation, BotModelData> = mapOf()
     var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
 
     override fun onInitializeClient() {

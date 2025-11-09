@@ -5,6 +5,8 @@ import net.minecraft.nbt.*
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
+import software.bernie.geckolib.cache.`object`.BakedGeoModel
+import software.bernie.geckolib.cache.`object`.GeoBone
 import java.util.UUID
 
 @Suppress("unused")
@@ -31,6 +33,23 @@ object Extensions {
         change(this)
         markDirtyNotifyAll()
     }
+
+    //region GeckoLib
+    fun GeoBone.getChildrenFlattened(): HashSet<GeoBone> {
+        val bones = hashSetOf<GeoBone>(this)
+        this.childBones.forEach { bones.addAll(it.getChildrenFlattened()) }
+        return bones
+    }
+
+    fun BakedGeoModel.getAllBones(): HashSet<GeoBone> {
+        val bones = hashSetOf<GeoBone>()
+        topLevelBones.forEach {
+            bones.add(it)
+            bones.addAll(it.getChildrenFlattened())
+        }
+        return bones
+    }
+    //endregion
 
     //region Compound get functions, since these change for 1.21.5+
     fun CompoundTag.getOrNull(string: String): Tag? =

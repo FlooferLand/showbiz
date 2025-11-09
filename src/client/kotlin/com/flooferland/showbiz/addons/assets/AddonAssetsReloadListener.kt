@@ -5,11 +5,10 @@ import com.flooferland.bizlib.bits.BitsMap
 import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.models.BaseBotModel
-import com.flooferland.showbiz.utils.ResourcePath
-import com.flooferland.showbiz.utils.rl
-import com.flooferland.showbiz.utils.rlCustom
-import com.flooferland.showbiz.utils.toPath
+import com.flooferland.showbiz.utils.*
+import com.flooferland.showbiz.utils.Extensions.getAllBones
 import com.google.gson.JsonObject
 import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType
@@ -158,7 +157,30 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         ShowbizClient.bots = bots
 
         // TODO: Add these to GeckoLib cache, and compare the existing assets with the loaded ones to tell what to remove/add to the Gecko cache
-        ShowbizClient.models = loaded.models
+        val models = mutableMapOf<ResourceLocation, BotModelData>()
+        for ((id, model) in loaded.models) {
+            val initBoneRots = mutableMapOf<String, Vec3f>()
+            val initBoneMoves = mutableMapOf<String, Vec3f>()
+            for (bone in model.getAllBones()) {
+                initBoneRots[bone.name] = Vec3f(
+                    bone.rotX,
+                    bone.rotY,
+                    bone.rotZ
+                )
+                initBoneMoves[bone.name] = Vec3f(
+                    bone.posX,
+                    bone.posY,
+                    bone.posZ
+                )
+            }
+
+            models[id] = BotModelData(
+                initBoneRots = initBoneRots,
+                initBoneMoves = initBoneMoves,
+                bakedModel = model
+            )
+        }
+        ShowbizClient.botModels = models
         ShowbizClient.animations = loaded.animations
         BaseBotModel.modelBaked = false
     }
