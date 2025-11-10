@@ -111,6 +111,7 @@ loom {
         ideConfigGenerated(true) // Run configurations are not created for subprojects by default
         runDir = "../../run" // Shared run folder between versions
     }
+    log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
 }
 
 // License
@@ -128,6 +129,7 @@ tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.WARN
     exclude("**/*.lnk", "**/*.exe", "**/*.dll", "**/*.so", "**/*.jar")
     exclude("projects")
+    exclude("log4j.xml")
 
     // Inserting strings into what-not
     val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"

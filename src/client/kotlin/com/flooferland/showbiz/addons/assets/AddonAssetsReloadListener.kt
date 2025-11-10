@@ -174,6 +174,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 )
             }
 
+            BaseBotModel.baked[id] = false
             models[id] = BotModelData(
                 initBoneRots = initBoneRots,
                 initBoneMoves = initBoneMoves,
@@ -182,7 +183,6 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         }
         ShowbizClient.botModels = models
         ShowbizClient.animations = loaded.animations
-        BaseBotModel.modelBaked = false
     }
 
     fun loadBakedModel(location: ResourceLocation, json: String): BakedGeoModel {

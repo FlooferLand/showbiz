@@ -38,5 +38,6 @@ object Showbiz : ModInitializer {
         
         // Finished
         log.info("Enjoy the show!")
+        log.debug("Debugging log level enabled! More information will be printed.")
     }
 }
