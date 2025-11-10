@@ -6,7 +6,6 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
-import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.utils.*
 import com.flooferland.showbiz.utils.Extensions.getAllBones
 import com.google.gson.JsonObject
@@ -174,7 +173,6 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 )
             }
 
-            BaseBotModel.baked[id] = false
             models[id] = BotModelData(
                 initBoneRots = initBoneRots,
                 initBoneMoves = initBoneMoves,
