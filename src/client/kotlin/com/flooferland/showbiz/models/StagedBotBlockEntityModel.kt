@@ -14,6 +14,9 @@ import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import java.lang.Math.clamp
 
+// TODO: Make the bot model not share the same bitSmooths and other properties.
+//       Currently, 2 shows cannot animate at the same time due to this shared memory.
+
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
     val bitSmooths = mutableMapOf<BitId, Double>()

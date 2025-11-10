@@ -16,7 +16,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     protected var currentModel: BotModelData? = null
 
     companion object {
-        var modelBaked = false
+        var baked = mutableMapOf<ResourceLocation, Boolean>()
     }
 
     override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
@@ -45,11 +45,13 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel? {
         if (location == null) error("Couldn't get baked model (null)")
-        val model = ShowbizClient.botModels[location] ?: error("Couldn't find bot model for $location");
-        if (!modelBaked) {
+        val model = ShowbizClient.botModels[location] ?: error("Couldn't find bot model for $location")
+        val baked = baked[location] ?: false
+        if (!baked) {
             currentModel = model
             animationProcessor.setActiveModel(model.bakedModel)
-            modelBaked = true
+            BaseBotModel.baked[location] = true
+            Showbiz.log.debug("Baked model '{}'", location)
         }
         return model.bakedModel
     }
