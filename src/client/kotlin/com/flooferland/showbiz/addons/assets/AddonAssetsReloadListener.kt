@@ -6,8 +6,12 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
-import com.flooferland.showbiz.utils.*
+import com.flooferland.showbiz.types.ResourcePath
+import com.flooferland.showbiz.types.Vec3f
+import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
+import com.flooferland.showbiz.utils.rl
+import com.flooferland.showbiz.utils.rlCustom
 import com.google.gson.JsonObject
 import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType

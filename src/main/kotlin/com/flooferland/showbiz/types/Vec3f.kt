@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.utils
+package com.flooferland.showbiz.types
 
 data class Vec3f(val x: Float = 0f, val y: Float = 0f, val z: Float = 0f) {
     companion object {

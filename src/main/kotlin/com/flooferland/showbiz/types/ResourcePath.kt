@@ -1,5 +1,6 @@
-package com.flooferland.showbiz.utils
+package com.flooferland.showbiz.types
 
+import com.flooferland.showbiz.utils.copy
 import net.minecraft.resources.*
 
 fun ResourceLocation.toPath(): ResourcePath =

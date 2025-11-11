@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.addons.assets
 
 import com.flooferland.bizlib.bits.BotBitmapFile
-import com.flooferland.showbiz.utils.ResourcePath
+import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.utils.rlCustom
 import kotlinx.serialization.Serializable
 import net.minecraft.resources.*
