@@ -2,6 +2,10 @@ package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.show.SignalFrame
+import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.DataChannelIn
+import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.minecraft.core.*
@@ -14,10 +18,17 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity {
-    val cache = GeckoLibUtil.createInstanceCache(this)!!
+class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity, IConnectable {
+    object PlayingIn : DataChannelIn<Boolean>("playing")
+    object SignalIn : DataChannelIn<SignalFrame>("signal")
+    override val connectionManager = ConnectionManager(this) {
+        bind(PlayingIn) { isPlaying = it }
+        bind(SignalIn) { signalFrame.load(it.save()) }
+    }
+    val signalFrame = SignalFrame()
+    var isPlaying: Boolean = false
 
-    var greyboxPos: BlockPos? = null
+    val cache = GeckoLibUtil.createInstanceCache(this)!!
     var botId: String? = findFirstBot()
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
@@ -25,29 +36,28 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
+        connectionManager.save(tag)
+
+        tag.putBoolean("Is-Playing", isPlaying)
+        tag.putIntArray("Signal-Frame", signalFrame.save())
 
         if (level?.isClientSide == false) {
             botId?.let { tag.putString("Bot-Id", it) }
-        }
-
-        greyboxPos?.let {
-            tag.putIntArray("Bound-Greybox", intArrayOf(it.x, it.y, it.z))
         }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
+        connectionManager.load(tag)
+
+        isPlaying = tag.getBoolean("Is-Playing")
+        tag.getIntArrayOrNull("Signal-Frame")?.let { signalFrame.load(it) }
 
         var botId = tag.getStringOrNull("Bot-Id")
         if (botId == null && level?.isClientSide == false) {
             botId = findFirstBot()
         }
         botId?.let { this.botId = it }
-
-        greyboxPos = tag.getIntArrayOrNull("Bound-Greybox")?.let {
-            if (it.size < 3) return@let null
-            BlockPos(it[0], it[1], it[2])
-        }
     }
 
     fun findFirstBot() = Showbiz.addons.firstOrNull()?.bots?.entries?.firstOrNull()?.key

@@ -1,42 +1,42 @@
 package com.flooferland.showbiz.blocks.entities
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
-import com.flooferland.showbiz.utils.Extensions.getOrNull
+import com.flooferland.showbiz.show.SignalFrame
+import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.DataChannelIn
+import com.flooferland.showbiz.types.connection.DataChannelOut
+import com.flooferland.showbiz.types.connection.IConnectable
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 
-class GreyboxBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Greybox.entity!!, pos, blockState) {
-    var reelToReelPos: BlockPos? = null
-    val connected = mutableListOf<BlockPos>()
+class GreyboxBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Greybox.entity!!, pos, blockState), IConnectable {
+    object PlayingOut : DataChannelOut<Boolean>("playing")
+    object PlayingIn : DataChannelIn<Boolean>("playing")
+    object SignalOut : DataChannelOut<SignalFrame>("signal")
+    object SignalIn : DataChannelIn<SignalFrame>("signal")
+    override val connectionManager = ConnectionManager(this) {
+        bind(PlayingOut)
+        bind(PlayingIn) { data ->
+            Showbiz.log.debug("Received playing '{}' on in:${PlayingIn.id}", data)
+            it.send(PlayingOut, data)
+        }
+
+        bind(SignalOut)
+        bind(SignalIn) { data ->
+            it.send(SignalOut, data)
+        }
+    }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        reelToReelPos?.let { tag.putIntArray("Reel-To-Reel", intArrayOf(it.x, it.y, it.z)) }
-        tag.put("Connected", CompoundTag().also {
-            for ((i, pos) in connected.withIndex()) {
-                it.putIntArray("$i", intArrayOf(pos.x, pos.y, pos.z))
-            }
-        })
+        connectionManager.save(tag)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        reelToReelPos = tag.getIntArrayOrNull("Reel-To-Reel")?.let {
-            if (it.size < 3) return@let null
-            BlockPos(it[0], it[1], it[2])
-        }
-
-        connected.clear()
-        tag.getOrNull("Connected")?.let {
-            val tag = (it as CompoundTag)
-            for (i in 0..tag.size()) {
-                val arr = tag.getIntArrayOrNull("$i") ?: continue
-                if (arr.size < 3) continue
-                connected.add(BlockPos(arr[0], arr[1], arr[2]))
-            }
-        }
+        connectionManager.load(tag)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {

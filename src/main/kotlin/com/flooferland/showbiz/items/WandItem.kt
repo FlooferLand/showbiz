@@ -5,6 +5,7 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.network.chat.*
@@ -70,13 +71,33 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
             val firstEntity = level.getBlockEntity(first.pos.get())
             when (lastEntity) {
                 is GreyboxBlockEntity if firstEntity is StagedBotBlockEntity -> {
-                    firstEntity.applyChange(true) { greyboxPos = lastEntity.blockPos }
+                    val (greybox, stagedBot) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        connectionManager.bindListener(
+                            GreyboxBlockEntity.PlayingOut,
+                            ConnectionManager.Receiver(stagedBot.blockPos, StagedBotBlockEntity.PlayingIn)
+                        )
+                        connectionManager.bindListener(
+                            GreyboxBlockEntity.SignalOut,
+                            ConnectionManager.Receiver(stagedBot.blockPos, StagedBotBlockEntity.SignalIn)
+                        )
+                    }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Bot added")
                     return InteractionResult.SUCCESS
                 }
                 is GreyboxBlockEntity if firstEntity is ReelToReelBlockEntity -> {
-                    lastEntity.applyChange(true) { reelToReelPos = firstEntity.blockPos }
+                    val (greybox, reelToReel) = Pair(lastEntity, firstEntity)
+                    reelToReel.applyChange(true) {
+                        connectionManager.bindListener(
+                            ReelToReelBlockEntity.PlayingOut,
+                            ConnectionManager.Receiver(greybox.blockPos, GreyboxBlockEntity.PlayingIn),
+                        )
+                        connectionManager.bindListener(
+                            ReelToReelBlockEntity.SignalOut,
+                            ConnectionManager.Receiver(greybox.blockPos, GreyboxBlockEntity.SignalIn),
+                        )
+                    }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
                     return InteractionResult.SUCCESS

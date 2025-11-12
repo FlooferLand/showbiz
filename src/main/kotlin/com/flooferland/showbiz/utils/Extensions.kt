@@ -7,7 +7,6 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
-import java.util.UUID
 
 @Suppress("unused")
 object Extensions {
@@ -52,27 +51,18 @@ object Extensions {
     //endregion
 
     //region Compound get functions, since these change for 1.21.5+
-    fun CompoundTag.getOrNull(string: String): Tag? =
-        if (contains(string)) get(string) else null
-    fun CompoundTag.getCompoundOrNull(string: String): CompoundTag? =
-        if (contains(string)) getCompound(string) else null
-    fun CompoundTag.getBooleanOrNull(string: String): Boolean? =
-        if (contains(string)) getBoolean(string) else null
-    fun CompoundTag.getByteOrNull(string: String): Byte? =
-        if (contains(string)) getByte(string) else null
-    fun CompoundTag.getIntOrNull(string: String): Int? =
-        if (contains(string)) getInt(string) else null
-    fun CompoundTag.getFloatOrNull(string: String): Float? =
-        if (contains(string)) getFloat(string) else null
-    fun CompoundTag.getDoubleOrNull(string: String): Double? =
-        if (contains(string)) getDouble(string) else null
-    fun CompoundTag.getStringOrNull(string: String): String? =
-        if (contains(string)) getString(string) else null
-    fun CompoundTag.getIntArrayOrNull(string: String): IntArray? =
-        if (contains(string)) getIntArray(string) else null
-    fun CompoundTag.getByteArrayOrNull(string: String): ByteArray? =
-        if (contains(string)) getByteArray(string) else null
-    fun CompoundTag.getUUIDOrNull(string: String): UUID? =
-        if (contains(string)) getUUID(string) else null
+    fun CompoundTag.getOrNull(key: String)          = if (contains(key)) get(key) else null
+    fun CompoundTag.getCompoundOrNull(key: String)  = if (contains(key)) getCompound(key) else null
+    fun CompoundTag.getBooleanOrNull(key: String)   = if (contains(key)) getBoolean(key) else null
+    fun CompoundTag.getByteOrNull(key: String)      = if (contains(key)) getByte(key) else null
+    fun CompoundTag.getIntOrNull(key: String)       = if (contains(key)) getInt(key) else null
+    fun CompoundTag.getLongOrNull(key: String)      = if (contains(key)) getLong(key) else null
+    fun CompoundTag.getFloatOrNull(key: String)     = if (contains(key)) getFloat(key) else null
+    fun CompoundTag.getDoubleOrNull(key: String)    = if (contains(key)) getDouble(key) else null
+    fun CompoundTag.getStringOrNull(key: String)    = if (contains(key)) getString(key) else null
+    fun CompoundTag.getIntArrayOrNull(key: String)  = if (contains(key)) getIntArray(key) else null
+    fun CompoundTag.getByteArrayOrNull(key: String) = if (contains(key)) getByteArray(key) else null
+    fun CompoundTag.getLongArrayOrNull(key: String) = if (contains(key)) getLongArray(key) else null
+    fun CompoundTag.getUUIDOrNull(key: String)      = if (contains(key)) getUUID(key) else null
     //endregion
 }

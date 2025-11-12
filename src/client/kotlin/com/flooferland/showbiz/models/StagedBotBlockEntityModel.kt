@@ -3,8 +3,6 @@ package com.flooferland.showbiz.models
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
-import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.utils.lerp
@@ -59,14 +57,16 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             this.greybox = greybox
             this.reelToReel = reelToReel
         }*/
-        val greybox = animatable.greyboxPos?.let {
+        /*val greybox = animatable.greyboxPos?.let {
             animatable.level?.getBlockEntity(it) as? GreyboxBlockEntity
         }
         val reelToReel = greybox?.reelToReelPos?.let {
             animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
         }
         if (greybox == null || reelToReel == null) return
-        val bitmapBits = bot.bitmap.bits[reelToReel.show.mapping] ?: return
+        val bitmapBits = bot.bitmap.bits[reelToReel.show.mapping] ?: return*/
+        val bitmapBits = bot.bitmap.bits["faz"] ?: return  // DEBUG ONLY
+        // println("TEST: ${animatable.isPlaying} ${animatable.signalFrame?.raw?.size}")
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -88,20 +88,20 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.posZ = initMove?.z ?: 0f
             }
 
-            if (!reelToReel.playing) {
+            if (!animatable.isPlaying) {
                 data.anim?.let { anim ->
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
             }
         }
-        if (!reelToReel.playing) return
+        if (!animatable.isPlaying) return
 
         // Driving animation
         val delta = nextDelta()
         for ((bit, data) in bitmapBits) {
             // Getting things
-            val frame = reelToReel.signal
+            val frame = animatable.signalFrame ?: continue
             val flowSpeed = (data.flow.toFloat() * 10.0f)
             val bitOn = frame.frameHas(bit)
 

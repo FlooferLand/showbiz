@@ -6,6 +6,9 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
+import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.DataChannelOut
+import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
@@ -19,7 +22,14 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import kotlin.math.roundToInt
 
-class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState) {
+class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState), IConnectable {
+    object PlayingOut : DataChannelOut<Boolean>("playing")
+    object SignalOut : DataChannelOut<SignalFrame>("signal")
+    override val connectionManager = ConnectionManager(this) {
+        bind(PlayingOut)
+        bind(SignalOut)
+    }
+
     val aFrameMs: Int
         get() =  50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
     val aBufferSize: Int
@@ -30,8 +40,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     public val signal = SignalFrame()
 
     var playing = false
-        public get
-        private set
+        public get private set
     private val tickDelta = (50 * 0.001) // ms
     private val fps = 60  // Tied to rshw
 
@@ -50,6 +59,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val entry = show.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             signal.set(entry)
             shouldUpdate = signal.raw.isNotEmpty()
+            connectionManager.send(SignalOut, signal)
         }
 
         // Audio
@@ -85,6 +95,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
+        connectionManager.send(PlayingOut, playing)
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -103,6 +114,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.putBoolean("Playing", playing)
         tag.putDouble("Seek", seek)
         tag.putIntArray("Signal-Frame", signal.save())
+        connectionManager.save(tag)
         show.saveNBT(tag)
     }
 
@@ -113,6 +125,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         playing = tag.getBooleanOrNull("Playing") ?: false
         seek = tag.getDoubleOrNull("Seek") ?: 0.0
         signal.load(tag.getIntArrayOrNull("Signal-Frame"))
+        connectionManager.load(tag)
         show.loadNBT(tag)
     }
 
