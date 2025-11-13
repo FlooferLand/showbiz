@@ -1,3 +1,5 @@
+*.blend1
+
 # Stonecutter
 versions/**/logs/
 versions/**/src/main/generated/
