@@ -4,8 +4,8 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.connection.DataChannelIn
 import com.flooferland.showbiz.types.connection.IConnectable
+import com.flooferland.showbiz.types.connection.Ports
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.minecraft.core.*
@@ -19,11 +19,9 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
 class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity, IConnectable {
-    object PlayingIn : DataChannelIn<Boolean>("playing")
-    object SignalIn : DataChannelIn<SignalFrame>("signal")
     override val connectionManager = ConnectionManager(this) {
-        bind(PlayingIn) { isPlaying = it }
-        bind(SignalIn) { signalFrame.load(it.save()) }
+        bind(Ports.PlayingIn) { isPlaying = it }
+        bind(Ports.SignalIn) { signalFrame.load(it.save()) }
     }
     val signalFrame = SignalFrame()
     var isPlaying: Boolean = false

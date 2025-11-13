@@ -7,8 +7,8 @@ import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.connection.DataChannelOut
 import com.flooferland.showbiz.types.connection.IConnectable
+import com.flooferland.showbiz.types.connection.Ports
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
@@ -23,11 +23,9 @@ import net.minecraft.world.level.block.state.*
 import kotlin.math.roundToInt
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState), IConnectable {
-    object PlayingOut : DataChannelOut<Boolean>("playing")
-    object SignalOut : DataChannelOut<SignalFrame>("signal")
     override val connectionManager = ConnectionManager(this) {
-        bind(PlayingOut)
-        bind(SignalOut)
+        bind(Ports.PlayingOut)
+        bind(Ports.SignalOut)
     }
 
     val aFrameMs: Int
@@ -59,7 +57,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val entry = show.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             signal.set(entry)
             shouldUpdate = signal.raw.isNotEmpty()
-            connectionManager.send(SignalOut, signal)
+            connectionManager.send(Ports.SignalOut, signal)
         }
 
         // Audio
@@ -95,7 +93,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
-        connectionManager.send(PlayingOut, playing)
+        connectionManager.send(Ports.PlayingOut, playing)
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return

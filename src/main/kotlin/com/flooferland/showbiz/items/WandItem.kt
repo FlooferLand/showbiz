@@ -6,6 +6,7 @@ import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.Ports
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.network.chat.*
@@ -74,12 +75,12 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     val (greybox, stagedBot) = Pair(lastEntity, firstEntity)
                     greybox.applyChange(true) {
                         connectionManager.bindListener(
-                            GreyboxBlockEntity.PlayingOut,
-                            ConnectionManager.Receiver(stagedBot.blockPos, StagedBotBlockEntity.PlayingIn)
+                            Ports.PlayingOut,
+                            ConnectionManager.Receiver(stagedBot.blockPos, Ports.PlayingIn)
                         )
                         connectionManager.bindListener(
-                            GreyboxBlockEntity.SignalOut,
-                            ConnectionManager.Receiver(stagedBot.blockPos, StagedBotBlockEntity.SignalIn)
+                            Ports.SignalOut,
+                            ConnectionManager.Receiver(stagedBot.blockPos, Ports.SignalIn)
                         )
                     }
                     first.pos = Optional.empty()
@@ -90,12 +91,12 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     val (greybox, reelToReel) = Pair(lastEntity, firstEntity)
                     reelToReel.applyChange(true) {
                         connectionManager.bindListener(
-                            ReelToReelBlockEntity.PlayingOut,
-                            ConnectionManager.Receiver(greybox.blockPos, GreyboxBlockEntity.PlayingIn),
+                            Ports.PlayingOut,
+                            ConnectionManager.Receiver(greybox.blockPos, Ports.PlayingIn),
                         )
                         connectionManager.bindListener(
-                            ReelToReelBlockEntity.SignalOut,
-                            ConnectionManager.Receiver(greybox.blockPos, GreyboxBlockEntity.SignalIn),
+                            Ports.SignalOut,
+                            ConnectionManager.Receiver(greybox.blockPos, Ports.SignalIn),
                         )
                     }
                     first.pos = Optional.empty()
