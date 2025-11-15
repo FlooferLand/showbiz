@@ -6,11 +6,11 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.utils.lerp
+import java.lang.Math.clamp
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
-import java.lang.Math.clamp
 
 // TODO: Make the bot model not share the same bitSmooths and other properties.
 //       Currently, 2 shows cannot animate at the same time due to this shared memory.
@@ -74,7 +74,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
-                val initRot = model.initBoneMoves[bone.name]
+                val initRot = model.initBoneRots[bone.name]
                 bone.rotX = initRot?.x ?: 0f
                 bone.rotY = initRot?.y ?: 0f
                 bone.rotZ = initRot?.z ?: 0f
@@ -101,7 +101,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val delta = nextDelta()
         for ((bit, data) in bitmapBits) {
             // Getting things
-            val frame = animatable.signalFrame ?: continue
+            val frame = animatable.signalFrame
             val flowSpeed = (data.flow.toFloat() * 10.0f)
             val bitOn = frame.frameHas(bit)
 
