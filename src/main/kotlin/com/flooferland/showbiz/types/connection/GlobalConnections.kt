@@ -13,17 +13,20 @@ object GlobalConnections {
 
     fun updateConnections(manager: ConnectionManager, connectable: IConnectable) {
         if (connectable !is BlockEntity) return
-        val pointList = entries[connectable.blockPos] ?: return
-        pointList.forEach { it.connections.clear() }
+        val points = entries[connectable.blockPos] ?: return
+        points.forEach { point ->
+            point.connections.removeIf { it.pos == connectable.blockPos || entries[it.pos] == null }
+        }
+        points.forEach { it.connections.clear() }
 
         for ((output, receivers) in manager.listeners) {
-            val fromIndex = pointList.indexOfFirst { it.id == output.id && it.type == PointType.Output }
+            val fromIndex = points.indexOfFirst { it.id == output.id && it.type == PointType.Output }
             if (fromIndex == -1) continue
 
             for (receiver in receivers) {
                 val otherPoints = entries[receiver.pos] ?: continue
                 val otherPoint = otherPoints.firstOrNull { it.id == receiver.channelId && it.type == PointType.Input } ?: continue
-                pointList[fromIndex].connections.add(Connection(receiver.pos, otherPoint))
+                points[fromIndex].connections.add(Connection(receiver.pos, otherPoint))
             }
         }
     }

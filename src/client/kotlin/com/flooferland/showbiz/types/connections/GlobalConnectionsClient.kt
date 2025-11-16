@@ -22,7 +22,15 @@ object GlobalConnectionsClient {
         }
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { blockEntity, level ->
             if (blockEntity !is IConnectable) return@register
+
             entries.remove(blockEntity.blockPos)
+            loaded.remove(blockEntity)
+
+            for ((_, points) in entries) {
+                points.forEach { point ->
+                    point.connections.removeIf { it.pos == blockEntity.blockPos }
+                }
+            }
         }
 
         ClientTickEvents.END_WORLD_TICK.register { level ->
