@@ -1,5 +1,11 @@
 package com.flooferland.showbiz
 
+import net.minecraft.client.*
+import net.minecraft.client.renderer.*
+import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.resources.*
+import net.minecraft.server.packs.*
+import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
@@ -11,17 +17,15 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModPackets
+import com.flooferland.showbiz.renderers.ConnectionRenderer
 import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
 import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
 import com.flooferland.showbiz.renderers.WandItemRenderer
+import com.flooferland.showbiz.types.connections.GlobalConnectionsClient
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.resources.*
-import net.minecraft.server.packs.*
-import net.minecraft.world.level.block.entity.*
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 
@@ -35,6 +39,7 @@ object ShowbizClient : ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ModPackets.registerC2S()
         ShowbizShowAudio.init()
+        GlobalConnectionsClient.register()
 
         // Block entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
@@ -62,6 +67,22 @@ object ShowbizClient : ClientModInitializer {
                 if (renderer == null) renderer = WandItemRenderer()
                 return renderer!!
             }
+        }
+
+        // World
+        WorldRenderEvents.LAST.register { context ->
+            if (context == null) return@register
+            val mc = Minecraft.getInstance() ?: return@register
+            val player = mc.player ?: return@register
+            val partialTick = context.tickCounter().getGameTimeDeltaPartialTick(true)
+            val view = context.camera()?.position ?: return@register
+
+            val pose = context.matrixStack() ?: return@register
+            pose.pushPose()
+            pose.translate(-view.x, -view.y, -view.z)
+            ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
+            ConnectionRenderer.renderDeferred(pose)
+            pose.popPose()
         }
     }
 }

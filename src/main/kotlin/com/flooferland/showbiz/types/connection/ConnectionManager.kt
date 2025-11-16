@@ -1,19 +1,19 @@
 package com.flooferland.showbiz.types.connection
 
-import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.utils.Extensions.applyChange
-import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
-import com.flooferland.showbiz.utils.Extensions.getLongOrNull
-import com.flooferland.showbiz.utils.Extensions.getOrNull
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import com.flooferland.showbiz.utils.Extensions.getLongOrNull
+import com.flooferland.showbiz.utils.Extensions.getOrNull
 
 class ConnectionManager(val owner: IConnectable, val register: ConnectionManagerRegistrar.(ConnectionManager) -> Unit) {
-    private val inputs = mutableMapOf<String, DataChannelIn<*>>()
-    private val outputs = mutableMapOf<String, DataChannelOut<*>>()
+    val inputs = mutableMapOf<String, DataChannelIn<*>>()
+    val outputs = mutableMapOf<String, DataChannelOut<*>>()
 
     /** This block's DataChannelOut listeners mapped to listeners' block position and channel */
     val listeners = mutableMapOf<DataChannelOut<*>, MutableList<Receiver>>()
@@ -73,9 +73,15 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
     }
 
     /** Binds [ours] to [theirs] */
-    public fun <T> bindListener(ours: DataChannelOut<T>, theirs: Receiver) {
+    public fun <T> bindListener(ours: DataChannelOut<T>, theirs: Receiver): Boolean {
         val listeners = this.listeners.getOrPut(ours, { mutableListOf() })
-        listeners.add(theirs)
+        if (listeners.none { it.channelId == theirs.channelId }) {
+            listeners.add(theirs)
+            GlobalConnections.updateConnections(this, owner)
+            return true
+        }
+        GlobalConnections.updateConnections(this, owner)
+        return false
     }
 
     fun save(saveTag: CompoundTag) {
@@ -92,8 +98,8 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
     fun load(loadTag: CompoundTag) {
         listeners.clear()
 
-        val tag = loadTag.getOrNull("Listeners") as? CompoundTag ?: return
-        tag.allKeys.forEach { outputId ->
+        val tag = loadTag.getOrNull("Listeners") as? CompoundTag
+        tag?.allKeys?.forEach { outputId ->
             val output = outputs[outputId] ?: return@forEach
             val listenerTag = tag.getCompoundOrNull(outputId) ?: return@forEach
 
@@ -103,5 +109,7 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
                     .add(Receiver(pos, channelId))
             }
         }
+
+        GlobalConnections.updateConnections(this, owner)
     }
 }
