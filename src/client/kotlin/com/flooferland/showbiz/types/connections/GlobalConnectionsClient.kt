@@ -34,6 +34,7 @@ object GlobalConnectionsClient {
         }
 
         ClientTickEvents.END_WORLD_TICK.register { level ->
+            val queued = mutableListOf<IConnectable>()
             for (connectable in loaded) {
                 if (connectable !is BlockEntity) continue
                 val manager = connectable.connectionManager
@@ -49,7 +50,10 @@ object GlobalConnectionsClient {
                 }
 
                 entries[connectable.blockPos] = points
-                updateConnections(manager, connectable)
+                queued.add(connectable)
+            }
+            for (connectable in queued) {
+                updateConnections(connectable)
             }
         }
     }

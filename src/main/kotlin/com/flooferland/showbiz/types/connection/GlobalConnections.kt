@@ -11,8 +11,10 @@ object GlobalConnections {
     data class Connection(val pos: BlockPos, val point: Point)
     data class Point(val index: Int, val pointCount: Int, val id: String, val type: PointType, val connections: MutableList<Connection> = mutableListOf())
 
-    fun updateConnections(manager: ConnectionManager, connectable: IConnectable) {
+    fun updateConnections(connectable: IConnectable) {
         if (connectable !is BlockEntity) return
+        val manager = connectable.connectionManager
+
         val points = entries[connectable.blockPos] ?: return
         points.forEach { point ->
             point.connections.removeIf { it.pos == connectable.blockPos || entries[it.pos] == null }

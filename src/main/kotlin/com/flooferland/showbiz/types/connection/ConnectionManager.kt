@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
-import com.flooferland.showbiz.utils.Extensions.getLongOrNull
+import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getOrNull
 
 class ConnectionManager(val owner: IConnectable, val register: ConnectionManagerRegistrar.(ConnectionManager) -> Unit) {
@@ -74,27 +74,18 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
 
     /** Binds [ours] to [theirs] */
     public fun <T> bindListener(ours: DataChannelOut<T>, theirs: Receiver): Boolean {
-        val listeners = this.listeners.getOrPut(ours, { mutableListOf() })
-        if (listeners.none { it.channelId == theirs.channelId }) {
+        val listeners = this.listeners.getOrPut(ours) { mutableListOf() }
+        // Only prevent adding the listener if the exact same (pos + channelId) already exists.
+        val alreadyExists = listeners.any { it.pos == theirs.pos && it.channelId == theirs.channelId }
+        if (!alreadyExists) {
             listeners.add(theirs)
-            GlobalConnections.updateConnections(this, owner)
+            GlobalConnections.updateConnections(owner)
             return true
         }
-        GlobalConnections.updateConnections(this, owner)
+        GlobalConnections.updateConnections(owner)
         return false
     }
 
-    fun save(saveTag: CompoundTag) {
-        val tag = CompoundTag()
-        listeners.forEach { (output, receivers) ->
-            val map = CompoundTag()
-            receivers.forEach { (pos, channeld) ->
-                map.putLong(channeld, pos.asLong())
-            }
-            tag.put(output.id, map)
-        }
-        saveTag.put("Listeners", tag)
-    }
     fun load(loadTag: CompoundTag) {
         listeners.clear()
 
@@ -104,12 +95,28 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
             val listenerTag = tag.getCompoundOrNull(outputId) ?: return@forEach
 
             listenerTag.allKeys.forEach { channelId ->
-                val pos = BlockPos.of(listenerTag.getLongOrNull(channelId) ?: return@forEach)
-                listeners.getOrPut(output) { mutableListOf() }
-                    .add(Receiver(pos, channelId))
+                val longs = listenerTag.getLongArrayOrNull(channelId) ?: return@forEach
+                for (long in longs) {
+                    val pos = BlockPos.of(long)
+                    listeners.getOrPut(output) { mutableListOf() }.add(Receiver(pos, channelId))
+                }
             }
         }
 
-        GlobalConnections.updateConnections(this, owner)
+        GlobalConnections.updateConnections(owner)
+    }
+
+    fun save(saveTag: CompoundTag) {
+        val tag = CompoundTag()
+        listeners.forEach { (output, receivers) ->
+            val map = CompoundTag()
+            val grouped = receivers.groupBy { it.channelId }
+            grouped.forEach { (channelId, recv) ->
+                val positions = LongArray(recv.size) { i -> recv[i].pos.asLong() }
+                map.putLongArray(channelId, positions)
+            }
+            tag.put(output.id, map)
+        }
+        saveTag.put("Listeners", tag)
     }
 }
