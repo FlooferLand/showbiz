@@ -19,7 +19,7 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
     val listeners = mutableMapOf<DataChannelOut<*>, MutableList<Receiver>>()
 
     /** This block's functions that receive and use data */
-    val receivers = mutableMapOf<DataChannelIn<*>, (Any?) -> Unit>()
+    private val receivers = mutableMapOf<DataChannelIn<*>, (Any?) -> Unit>()
 
     private var levelBacking: Level? = null
     val level: Level?
@@ -75,7 +75,6 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
     /** Binds [ours] to [theirs] */
     public fun <T> bindListener(ours: DataChannelOut<T>, theirs: Receiver): Boolean {
         val listeners = this.listeners.getOrPut(ours) { mutableListOf() }
-        // Only prevent adding the listener if the exact same (pos + channelId) already exists.
         val alreadyExists = listeners.any { it.pos == theirs.pos && it.channelId == theirs.channelId }
         if (!alreadyExists) {
             listeners.add(theirs)
@@ -102,7 +101,6 @@ class ConnectionManager(val owner: IConnectable, val register: ConnectionManager
                 }
             }
         }
-
         GlobalConnections.updateConnections(owner)
     }
 

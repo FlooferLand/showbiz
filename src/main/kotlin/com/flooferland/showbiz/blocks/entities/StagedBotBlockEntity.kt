@@ -1,5 +1,10 @@
 package com.flooferland.showbiz.blocks.entities
 
+import net.minecraft.core.*
+import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.SignalFrame
@@ -8,11 +13,6 @@ import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.Ports
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -66,6 +66,10 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return tag
     }
 
-    override fun getUpdatePacket() =
-        ClientboundBlockEntityDataPacket.create(this)!!
+    override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
+        ClientboundBlockEntityDataPacket.create(this) { _, registries ->
+            val tag = CompoundTag()
+            saveAdditional(tag, registries)
+            tag
+        }
 }

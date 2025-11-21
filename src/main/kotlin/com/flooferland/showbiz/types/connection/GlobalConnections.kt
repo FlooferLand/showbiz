@@ -15,12 +15,22 @@ object GlobalConnections {
         if (connectable !is BlockEntity) return
         val manager = connectable.connectionManager
 
-        val points = entries[connectable.blockPos] ?: return
-        points.forEach { point ->
-            point.connections.removeIf { it.pos == connectable.blockPos || entries[it.pos] == null }
+        // Clearing listeners
+        for ((channel, receiver) in manager.listeners) {
+            val iterator = receiver.iterator()
+            while (iterator.hasNext()) {
+                val receiver = iterator.next()
+                if (connectable.level?.getBlockEntity(receiver.pos) !is IConnectable) {
+                    iterator.remove()
+                }
+            }
         }
+
+        // Cleaning connections
+        val points = entries[connectable.blockPos] ?: return
         points.forEach { it.connections.clear() }
 
+        // Adding listeners
         for ((output, receivers) in manager.listeners) {
             val fromIndex = points.indexOfFirst { it.id == output.id && it.type == PointType.Output }
             if (fromIndex == -1) continue
