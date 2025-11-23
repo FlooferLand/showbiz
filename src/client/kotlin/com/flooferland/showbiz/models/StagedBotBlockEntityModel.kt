@@ -11,6 +11,7 @@ import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
+import kotlin.math.sin
 
 // TODO: Make the bot model not share the same bitSmooths and other properties.
 //       Currently, 2 shows cannot animate at the same time due to this shared memory.
@@ -31,6 +32,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val delta = ((now - lastTime) / 1_000_000_000.0).coerceIn(0.005, 0.3)
         lastTimes[instanceId] = now
         return delta
+    }
+    private fun wiggle(time: Double, freq: Double = 1.0, amp: Double = 1.0): Double {
+        return sin(time * freq * Math.PI * 2) * amp
     }
 
     fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
@@ -156,17 +160,28 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
-                // Applying
+                // Applying movement
                 bone.rotX += (Math.toRadians(rotate.target.x.toDouble()) * bitSmooth).toFloat()
                 bone.rotY += (Math.toRadians(rotate.target.y.toDouble()) * bitSmooth).toFloat()
                 bone.rotZ += (Math.toRadians(rotate.target.z.toDouble()) * bitSmooth).toFloat()
+
+                // Applying wiggle
+                // TODO: Scale this based on bone length
+                val wiggle = 0.08
+                val time = System.nanoTime() / 1_000_000_000.0
+                bone.rotX += wiggle(time + 0.0, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                bone.rotY += wiggle(time + 0.2, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                bone.rotZ += wiggle(time + 0.4, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                bone.rotX += wiggle(time + 0.0, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                bone.rotY += wiggle(time + 0.2, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                bone.rotZ += wiggle(time + 0.4, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
             }
 
             // Manual position
             for (move in data.moves) {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
-                // Applying
+                // Applying movement
                 bone.posX += (move.target.x.toDouble() * bitSmooth).toFloat()
                 bone.posY += (move.target.y.toDouble() * bitSmooth).toFloat()
                 bone.posZ += (move.target.z.toDouble() * bitSmooth).toFloat()
