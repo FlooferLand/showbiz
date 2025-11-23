@@ -1,5 +1,8 @@
 package com.flooferland.showbiz.registry
 
+import net.minecraft.commands.*
+import net.minecraft.core.component.*
+import net.minecraft.network.chat.*
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.items.ReelItem
@@ -7,10 +10,6 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.CommandNode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import net.minecraft.commands.*
-import net.minecraft.commands.Commands.*
-import net.minecraft.core.component.*
-import net.minecraft.network.chat.*
 import kotlin.io.path.Path
 import kotlin.io.path.extension
 
@@ -32,7 +31,7 @@ object ModCommands {
                 0
             }
             .then(
-                argument("file", StringArgumentType.greedyString())
+                Commands.argument("file", StringArgumentType.greedyString())
                     .executes { ctx ->
                         fun err(text: String): Int {
                             ctx.source.sendFailure(Component.literal(text))
