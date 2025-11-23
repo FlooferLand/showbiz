@@ -18,18 +18,18 @@ import software.bernie.geckolib.animation.RawAnimation
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
     val bitSmooths = mutableMapOf<BitId, Double>()
+    val lastTimes = mutableMapOf<Long, Long>()
 
     // var reelToReel: ReelToReelBlockEntity? = null
     // var greybox: GreyboxBlockEntity? = null
 
-    var lastTime = System.nanoTime()
     var triggeredBadAnimationError = false
 
-    private fun nextDelta(): Double {
+    private fun nextDelta(instanceId: Long): Double {
         val now = System.nanoTime()
-        val delta = ((now - lastTime) / 1_000_000_000.0)  // To secs (there's no function for this I checked)
-            .coerceIn(0.005, 0.3)
-        lastTime = now
+        val lastTime = lastTimes.getOrDefault(instanceId, now)
+        val delta = ((now - lastTime) / 1_000_000_000.0).coerceIn(0.005, 0.3)
+        lastTimes[instanceId] = now
         return delta
     }
 
@@ -98,7 +98,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (!animatable.isPlaying) return
 
         // Driving animation
-        val delta = nextDelta()
+        val delta = nextDelta(instanceId)
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.signalFrame
