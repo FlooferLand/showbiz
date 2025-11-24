@@ -21,7 +21,6 @@ import com.flooferland.showbiz.renderers.ConnectionRenderer
 import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
 import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
 import com.flooferland.showbiz.renderers.WandItemRenderer
-import com.flooferland.showbiz.types.connections.GlobalConnectionsClient
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -39,7 +38,6 @@ object ShowbizClient : ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ModPackets.registerC2S()
         ShowbizShowAudio.init()
-        GlobalConnectionsClient.register()
 
         // Block entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
