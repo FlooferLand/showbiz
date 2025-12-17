@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
+import net.minecraft.util.*
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
@@ -19,7 +20,7 @@ import kotlin.math.sin
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
-    val bitSmooths = mutableMapOf<BitId, Double>()
+    val bitSmooths = mutableMapOf<BitId, Float>()
     val lastTimes = mutableMapOf<Long, Long>()
 
     // var reelToReel: ReelToReelBlockEntity? = null
@@ -27,8 +28,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
     var triggeredBadAnimationError = false
 
-    private fun wiggle(time: Double, freq: Double = 1.0, amp: Double = 1.0): Double {
-        return sin(time * freq * Math.PI * 2) * amp
+    private fun wiggle(time: Float, freq: Float = 1.0f, amp: Float = 1.0f): Float {
+        return sin(time * freq * Mth.PI * 2f) * amp
     }
 
     fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
@@ -143,10 +144,10 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
 
             // Manual smoothing
-            val oldSmooth = bitSmooths.putIfAbsent(bit, 0.0) ?: 0.0
+            val oldSmooth = bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
             val bitSmooth = clamp(
-                lerp(oldSmooth, if (bitOn) 1.0 else 0.0, clamp(flowSpeed * delta, 0.01, 10.0)),
-                0.0, 1.0
+                lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.01f, 10.0f)),
+                0.0f, 1.0f
             )
             bitSmooths[bit] = bitSmooth
 
@@ -155,20 +156,20 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                bone.rotX += (Math.toRadians(rotate.target.x.toDouble()) * bitSmooth).toFloat()
-                bone.rotY += (Math.toRadians(rotate.target.y.toDouble()) * bitSmooth).toFloat()
-                bone.rotZ += (Math.toRadians(rotate.target.z.toDouble()) * bitSmooth).toFloat()
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * bitSmooth
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * bitSmooth
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
 
                 // Applying wiggle
                 // TODO: Scale this based on bone length
-                val wiggle = 0.08
-                val time = System.nanoTime() / 1_000_000_000.0
-                bone.rotX += wiggle(time + 0.0, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
-                bone.rotY += wiggle(time + 0.2, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
-                bone.rotZ += wiggle(time + 0.4, freq = 2.0, amp = wiggle * bitSmooth * (1.0 - bitSmooth)).toFloat()
-                bone.rotX += wiggle(time + 0.0, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
-                bone.rotY += wiggle(time + 0.2, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
-                bone.rotZ += wiggle(time + 0.4, freq = 0.5, amp = (wiggle * 2f) * bitSmooth * (1.0 - bitSmooth)).toFloat()
+                val wiggle = 0.08f
+                val time = System.nanoTime() / 1_000_000_000.0f
+                bone.rotX += wiggle(time + 0.0f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
+                bone.rotY += wiggle(time + 0.2f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
+                bone.rotZ += wiggle(time + 0.4f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
+                bone.rotX += wiggle(time + 0.0f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
+                bone.rotY += wiggle(time + 0.2f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
+                bone.rotZ += wiggle(time + 0.4f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
             }
 
             // Manual position
