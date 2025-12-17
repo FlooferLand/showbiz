@@ -26,13 +26,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
     var triggeredBadAnimationError = false
 
-    private fun nextDelta(instanceId: Long): Double {
-        val now = System.nanoTime()
-        val lastTime = lastTimes.getOrDefault(instanceId, now)
-        val delta = ((now - lastTime) / 1_000_000_000.0).coerceIn(0.005, 0.3)
-        lastTimes[instanceId] = now
-        return delta
-    }
     private fun wiggle(time: Double, freq: Double = 1.0, amp: Double = 1.0): Double {
         return sin(time * freq * Math.PI * 2) * amp
     }
@@ -102,7 +95,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (!animatable.isPlaying) return
 
         // Driving animation
-        val delta = nextDelta(instanceId)
+        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.signalFrame
