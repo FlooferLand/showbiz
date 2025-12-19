@@ -25,7 +25,7 @@ plugins {
     kotlin("plugin.serialization") version "2.2.20"
     id("com.google.devtools.ksp") version "2.2.20-2.0.2"
     id("dev.kikugie.stonecutter")
-    id("fabric-loom") version "1.11-SNAPSHOT"
+    id("fabric-loom") version "1.14-SNAPSHOT"
     id("com.gradleup.shadow") version "9.2.2"
 }
 
@@ -105,6 +105,16 @@ loom {
         register(modId) {
             sourceSet("main")
             sourceSet("client")
+        }
+    }
+    runs {
+        create("client_alt") {
+            client()
+            name("Minecraft Client (ALT)")
+            runDir = "../../run-alt"
+            vmArgs += "-Ddevauth.enabled=false"
+            programArgs.addAll(arrayOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
+            environmentVariable("DEVAUTH_ENABLED", "false")
         }
     }
     runConfigs.all {
