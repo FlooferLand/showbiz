@@ -1,13 +1,12 @@
 package com.flooferland.showbiz.datagen.blocks
 
-import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.utils.Extensions.blockPath
-import com.flooferland.showbiz.utils.rl
-import kotlinx.serialization.json.JsonObject
 import net.minecraft.resources.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.properties.*
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.utils.Extensions.blockPath
+import kotlinx.serialization.json.JsonObject
 
 /** Class I use for data generation, for more complex things.
  * Can / should be implemented by the blocks themselves

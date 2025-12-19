@@ -16,7 +16,7 @@ import software.bernie.geckolib.animation.RawAnimation
 import kotlin.math.sin
 
 // TODO: Make the bot model not share the same bitSmooths and other properties.
-//       Currently, 2 shows cannot animate at the same time due to this shared memory.
+//       Currently, 2 shows containing the same bots cannot animate at the same time due to this shared memory.
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
@@ -62,10 +62,15 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val reelToReel = greybox?.reelToReelPos?.let {
             animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
         }
-        if (greybox == null || reelToReel == null) return
-        val bitmapBits = bot.bitmap.bits[reelToReel.show.mapping] ?: return*/
-        val bitmapBits = bot.bitmap.bits["faz"] ?: return  // DEBUG ONLY
-        // println("TEST: ${animatable.isPlaying} ${animatable.signalFrame?.raw?.size}")
+        if (greybox == null || reelToReel == null) return*/
+
+        // Getting the bits via the mapping
+        val mapping = animatable.show.data.mapping ?: return
+        if (mapping.isEmpty()) return
+        val bitmapBits = bot.bitmap.bits[mapping] ?: run {
+            Showbiz.log.warn("Mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
+            return
+        }
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -87,21 +92,23 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.posZ = initMove?.z ?: 0f
             }
 
-            if (!animatable.isPlaying) {
+            if (!animatable.show.data.playing) {
                 data.anim?.let { anim ->
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
             }
         }
-        if (!animatable.isPlaying) return
+
+        // TODO: FIXME: WHY THE F#@! IS 'PLAYING' FALSE??
+        // if (!animatable.show.data.playing) return
 
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
         for ((bit, data) in bitmapBits) {
             // Getting things
-            val frame = animatable.signalFrame
-            val flowSpeed = (data.flow.toFloat() * 10.0f)
+            val frame = animatable.show.data.signal
+            val flowSpeed = (data.flow.toFloat() * 0.2f)
             val bitOn = frame.frameHas(bit)
 
             // Animation
@@ -161,8 +168,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
 
                 // Applying wiggle
-                // TODO: Scale this based on bone length
-                val wiggle = 0.08f
+                // TODO: Scale the wiggle intensity and frequency based on bone length
+                val wiggle = 0.05f
                 val time = System.nanoTime() / 1_000_000_000.0f
                 bone.rotX += wiggle(time + 0.0f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
                 bone.rotY += wiggle(time + 0.2f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))

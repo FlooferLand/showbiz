@@ -1,120 +1,62 @@
 package com.flooferland.showbiz.types.connection
 
-import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
-import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
-import com.flooferland.showbiz.utils.Extensions.getOrNull
 
-class ConnectionManager(val owner: IConnectable, val register: ConnectionManagerRegistrar.(ConnectionManager) -> Unit) {
-    val inputs = mutableMapOf<String, DataChannelIn<*>>()
-    val outputs = mutableMapOf<String, DataChannelOut<*>>()
+class ConnectionManager(val entity: BlockEntity) {
+    /** Ports that take in information */
+    val inputs = hashMapOf<String, ConnectionPort<*>>()
 
-    /** This block's DataChannelOut listeners mapped to listeners' block position and channel */
-    val listeners = mutableMapOf<DataChannelOut<*>, MutableList<Receiver>>()
+    /** Ports that put out information; Includes listeners */
+    val outputs = hashMapOf<String, ConnectionPort<*>>()
 
-    /** This block's functions that receive and use data */
-    private val receivers = mutableMapOf<DataChannelIn<*>, (Any?) -> Unit>()
+    fun <T: ConnectionData> addInput(port: ConnectionPort<T>) {
+        if (port.direction == PortDirection.Out)
+            Showbiz.log.warn("Port '${port.name}' was added via 'addInput'. However, it is an output.")
+        inputs[port.id] = port
+    }
+    fun <T: ConnectionData> addOutput(port: ConnectionPort<T>) {
+        if (port.direction == PortDirection.In)
+            Showbiz.log.warn("Port '${port.name}' was added via 'addOutput'. However, it is an input.")
+        outputs[port.id] = port
+    }
 
-    private var levelBacking: Level? = null
-    val level: Level?
-        get() {
-            if (levelBacking == null) {
-                levelBacking = when (owner) {
-                    is BlockEntity -> owner.level
-                    is Entity -> owner.level()
-                    else -> null
-                }
+    fun <T: ConnectionData> port(id: String, data: T, direction: PortDirection, react: ConnectionPort<T>.(T) -> Unit = {}) =
+        ConnectionPort(this.entity as IConnectable, id, data, direction, react)
+
+    /** Saves connections to a tag */
+    fun save(tag: CompoundTag) {
+        val tag = CompoundTag().also { tag.put("connections", it) }
+        inputs.forEach { (id, port) ->
+            val saved = runCatching { tag.put(id, CompoundTag().also { port.saveOrThrow(it) }) }
+            saved.onFailure { throwable ->
+                Showbiz.log.error("Failed to save input '${id}' on block entity '${entity::class.java.name}'", throwable)
             }
-            return levelBacking
         }
-
-    init {
-        // Registering
-        ConnectionManagerRegistrar().apply { register(this@ConnectionManager) }
-    }
-
-    data class Receiver(val pos: BlockPos, val channelId: String) {
-        constructor(pos: BlockPos, channel: DataChannelIn<*>) : this(pos, channel.id)
-    }
-    inner class ConnectionManagerRegistrar {
-        public fun <T> bind(input: DataChannelIn<T>, receive: (T) -> Unit) {
-            @Suppress("UNCHECKED_CAST")
-            receivers[input] = receive as (Any?) -> Unit
-            inputs[input.id] = input
-        }
-        public fun <T> bind(output: DataChannelOut<T>) {
-            outputs[output.id] = output
-        }
-    }
-
-    /** Broadcasts some data to all listeners of this channel */
-    public fun <T> send(output: DataChannelOut<T>, data: T) {
-        val receivers = listeners[output] ?: return
-        val level = level ?: return
-
-        receivers.forEach { (targetPos, inputId) ->
-            val entity = level.getBlockEntity(targetPos) ?: return@forEach
-            if (entity !is IConnectable) {
-                Showbiz.log.warn("Block entity at '${entity.blockPos}' does not implement ${IConnectable::class.simpleName}")
-                return@forEach
-            }
-            entity.applyChange(true) {
-                entity.connectionManager.receivers.forEach { (channel, receiver) ->
-                    if (channel.id == inputId) receiver.invoke(data)
-                }
+        outputs.forEach { (id, port) ->
+            val saved = runCatching { tag.put(id, CompoundTag().also { port.saveOrThrow(it) }) }
+            saved.onFailure { throwable ->
+                Showbiz.log.error("Failed to save output '${id}' on block entity '${entity::class.java.name}'", throwable)
             }
         }
     }
 
-    /** Binds [ours] to [theirs] */
-    public fun <T> bindListener(ours: DataChannelOut<T>, theirs: Receiver): Boolean {
-        val listeners = this.listeners.getOrPut(ours) { mutableListOf() }
-        val alreadyExists = listeners.any { it.pos == theirs.pos && it.channelId == theirs.channelId }
-        if (!alreadyExists) {
-            listeners.add(theirs)
-            GlobalConnections.updateConnections(owner)
-            return true
-        }
-        GlobalConnections.updateConnections(owner)
-        return false
-    }
-
-    fun load(loadTag: CompoundTag) {
-        listeners.clear()
-
-        val tag = loadTag.getOrNull("Listeners") as? CompoundTag
-        tag?.allKeys?.forEach { outputId ->
-            val output = outputs[outputId] ?: return@forEach
-            val listenerTag = tag.getCompoundOrNull(outputId) ?: return@forEach
-
-            listenerTag.allKeys.forEach { channelId ->
-                val longs = listenerTag.getLongArrayOrNull(channelId) ?: return@forEach
-                for (long in longs) {
-                    val pos = BlockPos.of(long)
-                    listeners.getOrPut(output) { mutableListOf() }.add(Receiver(pos, channelId))
-                }
+    /** Loads connections from a tag */
+    fun load(tag: CompoundTag) {
+        val tag = tag.getCompoundOrNull("connections") ?: return
+        inputs.forEach { (id, port) ->
+            val loaded = runCatching { tag.getCompoundOrNull(id)?.let { port.loadOrThrow(it) } }
+            loaded.onFailure { throwable ->
+                Showbiz.log.error("Failed to load input '${id}' on block entity '${entity::class.java.name}'", throwable)
             }
         }
-        GlobalConnections.updateConnections(owner)
-    }
-
-    fun save(saveTag: CompoundTag) {
-        val tag = CompoundTag()
-        listeners.forEach { (output, receivers) ->
-            val map = CompoundTag()
-            val grouped = receivers.groupBy { it.channelId }
-            grouped.forEach { (channelId, recv) ->
-                val positions = LongArray(recv.size) { i -> recv[i].pos.asLong() }
-                map.putLongArray(channelId, positions)
+        outputs.forEach { (id, port) ->
+            val loaded = runCatching { tag.getCompoundOrNull(id)?.let { port.loadOrThrow(it) } }
+            loaded.onFailure { throwable ->
+                Showbiz.log.error("Failed to load output '${id}' on block entity '${entity::class.java.name}'", throwable)
             }
-            tag.put(output.id, map)
         }
-        saveTag.put("Listeners", tag)
     }
 }

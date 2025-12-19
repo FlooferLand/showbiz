@@ -1,5 +1,11 @@
 package com.flooferland.showbiz.blocks.entities
 
+import net.minecraft.core.*
+import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.server.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.network.base.PlaybackChunkPacket
 import com.flooferland.showbiz.network.base.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -8,28 +14,21 @@ import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
-import com.flooferland.showbiz.types.connection.Ports
+import com.flooferland.showbiz.types.connection.PortDirection
+import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import kotlin.math.roundToInt
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState), IConnectable {
-    override val connectionManager = ConnectionManager(this) {
-        bind(Ports.PlayingOut)
-        bind(Ports.SignalOut)
-    }
+    override val connectionManager = ConnectionManager(this)
+    val showOut = connectionManager.port("show", PackedShowData(), PortDirection.Out)
 
     val aFrameMs: Int
-        get() =  50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
+        get() = 50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
     val aBufferSize: Int
         get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
 
@@ -57,7 +56,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val entry = show.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             signal.set(entry)
             shouldUpdate = signal.raw.isNotEmpty()
-            connectionManager.send(Ports.SignalOut, signal)
+            showOut.send(PackedShowData(playing, signal, show.mapping))
         }
 
         // Audio
@@ -93,7 +92,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
-        connectionManager.send(Ports.PlayingOut, playing)
+        showOut.send(PackedShowData(playing, signal, show.mapping))
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -109,9 +108,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         super.saveAdditional(tag, registries)
 
         // Save other
-        tag.putBoolean("Playing", playing)
-        tag.putDouble("Seek", seek)
-        tag.putIntArray("Signal-Frame", signal.save())
+        tag.putBoolean("playing", playing)
+        tag.putDouble("seek", seek)
+        tag.putIntArray("signal_frame", signal.save())
         connectionManager.save(tag)
         show.saveNBT(tag)
     }
@@ -120,9 +119,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         super.loadAdditional(tag, registries)
 
         // Load other
-        playing = tag.getBooleanOrNull("Playing") ?: false
-        seek = tag.getDoubleOrNull("Seek") ?: 0.0
-        signal.load(tag.getIntArrayOrNull("Signal-Frame"))
+        playing = tag.getBooleanOrNull("playing") ?: false
+        seek = tag.getDoubleOrNull("seek") ?: 0.0
+        signal.load(tag.getIntArrayOrNull("signal_frame"))
         connectionManager.load(tag)
         show.loadNBT(tag)
     }

@@ -110,6 +110,7 @@ loom {
     runConfigs.all {
         ideConfigGenerated(true) // Run configurations are not created for subprojects by default
         runDir = "../../run" // Shared run folder between versions
+        vmArgs.addAll((properties["net.minecraft.jvmargs"] as String).split(" "))
     }
     log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
 }

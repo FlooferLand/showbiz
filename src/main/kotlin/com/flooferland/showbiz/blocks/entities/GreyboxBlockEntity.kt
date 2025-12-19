@@ -1,27 +1,19 @@
 package com.flooferland.showbiz.blocks.entities
 
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.connection.IConnectable
-import com.flooferland.showbiz.types.connection.Ports
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.IConnectable
+import com.flooferland.showbiz.types.connection.PortDirection
+import com.flooferland.showbiz.types.connection.data.PackedShowData
 
 class GreyboxBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Greybox.entity!!, pos, blockState), IConnectable {
-    override val connectionManager = ConnectionManager(this) {
-        bind(Ports.PlayingOut)
-        bind(Ports.PlayingIn) { data ->
-            it.send(Ports.PlayingOut, data)
-        }
-
-        bind(Ports.SignalOut)
-        bind(Ports.SignalIn) { data ->
-            it.send(Ports.SignalOut, data)
-        }
-    }
+    override val connectionManager = ConnectionManager(this)
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { send(it) }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)

@@ -58,30 +58,24 @@ object GlobalConnections {
         if (connectable !is BlockEntity) return
         val manager = connectable.connectionManager
 
-        // Clearing listeners
-        for ((channel, receiver) in manager.listeners) {
-            val iterator = receiver.iterator()
-            while (iterator.hasNext()) {
-                val receiver = iterator.next()
-                if (connectable.level?.getBlockEntity(receiver.pos) !is IConnectable) {
-                    iterator.remove()
-                }
-            }
+        // Clearing invalid listeners
+        for ((_, port) in manager.outputs) {
+            port.removeListeners { connectable.level?.getBlockEntity(it) !is IConnectable }
         }
 
         // Cleaning connections
         val points = entries[connectable.blockPos] ?: return
         points.forEach { it.connections.clear() }
 
-        // Adding listeners
-        for ((output, receivers) in manager.listeners) {
-            val fromIndex = points.indexOfFirst { it.id == output.id && it.type == PointType.Output }
+        // Adding listeners from the other side
+        for ((portId, port) in manager.outputs) {
+            val fromIndex = points.indexOfFirst { it.id == portId && it.type == PointType.Output }
             if (fromIndex == -1) continue
 
-            for (receiver in receivers) {
-                val otherPoints = entries[receiver.pos] ?: continue
-                val otherPoint = otherPoints.firstOrNull { it.id == receiver.channelId && it.type == PointType.Input } ?: continue
-                points[fromIndex].connections.add(Connection(receiver.pos, otherPoint))
+            for (pos in port.readListeners()) {
+                val otherPoints = entries[pos] ?: continue
+                val otherPoint = otherPoints.firstOrNull { it.id == portId && it.type == PointType.Input } ?: continue
+                points[fromIndex].connections.add(Connection(pos, otherPoint))
             }
         }
     }
