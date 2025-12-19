@@ -3,3 +3,9 @@ name = "Conner The Cow"
 authors = ["Saloon Devs"]
 accepts.rockafire = true
 accepts.fnaf1 = true
+
+[billy_bob]
+name = "Billy Bob"
+authors = ["Creative Engineering", "LBN"]
+accepts.rockafire = true
+accepts.fnaf1 = true

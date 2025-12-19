@@ -1,0 +1,56 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": [-5, -20, 0]
+					}
+				},
+				"jaw": {
+					"rotation": {
+						"vector": [20, 0, 0]
+					}
+				},
+				"eyelids": {
+					"rotation": {
+						"vector": [-12.5, 0, 0]
+					}
+				},
+				"eyes": {
+					"position": {
+						"vector": [-0.7, 0, 0]
+					}
+				}
+			}
+		},
+		"posing": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": [-5, -20, 0]
+					}
+				},
+				"jaw": {
+					"rotation": {
+						"vector": [20, 0, 0]
+					}
+				},
+				"eyelids": {
+					"rotation": {
+						"vector": [-12.5, 0, 0]
+					}
+				},
+				"eyes": {
+					"position": {
+						"vector": [-0.7, 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

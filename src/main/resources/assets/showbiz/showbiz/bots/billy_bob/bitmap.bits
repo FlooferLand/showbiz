@@ -1,0 +1,59 @@
+set rae billy_bob
+set faz bonnie
+
+rae body_twist_left, faz body_turn_l {
+    flow 0.5
+    rotate "torso" x:10
+}
+
+rae body_twist_right, faz body_turn_r {
+    flow 0.5
+    rotate "torso" x:-10
+}
+
+any head_up {
+    flow 0.7
+    rotate "head" x:15
+}
+
+rae head_left {
+    flow 0.7
+    rotate "head" y:15
+}
+
+rae head_right {
+    flow 0.7
+    rotate "head" y:-15
+}
+
+rae head_tip_left {
+    flow 0.7
+    rotate "head" z:10
+}
+
+rae head_tip_right {
+    flow 0.7
+    rotate "head" z:-10
+}
+
+# face
+
+any jaw {
+    flow 2.0
+    rotate "jaw" x:-20
+}
+
+rae left_eyelid, faz eyes_left {
+    flow 0.5
+    move "eyes" x:1
+}
+
+rae right_eyelid, faz eyes_right {
+    flow 0.5
+    move "eyes" x:-1
+}
+
+rae left_eyelid, rae right_eyelid {
+    flow 0.6
+    move "eyelids" y:1
+}

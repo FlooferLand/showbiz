@@ -169,7 +169,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
                 // Applying wiggle
                 // TODO: Scale the wiggle intensity and frequency based on bone length
-                val wiggle = 0.05f
+                val wiggle = 0.04f
                 val time = System.nanoTime() / 1_000_000_000.0f
                 bone.rotX += wiggle(time + 0.0f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
                 bone.rotY += wiggle(time + 0.2f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
