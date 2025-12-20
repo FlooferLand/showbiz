@@ -21,16 +21,18 @@ import kotlin.math.sin
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
     val bitSmooths = mutableMapOf<BitId, Float>()
-    val lastTimes = mutableMapOf<Long, Long>()
+    val bitSpringOffset = mutableMapOf<BitId, Float>()
+    val bitSpringVelocity = mutableMapOf<BitId, Float>()
+
+    // Spring properties -- methods so I can hot reload code to modify them >:)
+    fun getSpringStiff() = 0.1f
+    fun getSpringDamp() = 0.88f
+    fun getSpringImpulse() = 0.5f
 
     // var reelToReel: ReelToReelBlockEntity? = null
     // var greybox: GreyboxBlockEntity? = null
 
     var triggeredBadAnimationError = false
-
-    private fun wiggle(time: Float, freq: Float = 1.0f, amp: Float = 1.0f): Float {
-        return sin(time * freq * Mth.PI * 2f) * amp
-    }
 
     fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
         val id = if (bitOn)
@@ -141,7 +143,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                         } else {
                             triggeredBadAnimationError = false
                         }
-
                         controller.setCurrentAnimation(RawAnimation.begin().thenPlayAndHold(animId))
                     }
                     playback.onFailure { throwable ->
@@ -158,6 +159,18 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             )
             bitSmooths[bit] = bitSmooth
 
+            // Spring
+            val (springVel, springOffset) = run {
+                val diff = (bitSmooth - oldSmooth) / delta.coerceAtLeast(0.001f)
+                var springOffset = bitSpringOffset.getOrDefault(bit, 0f)
+                var springVel= bitSpringVelocity.getOrDefault(bit, 0f)
+                springVel = (springVel + diff * getSpringImpulse() - springOffset * getSpringStiff()) * getSpringDamp()
+                springOffset += springVel * delta
+                Pair(springVel, springOffset)
+            }
+            bitSpringOffset[bit] = springOffset
+            bitSpringVelocity[bit] = springVel
+
             // Manual rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
@@ -168,15 +181,11 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
 
                 // Applying wiggle
-                // TODO: Scale the wiggle intensity and frequency based on bone length
-                val wiggle = 0.04f
-                val time = System.nanoTime() / 1_000_000_000.0f
-                bone.rotX += wiggle(time + 0.0f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
-                bone.rotY += wiggle(time + 0.2f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
-                bone.rotZ += wiggle(time + 0.4f, freq = 2.0f, amp = wiggle * bitSmooth * (1.0f - bitSmooth))
-                bone.rotX += wiggle(time + 0.0f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
-                bone.rotY += wiggle(time + 0.2f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
-                bone.rotZ += wiggle(time + 0.4f, freq = 0.5f, amp = (wiggle * 2f) * bitSmooth * (1.0f - bitSmooth))
+                var boneSizeMul = bone.cubes.map { it.size.length() / 8f }.average().toFloat()
+                boneSizeMul = boneSizeMul.coerceIn(0f..1.5f)
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
             }
 
             // Manual position

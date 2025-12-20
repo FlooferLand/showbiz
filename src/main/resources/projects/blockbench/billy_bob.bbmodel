@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 922,
+	"activity_tracker": 934,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\billy_bob\\models\\billy_bob.geo.json",
@@ -1459,7 +1459,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "ae4b7c01-d0af-2c9d-0aad-aa630b1600fb",
@@ -2784,7 +2784,7 @@
 			"override": false,
 			"length": 0.5,
 			"snapping": 24,
-			"selected": true,
+			"selected": false,
 			"saved": false,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
