@@ -85,10 +85,11 @@ dependencies {
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
-    // Useful dev tools
-    modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("dev_auth")}")
-    //modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("dev.sodium")}-$loader")
-    //modRuntimeOnly("maven.modrinth:sodium-extra:mc$minecraft-${dep("dev.sodium_extra")}+$loader")
+    // Useful dev tools (not included in the mod, helps me build things and ensure mod compatibility)
+    modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")
+    modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("devonly.sodium")}-$loader")
+    modRuntimeOnly("maven.modrinth:iris:${dep("devonly.iris")}+$minecraft-$loader")
+    modRuntimeOnly("maven.modrinth:worldedit:${dep("devonly.worldedit")}")
 }
 
 tasks.shadowJar {

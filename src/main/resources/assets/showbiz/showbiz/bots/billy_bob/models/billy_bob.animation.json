@@ -50,6 +50,110 @@
 					}
 				}
 			}
+		},
+		"animation.billy_bob.eyelids_down.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"eyelids": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, -0.675, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.billy_bob.eyelids_down.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"eyelids": {
+					"position": {
+						"0.0": {
+							"vector": [0, -0.675, 0]
+						},
+						"0.25": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.billy_bob.right_arm_raise.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.625,
+			"bones": {
+				"arm_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.625": {
+							"vector": [-95.30087, 37.98837, 89.35585]
+						}
+					}
+				}
+			}
+		},
+		"animation.billy_bob.right_arm_raise.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.625,
+			"bones": {
+				"arm_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [-95.30087, 37.98837, 89.35585]
+						},
+						"0.625": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.billy_bob.right_arm_twist.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5
+		},
+		"animation.billy_bob.right_arm_twist.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5
+		},
+		"animation.billy_bob.right_elbow_twist.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"arm2_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [-41.15963, 60.57503, 38.68601]
+						}
+					}
+				}
+			}
+		},
+		"animation.billy_bob.right_elbow_twist.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"arm2_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [-41.15963, 60.57503, 38.68601]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
 		}
 	},
 	"geckolib_format_version": 2
