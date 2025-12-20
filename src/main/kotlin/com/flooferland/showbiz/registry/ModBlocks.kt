@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
+import com.flooferland.showbiz.blocks.ShowParserBlock
+import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 
 enum class ModBlocks {
     StagedBot(
@@ -58,7 +60,18 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = ::SpeakerBlockEntity
-    );
+    ),
+    ShowParser(
+        "show_parser", ::ShowParserBlock,
+        Properties.of()
+            .strength(3.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::ShowParserBlockEntity
+    )
+    ;
 
     val id: ResourceLocation
     val block: Block

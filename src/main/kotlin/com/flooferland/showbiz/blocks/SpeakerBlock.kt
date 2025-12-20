@@ -7,8 +7,7 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 
 class SpeakerBlock(props: Properties) : FacingEntityBlock(props) {
-    val codec = simpleCodec(::SpeakerBlock)!!
-    override fun codec() = codec
+    override val codec = simpleCodec(::SpeakerBlock)!!
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.Speaker.entity!!.create(pos, state)!!

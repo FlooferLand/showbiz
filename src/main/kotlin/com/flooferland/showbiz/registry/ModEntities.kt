@@ -28,4 +28,8 @@ sealed class ModEntities<T : Entity> {
     fun interface EntityFactory<T : Entity> {
         fun factory(level: Level): T;
     }
+
+    companion object {
+        init { ModEntities::class.sealedSubclasses.forEach { it.objectInstance } }
+    }
 }

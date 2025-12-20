@@ -5,7 +5,8 @@ class SignalFrame {
     var raw: BitIdArray = bitIdArrayOf(0)
 
     companion object {
-        val NEXT_DRAWER: BitId = 150.toBitId()  // To convert from/to bottom and top drawer bits, this is added to them
+        /** To convert from/to bottom and top drawer bits, this is added to them */
+        val NEXT_DRAWER: BitId = 150.toBitId()
     }
 
     fun frameHas(id: BitId): Boolean =

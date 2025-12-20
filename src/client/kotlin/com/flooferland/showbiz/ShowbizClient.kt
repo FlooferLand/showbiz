@@ -1,6 +1,7 @@
 package com.flooferland.showbiz
 
 import net.minecraft.client.*
+import net.minecraft.client.gui.screens.MenuScreens
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.resources.*
@@ -17,10 +18,12 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModPackets
+import com.flooferland.showbiz.registry.ModScreenHandlers
 import com.flooferland.showbiz.renderers.ConnectionRenderer
 import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
 import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
 import com.flooferland.showbiz.renderers.WandItemRenderer
+import com.flooferland.showbiz.screens.ShowParserScreen
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -36,8 +39,13 @@ object ShowbizClient : ClientModInitializer {
 
     override fun onInitializeClient() {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
-        ModPackets.registerC2S()
+        run {
+            ModPackets
+        }
         ShowbizShowAudio.init()
+
+        // Screens
+        MenuScreens.register(ModScreenHandlers.ShowParser.type, ::ShowParserScreen)
 
         // Block entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")

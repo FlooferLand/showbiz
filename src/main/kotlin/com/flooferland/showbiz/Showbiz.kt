@@ -22,16 +22,15 @@ object Showbiz : ModInitializer {
         // Making sure the JVM compiles these
         @Suppress("UnusedExpression")
         run {
+            ModComponents
+            ModPackets
             ModBlocks.entries
             ModItems.entries
             ModItemGroups.entries
             ModSounds.entries
-            ModComponents.WandBind
             ModCommands
+            ModScreenHandlers
         }
-
-        // Networking
-        ModPackets.registerS2C()
 
         // Server addons
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(AddonDataReloadListener)

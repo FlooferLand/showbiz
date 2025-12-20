@@ -1,8 +1,8 @@
 package com.flooferland.showbiz.audio
 
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.network.base.PlaybackChunkPacket
-import com.flooferland.showbiz.network.base.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
+import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents

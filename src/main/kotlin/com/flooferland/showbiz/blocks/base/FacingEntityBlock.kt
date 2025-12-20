@@ -7,9 +7,12 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.DirectionProperty
+import com.mojang.serialization.MapCodec
 
 /** A base block entity with the `FACING` property and block state model generation */
 abstract class FacingEntityBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
+    abstract val codec: MapCodec<out FacingEntityBlock>
+    override fun codec() = codec
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
         builder.facing(FACING)
     }

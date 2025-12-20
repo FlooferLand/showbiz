@@ -30,4 +30,8 @@ sealed class ModComponents<T> {
 
     val id: ResourceLocation
     val type: DataComponentType<T>
+
+    companion object {
+        init { ModComponents::class.sealedSubclasses.forEach { it.objectInstance } }
+    }
 }

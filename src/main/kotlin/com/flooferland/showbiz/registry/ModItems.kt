@@ -14,14 +14,12 @@ import net.minecraft.world.item.Item.*
 enum class ModItems {
     Wand(
         "wand", ::WandItem,
-        Properties().stacksTo(1)
-            .component(ModComponents.WandBind.type, OptionBlockPos.EMPTY),
+        { stacksTo(1).component(ModComponents.WandBind.type, OptionBlockPos.EMPTY) },
         model = ItemModelId.Custom
     ),
     Reel(
         "reel", ::ReelItem,
-        Properties().stacksTo(1)
-            .component(ModComponents.FileName.type, ""),
+        { stacksTo(1).component(ModComponents.FileName.type, "") },
         model = ItemModelId.Custom
     )
     ;
@@ -29,17 +27,18 @@ enum class ModItems {
     val id: ResourceLocation
     lateinit var item: Item
     var model: ItemModelId? = null
-    constructor(name: String, constructor: (Properties) -> Item, properties: Properties, model: ItemModelId = ItemModelId.Generated) {
+    constructor(name: String, constructor: (Properties) -> Item, properties: Properties.() -> Properties, model: ItemModelId = ItemModelId.Generated) {
         this.id = rl(name)
         this.model = model;
         if (DataGenerator.engaged) return
 
+        val baseProps = Properties()
         this.item = Items.registerItem(
             ResourceKey.create(BuiltInRegistries.ITEM.key(), this.id),
             //? if >1.21.9 {
-            /*constructor, props
+            /*constructor, properties(baseProps)
             *///?} else {
-            constructor(properties)
+            constructor(properties(baseProps))
             //?}
         )
     }

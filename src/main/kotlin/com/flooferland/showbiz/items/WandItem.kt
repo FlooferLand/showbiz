@@ -8,6 +8,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
@@ -59,7 +60,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
 
         if (first.pos.isEmpty) {
             when (lastEntity) {
-                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity -> {
+                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity, is ShowParserBlockEntity -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
                     return InteractionResult.SUCCESS
@@ -67,6 +68,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 else -> { reset(); return InteractionResult.CONSUME }
             }
         } else {
+            // TODO: Add automatic linking instead of dealing with this wand useOn monstrosity
             val firstEntity = level.getBlockEntity(first.pos.get())
             when (lastEntity) {
                 is GreyboxBlockEntity if firstEntity is StagedBotBlockEntity -> {
@@ -85,6 +87,15 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is ShowParserBlockEntity -> {
+                    val (greybox, showParser) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        show.bindListener(showParser)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Show parser added")
                     return InteractionResult.SUCCESS
                 }
                 else -> { reset(error = "Unknown order"); return InteractionResult.CONSUME }

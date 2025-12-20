@@ -6,8 +6,8 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import com.flooferland.showbiz.network.base.PlaybackChunkPacket
-import com.flooferland.showbiz.network.base.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
+import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame

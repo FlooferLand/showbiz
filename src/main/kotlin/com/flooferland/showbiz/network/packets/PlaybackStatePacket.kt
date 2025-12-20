@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.network.base
+package com.flooferland.showbiz.network.packets
 
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.*
