@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.codec.StreamCodec
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Inventory
@@ -42,12 +43,23 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider?) {
+        connectionManager.load(tag)
         bitFilter = (tag.getIntArrayOrNull("bit_filter") ?: intArrayOf()).map { it.toShort() }.toMutableList()
     }
 
-    override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider?) {
+    override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        connectionManager.save(tag)
         tag.putIntArray("bit_filter", bitFilter.map { it.toInt() })
     }
+
+    override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {
+        val tag = super.getUpdateTag(registries)
+        saveAdditional(tag, registries)
+        return tag
+    }
+
+    override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
+        ClientboundBlockEntityDataPacket.create(this)
 
     override fun getScreenOpeningData(player: ServerPlayer) =
         ShowParserDataPacket(worldPosition, bitFilter, show.data.mapping)

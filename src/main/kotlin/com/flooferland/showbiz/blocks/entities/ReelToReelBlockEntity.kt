@@ -126,18 +126,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         show.loadNBT(tag)
     }
 
-    override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
-        val tag = CompoundTag()
+    override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {
+        val tag = super.getUpdateTag(registries)
         saveAdditional(tag, registries)
         return tag
     }
 
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
-        ClientboundBlockEntityDataPacket.create(this) { _, registries ->
-            val tag = CompoundTag()
-            saveAdditional(tag, registries)
-            tag
-        }
+        ClientboundBlockEntityDataPacket.create(this)
 
     fun resetPlayback() {
         seek = 0.0

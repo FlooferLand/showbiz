@@ -1,9 +1,12 @@
 package com.flooferland.showbiz.types.connection
 
 import net.minecraft.core.*
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.*
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+
+// TODO: Add connection support for multiple levels/dimensions
 
 /** Common object for handling entity connections/links (See the client-side object) */
 object GlobalConnections {
@@ -16,10 +19,12 @@ object GlobalConnections {
 
     init {
         ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { blockEntity, level ->
+            if (level.dimension() != Level.OVERWORLD) return@register
             if (blockEntity !is IConnectable) return@register
             loaded.add(blockEntity)
         }
         ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { blockEntity, level ->
+            if (level.dimension() != Level.OVERWORLD) return@register
             if (blockEntity !is IConnectable) return@register
             loaded.remove(blockEntity)
             for ((_, points) in entries) {
@@ -30,6 +35,7 @@ object GlobalConnections {
             entries.remove(blockEntity.blockPos)
         }
         ServerTickEvents.END_WORLD_TICK.register { level ->
+            if (level.dimension() != Level.OVERWORLD) return@register
             val queued = mutableListOf<IConnectable>()
             for (connectable in loaded) {
                 if (connectable !is BlockEntity) continue

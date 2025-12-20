@@ -11,6 +11,9 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.items.WandItem
@@ -21,6 +24,11 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock(properties) {
     override val codec = simpleCodec(::ShowParserBlock)!!
+    val shape = Shapes.create(0.05, 0.0, 0.05, 0.95, 0.1, 0.95)!!
+
+    override fun getShape(state: BlockState?, level: BlockGetter?, pos: BlockPos?, context: CollisionContext?) = shape
+    override fun getCollisionShape(state: BlockState?, level: BlockGetter?, pos: BlockPos?, context: CollisionContext?) = shape
+
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
         return ModBlocks.ShowParser.entity!!.create(pos, state)!!
     }
