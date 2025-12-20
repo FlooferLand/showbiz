@@ -3,27 +3,27 @@ package com.flooferland.showbiz.audio
 import com.flooferland.showbiz.Showbiz
 import net.minecraft.client.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.types.FriendlyAudioFormat
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
-import javax.sound.sampled.AudioFormat
 
 // TODO: Should probably avoid sending stereo audio to this cuz an extra channel means extra network bandwidth
 //       OpenAL can only do mono (without exploding)
 
 /** Low-level AL11 audio handling, because Minecraft's built-in audio streaming system is very dumb and undocumented */
-class Source(val javaFormat: AudioFormat, var position: Vec3? = null) {
+class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null) {
     val buffers = IntArray(4)
     val format = run {
-        val (bits, channels) = javaFormat.let { Pair(it.sampleSizeInBits, it.channels) }
+        val (bits, stereo, mono) = friendlyFormat.let { Triple(it.sampleBits, it.stereo, it.mono) }
         return@run when (bits) {
-            8 if channels == 1 -> AL_FORMAT_MONO8
-            8 if channels == 2 -> AL_FORMAT_STEREO8
-            16 if channels == 1 -> AL_FORMAT_MONO16
-            16 if channels == 2 -> AL_FORMAT_STEREO16
-            else -> error("Unsupported format: $javaFormat")
+            8 if mono -> AL_FORMAT_MONO8
+            8 if stereo -> AL_FORMAT_STEREO8
+            16 if mono -> AL_FORMAT_MONO16
+            16 if stereo -> AL_FORMAT_STEREO16
+            else -> error("Unsupported format: $friendlyFormat")
         }
     }
-    val maxDistance = 16f
+    val maxDistance = 24f
     var source = 0
     var nextBufIndex = 0
 

@@ -8,7 +8,6 @@ import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.network.packets.ShowParserDataPacket
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
-import net.fabricmc.loader.api.FabricLoader
 
 sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackChunk : ModPackets<PlaybackChunkPacket>(ServerToClient, PlaybackChunkPacket.type, PlaybackChunkPacket.codec)
@@ -16,7 +15,6 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ShowParserData : ModPackets<ShowParserDataPacket>(Bidirectional, ShowParserDataPacket.type, ShowParserDataPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
-        val env = FabricLoader.getInstance().environmentType
         when (way) {
             ServerToClient -> PayloadTypeRegistry.playS2C().register(type, codec)
             ClientToServer -> PayloadTypeRegistry.playC2S().register(type, codec)

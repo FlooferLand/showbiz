@@ -18,6 +18,7 @@ data class ConnectionPort<T: ConnectionData>(val owner: IConnectable, val id: St
     @NotNull var data: T = initData
 
     private var listeners = hashSetOf<BlockPos>()
+    fun hasListeners(): Boolean = listeners.isNotEmpty()
     fun readListeners(): HashSet<BlockPos> = listeners
     fun removeListeners(block: (BlockPos) -> Boolean) {
         if (direction == PortDirection.In) Showbiz.log.warn("Port $name is an input port. Failed to remove listeners")
@@ -58,9 +59,8 @@ data class ConnectionPort<T: ConnectionData>(val owner: IConnectable, val id: St
         }
     }
 
-    /** Sends a piece of data through this port and notifies the listeners */
-    fun send(data: T) {
-        this.data = data
+    /** Sends the current data through this port and notifies the listeners */
+    fun send() {
         (owner as? BlockEntity)?.level?.let { level ->
             @Suppress("UNCHECKED_CAST")
             listeners.forEach { pos ->
@@ -74,6 +74,12 @@ data class ConnectionPort<T: ConnectionData>(val owner: IConnectable, val id: St
                 }
             }
         }
+    }
+
+    /** Sends a piece of data through this port and notifies the listeners */
+    fun send(data: T) {
+        this.data = data
+        send()
     }
 
     /** Binds [listening] to this port on the current block */

@@ -16,18 +16,13 @@ object ShowbizShowAudio {
 
     fun init() {
         ClientPlayNetworking.registerGlobalReceiver(PlaybackChunkPacket.type) { payload, context ->
-            val level = context.player().level() ?: return@registerGlobalReceiver
-            val entity = level.getBlockEntity(payload.blockPos) as? ReelToReelBlockEntity ?: return@registerGlobalReceiver
-
-            val source = sources.getOrPut(payload.blockPos) { Source(entity.getFormat(), entity.blockPos.center) }
-            if (entity.playing) {
+            val source = sources.getOrPut(payload.blockPos) { Source(payload.format, payload.blockPos.center) }
+            if (payload.playing) {
                 if (!source.isOpen()) source.open()
-                source.write(payload.audioChunk, entity.getFormat().sampleRate.toInt())
+                source.write(payload.audioChunk, payload.format.sampleRate)
             }
         }
         ClientPlayNetworking.registerGlobalReceiver(PlaybackStatePacket.type) { payload, context ->
-            val level = context.player().level() ?: return@registerGlobalReceiver
-            val entity = level.getBlockEntity(payload.blockPos) as? ReelToReelBlockEntity ?: return@registerGlobalReceiver
             val state = sources[payload.blockPos] ?: return@registerGlobalReceiver
             when (payload.playing) {
                 true -> state.open()
@@ -36,10 +31,11 @@ object ShowbizShowAudio {
         }
 
         // In case a chunk loads
+        // TODO: Test if audio still loads for new chunks without this; It should?
+        /*
         ClientChunkEvents.CHUNK_LOAD.register { level, chunk ->
             chunk.blockEntities.forEach { (blockPos, entity) ->
                 if (entity !is ReelToReelBlockEntity) return@forEach
-
                 if (entity.playing) {
                     sources[blockPos]?.close()
                     sources.remove(entity.blockPos)
@@ -48,15 +44,12 @@ object ShowbizShowAudio {
                     source.open()
                 }
             }
-        }
+        }*/
 
         // Cleanup in case the chunk unloads
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
-            if (entity !is ReelToReelBlockEntity) return@register
-             run {
-                 val state = sources[entity.blockPos] ?: return@register
-                 state.close()
-             }
+            val state = sources[entity.blockPos] ?: return@register
+            state.close()
             sources.remove(entity.blockPos)
         }
     }

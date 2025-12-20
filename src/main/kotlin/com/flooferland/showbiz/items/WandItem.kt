@@ -9,6 +9,7 @@ import net.minecraft.world.item.context.*
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
+import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
@@ -60,7 +61,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
 
         if (first.pos.isEmpty) {
             when (lastEntity) {
-                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity, is ShowParserBlockEntity -> {
+                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity, is ShowParserBlockEntity, is SpeakerBlockEntity -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
                     return InteractionResult.SUCCESS
@@ -84,6 +85,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     val (greybox, reelToReel) = Pair(lastEntity, firstEntity)
                     reelToReel.applyChange(true) {
                         showOut.bindListener(greybox)
+                        audioOut.bindListener(greybox)
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
@@ -96,6 +98,15 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Show parser added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is SpeakerBlockEntity -> {
+                    val (greybox, speaker) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        audio.bindListener(speaker)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Speaker added")
                     return InteractionResult.SUCCESS
                 }
                 else -> { reset(error = "Unknown order"); return InteractionResult.CONSUME }

@@ -6,7 +6,6 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.ShowData
@@ -15,6 +14,7 @@ import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
+import com.flooferland.showbiz.types.connection.data.PackedAudioData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
@@ -26,6 +26,7 @@ import kotlin.math.roundToInt
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val showOut = connectionManager.port("show", PackedShowData(), PortDirection.Out)
+    val audioOut = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
 
     val aFrameMs: Int
         get() = 50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
@@ -80,13 +81,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
-        val serverLevel = level as? ServerLevel ?: return
-
-        // TODO: Find only near players
-        for (player in serverLevel.players()) {
-            val payload = PlaybackChunkPacket(blockPos, chunk)
-            ServerPlayNetworking.send(player, payload)
-        }
+        audioOut.data.mono = chunk
+        audioOut.send()
     }
 
     fun setPlaying(playing: Boolean) {
