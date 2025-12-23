@@ -104,13 +104,13 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
 
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
         super.modelBlockStates(builder)
-        builder.defaultState(PLAYING, true)
+        builder.defaultState(suffix = "off")
         builder.bool(PLAYING) {
-            trueState(postfix = "on") {
-                model { endTextureWith(name.postfix) }
+            trueState(suffix = "on") {
+                model { endTextureWith(name.suffix) }
             }
-            falseState(postfix = "off") {
-                model { endTextureWith(name.postfix) }
+            falseState(suffix = "off") {
+                model { endTextureWith(name.suffix) }
             }
         }
     }

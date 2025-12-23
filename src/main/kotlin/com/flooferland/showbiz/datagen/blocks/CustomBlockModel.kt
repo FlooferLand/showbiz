@@ -19,23 +19,27 @@ interface CustomBlockModel {
     @DslMarker
     annotation class CustomBlockModelDsl
 
-    class NameBuilder(ctx: BlockStateBuilder, name: String?, val postfix: String?) {
+    class NameBuilder(ctx: BlockStateBuilder, name: String?, val suffix: String?) {
         var name: String? = null
         override fun toString(): String = name ?: ""
         init {
             if (name != null) {
                 this.name = name
-            } else if (postfix != null) {
-                this.name = "${ctx.blockId.path}_${postfix}"
+            } else if (suffix != null) {
+                this.name = "${ctx.blockId.path}_${suffix}"
             }
         }
     }
 
+    // TODO: Adapt defaultState to allow use of several states in data generation
     @CustomBlockModelDsl
     class BlockStateBuilder(val blockId: ResourceLocation, val block: Block) {
         constructor(block: ModBlocks) : this(block.id, block.block)
 
         val states = mutableListOf<Variation>()
+        var defaultStateId: ResourceLocation = blockId
+            public get
+            private set
         private var defaultStateValue: Comparable<*>? = null
         private var defaultStateProp: StrippedProperty? = null
         private var buildFinished = false
@@ -51,7 +55,7 @@ interface CustomBlockModel {
                 val defaultValue = runCatching { block.defaultBlockState().getValue(defaultProperty) }.getOrNull()
                     ?: defaultProperty.possibleValues.first()
 
-                val name = NameBuilder(this, name = blockId.path, postfix = "")
+                val name = NameBuilder(this, name = blockId.path, suffix = "")
                 val stateModel = StateModel(this, name)
                 val defaultProp = StrippedProperty(block, defaultProperty)
                 val variation = Variation(this, defaultProp, defaultValue, stateModel, name)
@@ -64,6 +68,7 @@ interface CustomBlockModel {
 
         // TODO: Add a better way to get the default block state by looping through the block
         //       Only supports one block state rn
+        @Deprecated("Should move to using identiifers")
         fun getDefaultState(): StateModel {
             if (!buildFinished) finish()
             val found = states.firstOrNull({ state -> state.prop.name == defaultStateProp?.name })
@@ -71,44 +76,57 @@ interface CustomBlockModel {
         }
 
         /** Set the default block state */
+        @Deprecated("Should move to using identiifers")
         fun <T: Comparable<T>> defaultState(prop: Property<T>, value: T) {
             defaultStateValue = value
             defaultStateProp = StrippedProperty(block, prop)
         }
 
+        /** Set the default block state */
+        fun defaultState(id: ResourceLocation? = null, prefix: String? = null, suffix: String? = null) {
+            var id = id ?: blockId
+            prefix?.let { id = id.withPrefix("${it}_") }
+            suffix?.let { id = id.withSuffix("_${it}") }
+            defaultStateId = id
+        }
+
         // Bool
         @CustomBlockModelDsl
-        class BoolStateScope(val ctx: BlockStateBuilder, val prop: BooleanProperty) {
-            public fun trueState(name: String? = null, postfix: String? = null, block: StateModel.() -> Unit) {
-                val name = NameBuilder(ctx, name = name, postfix = postfix)
+        class BoolStateScope(val ctx: BlockStateBuilder, val props: List<BooleanProperty>) {
+            public fun trueState(name: String? = null, suffix: String? = null, block: StateModel.() -> Unit) {
+                val name = NameBuilder(ctx, name = name, suffix = suffix)
                 val built = StateModel(ctx, name).apply(block)
-                ctx.states.add(Variation(
-                    ctx, StrippedProperty(ctx.block, prop),
-                    expected = true,
-                    state = built,
-                    name = name
-                ))
+                props.forEach { prop ->
+                    ctx.states.add(Variation(
+                        ctx, StrippedProperty(ctx.block, prop),
+                        expected = true,
+                        state = built,
+                        name = name
+                    ))
+                }
             }
-            public fun falseState(name: String? = null, postfix: String? = null, block: StateModel.() -> Unit) {
-                val name = NameBuilder(ctx, name = name, postfix = postfix)
+            public fun falseState(name: String? = null, suffix: String? = null, block: StateModel.() -> Unit) {
+                val name = NameBuilder(ctx, name = name, suffix = suffix)
                 val built = StateModel(ctx, name).apply(block)
-                ctx.states.add(Variation(
-                    ctx, StrippedProperty(ctx.block, prop),
-                    expected = false,
-                    state = built,
-                    name = name
-                ))
+                props.forEach { prop ->
+                    ctx.states.add(Variation(
+                        ctx, StrippedProperty(ctx.block, prop),
+                        expected = false,
+                        state = built,
+                        name = name
+                    ))
+                }
             }
         }
-        fun bool(prop: BooleanProperty, block: BoolStateScope.() -> Unit) {
-            BoolStateScope(this, prop).apply(block)
+        fun bool(vararg prop: BooleanProperty, block: BoolStateScope.() -> Unit) {
+            BoolStateScope(this, prop.toList()).apply(block)
         }
 
         // Facing / Horizontal direction
         fun facing(prop: DirectionProperty) {
             for (value in prop.allValues) {
                 val direction = value.value
-                val name = NameBuilder(this, name = this.blockId.path, postfix = null)
+                val name = NameBuilder(this, name = this.blockId.path, suffix = null)
                 val built = StateModel(this, name)
                 built.y = ((direction.get2DDataValue() and 3) * 90) - 180
                 built.model = Model(this).also { it.texture(this.blockId) }
@@ -138,9 +156,9 @@ interface CustomBlockModel {
         public val name: NameBuilder
     )
 
-    class StateModel(val ctx: BlockStateBuilder, val name: NameBuilder) {
-        var model: Model? = null
-        fun model(block: Model.() -> Unit) = apply { this.model = Model(ctx).apply(block) }
+    class StateModel(ctx: BlockStateBuilder, val name: NameBuilder) {
+        var model = Model(ctx)
+        fun model(block: Model.() -> Unit) = apply { this.model = model.apply(block) }
 
         var x: Int = 0
         fun x(block: Int.() -> Unit) = apply { this.x = x.apply(block) }

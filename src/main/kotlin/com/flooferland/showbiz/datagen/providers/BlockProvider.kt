@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.datagen.providers
 
+import net.minecraft.resources.ResourceLocation
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlVanilla
+import com.google.common.collect.Lists.cartesianProduct
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -36,7 +38,7 @@ object BlockProvider {
         }
     }
 
-    // TODO: Accumulate every separate variant together so every state include severy variant as the string
+    // TODO: Accumulate every separate variant together so every state includes every variant in the string
     fun generateStates(block: ModBlocks, variations: List<CustomBlockModel.Variation>): JsonObject? {
         return buildJsonObject {
             putJsonObject("variants") {
@@ -44,20 +46,37 @@ object BlockProvider {
                     putJsonObject("") {
                         put("model", block.id.blockPath().toString())
                     }
-                } else for (variation in variations) {
-                    putJsonObject("${variation.prop.name}=${variation.expected}") {
-                        put("model", rl(variation.name.name!!).blockPath().toString())
-                        if (variation.state.x != 0) put("x", variation.state.x)
-                        if (variation.state.y != 0) put("y", variation.state.y)
+                    return@putJsonObject
+                }
+
+                val props = variations.groupBy { it.prop.name }
+                val propNames = props.keys.toList()
+                val propsCombined = cartesianProduct(propNames.map { props[it] })
+                for (combination in propsCombined) {
+                    val key = combination.sortedBy { it.prop.name }.joinToString(",") { "${it.prop.name}=${it.expected}" }
+                    val combinationMap = combination.associateBy({ it.prop.name }, { it.expected })
+                    val primary = variations
+                        .groupBy { it.name.name }
+                        .mapNotNull { (_, sameNameVaris) ->
+                            val matching = sameNameVaris.all { combinationMap[it.prop.name] == it.expected }
+                            if (matching) sameNameVaris.size to sameNameVaris.first() else null
+                        }
+                        .maxByOrNull { it.first }
+                        ?.second
+                        ?: combination.first()
+                    putJsonObject(key) {
+                        put("model", rl(primary.name.name!!).blockPath().toString())
+                        combination.sumOf { it.state.x }.let { if (it != 0) put("x", it) }
+                        combination.sumOf { it.state.y }.let { if (it != 0) put("y", it) }
                     }
                 }
             }
         }
     }
 
-    fun generateBlockItemModel(block: ModBlocks, state: CustomBlockModel.StateModel): JsonObject? {
+    fun generateBlockItemModel(block: ModBlocks, blockStateId: ResourceLocation): JsonObject? {
         return buildJsonObject {
-            put("parent", rl(state.name.toString()).blockPath().toString())
+            put("parent", blockStateId.toString())
         }
     }
 }

@@ -2,25 +2,28 @@ package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
-import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.Vec3
+import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.PLAYING_POWERED
+import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.SIGNAL_POWERED
+import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.menus.ShowParserMenu
 import com.flooferland.showbiz.network.packets.ShowParserDataPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.show.toBitId
-import com.flooferland.showbiz.show.toBitIdArray
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -40,6 +43,35 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
         return ShowParserMenu(i, getScreenOpeningData(player))
+    }
+
+    fun tick(level: Level, pos: BlockPos, state: BlockState) {
+        val level = level as? ServerLevel ?: return
+        if (bitFilter.isEmpty()) {
+            if (level.gameTime % 25 == 0L) {
+                val facing = state.getValue(FacingEntityBlock.FACING)
+                val forward = Vec3(facing.normal.x.toDouble(), facing.normal.y.toDouble(), facing.normal.z.toDouble())
+                val center = pos.center.add(forward.scale(0.5)).subtract(0.0, 0.1, 0.0)
+                level.sendParticles(ParticleTypes.SMOKE, center.x, center.y, center.z, 5, 0.15, 0.15, 0.15, 0.02)
+                level.playSound(null, pos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.2f, 1.0f)
+            }
+            return
+        }
+        when (show.data.playing) {
+             true -> {
+                 val newState = state
+                     .setValue(PLAYING_POWERED, true)
+                     .setValue(SIGNAL_POWERED, show.data.signal.raw.any { bitId -> bitFilter.contains(bitId) })
+                 level.setBlockAndUpdate(blockPos, newState)
+             }
+            false if (state.getValue(PLAYING_POWERED) || state.getValue(SIGNAL_POWERED)) -> {
+                val newState = state
+                    .setValue(PLAYING_POWERED, false)
+                    .setValue(SIGNAL_POWERED, false)
+                level.setBlockAndUpdate(blockPos, newState)
+            }
+            else -> {}
+        }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider?) {

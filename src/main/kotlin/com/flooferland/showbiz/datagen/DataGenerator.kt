@@ -20,6 +20,8 @@ import kotlinx.serialization.json.buildJsonObject
 import net.minecraft.*
 import net.minecraft.core.registries.*
 import net.minecraft.server.*
+import net.minecraft.world.level.block.Block
+import com.flooferland.showbiz.registry.ModPackets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -52,7 +54,15 @@ object DataGenerator {
             registryCall("createContents")
             Bootstrap.bootstrapDuration.set(Duration.between(start, Instant.now()).toMillis())
         }
-        generate()
+        run {
+            // Loading things
+            run {
+                ModPackets
+            }
+
+            // Calling the generator
+            generate()
+        }
         registryCall("freeze")
         Bootstrap.validate()
     }
@@ -74,48 +84,50 @@ object DataGenerator {
         }
 
         // Generation
-        for (block in ModBlocks.entries) {
+        for (modBlock in ModBlocks.entries) {
             // States and models
-            val builder = CustomBlockModel.BlockStateBuilder(block)
-            (block.block as? CustomBlockModel)?.modelBlockStates(builder)
+            val builder = CustomBlockModel.BlockStateBuilder(modBlock)
+            val block = (modBlock.block as? CustomBlockModel)
+            block?.modelBlockStates(builder, modBlock.id)
+            block?.modelBlockStates(builder)
             if (builder.states.isNotEmpty()) {
-                val stateJson = BlockProvider.generateStates(block, builder.states) ?: run {
-                    print("Skipped block '${block.id}'")
+                val stateJson = BlockProvider.generateStates(modBlock, builder.states) ?: run {
+                    print("Skipped block '${modBlock.id}'")
                     continue
                 }
-                val statePath = assetsRoot / "blockstates" / "${block.id.path}.json"
+                val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
                 writeAsset(statePath, stateJson)
 
                 // Write a block model for every state
                 for (state in builder.states) {
-                    val modelJson = BlockProvider.generateBlockModel(block, state.state.model!!) ?: continue
+                    val modelJson = BlockProvider.generateBlockModel(modBlock, state.state.model!!) ?: continue
                     val modelPath = assetsRoot / "models" / "block" / "${state.name}.json"
                     writeAsset(modelPath, modelJson)
                 }
             } else {
                 // Default / empty state
-                val stateJson = BlockProvider.generateStates(block, listOf()) ?: run {
-                    print("Skipped block '${block.id}'")
+                val stateJson = BlockProvider.generateStates(modBlock, listOf()) ?: run {
+                    print("Skipped block '${modBlock.id}'")
                     continue
                 }
-                val statePath = assetsRoot / "blockstates" / "${block.id.path}.json"
+                val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
                 writeAsset(statePath, stateJson)
 
                 // Default / empty model
-                val modelJson = BlockProvider.generateBlockModel(block, Model(builder).texture(block.id)) ?: continue
-                val modelPath = assetsRoot / "models" / "block" / "${block.id.path}.json"
+                val modelJson = BlockProvider.generateBlockModel(modBlock, Model(builder).texture(modBlock.id)) ?: continue
+                val modelPath = assetsRoot / "models" / "block" / "${modBlock.id.path}.json"
                 writeAsset(modelPath, modelJson)
             }
 
             // Item model
-            val defaultState = builder.getDefaultState()
-            val itemModelJson = BlockProvider.generateBlockItemModel(block, defaultState) ?: continue
-            val itemModelPath = assetsRoot / "models" / "item" / "${block.id.path}.json"
+            val defaultState = builder.defaultStateId
+            val itemModelJson = BlockProvider.generateBlockItemModel(modBlock, defaultState.blockPath()) ?: continue
+            val itemModelPath = assetsRoot / "models" / "item" / "${modBlock.id.path}.json"
             writeAsset(itemModelPath, itemModelJson)
 
             // Item (items/ entry)
-            val itemJson = ItemProvider.generateItem(rl(defaultState.name.toString()).blockPath()) ?: continue
-            val itemPath = assetsRoot / "items" / "${block.id.path}.json"
+            val itemJson = ItemProvider.generateItem(defaultState.itemPath()) ?: continue
+            val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
             writeAsset(itemPath, itemJson)
         }
         for (item in ModItems.entries) {
