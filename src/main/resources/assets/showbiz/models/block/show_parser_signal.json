@@ -42,38 +42,35 @@
 			"name": "center",
 			"from": [6, 2.05, 1],
 			"to": [10, 2.05, 15],
-			"shade": false,
 			"rotation": {"angle": 0, "axis": "y", "origin": [7, 2.05, 7]},
 			"faces": {
-				"up": {"uv": [4.25, 6.25, 0.75, 7.25], "rotation": 270, "texture": "#0"}
+				"up": {"uv": [4.25, 5, 0.75, 6], "rotation": 270, "texture": "#0"}
 			}
 		},
 		{
 			"name": "link",
 			"from": [7, 0, 0],
 			"to": [9, 2, 1],
-			"shade": false,
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 1.525, 8]},
 			"faces": {
-				"north": {"uv": [0, 6.5, 0.5, 7], "texture": "#0"},
-				"east": {"uv": [0.25, 6.5, 0.5, 7], "texture": "#0"},
-				"west": {"uv": [0, 6.5, 0.25, 7], "texture": "#0"},
-				"up": {"uv": [0, 6.5, 0.25, 7], "rotation": 90, "texture": "#0"},
-				"down": {"uv": [0, 6.5, 0.25, 7], "rotation": 270, "texture": "#0"}
+				"north": {"uv": [0, 5.25, 0.5, 5.75], "texture": "#0"},
+				"east": {"uv": [0.25, 5.25, 0.5, 5.75], "texture": "#0"},
+				"west": {"uv": [0, 5.25, 0.25, 5.75], "texture": "#0"},
+				"up": {"uv": [0, 5.25, 0.25, 5.75], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [0, 5.25, 0.25, 5.75], "rotation": 270, "texture": "#0"}
 			}
 		},
 		{
 			"name": "link",
 			"from": [7, 0, 15],
 			"to": [9, 2, 16],
-			"shade": false,
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 1.525, 8]},
 			"faces": {
-				"east": {"uv": [4.5, 6.5, 4.75, 7], "texture": "#0"},
-				"south": {"uv": [4.5, 6.5, 5, 7], "texture": "#0"},
-				"west": {"uv": [4.75, 6.5, 5, 7], "texture": "#0"},
-				"up": {"uv": [4.5, 6.5, 4.75, 7], "rotation": 270, "texture": "#0"},
-				"down": {"uv": [4.5, 6.5, 4.75, 7], "rotation": 90, "texture": "#0"}
+				"east": {"uv": [4.5, 5.25, 4.75, 5.75], "texture": "#0"},
+				"south": {"uv": [4.5, 5.25, 5, 5.75], "texture": "#0"},
+				"west": {"uv": [4.75, 5.25, 5, 5.75], "texture": "#0"},
+				"up": {"uv": [4.5, 5.25, 4.75, 5.75], "rotation": 270, "texture": "#0"},
+				"down": {"uv": [4.5, 5.25, 4.75, 5.75], "rotation": 90, "texture": "#0"}
 			}
 		}
 	],
@@ -122,10 +119,9 @@
 				1,
 				2,
 				{
-					"name": "powered_playing",
+					"name": "powered_signal",
 					"origin": [8, 1.525, 8],
 					"color": 0,
-					"shade": false,
 					"children": [3, 4, 5]
 				}
 			]
