@@ -37,10 +37,10 @@ class BotSoundHandler : IBotSoundHandler {
                 val pitch = 0.6f + (flow * 0.6f)
                 val volume = 0.6f + (flow * 0.6f)
                 level.playLocalSound(
-                    entity.blockPos,
+                    entity.blockPos.above().above(),
                     sound.event,
                     SoundSource.BLOCKS,
-                    volume * 0.1f, pitch, false
+                    volume * 0.2f, pitch, false
                 )
             }
 
