@@ -1,11 +1,13 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
+import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
@@ -13,16 +15,16 @@ import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
-import kotlin.math.sin
-
-// TODO: Make the bot model not share the same bitSmooths and other properties.
-//       Currently, 2 shows containing the same bots cannot animate at the same time due to this shared memory.
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
-    val bitSmooths = mutableMapOf<BitId, Float>()
-    val bitSpringOffset = mutableMapOf<BitId, Float>()
-    val bitSpringVelocity = mutableMapOf<BitId, Float>()
+    // TODO: Remove instance IDs when bots are removed (memory leak)
+    val localStorage = mutableMapOf<Long, LocalBotStorage>()
+    class LocalBotStorage {
+        val bitSmooths = mutableMapOf<BitId, Float>()
+        val bitSpringOffset = mutableMapOf<BitId, Float>()
+        val bitSpringVelocity = mutableMapOf<BitId, Float>()
+    }
 
     // Spring properties -- methods so I can hot reload code to modify them >:)
     fun getSpringStiff() = 0.1f
@@ -45,6 +47,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: return
         val model = currentModel ?: return
+        val storage = localStorage.getOrPut(instanceId) { LocalBotStorage() }
 
         // Getting the animation controller/state
         // TODO: Figure out why caching these won't work
@@ -152,24 +155,24 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
 
             // Manual smoothing
-            val oldSmooth = bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
+            val oldSmooth = storage.bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
             val bitSmooth = clamp(
                 lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.01f, 10.0f)),
                 0.0f, 1.0f
             )
-            bitSmooths[bit] = bitSmooth
+            storage.bitSmooths[bit] = bitSmooth
 
             // Spring
             val (springVel, springOffset) = run {
                 val diff = (bitSmooth - oldSmooth) / delta.coerceAtLeast(0.001f)
-                var springOffset = bitSpringOffset.getOrDefault(bit, 0f)
-                var springVel= bitSpringVelocity.getOrDefault(bit, 0f)
+                var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
+                var springVel= storage.bitSpringVelocity.getOrDefault(bit, 0f)
                 springVel = (springVel + diff * getSpringImpulse() - springOffset * getSpringStiff()) * getSpringDamp()
                 springOffset += springVel * delta
                 Pair(springVel, springOffset)
             }
-            bitSpringOffset[bit] = springOffset
-            bitSpringVelocity[bit] = springVel
+            storage.bitSpringOffset[bit] = springOffset
+            storage.bitSpringVelocity[bit] = springVel
 
             // Manual rotation
             for (rotate in data.rotates) {

@@ -92,8 +92,8 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         return if (on) 15 else 0
     }
 
-    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
-        BlockEntityTicker({ level, pos, blockState, entity -> (entity as? ShowParserBlockEntity)?.tick(level, pos, blockState) })
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
+        BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? ShowParserBlockEntity)?.tick(level, pos, blockState) }
 
     override fun getDirectSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
         return getSignal(state, level, pos, direction)

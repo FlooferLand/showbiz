@@ -7,6 +7,9 @@ import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
+import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.parsers.TomlParser
+import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
@@ -16,6 +19,7 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModClientCommands
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModPackets
 import com.flooferland.showbiz.registry.ModScreenHandlers
@@ -24,10 +28,15 @@ import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
 import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
 import com.flooferland.showbiz.renderers.WandItemRenderer
 import com.flooferland.showbiz.screens.ShowParserScreen
+import com.flooferland.showbiz.types.BotSoundHandler
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
+import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 
@@ -36,13 +45,31 @@ object ShowbizClient : ClientModInitializer {
     var bots: Map<String, AddonBot> = mapOf()
     var botModels: Map<ResourceLocation, BotModelData> = mapOf()
     var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
+    var config = ShowbizClientConfig()
 
     override fun onInitializeClient() {
+        // Loading config
+        val configResult = runCatching {
+            val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
+            if (configFile.exists()) {
+                config = Toml.decodeFromString<ShowbizClientConfig>("")
+            } else {
+                configFile.writeText(Toml.encodeToString<ShowbizClientConfig>(config))
+            }
+        }
+        configResult.onFailure { throwable ->
+            Showbiz.log.error("Error loading config", throwable)
+        }
+
+        // Loading the mod
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
+        @Suppress("UnusedExpression")
         run {
             ModPackets
+            ModClientCommands
         }
         ShowbizShowAudio.init()
+        StagedBotBlockEntity.soundHandler = BotSoundHandler()
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParser.type, ::ShowParserScreen)

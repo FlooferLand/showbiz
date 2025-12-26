@@ -64,4 +64,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
         return defaultBlockState().setValue(facing, context.horizontalDirection.opposite)
     }
+
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
+        BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? StagedBotBlockEntity)?.tick(level, pos, blockState) }
 }

@@ -109,6 +109,14 @@ loom {
         }
     }
     runs {
+        create("client_offline") {
+            client()
+            name("Minecraft Client (Offline)")
+            runDir = "../../run"
+            vmArgs += "-Ddevauth.enabled=false"
+            programArgs.addAll(arrayOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
+            environmentVariable("DEVAUTH_ENABLED", "false")
+        }
         create("client_alt") {
             client()
             name("Minecraft Client (ALT)")

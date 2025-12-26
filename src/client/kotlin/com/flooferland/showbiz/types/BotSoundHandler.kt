@@ -1,0 +1,50 @@
+package com.flooferland.showbiz.types
+
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.state.BlockState
+import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.show.BitId
+import java.util.WeakHashMap
+
+class BotSoundHandler : IBotSoundHandler {
+    private val lastBits = WeakHashMap<StagedBotBlockEntity, MutableMap<BitId, Boolean>>()
+
+    override fun tick(entity: StagedBotBlockEntity, level: Level, pos: BlockPos, state: BlockState) {
+        val level = level as? ClientLevel ?: return
+        if (!ShowbizClient.config.audio.playPneumaticSounds) return
+
+        val bot = ShowbizClient.bots[entity.botId] ?: return
+        val show = entity.show.data
+        val bitmapBits = bot.bitmap.bits[show.mapping] ?: return
+        /*if (!show.playing) {
+            lastBits.remove(entity)
+            return
+        }*/
+        val states = lastBits.getOrPut(entity) { mutableMapOf() }
+
+        for ((bit, data) in bitmapBits) {
+            val bitOn = show.signal.frameHas(bit)
+            val prevState = states[bit]
+
+            if (prevState != null && prevState != bitOn) {
+                val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
+                val flow = data.flow.toFloat().coerceIn(0.1f, 2.0f)
+                val pitch = 0.6f + (flow * 0.6f)
+                val volume = 0.6f + (flow * 0.6f)
+                level.playLocalSound(
+                    entity.blockPos,
+                    sound.event,
+                    SoundSource.BLOCKS,
+                    volume * 0.1f, pitch, false
+                )
+            }
+
+            states[bit] = bitOn
+        }
+    }
+}
