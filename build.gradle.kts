@@ -31,18 +31,12 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("https://maven.parchmentmc.org") {
-        name = "ParchmentMC"
-    }
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") {
-        name = "DevAuth"
-    }
-    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") {
-        name = "GeckoLib"
-    }
-    maven("https://www.jitpack.io") {
-        name = "Jitpack"
-    }
+    maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") { name = "DevAuth" }
+    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") { name = "GeckoLib" }
+    maven("https://www.jitpack.io") { name = "Jitpack" }
+    maven("https://maven.terraformersmc.com/") { name = "Terraformers" }
+
     exclusiveContent {
         forRepository {
             maven("https://api.modrinth.com/maven") {
@@ -57,6 +51,7 @@ fun dep(name: String): String = property("deps.${name}") as String
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
     // Loader-specific
     if (loader == "fabric") {
@@ -84,6 +79,9 @@ dependencies {
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
+
+    // Modmenu
+    modApi("com.terraformersmc:modmenu:${dep("modmenu")}")
 
     // Useful dev tools (not included in the mod, helps me build things and ensure mod compatibility)
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")

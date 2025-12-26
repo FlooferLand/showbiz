@@ -25,6 +25,12 @@
                 "value": "com.flooferland.showbiz.ShowbizClient",
                 "adapter": "kotlin"
             }
+        ],
+        "modmenu": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizModMenu",
+                "adapter": "kotlin"
+            }
         ]
     },
     "mixins": [

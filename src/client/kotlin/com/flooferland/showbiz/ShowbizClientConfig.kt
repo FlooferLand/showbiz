@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class ShowbizClientConfig(val audio: Audio = Audio()) : Cloneable {
     @Serializable
     data class Audio(
-        val playPneumaticSounds: Boolean = true
+        var playPneumaticSounds: Boolean = true
     )
 
     public override fun clone() = super.clone() as ShowbizClientConfig

@@ -1,31 +1,38 @@
 package com.flooferland.showbiz.screens
 
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.Checkbox
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.ShowbizClientConfig
 import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.staticProperties
 
 typealias Category = String
 
-class ShowbizConfigScreen : Screen(Component.literal("Showbiz Config")) {
+class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal("Showbiz Config")) {
     val config = ShowbizClient.config.clone()
 
     data class ConfigWidget(val name: String, val widget: AbstractWidget)
     val configEntries = mutableMapOf<Category, MutableList<ConfigWidget>>()
 
     override fun init() {
-        for (categoryClass in ShowbizClientConfig::class.nestedClasses) {
-            when (categoryClass) {
-                ShowbizClientConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
+        runCatching {
+            for (categoryClass in ShowbizClientConfig::class.nestedClasses) {
+                when (categoryClass) {
+                    ShowbizClientConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
+                }
             }
-        }
+        }.onFailure { Showbiz.log.error("Failure adding config categories", it) }
 
         // Placing the UI
+        if (configEntries.isEmpty()) Minecraft.getInstance().screen = parent
         for ((categoryName, widgets) in configEntries) {
             widgets.firstOrNull()?.widget?.isFocused = true
 
@@ -49,19 +56,18 @@ class ShowbizConfigScreen : Screen(Component.literal("Showbiz Config")) {
         }
     }
 
-    private inline fun <reified T> categoryAddWidgets(categoryName: String, category: T) {
-        val props = T::class.staticProperties
+    private inline fun <reified T: Any> categoryAddWidgets(categoryName: String, category: T) {
+        val props = T::class.memberProperties
         props.forEach { prop ->
-            val prop = prop as KMutableProperty0
             val categoryName = categoryName
             val propName = Component.literal(prop.name)
-            val propValue = prop.get()!!
+            val propValue = prop.call(category) ?: return@forEach
 
             @Suppress("UNCHECKED_CAST")
             val widget = when (propValue) {
                 is Boolean -> Checkbox.builder(propName, font)
                     .selected(propValue)
-                    .onValueChange { _, bool -> (prop as KMutableProperty0<Boolean>).set(bool) }
+                    .onValueChange { _, bool -> (prop as KMutableProperty1<T, Boolean>).set(category, bool) }
                     .build()
                 else -> error("Prop of this type does not exist")
             }
@@ -73,5 +79,6 @@ class ShowbizConfigScreen : Screen(Component.literal("Showbiz Config")) {
 
     override fun onClose() {
         ShowbizClient.config = config
+        super.onClose()
     }
 }
