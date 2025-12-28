@@ -7,6 +7,7 @@ import net.minecraft.network.chat.*
 import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.SignalFrame.Companion.NEXT_DRAWER
@@ -19,6 +20,9 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.io.path.Path
 import kotlin.io.path.extension
+import kotlin.io.path.name
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.pathString
 
 // TODO: FIXME: Clean up the ugliest class in the entire mod (ModCommands)
 object ModCommands {
@@ -85,13 +89,24 @@ object ModCommands {
             .executes { ctx ->
                 val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
                 if (shows == null) {
-                    ctx.source.sendFailure(Component.literal("No shows found"))
+                    ctx.source.sendFailure(Component.literal("No shows found.\nUpload an ${FileStorage.SUPPORTED_FORMATS.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"))
                     return@executes 0
                 }
 
-                val showsStr = shows.joinToString { "  - '${it}'\n" }
+                val showsComp = Component.empty().also { showsComp ->
+                    shows.map { path ->
+                        val hover = Component.literal("Click to upload to a reel you're holding\n")
+                            .append(Component.literal(path.name).withStyle(ChatFormatting.GRAY))
+                        Component.literal("${path.nameWithoutExtension}\n")
+                            .withStyle { it
+                                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hover))
+                                .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$MOD_ID reelupload ${path.name}"))
+                                .withBold(true)
+                            }
+                    }.forEach { showsComp.append(Component.literal("- ").append(it)) }
+                }
                 ctx.source.sendSuccess(
-                    { Component.literal("Call the command with one of the following file names: \n$showsStr") },
+                    { Component.literal("Click or run the command with one of the following file names:\n").append(showsComp) },
                     false
                 )
                 0
@@ -113,15 +128,14 @@ object ModCommands {
                         // Validating the file
                         val filename = StringArgumentType.getString(ctx, "file") ?: return@executes err("Failed to find parameter")
                         if (!FileStorage.SUPPORTED_FORMATS.contains(Path(filename).extension)) {
-                            return@executes err("File name must end with the supported formats: [${FileStorage.SUPPORTED_FORMATS.joinToString(", ") }]")
+                            return@executes err("File name must end with the supported file extensions: [${FileStorage.SUPPORTED_FORMATS.joinToString(", ") }]")
                         }
 
                         val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-                        if (shows == null || !shows.contains(filename)) {
+                        if (shows?.find { it.name == filename } == null) {
                             ctx.source.sendFailure(
                                 Component.literal("File does not exist: '${filename}'\n")
-                                    .append(Component.literal("  Hint: \n"))
-                                    .append(Component.literal(shows?.joinToString { "  - '${it}'\n" }.toString()))
+                                    .append(Component.literal("  Hint: Run the command with no file to list all files\n"))
                             )
                             return@executes 0
                         }
