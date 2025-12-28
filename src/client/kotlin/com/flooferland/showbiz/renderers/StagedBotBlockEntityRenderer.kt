@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.level.*
+import net.minecraft.world.phys.shapes.CollisionContext
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
@@ -85,9 +86,11 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             val level = animatable?.level ?: return@run
             val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
             if (above.isAir) return@run
-            val shape = above.getCollisionShape(level, animatable.blockPos.above())
-            val top = clamp(shape.bounds().maxY, 0.0, 1.0)
-            poseStack.translate(0.0, top, 0.0)
+            val shape = above.getShape(level, animatable.blockPos.above())
+            if (!shape.isEmpty) {
+                val top = clamp(shape.bounds().maxY, 0.0, 1.0)
+                poseStack.translate(0.0, top, 0.0)
+            }
         }
 
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
