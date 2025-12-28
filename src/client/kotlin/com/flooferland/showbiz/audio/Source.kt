@@ -12,7 +12,7 @@ import org.lwjgl.openal.AL11.*
 
 /** Low-level AL11 audio handling, because Minecraft's built-in audio streaming system is very dumb and undocumented */
 class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null) {
-    val buffers = IntArray(4)
+    val buffers = IntArray(8)
     val format = run {
         val (bits, stereo, mono) = friendlyFormat.let { Triple(it.sampleBits, it.stereo, it.mono) }
         return@run when (bits) {
@@ -23,7 +23,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             else -> error("Unsupported format: $friendlyFormat")
         }
     }
-    val maxDistance = 24f
+    val maxDistance = 18f
     var source = 0
     var nextBufIndex = 0
 
@@ -34,21 +34,19 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     private fun isValidSource() = source != 0 && alIsSource(source)
 
     fun isOpen() = isValidSource()
-
     fun open() {
         if (isValidSource()) close()
         source = handleAL { alGenSources() }
         handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
         handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
-        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 0f) }
+        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
         handleAL { alGenBuffers(buffers) }
     }
     fun close() {
         if (handleAL { alIsSource(source) }) {
-            if (getState() == AL_PLAYING) {
-                handleAL { alSourceStop(source) }
-            }
+            handleAL { alSourceStop(source) }
+            handleAL { alSourcei(source, AL_BUFFER, 0) }
             handleAL { alDeleteSources(source) }
             handleAL { alDeleteBuffers(buffers) }
         }
@@ -56,7 +54,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     fun write(chunk: ByteArray, sampleRate: Int) {
         if (!isValidSource()) return
-        updateAttenuation()
         updatePosition()
 
         // Cleaning buffers
@@ -87,16 +84,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
 
     fun updatePosition() {
-        val mc = Minecraft.getInstance() ?: return
-        val camera = mc.gameRenderer?.mainCamera ?: return
-
-        val camPos = camera.position
-        handleAL { alListener3f(AL_POSITION, camPos.x.toFloat(), camPos.y.toFloat(), camPos.z.toFloat()) }
-
-        val look = camera.lookVector
-        val up = camera.upVector
-        handleAL { alListenerfv(AL_ORIENTATION, floatArrayOf(look.x, look.y, look.z, up.x, up.y, up.z)) }
-
         val pos = position
         if (pos != null) {
             handleAL { alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE) }
@@ -105,12 +92,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             handleAL { alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE) }
             handleAL { alSource3f(source, AL_POSITION, 0F, 0F, 0F) }
         }
-    }
-
-    fun updateAttenuation() {
-        handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
-        handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
-        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
     }
 
     private fun <T> handleAL(block: () -> T): T {
@@ -125,7 +106,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             return false
         }
         val stack = Thread.currentThread().stackTrace.slice(3..7).joinToString("\n")
-        Showbiz.log.error("OpenAL error \"${formatAlError(error)}\": ${stack}")
+        Showbiz.log.error("OpenAL error \"${formatAlError(error)}\": $stack")
         return true
     }
 
