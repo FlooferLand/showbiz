@@ -16,7 +16,7 @@ data class PackedShowData(
     }
 
     override fun loadOrThrow(tag: CompoundTag) {
-        playing = tag.getBoolean("slaying")
+        playing = tag.getBoolean("playing")
         signal.load(tag.getIntArray("signal"))
         mapping = tag.getString("mapping")
     }

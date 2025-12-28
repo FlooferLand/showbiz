@@ -15,8 +15,8 @@ object SoundProvider {
                     }
                 } else {
                     for (name in sound.sounds) {
-                        val id = rl(name).also {
-                            if (sound.folder != null) { it.withPrefix("${sound.folder}/") }
+                        val id = rl(name).let {
+                            if (sound.folder != null) { it.withPrefix("${sound.folder}/") } else name
                         }
                         add(id.toString())
                     }

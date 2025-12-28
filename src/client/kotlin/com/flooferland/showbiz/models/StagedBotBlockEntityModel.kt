@@ -15,6 +15,7 @@ import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
+import software.bernie.geckolib.cache.`object`.GeoBone
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
@@ -47,7 +48,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: return
         val model = currentModel ?: return
-        val storage = localStorage.getOrPut(instanceId) { LocalBotStorage() }
 
         // Getting the animation controller/state
         // TODO: Figure out why caching these won't work
@@ -102,11 +102,17 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
+                animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
             }
         }
 
-        // TODO: FIXME: WHY THE F#@! IS 'PLAYING' FALSE??
-        // if (!animatable.show.data.playing) return
+        val storage = if (animatable.show.data.playing) {
+            localStorage.getOrPut(instanceId) { LocalBotStorage() }
+        } else {
+            localStorage.remove(instanceId)
+            return
+        }
+
 
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
@@ -184,11 +190,21 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
 
                 // Applying wiggle
-                var boneSizeMul = bone.cubes.map { it.size.length() / 8f }.average().toFloat()
+                val boneSize = run {
+                    var size = 0f
+                    fun recurse(bone: GeoBone) {
+                        size += (bone.cubes.map { it.size.length() }.average() / bone.cubes.size).toFloat()
+                        bone.childBones.forEach { recurse(it) }
+                    }
+                    recurse(bone)
+                    size
+                }
+                var boneSizeMul = boneSize / 2f
                 boneSizeMul = boneSizeMul.coerceIn(0f..1.5f)
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * (springOffset * boneSizeMul)
+                val affect = (springOffset * boneSizeMul).coerceIn(0.5f, 2f).let { if (it.isNaN()) 1f else it }
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * affect
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * affect
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * affect
             }
 
             // Manual position

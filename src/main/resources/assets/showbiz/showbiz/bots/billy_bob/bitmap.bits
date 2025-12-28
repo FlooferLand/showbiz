@@ -22,13 +22,13 @@ any head_up {
 }
 
 rae head_left {
-    flow 0.5
-    rotate "head" y:30
+    flow 0.4
+    rotate "head" y:35
 }
 
 rae head_right {
-    flow 0.5
-    rotate "head" y:-30
+    flow 0.4
+    rotate "head" y:-35
 }
 
 rae head_tip_left {
