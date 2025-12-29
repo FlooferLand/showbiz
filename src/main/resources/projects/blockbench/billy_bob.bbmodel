@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 934,
+	"activity_tracker": 1037,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\billy_bob\\models\\billy_bob.geo.json",
@@ -1139,12 +1139,12 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [-3, 32.8, -5.2],
-			"to": [-1, 33.8, -3.2],
+			"from": [-3, 32.3, -5.2],
+			"to": [-1, 33.3, -3.2],
 			"autouv": 0,
 			"color": 2,
 			"inflate": 0.1,
-			"origin": [-5, 15.8, -4.2],
+			"origin": [-5, 15.3, -4.2],
 			"uv_offset": [30, 60],
 			"faces": {
 				"north": {
@@ -1181,12 +1181,12 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [1, 32.8, -5.2],
-			"to": [3, 33.8, -3.2],
+			"from": [1, 32.3, -5.2],
+			"to": [3, 33.3, -3.2],
 			"autouv": 0,
 			"color": 2,
 			"inflate": 0.1,
-			"origin": [-1, 15.8, -4.2],
+			"origin": [-1, 15.3, -4.2],
 			"uv_offset": [68, 36],
 			"faces": {
 				"north": {
@@ -1459,7 +1459,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"uuid": "ae4b7c01-d0af-2c9d-0aad-aa630b1600fb",
@@ -1735,7 +1735,7 @@
 			"uuid": "cd95126f-d5f9-a57a-7e2c-710ffab8e0c5",
 			"export": true,
 			"locked": false,
-			"origin": [0, 32.7, -4.2],
+			"origin": [0, 32.2, -4.2],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"name": "eyelids",
@@ -1747,7 +1747,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "43e0e492-e1c6-3ddf-f0f0-0939ec322d68",
@@ -1765,6 +1765,24 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
+			"primary_selected": false
+		},
+		{
+			"uuid": "e090fdb7-6e26-92d2-e08c-4cd02f15f466",
+			"export": true,
+			"locked": false,
+			"origin": [0, 28.76903, -4.30099],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"name": "snout",
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"selected": false,
+			"visibility": true,
+			"autouv": 0,
+			"isOpen": true,
 			"primary_selected": false
 		}
 	],
@@ -1794,10 +1812,16 @@
 							"isOpen": true,
 							"children": [
 								"c4b19aa8-d126-1d6b-cfcf-be0384801b42",
-								"d58decde-8633-3f3f-6f69-af7db0c77d50",
-								"a9c69314-f641-5fb0-8d1e-a7543a8df558",
-								"b84c8812-fc92-2b98-4713-0cbbb5483031",
-								"32eb1053-c48b-554e-db3a-e673f8f0c970",
+								{
+									"uuid": "e090fdb7-6e26-92d2-e08c-4cd02f15f466",
+									"isOpen": true,
+									"children": [
+										"d58decde-8633-3f3f-6f69-af7db0c77d50",
+										"b84c8812-fc92-2b98-4713-0cbbb5483031",
+										"a9c69314-f641-5fb0-8d1e-a7543a8df558",
+										"32eb1053-c48b-554e-db3a-e673f8f0c970"
+									]
+								},
 								"9ab65797-366b-e886-00bd-67bbd19dd3d4",
 								"691b9bda-85ad-c69e-0af2-b93993a75480",
 								{
@@ -2130,12 +2154,18 @@
 							"interpolation": "linear"
 						}
 					]
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
 				}
 			}
 		},
 		{
 			"uuid": "32c5b6b9-fe74-eba2-d466-001ca8654c7c",
-			"name": "animation.billy_bob.eyelids_down.on",
+			"name": "animation.billy_bob.eyelids.on",
 			"loop": "hold",
 			"override": false,
 			"length": 0.25,
@@ -2275,7 +2305,7 @@
 							"data_points": [
 								{
 									"x": "0",
-									"y": "-0.675",
+									"y": "0.575",
 									"z": "0"
 								}
 							],
@@ -2288,6 +2318,12 @@
 				},
 				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
 					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false
@@ -2296,13 +2332,13 @@
 		},
 		{
 			"uuid": "a3dd2761-8d64-32d1-1b09-a504c12da71b",
-			"name": "animation.billy_bob.eyelids_down.off",
+			"name": "animation.billy_bob.eyelids.off",
 			"loop": "hold",
 			"override": false,
 			"length": 0.25,
 			"snapping": 24,
-			"selected": false,
-			"saved": true,
+			"selected": true,
+			"saved": false,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
 			"blend_weight": "",
@@ -2426,7 +2462,7 @@
 									"z": "0"
 								}
 							],
-							"uuid": "577a458a-1916-7c44-061b-cdcf603e0bf0",
+							"uuid": "be5e0622-f12f-0895-68a5-6603e7b2b20f",
 							"time": 0.25,
 							"color": -1,
 							"interpolation": "linear"
@@ -2436,11 +2472,11 @@
 							"data_points": [
 								{
 									"x": "0",
-									"y": "-0.675",
+									"y": "0.575",
 									"z": "0"
 								}
 							],
-							"uuid": "0d72b9c5-cb11-ae68-f55b-ce3305eb380a",
+							"uuid": "8975e97f-9606-1c86-69a1-f4461449f226",
 							"time": 0,
 							"color": -1,
 							"interpolation": "linear"
@@ -2449,6 +2485,12 @@
 				},
 				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
 					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false
@@ -2785,7 +2827,7 @@
 			"length": 0.5,
 			"snapping": 24,
 			"selected": false,
-			"saved": false,
+			"saved": true,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
 			"blend_weight": "",
@@ -2916,7 +2958,7 @@
 			"length": 0.5,
 			"snapping": 24,
 			"selected": false,
-			"saved": false,
+			"saved": true,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
 			"blend_weight": "",
@@ -3365,5 +3407,6 @@
 				}
 			}
 		}
-	]
+	],
+	"geckolib_model_type": "Entity"
 }

@@ -31,7 +31,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
-        BlockEntityTicker({ _, _, _, entity -> (entity as? ReelToReelBlockEntity)?.tick() })
+        BlockEntityTicker { _, _, _, entity -> (entity as? ReelToReelBlockEntity)?.tick() }
 
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
 

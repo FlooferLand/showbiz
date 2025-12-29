@@ -51,7 +51,7 @@
 				}
 			}
 		},
-		"animation.billy_bob.eyelids_down.on": {
+		"animation.billy_bob.eyelids.on": {
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.25,
 			"bones": {
@@ -61,20 +61,20 @@
 							"vector": [0, 0, 0]
 						},
 						"0.25": {
-							"vector": [0, -0.675, 0]
+							"vector": [0, 0.575, 0]
 						}
 					}
 				}
 			}
 		},
-		"animation.billy_bob.eyelids_down.off": {
+		"animation.billy_bob.eyelids.off": {
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.25,
 			"bones": {
 				"eyelids": {
 					"position": {
 						"0.0": {
-							"vector": [0, -0.675, 0]
+							"vector": [0, 0.575, 0]
 						},
 						"0.25": {
 							"vector": [0, 0, 0]

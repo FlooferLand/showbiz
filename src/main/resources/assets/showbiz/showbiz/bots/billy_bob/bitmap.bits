@@ -17,8 +17,8 @@ rae body_twist_right, faz body_turn_r {
 }
 
 any head_up {
-    flow 0.6
-    rotate "head" x:15
+    flow 0.85
+    rotate "head" x:13
 }
 
 rae head_left {
@@ -61,8 +61,9 @@ rae right_elbow_twist {
 # face
 
 any jaw {
-    flow 2.0
-    rotate "jaw" x:-20
+    flow 3.0
+    rotate "jaw" x:-15
+    rotate "snout" x:5
 }
 
 any eyes_left {
@@ -77,5 +78,5 @@ any eyes_right {
 
 rae left_eyelid, rae right_eyelid {
     flow 0.8
-    anim "eyelids_down"
+    anim "eyelids"
 }

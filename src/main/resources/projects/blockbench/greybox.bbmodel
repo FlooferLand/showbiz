@@ -13,7 +13,7 @@
 	"variable_placeholders": "",
 	"variable_placeholder_buttons": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 312,
+	"activity_tracker": 383,
 	"resolution": {
 		"width": 64,
 		"height": 64
@@ -1769,7 +1769,8 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": false,
+			"primary_selected": false
 		},
 		{
 			"uuid": "e8cd3734-a942-fad8-0ea2-d3e82d70b6d2",
@@ -1786,7 +1787,8 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": true,
+			"primary_selected": false
 		},
 		{
 			"uuid": "b80fe7a4-0dd2-23a7-4aad-c3392018b3e6",
@@ -1803,7 +1805,8 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": true,
+			"primary_selected": false
 		},
 		{
 			"uuid": "4db59173-4d90-d9ec-834a-050040e2b62b",
@@ -1820,7 +1823,8 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": true,
+			"primary_selected": false
 		},
 		{
 			"uuid": "e2a19950-77f2-b1fa-e341-c66449762b73",
@@ -1837,17 +1841,18 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": false,
+			"primary_selected": false
 		}
 	],
 	"outliner": [
 		{
 			"uuid": "9481d162-b989-cb41-72f7-19217b2c0f79",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				{
 					"uuid": "e2a19950-77f2-b1fa-e341-c66449762b73",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						"ae339342-0664-486b-6645-3bc1519271db",
 						"f6cb3235-c0a2-eb53-2de9-3575710afe3b",
@@ -1958,6 +1963,5 @@
 		"head": {
 			"scale": [2, 1.5, 1.5]
 		}
-	},
-	"tint_color": [1, 0.705, 0.294]
+	}
 }
