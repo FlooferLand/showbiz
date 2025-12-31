@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
@@ -58,7 +57,7 @@ class ModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: Re
 
         // Spawning the entities
         val facing = ownerEntity.blockState.getOptionalValue(BlockStateProperties.HORIZONTAL_FACING).getOrNull()
-        for ((name, part) in interactableParts) {
+        for ((partId, part) in interactableParts) {
             val pos = facing?.let {
                 val angle = (it.toYRot() - 90.0) * Mth.DEG_TO_RAD
                 Vec3(
@@ -67,7 +66,8 @@ class ModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: Re
                     part.pos.x * sin(angle) + part.pos.z * cos(angle)
                 )
             } ?: part.pos
-            val entity = ModelPartEntity(level, name, pos, part.size, ownerEntity.blockPos)
+            val displayName = interactionMapping[partId]?.toString() ?: partId
+            val entity = ModelPartEntity(level, partId, displayName, pos, part.size, ownerEntity.blockPos)
             level.addEntity(entity)
             trackedEntities.add(entity.id)
         }
