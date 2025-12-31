@@ -1,45 +1,26 @@
 package com.flooferland.showbiz.utils
 
-import javax.sound.sampled.*
+import net.minecraft.resources.*
+import net.minecraft.util.*
+import com.flooferland.showbiz.Showbiz
+import com.google.gson.JsonObject
+import software.bernie.geckolib.loading.json.raw.Model
+import software.bernie.geckolib.loading.json.typeadapter.KeyFramesAdapter
+import software.bernie.geckolib.loading.`object`.BakedAnimations
+import software.bernie.geckolib.loading.`object`.BakedModelFactory
+import software.bernie.geckolib.loading.`object`.GeometryTree
 
 object ShowbizUtils {
-    fun convertAudio(data: ByteArray, sourceFormat: AudioFormat, targetFormat: AudioFormat): ByteArray {
-        val source = AudioInputStream(
-            data.inputStream(),
-            sourceFormat,
-            (data.size / sourceFormat.frameSize).toLong()
+    fun loadBakedModel(location: ResourceLocation, json: String) = runCatching {
+        val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
+        val geo = GeometryTree.fromModel(model)
+        BakedModelFactory.getForNamespace(location.namespace).constructGeoModel(geo)
+    }.onFailure { Showbiz.log.error("Failed to load GeckoLib model '${location}'", it) }.getOrNull()
+    fun loadBakedAnimation(location: ResourceLocation, json: String) = runCatching {
+        val json = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, JsonObject::class.java)
+        KeyFramesAdapter.GEO_GSON.fromJson(
+            GsonHelper.getAsJsonObject(json, "animations"),
+            BakedAnimations::class.java
         )
-        val target = AudioSystem.getAudioInputStream(targetFormat, source)
-        return target.readAllBytes()
-    }
-
-    /** Gets the source data line; Will return an error if Java's audio system is acting up, as it does most times */
-    fun startAudioDevice(bestFormat: AudioFormat, bufferSize: Int, device: Mixer.Info? = null): Result<SourceDataLine> {
-        // Finding a line
-        val result = runCatching {
-            val info = DataLine.Info(SourceDataLine::class.java, bestFormat)
-            if (device == null) {
-                (AudioSystem.getLine(info) as SourceDataLine)
-            } else {
-                AudioSystem.getMixer(device).getLine(info) as SourceDataLine
-            }
-        }
-        result.onFailure { err ->
-            return Result.failure(err)
-        }
-
-        // Starting the line
-        val line = result.getOrNull()!!
-        val lineResult = runCatching {
-            line.open(bestFormat, bufferSize * 2)
-            line.start()
-        }
-        lineResult.onSuccess {
-            return Result.success(line)
-        }
-        lineResult.onFailure { err ->
-            return Result.failure(Error("Error opening line: $err"))
-        }
-        return Result.failure(Error("Unknown"))
-    }
+    }.onFailure { Showbiz.log.error("Failed to load GeckoLib animation '${location}'", it) }.getOrNull()
 }

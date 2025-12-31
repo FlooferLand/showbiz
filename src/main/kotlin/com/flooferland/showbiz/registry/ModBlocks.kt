@@ -20,7 +20,9 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.ShowParserBlock
+import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
+import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 
 enum class ModBlocks {
     StagedBot(
@@ -70,6 +72,16 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = ::ShowParserBlockEntity
+    ),
+    ShowSelector(
+        "show_selector", ::ShowSelectorBlock,
+        Properties.of()
+            .strength(3.0f)
+            .requiresCorrectToolForDrops()
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::ShowSelectorBlockEntity
     )
     ;
 
@@ -77,7 +89,7 @@ enum class ModBlocks {
     val block: Block
     val item: BlockItem
     var model: BlockModelId? = null
-    var entity: BlockEntityType<*>? = null
+    var entityType: BlockEntityType<*>? = null
     constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null) {
         this.id = rl(name)
         this.model = modelPreset;
@@ -90,11 +102,13 @@ enum class ModBlocks {
             constructor(props)
             //?}
         )
-        this.item = Items.registerBlock(this.block) as BlockItem
+
+        var blockItem = BlockItem(this.block, Item.Properties())
+        this.item = Items.registerBlock(blockItem) as BlockItem
 
         if (entity != null && !DataGenerator.engaged) {
-            this.entity = BlockEntityType.Builder.of(entity, this.block).build()
-            Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entity!!)
+            this.entityType = BlockEntityType.Builder.of(entity, this.block).build()
+            Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entityType!!)
         }
     }
 }

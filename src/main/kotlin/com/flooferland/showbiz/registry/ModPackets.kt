@@ -3,6 +3,7 @@ package com.flooferland.showbiz.registry
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
+import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.network.packets.ShowParserDataPacket
@@ -13,6 +14,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackChunk : ModPackets<PlaybackChunkPacket>(ServerToClient, PlaybackChunkPacket.type, PlaybackChunkPacket.codec)
     data object PlaybackState : ModPackets<PlaybackStatePacket>(ServerToClient, PlaybackStatePacket.type, PlaybackStatePacket.codec)
     data object ShowParserData : ModPackets<ShowParserDataPacket>(Bidirectional, ShowParserDataPacket.type, ShowParserDataPacket.codec)
+    data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

@@ -19,7 +19,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entity!!, pos, blockState), GeoBlockEntity, IConnectable {
+class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In)
 
@@ -38,7 +38,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         connectionManager.save(tag)
 
         if (level?.isClientSide == false) {
-            botId?.let { tag.putString("Bot-Id", it) }
+            botId?.let { tag.putString("bot_id", it) }
         }
     }
 
@@ -46,7 +46,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         super.loadAdditional(tag, registries)
         connectionManager.load(tag)
 
-        var botId = tag.getStringOrNull("Bot-Id")
+        var botId = tag.getStringOrNull("bot_id")
         if (botId == null && level?.isClientSide == false) {
             botId = findFirstBot()
         }
@@ -61,8 +61,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return tag
     }
 
-    override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
-        ClientboundBlockEntityDataPacket.create(this)
+    override fun getUpdatePacket() = ClientboundBlockEntityDataPacket.create(this)!!
 
     companion object {
         var soundHandler: IBotSoundHandler? = null

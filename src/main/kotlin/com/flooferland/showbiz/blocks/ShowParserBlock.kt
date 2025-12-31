@@ -2,8 +2,6 @@ package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.util.RandomSource
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.BlockGetter
@@ -21,7 +19,6 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.WandItem
@@ -67,7 +64,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
     override fun getCollisionShape(state: BlockState?, level: BlockGetter?, pos: BlockPos?, context: CollisionContext?) = shape
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
-        return ModBlocks.ShowParser.entity!!.create(pos, state)!!
+        return ModBlocks.ShowParser.entityType!!.create(pos, state)!!
     }
 
     override fun getRenderShape(state: BlockState?) = RenderShape.MODEL

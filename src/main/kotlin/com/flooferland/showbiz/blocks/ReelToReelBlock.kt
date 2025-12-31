@@ -36,7 +36,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.ReelToReel.entity!!.create(pos, state)!!
+        ModBlocks.ReelToReel.entityType!!.create(pos, state)!!
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
         super.createBlockStateDefinition(builder)

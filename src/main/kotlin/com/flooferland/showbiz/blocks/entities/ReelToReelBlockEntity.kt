@@ -23,7 +23,7 @@ import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
-class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entity!!, pos, blockState), IConnectable {
+class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val showOut = connectionManager.port("show", PackedShowData(), PortDirection.Out)
     val audioOut = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)

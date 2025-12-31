@@ -10,5 +10,5 @@ class SpeakerBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::SpeakerBlock)!!
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.Speaker.entity!!.create(pos, state)!!
+        ModBlocks.Speaker.entityType!!.create(pos, state)!!
 }

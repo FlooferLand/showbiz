@@ -13,7 +13,7 @@ import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 
-class GreyboxBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Greybox.entity!!, pos, blockState), IConnectable {
+class GreyboxBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.Greybox.entityType!!, pos, state), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { send(it) }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Both) {

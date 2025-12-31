@@ -7,14 +7,12 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
-class SpeakerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Speaker.entity!!, pos, blockState), IConnectable {
+class SpeakerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Speaker.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port

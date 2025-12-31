@@ -31,7 +31,7 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 
-class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entity!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<ShowParserDataPacket> {
+class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<ShowParserDataPacket> {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port

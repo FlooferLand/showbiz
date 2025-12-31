@@ -118,10 +118,10 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     fun loadNBT(tag: CompoundTag?) {
         if (tag == null) return
         val oldName = name
-        id = tag.getUUIDOrNull("Show-Id")
-        name = tag.getStringOrNull("Show-Name")
-        isLoaded = tag.getBooleanOrNull("Is-Loaded") ?: false
-        mapping = tag.getStringOrNull("Show-Mapping")
+        id = tag.getUUIDOrNull("show_id")
+        name = tag.getStringOrNull("show_name")
+        isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
+        mapping = tag.getStringOrNull("show_mapping")
         /*if (id == null || name == null) {
             Showbiz.log.error("Missing one of: id=$id, name=$name")
             return
@@ -135,10 +135,10 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         }*/
     }
     fun saveNBT(tag: CompoundTag) {
-        id?.let { tag.putUUID("Show-Id", it) }
-        name?.let { tag.putString("Show-Name", it) }
-        mapping?.let { tag.putString("Show-Mapping", it) }
-        tag.putBoolean("Is-Loaded", isLoaded)
+        id?.let { tag.putUUID("show_id", it) }
+        name?.let { tag.putString("show_name", it) }
+        mapping?.let { tag.putString("show_mapping", it) }
+        tag.putBoolean("is_loaded", isLoaded)
     }
 
     fun reset() {

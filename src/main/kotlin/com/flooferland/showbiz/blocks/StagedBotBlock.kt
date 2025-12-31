@@ -54,7 +54,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
-        return ModBlocks.StagedBot.entity!!.create(pos, state)!!
+        return ModBlocks.StagedBot.entityType!!.create(pos, state)!!
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {

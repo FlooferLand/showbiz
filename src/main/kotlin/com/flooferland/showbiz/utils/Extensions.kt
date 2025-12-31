@@ -5,6 +5,7 @@ import net.minecraft.nbt.*
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 
@@ -65,4 +66,6 @@ object Extensions {
     fun CompoundTag.getLongArrayOrNull(key: String) = if (contains(key)) getLongArray(key) else null
     fun CompoundTag.getUUIDOrNull(key: String)      = if (contains(key)) getUUID(key) else null
     //endregion
+
+    fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
 }

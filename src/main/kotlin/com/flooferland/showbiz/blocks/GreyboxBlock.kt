@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.shapes.VoxelShape
 
 class GreyboxBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::GreyboxBlock)!!
@@ -16,5 +15,5 @@ class GreyboxBlock(props: Properties) : FacingEntityBlock(props) {
         Shapes.create(0.2, 0.0, 0.2, 0.8, 0.95, 0.8)!!
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.Greybox.entity!!.create(pos, state)!!
+        ModBlocks.Greybox.entityType!!.create(pos, state)!!
 }

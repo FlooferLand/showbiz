@@ -22,6 +22,7 @@ import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
 import net.minecraft.util.*
 import net.minecraft.util.profiling.*
+import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.json.raw.Model
 import software.bernie.geckolib.loading.json.typeadapter.KeyFramesAdapter
@@ -56,8 +57,6 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
-                fun getResAsString(path: String) =
-                    getResAsString(rlCustom(namespace, path))
 
                 // Finding assets
                 data class BotLoadAssets(
@@ -71,29 +70,22 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     val botsIntro = "${Showbiz.MOD_ID}/bots/"
                     if (!location.path.startsWith(botsIntro)) return@ResourceOutput
                     val botId = location.path.replace(botsIntro, "").split('/').firstOrNull() ?: return@ResourceOutput
+                    val string = stream.get()?.readAllBytes()?.decodeToString()
 
                     // Models
                     if (location.path.endsWith(".geo.json")) {
-                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
                         assets.model = location
-                        runCatching {
-                            out.models.put(
-                                location,
-                                loadBakedModel(location, stream.get()!!.readAllBytes()!!.decodeToString())
-                            )
-                        }
+                        val model = string?.let { ShowbizUtils.loadBakedModel(location, it) }
+                        if (model != null) out.models[location] = model
                     }
 
                     // Animations
                     if (location.path.endsWith(".animation.json")) {
                         val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
                         assets.animations = location
-                        runCatching {
-                            out.animations.put(
-                                location,
-                                loadBakedAnimation(stream.get()!!.readAllBytes()!!.decodeToString())
-                            )
-                        }
+                        val anim = string?.let { ShowbizUtils.loadBakedAnimation(location, it) }
+                        if (anim != null) out.animations[location] = anim
                     }
 
                     // assets.toml
@@ -185,18 +177,5 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         }
         ShowbizClient.botModels = models
         ShowbizClient.animations = loaded.animations
-    }
-
-    fun loadBakedModel(location: ResourceLocation, json: String): BakedGeoModel {
-        val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
-        val geo = GeometryTree.fromModel(model)
-        return BakedModelFactory.getForNamespace(location.namespace).constructGeoModel(geo)
-    }
-    fun loadBakedAnimation(json: String): BakedAnimations {
-        val json = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, JsonObject::class.java)
-        return KeyFramesAdapter.GEO_GSON.fromJson(
-            GsonHelper.getAsJsonObject(json, "animations"),
-            BakedAnimations::class.java
-        );
     }
 }

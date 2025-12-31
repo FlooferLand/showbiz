@@ -1,14 +1,13 @@
 package com.flooferland.showbiz
 
 import net.minecraft.client.*
-import net.minecraft.client.gui.screens.MenuScreens
+import net.minecraft.client.gui.screens.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
 import com.akuleshov7.ktoml.Toml
-import com.akuleshov7.ktoml.parsers.TomlParser
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
@@ -16,24 +15,21 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.WandItem
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModClientCommands
-import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.registry.ModPackets
-import com.flooferland.showbiz.registry.ModScreenHandlers
-import com.flooferland.showbiz.renderers.ConnectionRenderer
-import com.flooferland.showbiz.renderers.PlaybackBlockEntityRenderer
-import com.flooferland.showbiz.renderers.StagedBotBlockEntityRenderer
-import com.flooferland.showbiz.renderers.WandItemRenderer
+import com.flooferland.showbiz.registry.*
+import com.flooferland.showbiz.renderers.*
+import com.flooferland.showbiz.resources.ModelPartReloadListener
 import com.flooferland.showbiz.screens.ShowParserScreen
 import com.flooferland.showbiz.types.BotSoundHandler
+import com.flooferland.showbiz.types.ModelPartInstance
+import com.flooferland.showbiz.types.ModelPartManager
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
@@ -52,7 +48,7 @@ object ShowbizClient : ClientModInitializer {
         val configResult = runCatching {
             val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
             if (configFile.exists()) {
-                config = Toml.decodeFromString<ShowbizClientConfig>("")
+                config = Toml.decodeFromString<ShowbizClientConfig>(configFile.readText())
             } else {
                 configFile.writeText(Toml.encodeToString<ShowbizClientConfig>(config))
             }
@@ -63,34 +59,39 @@ object ShowbizClient : ClientModInitializer {
 
         // Loading the mod
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)
         @Suppress("UnusedExpression")
         run {
             ModPackets
+            ModClientEntities
             ModClientCommands
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
+        ModelPartManager.modelPartInstancer = { owner, block -> ModelPartInstance(owner, block.id) }
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParser.type, ::ShowParserScreen)
 
-        // Block entity renderers (should find a nicer way to register these)
+        // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
         run {
             BlockEntityRenderers.register(
-                ModBlocks.StagedBot.entity!! as BlockEntityType<StagedBotBlockEntity>,
+                ModBlocks.StagedBot.entityType!! as BlockEntityType<StagedBotBlockEntity>,
                 ::StagedBotBlockEntityRenderer
             )
             BlockEntityRenderers.register(
-                ModBlocks.ReelToReel.entity!! as BlockEntityType<ReelToReelBlockEntity>,
+                ModBlocks.ReelToReel.entityType!! as BlockEntityType<ReelToReelBlockEntity>,
                 ::PlaybackBlockEntityRenderer
             )
-        }
-
-        // Block properties / render layers
-        for (block in ModBlocks.entries) {
-            if (block.model?.transparent != true) continue
-            BlockRenderLayerMap.INSTANCE.putBlock(block.block, RenderType.cutout())
+            BlockEntityRenderers.register(
+                ModBlocks.ShowSelector.entityType!! as BlockEntityType<ShowSelectorBlockEntity>,
+                ::ShowSelectorBlockEntityRenderer
+            )
+            EntityRendererRegistry.register(
+                ModClientEntities.ModelPart.type,
+                ::ModelPartEntityRenderer
+            )
         }
 
         // GeckoLib renderers
@@ -100,6 +101,12 @@ object ShowbizClient : ClientModInitializer {
                 if (renderer == null) renderer = WandItemRenderer()
                 return renderer!!
             }
+        }
+
+        // Block properties / render layers
+        for (block in ModBlocks.entries) {
+            if (block.model?.transparent != true) continue
+            BlockRenderLayerMap.INSTANCE.putBlock(block.block, RenderType.cutout())
         }
 
         // World
