@@ -4,6 +4,7 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.client.telemetry.events.WorldLoadEvent
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
