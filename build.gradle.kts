@@ -70,12 +70,16 @@ dependencies {
     }
 
     // Showbiz data library (https://github.com/FlooferLand/bizlib)
+    // TODO: Relocate Bizlib's dependencies to my own com.flooferland.showbiz.shadow package so other mods using ANTLR wont collide with Showbiz
     implementation("com.flooferland:bizlib:${dep("bizlib")}")
     include("com.flooferland:bizlib:${dep("bizlib")}")
+    shadow("com.flooferland:bizlib:${dep("bizlib")}")
 
     // ktoml
+    // TODO: Relocate ktoml to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
     implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
-    shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+    include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+    shadow("com.flooferland:bizlib:${dep("bizlib")}")
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")

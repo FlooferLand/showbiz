@@ -114,9 +114,9 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
                     fun getBits(filename: String): BotBitmapFile? {
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                        val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
+                        val res = getResAsString(path) ?: run { err("Failed to find bitsmap file '$path'"); return null }
                         val bits = runCatching { BitsMap().load(res.byteInputStream()) }
-                        bits.exceptionOrNull()?.let { throwable -> err("Failed to load $filename on '$path'", throwable) }
+                        bits.exceptionOrNull()?.let { throwable -> err("Failed to load bitsmap file '$filename' on '$path'", throwable) }
                         return bits.getOrNull()
                     }
 
