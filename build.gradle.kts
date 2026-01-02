@@ -79,7 +79,7 @@ dependencies {
     // TODO: Relocate ktoml to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
     implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
     include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
-    shadow("com.flooferland:bizlib:${dep("bizlib")}")
+    shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
