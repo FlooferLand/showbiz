@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
     JavaVersion.VERSION_21 else JavaVersion.VERSION_17
-val kotlinVersion = "2.2.20"
+val kotlinVersion = "2.3.0"
 val loader = "fabric"
 
 val minecraft = stonecutter.current.version
@@ -21,9 +21,9 @@ stonecutter {
 }
 
 plugins {
-    kotlin("jvm") version "2.2.20"
-    kotlin("plugin.serialization") version "2.2.20"
-    id("com.google.devtools.ksp") version "2.2.20-2.0.2"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.0"
+    id("com.google.devtools.ksp") version "2.3.4"
     id("dev.kikugie.stonecutter")
     id("fabric-loom") version "1.14-SNAPSHOT"
     id("com.gradleup.shadow") version "9.2.2"
@@ -50,8 +50,8 @@ fun vers(name: String): String = property("vers.${name}") as String
 fun dep(name: String): String = property("deps.${name}") as String
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.3.10-RC")
 
     // Loader-specific
     if (loader == "fabric") {
@@ -87,11 +87,10 @@ dependencies {
     // Modmenu
     modApi("com.terraformersmc:modmenu:${dep("modmenu")}")
 
-    // Useful dev tools (not included in the mod, helps me build things and ensure mod compatibility)
+    // Useful dev tools (not included in the mod, helps me ensure mod compatibility and other things)
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")
     modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("devonly.sodium")}-$loader")
     modRuntimeOnly("maven.modrinth:iris:${dep("devonly.iris")}+$minecraft-$loader")
-    modRuntimeOnly("maven.modrinth:worldedit:${dep("devonly.worldedit")}")
 }
 
 tasks.shadowJar {
