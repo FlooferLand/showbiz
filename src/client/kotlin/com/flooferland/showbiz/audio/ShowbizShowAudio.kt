@@ -21,7 +21,7 @@ object ShowbizShowAudio {
                 val source = sources.getOrPut(payload.blockPos) { Source(payload.format, payload.blockPos.center) }
                 if (payload.playing) {
                     if (!source.isOpen()) source.open()
-                    source.write(payload.audioChunk, payload.format.sampleRate)
+                    source.write(payload)
                 }
             }
         }

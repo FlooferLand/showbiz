@@ -8,6 +8,7 @@ import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import com.flooferland.showbiz.types.connection.ConnectionData
 import com.flooferland.showbiz.utils.Extensions.getByteArrayOrNull
+import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 data class PackedAudioData(
@@ -15,17 +16,20 @@ data class PackedAudioData(
     var right: ByteArray = byteArrayOf(),
     val format: FriendlyAudioFormat = FriendlyAudioFormat()
 ) : ConnectionData("audio") {
-    var mono: ByteArray
+    public var chunkId: Int = 0
+    public var mono: ByteArray
         get() = left
         set(value) { left = value }
 
     override fun saveOrThrow(tag: CompoundTag) {
+        tag.putInt("id", chunkId)
         tag.putByteArray("left", left)
         tag.putByteArray("right", right)
         tag.put("format", CompoundTag().also { format.saveOrThrow(it) })
     }
 
     override fun loadOrThrow(tag: CompoundTag) {
+        chunkId = tag.getIntOrNull("id") ?: 0
         left = tag.getByteArrayOrNull("left") ?: byteArrayOf()
         right = tag.getByteArrayOrNull("right") ?: byteArrayOf()
         tag.getCompound("format").let { format.loadOrThrow(it) }
@@ -34,9 +38,10 @@ data class PackedAudioData(
     fun broadcastToAll(level: ServerLevel, origin: BlockPos) {
         for (player in level.players()) {
             if (player.distanceToSqr(origin.center) > AUDIO_DIST_SQUARE) continue
-            val payload = PlaybackChunkPacket(origin, mono, format)
+            val payload = PlaybackChunkPacket(chunkId, origin, mono, format)
             ServerPlayNetworking.send(player, payload)
         }
+        chunkId++
     }
 
     override fun equals(other: Any?): Boolean {
@@ -51,6 +56,7 @@ data class PackedAudioData(
     override fun hashCode(): Int {
         var result = left.contentHashCode()
         result = 31 * result + right.contentHashCode()
+        result = 31 * chunkId
         return result
     }
 }

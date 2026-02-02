@@ -1,8 +1,8 @@
 package com.flooferland.showbiz.audio
 
 import com.flooferland.showbiz.Showbiz
-import net.minecraft.client.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
@@ -12,7 +12,6 @@ import org.lwjgl.openal.AL11.*
 
 /** Low-level AL11 audio handling, because Minecraft's built-in audio streaming system is very dumb and undocumented */
 class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null) {
-    val buffers = IntArray(8)
     val format = run {
         val (bits, stereo, mono) = friendlyFormat.let { Triple(it.sampleBits, it.stereo, it.mono) }
         return@run when (bits) {
@@ -25,7 +24,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     val maxDistance = 18f
     var source = 0
-    var nextBufIndex = 0
+    var lastReceivedChunkId = -1
 
     private fun getState(): Int {
         if (!isValidSource()) return -1
@@ -41,43 +40,57 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
         handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
         handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
-        handleAL { alGenBuffers(buffers) }
     }
     fun close() {
-        if (handleAL { alIsSource(source) }) {
-            handleAL { alSourceStop(source) }
-            handleAL { alSourcei(source, AL_BUFFER, 0) }
-            handleAL { alDeleteSources(source) }
+        if (!handleAL { alIsSource(source) }) return
+        handleAL { alSourceStop(source) }
+
+        val queued = handleAL { alGetSourcei(source, AL_BUFFERS_QUEUED) }
+        if (queued > 0) {
+            val buffers = BufferUtils.createIntBuffer(queued)
+            handleAL { alSourceUnqueueBuffers(source, buffers) }
             handleAL { alDeleteBuffers(buffers) }
         }
+
+        handleAL { alSourcei(source, AL_BUFFER, 0) }
+        handleAL { alDeleteSources(source) }
         source = 0
     }
-    fun write(chunk: ByteArray, sampleRate: Int) {
+    fun write(packet: PlaybackChunkPacket) {
         if (!isValidSource()) return
         updatePosition()
+
+        // Checking chunk order
+        if (packet.id <= lastReceivedChunkId) {
+            Showbiz.log.warn("Ignoring out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
+            return
+        }
+        lastReceivedChunkId = packet.id
 
         // Cleaning buffers
         val processed = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
         if (processed > 0) {
-            val buf = BufferUtils.createIntBuffer(processed)
-            handleAL { alSourceUnqueueBuffers(source, buf) }
+            val oldBuffers = BufferUtils.createIntBuffer(processed)
+            handleAL { alSourceUnqueueBuffers(source, oldBuffers) }
+            alDeleteBuffers(oldBuffers)
         }
 
-        val bufId = buffers[nextBufIndex++ and (buffers.size - 1)]
-        val buf = BufferUtils.createByteBuffer(chunk.size)
-        buf.put(chunk)
-        buf.flip()
+        // Creating a new buffer
+        val newBufId = handleAL { alGenBuffers() }
+        val data = BufferUtils.createByteBuffer(packet.audioChunk.size)
+            .put(packet.audioChunk)
+            .flip()
+        alBufferData(newBufId, format, data, packet.format.sampleRate)
 
         // Sets the buffer
         // !! Will fail if the window is resized, for whatever reason, so manual error handling re-creates the source and everything.
-        alBufferData(bufId, format, buf, sampleRate)
         if (alGetError() != AL_NO_ERROR) {
             close()
             open()
             return
         }
 
-        handleAL { alSourceQueueBuffers(source, bufId) }
+        handleAL { alSourceQueueBuffers(source, newBufId) }
         if (getState() != AL_PLAYING) {
             handleAL { alSourcePlay(source) }
         }

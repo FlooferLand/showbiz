@@ -134,6 +134,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun resetPlayback() {
         seek = 0.0
         audioBytesWritten = 0
+        audioOut.data.chunkId = 0
         if (playing) setPlaying(false)
         signal.reset()
         show.reset()

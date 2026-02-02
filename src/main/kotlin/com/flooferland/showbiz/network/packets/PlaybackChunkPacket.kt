@@ -9,7 +9,7 @@ import com.flooferland.showbiz.types.FriendlyAudioFormat
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioFormat.Encoding
 
-class PlaybackChunkPacket(val blockPos: BlockPos, val audioChunk: ByteArray, val format: FriendlyAudioFormat) : CustomPacketPayload {
+class PlaybackChunkPacket(val id: Int, val blockPos: BlockPos, val audioChunk: ByteArray, val format: FriendlyAudioFormat) : CustomPacketPayload {
     override fun type() = type
 
     val playing = audioChunk.isNotEmpty()
@@ -18,16 +18,19 @@ class PlaybackChunkPacket(val blockPos: BlockPos, val audioChunk: ByteArray, val
         val type = CustomPacketPayload.Type<PlaybackChunkPacket>(rl("show_data"))
         val codec = StreamCodec.of<FriendlyByteBuf, PlaybackChunkPacket>(
             { buf, chunk ->
+                buf.writeInt(chunk.id)
                 buf.writeBlockPos(chunk.blockPos)
                 buf.writeInt(chunk.audioChunk.size)
                 buf.writeByteArray(chunk.audioChunk)
                 FriendlyAudioFormat.codec.encode(buf, chunk.format)
             },
             { buf ->
+                val id = buf.readInt()
                 val blockPos = buf.readBlockPos()
                 val audioChunk = buf.readByteArray(buf.readInt())
                 val format = FriendlyAudioFormat.codec.decode(buf)
                 PlaybackChunkPacket(
+                    id = id,
                     blockPos = blockPos,
                     audioChunk = audioChunk,
                     format = format
