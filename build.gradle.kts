@@ -155,7 +155,9 @@ tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.WARN
     exclude("**/*.lnk", "**/*.exe", "**/*.dll", "**/*.so", "**/*.jar")
     exclude("projects")
-    exclude("log4j.xml")
+    exclude("log4j2.xml")
+    exclude(".vscode")
+    exclude(".assets_helper")
 
     // Inserting strings into what-not
     val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
