@@ -9,6 +9,7 @@ import com.flooferland.showbiz.registry.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.minecraft.server.packs.*
+import com.flooferland.showbiz.types.connection.GlobalConnections
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
@@ -35,6 +36,7 @@ object Showbiz : ModInitializer {
             ModSounds.entries
             ModCommands
             ModScreenHandlers
+            GlobalConnections
         }
 
         // Server addons
