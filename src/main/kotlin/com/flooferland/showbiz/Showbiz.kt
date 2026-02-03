@@ -60,18 +60,17 @@ object Showbiz : ModInitializer {
                 Component.literal("WARNING: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
                     .append(Component.literal(
                         "Showbiz is still in very early access.\n" +
-                                "Expect the mod's blocks, items, and other things to vanish or corrupt when you update the mod."
+                                "Expect the mod's blocks, items, and other things to vanish or break when you update the mod."
                     ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
                 false
             )
-            player.displayClientMessage(
+            /*player.displayClientMessage(
                 Component.literal("KNOWN BUGS: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
                     .append(Component.literal(
-                        "- If a show's signal data desyncs from its audio, rejoin the game or restart the show\n" +
-                        "- If you can't see connections, rejoin the game."
+                        "- None"
                     ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
                 false
-            )
+            )*/
         }
     }
 }
