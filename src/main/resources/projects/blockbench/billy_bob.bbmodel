@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 1037,
+	"activity_tracker": 1076,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\billy_bob\\models\\billy_bob.geo.json",
@@ -401,7 +401,7 @@
 			"locked": false,
 			"allow_mirror_modeling": true,
 			"from": [0, 27.4, -7.6],
-			"to": [1, 28.4, -7.6],
+			"to": [1, 28.4, -7.575],
 			"autouv": 0,
 			"color": 9,
 			"origin": [0, 10.4, -6.6],
@@ -1448,7 +1448,7 @@
 			"export": true,
 			"locked": false,
 			"origin": [0, 25, 0],
-			"rotation": [0, 0, 0],
+			"rotation": [-15, 0, 0],
 			"color": 0,
 			"name": "head",
 			"children": [],
@@ -1747,7 +1747,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"uuid": "43e0e492-e1c6-3ddf-f0f0-0939ec322d68",
@@ -2337,8 +2337,8 @@
 			"override": false,
 			"length": 0.25,
 			"snapping": 24,
-			"selected": true,
-			"saved": false,
+			"selected": false,
+			"saved": true,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
 			"blend_weight": "",
