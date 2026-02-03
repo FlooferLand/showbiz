@@ -15,6 +15,9 @@ base {
 }
 val isAlpha = "alpha" in modVersion
 val isBeta = "beta" in modVersion
+val excludedFromJar = arrayOf(
+    "**/showbiz-fnaf/**"
+)
 
 stonecutter {
     constants["fabric"] = (loader == "fabric")
@@ -95,6 +98,7 @@ dependencies {
 
 tasks.shadowJar {
     from(sourceSets.named("client").get().output)
+    excludedFromJar.forEach { exclude(it) }
     dependsOn(tasks.processResources)
     configurations.add(project.configurations.shadow)
     minimize()
@@ -138,6 +142,7 @@ loom {
 // License
 tasks.jar {
     inputs.property("archivesName", base.archivesName.get())
+    excludedFromJar.forEach { exclude(it) }
     from("LICENSE") {
         rename { "${it}_${base.archivesName}" }
     }
