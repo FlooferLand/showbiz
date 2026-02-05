@@ -25,10 +25,15 @@ _Not affiliated nor associated with Aaron Fechter, Rock-afire Explosion, or Crea
 
 5. Build the mod assets via my own custom `gradlew runDatagen`
 
+## Contributing
+
+This is an open-source project, so I'm glad if you can help!
+
+If you'd like to add anything to the project, please open an issue or send a message on the [Discord server](https://discord.gg/4MVEKKfuaY) to talk about it with us.
+
+Make sure you're at least somewhat familliar with the project's internals before doing so if trying to submit a technical change.
+
 ## Addons
 Showbiz allows you to add in your own bots, among other things.
 
-Currently, very undocumented due to the fact the mod is in alpha.
-
-Make sure to install the [Showbiz VSCode extension](https://marketplace.visualstudio.com/items?itemName=FlooferLand.showbiz)
-as it helps with addon creation quite a bit.
+Please see [the wiki](https://github.com/FlooferLand/showbiz/wiki) on more information about how to do this.
