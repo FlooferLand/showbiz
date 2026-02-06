@@ -90,7 +90,7 @@ object ModCommands {
         val reelAdd = Commands.literal("reelupload")
             .executes { ctx ->
                 val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-                if (shows == null) {
+                if (shows.isNullOrEmpty()) {
                     ctx.source.sendFailure(Component.literal("No shows found.\nUpload an ${FileStorage.SUPPORTED_FORMATS.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"))
                     return@executes 0
                 }
