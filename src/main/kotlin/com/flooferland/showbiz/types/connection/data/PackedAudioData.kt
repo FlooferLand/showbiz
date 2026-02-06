@@ -22,26 +22,24 @@ data class PackedAudioData(
         set(value) { left = value }
 
     override fun saveOrThrow(tag: CompoundTag) {
-        tag.putInt("id", chunkId)
         tag.putByteArray("left", left)
         tag.putByteArray("right", right)
         tag.put("format", CompoundTag().also { format.saveOrThrow(it) })
     }
 
     override fun loadOrThrow(tag: CompoundTag) {
-        chunkId = tag.getIntOrNull("id") ?: 0
         left = tag.getByteArrayOrNull("left") ?: byteArrayOf()
         right = tag.getByteArrayOrNull("right") ?: byteArrayOf()
         tag.getCompound("format").let { format.loadOrThrow(it) }
     }
 
     fun broadcastToAll(level: ServerLevel, origin: BlockPos) {
+        chunkId++
         for (player in level.players()) {
             if (player.distanceToSqr(origin.center) > AUDIO_DIST_SQUARE) continue
             val payload = PlaybackChunkPacket(chunkId, origin, mono, format)
             ServerPlayNetworking.send(player, payload)
         }
-        chunkId++
     }
 
     override fun equals(other: Any?): Boolean {

@@ -40,6 +40,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
         handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
         handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
+        lastReceivedChunkId = -1
     }
     fun close() {
         if (!handleAL { alIsSource(source) }) return
@@ -54,6 +55,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
 
         handleAL { alSourcei(source, AL_BUFFER, 0) }
         handleAL { alDeleteSources(source) }
+        lastReceivedChunkId = -1
         source = 0
     }
     fun write(packet: PlaybackChunkPacket) {
@@ -61,19 +63,23 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         updatePosition()
 
         // Checking chunk order
-        if (packet.id <= lastReceivedChunkId) {
+        if (packet.id <= lastReceivedChunkId && packet.id > 1) {
             Showbiz.log.warn("Ignoring out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
             return
         }
         lastReceivedChunkId = packet.id
 
+        // Hard reset
+        handleAL { alSourceStop(source) }
+
         // Cleaning buffers
-        val processed = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
-        if (processed > 0) {
-            val oldBuffers = BufferUtils.createIntBuffer(processed)
+        val queued = handleAL { alGetSourcei(source, AL_BUFFERS_QUEUED) }
+        if (queued > 0) {
+            val oldBuffers = BufferUtils.createIntBuffer(queued)
             handleAL { alSourceUnqueueBuffers(source, oldBuffers) }
             alDeleteBuffers(oldBuffers)
         }
+        handleAL { alSourcei(source, AL_BUFFER, 0) }
 
         // Creating a new buffer
         val newBufId = handleAL { alGenBuffers() }
