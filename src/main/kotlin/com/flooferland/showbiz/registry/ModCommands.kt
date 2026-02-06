@@ -13,6 +13,7 @@ import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.SignalFrame.Companion.NEXT_DRAWER
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.tree.CommandNode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import kotlin.collections.component1
@@ -45,7 +46,7 @@ object ModCommands {
                                 built.append(Component.literal(fixture).withStyle(ChatFormatting.WHITE))
                                 built.append("\n")
                             }
-                            built.append("Use ${ModCommands.bitmapCommandView(map = mapName)} to view the bitmap for a fixture")
+                            built.append("Use ${bitmapCommandView(map = mapName)} to view the bitmap for a fixture")
                             ctx.source.sendSuccess({ built }, true)
                             0
                         } else {
@@ -151,12 +152,21 @@ object ModCommands {
             )
             .build()
 
-        return arrayOf(reelAdd, bitmap)
+        val clientWiki = Commands.literal("wiki")
+            .executes { ctx ->
+                val link = "https://github.com/FlooferLand/showbiz/wiki"
+                val comp = Component.literal(link).withStyle { s -> s.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, link)) }
+                ctx.source.sendSuccess({ comp }, true)
+                0
+            }
+            .build()
+
+        return arrayOf(reelAdd, bitmap, clientWiki)
     }
 
     init {
         CommandRegistrationCallback.EVENT.register { dispatcher, registry, environment ->
-            var command = Commands.literal(Showbiz.MOD_ID)
+            var command = Commands.literal(MOD_ID)
                 .executes { ctx ->
                     ctx.source.sendSuccess({
                         Component.translatable("text.mod.description")
