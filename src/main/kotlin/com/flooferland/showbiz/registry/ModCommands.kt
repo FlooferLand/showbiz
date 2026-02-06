@@ -11,6 +11,7 @@ import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.SignalFrame.Companion.NEXT_DRAWER
+import com.flooferland.showbiz.utils.Extensions.asLink
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
@@ -154,9 +155,7 @@ object ModCommands {
 
         val clientWiki = Commands.literal("wiki")
             .executes { ctx ->
-                val link = "https://github.com/FlooferLand/showbiz/wiki"
-                val comp = Component.literal(link).withStyle { s -> s.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, link)) }
-                ctx.source.sendSuccess({ comp }, true)
+                ctx.source.sendSuccess({ Component.literal("https://github.com/FlooferLand/showbiz/wiki").asLink() }, true)
                 0
             }
             .build()

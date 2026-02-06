@@ -1,7 +1,12 @@
 package com.flooferland.showbiz.utils
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.component.*
 import net.minecraft.nbt.*
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
@@ -65,6 +70,21 @@ object Extensions {
     fun CompoundTag.getByteArrayOrNull(key: String) = if (contains(key)) getByteArray(key) else null
     fun CompoundTag.getLongArrayOrNull(key: String) = if (contains(key)) getLongArray(key) else null
     fun CompoundTag.getUUIDOrNull(key: String)      = if (contains(key)) getUUID(key) else null
+    //endregion
+
+    //region Components
+    fun MutableComponent.onHoverShowText(text: String) = withStyle {
+        it.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(text)))
+    }!!
+    fun MutableComponent.onClickRunCommand(command: String) = withStyle {
+        it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+    }!!
+    fun MutableComponent.asLink(url: String) = withStyle {
+        it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, url))
+            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open in your browser")))
+            .withBold(true)
+    }!!
+    fun MutableComponent.asLink() = asLink(string)
     //endregion
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
