@@ -238,7 +238,7 @@ publishMods {
         else -> STABLE
     })
     modLoaders.add("fabric")
-    dryRun = true
+    dryRun = System.getenv("dryrun") == "1"
 
     val modrinthId = property("mod.modrinthId") as String
     val modrinthToken = runCatching { System.getenv("tokens.modrinth") }
