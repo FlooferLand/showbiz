@@ -33,14 +33,14 @@ class BotSoundHandler : IBotSoundHandler {
 
             if (prevState != null && prevState != bitOn) {
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
-                val flow = data.flow.toFloat().coerceIn(0.1f, 2.0f)
-                val pitch = 0.6f + (flow * 0.6f)
+                val flow = data.flow.toFloat().coerceIn(0.1f, 1.0f)
+                val pitch = 0.5f + (flow * 0.7f)
                 val volume = 0.5f + (flow * 0.5f)
                 level.playLocalSound(
                     entity.blockPos.above().above(),
                     sound.event,
                     SoundSource.BLOCKS,
-                    volume * 0.13f, pitch, false
+                    volume * 0.1f, pitch, false
                 )
             }
 
