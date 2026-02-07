@@ -18,6 +18,9 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     companion object {
@@ -31,6 +34,8 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
     override fun codec(): MapCodec<out BaseEntityBlock> = codec
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
+    override fun getOcclusionShape(state: BlockState, level: BlockGetter, pos: BlockPos) =
+        Shapes.box(-0.5, 0.0, -0.5, 1.5, 4.0, 1.5)!!
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (level.isClientSide) return InteractionResult.PASS
