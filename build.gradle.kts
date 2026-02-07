@@ -229,7 +229,7 @@ publishMods {
     changelog.set(
         rootProject.file("changelogs/$modVersion.md")
             .takeIf { it.exists() }
-            ?.readText()
+            ?.readText()?.trim()
             ?: "No changelog provided."
     )
     type.set(when {
