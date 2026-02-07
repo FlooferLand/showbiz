@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.items
 
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
@@ -119,6 +120,16 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
             AnimationController(this, "main") { PlayState.CONTINUE }
                 .triggerableAnim("fire", fireAnim)
                 .triggerableAnim("retract", retractAnim)
+        )
+    }
+
+    override fun appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: MutableList<Component>, tooltipFlag: TooltipFlag) {
+        tooltip.add(
+            Component.literal("Use this wand").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(" (totally not a pneumatic cylinder)").withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY))
+        )
+        tooltip.add(
+            Component.literal("to create wires between blocks").withStyle(ChatFormatting.GRAY)
         )
     }
 }

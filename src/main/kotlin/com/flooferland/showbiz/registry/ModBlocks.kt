@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
+import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 
@@ -103,7 +104,7 @@ enum class ModBlocks {
             //?}
         )
 
-        var blockItem = BlockItem(this.block, Item.Properties())
+        var blockItem = FancyBlockItem(this.id, this.block, Item.Properties())
         this.item = Items.registerBlock(blockItem) as BlockItem
 
         if (entity != null && !DataGenerator.engaged) {

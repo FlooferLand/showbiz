@@ -11,5 +11,12 @@
     "block.showbiz.show_selector": "Show Selector",
 
     "item.showbiz.wand": "Wand",
-    "item.showbiz.reel": "Reel"
+    "item.showbiz.reel": "Reel",
+
+    "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\nRight-click to change models",
+    "tooltip.showbiz.block.reel_to_reel": "Plays back reels",
+    "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
+    "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
+    "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
+    "tooltip.showbiz.block.show_selector": "Sends out a trigger signal\nwhen one of the buttons is pressed"
 }
