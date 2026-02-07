@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.commands.*
 import net.minecraft.core.component.*
 import net.minecraft.network.chat.*
@@ -14,17 +14,9 @@ import com.flooferland.showbiz.show.SignalFrame.Companion.NEXT_DRAWER
 import com.flooferland.showbiz.utils.Extensions.asLink
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.tree.CommandNode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.iterator
-import kotlin.io.path.Path
-import kotlin.io.path.extension
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 
 // TODO: FIXME: Clean up the ugliest class in the entire mod (ModCommands)
 object ModCommands {
@@ -87,6 +79,7 @@ object ModCommands {
             )
             .build()
 
+        // TODO: Remove the reelupload command
         val reelAdd = Commands.literal("reelupload")
             .executes { ctx ->
                 val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()

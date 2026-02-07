@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.*
+import net.minecraft.util.FastColor
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.Vec3
@@ -72,16 +74,24 @@ object Extensions {
     fun CompoundTag.getUUIDOrNull(key: String)      = if (contains(key)) getUUID(key) else null
     //endregion
 
-    //region Components
-    fun MutableComponent.onHoverShowText(text: String) = withStyle {
-        it.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(text)))
-    }!!
-    fun MutableComponent.onClickRunCommand(command: String) = withStyle {
-        it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-    }!!
+    fun LivingEntity.getHeldItem(filter: (ItemStack) -> Boolean): ItemStack? =
+        when {
+            filter(mainHandItem) -> mainHandItem
+            filter(offhandItem) -> offhandItem
+            else -> null
+        }
+
+    //region Component
+    fun MutableComponent.hover(text: String) = hover(Component.literal(text))
+    fun MutableComponent.hover(comp: Component) =
+        withStyle { it.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, comp)) }!!
+    fun MutableComponent.click(action: ClickEvent.Action, value: String) =
+        withStyle { it.withClickEvent(ClickEvent(action, value)) }!!
     fun MutableComponent.asLink(url: String) = withStyle {
         it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, url))
-            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open in your browser")))
+            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open this URL in your browser")))
+            .withColor(FastColor.ARGB32.color(120, 200, 255))
+            .withUnderlined(true)
             .withBold(true)
     }!!
     fun MutableComponent.asLink() = asLink(string)

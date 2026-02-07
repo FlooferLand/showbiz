@@ -6,6 +6,8 @@ import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.ShowFileListPacket
+import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.network.packets.ShowParserDataPacket
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -15,6 +17,8 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackState : ModPackets<PlaybackStatePacket>(ServerToClient, PlaybackStatePacket.type, PlaybackStatePacket.codec)
     data object ShowParserData : ModPackets<ShowParserDataPacket>(Bidirectional, ShowParserDataPacket.type, ShowParserDataPacket.codec)
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
+    data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)
+    data object ShowFileSelect : ModPackets<ShowFileSelectPacket>(ClientToServer, ShowFileSelectPacket.type, ShowFileSelectPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

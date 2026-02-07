@@ -18,10 +18,12 @@ import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
+import com.flooferland.showbiz.screens.ReelUploadScreen
 import com.flooferland.showbiz.screens.ShowParserScreen
 import com.flooferland.showbiz.types.BotSoundHandler
 import com.flooferland.showbiz.types.ModelPartInstance
@@ -125,5 +127,8 @@ object ShowbizClient : ClientModInitializer {
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
         }
+
+        // DARN YOU SPLIT SOURCESETS
+        ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelUploadScreen(stack)) }
     }
 }

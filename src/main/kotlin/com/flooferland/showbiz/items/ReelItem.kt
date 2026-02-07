@@ -6,7 +6,11 @@ import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import net.minecraft.*
 import net.minecraft.network.chat.*
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
+import net.minecraft.world.level.Level
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 
@@ -27,10 +31,13 @@ class ReelItem(properties: Properties) : Item(properties) {
         val boundFile = stack.components.get(ModComponents.FileName.type)
         if (boundFile == null || boundFile.length < 2) {
             tooltip.add(Component.literal("No file bound.").withStyle(ChatFormatting.GRAY))
+            tooltip.add(Component.empty())
             tooltip.add(
-                Component.literal("Use ")
-                .append(Component.literal("/${Showbiz.MOD_ID} reelUpload").withStyle(ChatFormatting.GREEN))
-                .append(" to upload to this tape").withStyle(ChatFormatting.GRAY)
+                Component.literal("Right-click the air to upload to this reel").withStyle(ChatFormatting.GRAY)
+            )
+            tooltip.add(
+                Component.literal("Or use ")
+                    .append(Component.literal("/${Showbiz.MOD_ID} reelupload").withStyle(ChatFormatting.GREEN))
             )
             return
         }
@@ -38,7 +45,15 @@ class ReelItem(properties: Properties) : Item(properties) {
         tooltip.add(Component.literal("File: $boundFile").withStyle(ChatFormatting.GRAY))
     }
 
+    override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
+        val stack = player.getItemInHand(usedHand)
+        if (level.isClientSide) openScreenClient(stack)
+        return InteractionResultHolder.success(stack)
+    }
+
     companion object {
+        var openScreenClient: (ItemStack) -> Unit = { }
+
         fun makeItem(filename: String): ItemStack {
             val reelStack = ItemStack(ModItems.Reel.item)
             reelStack.applyComponent(ModComponents.FileName.type, filename)
