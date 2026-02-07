@@ -9,3 +9,9 @@ name = "Billy Bob"
 authors = ["Creative Engineering", "LBN"]
 accepts.rockafire = true
 accepts.fnaf1 = true
+
+[looney_bird]
+name = "Looney Bird"
+authors = ["Creative Engineering", "FlooferLand", "FizzGoose"]
+accepts.rockafire = true
+accepts.fnaf1 = false

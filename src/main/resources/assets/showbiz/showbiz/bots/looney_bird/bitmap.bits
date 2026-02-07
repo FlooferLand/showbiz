@@ -1,0 +1,17 @@
+set rae looney_bird
+
+rae head_right {
+    flow 0.5
+    rotate "head" y:-45
+}
+
+rae jaw {
+    flow 1.5
+    rotate "mouth" x:-25
+}
+
+rae raise {
+    flow 0.4
+    move "looney" y:11
+    #wigglemul 2.0
+}
