@@ -4,6 +4,7 @@ import net.minecraft.client.*
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
 import com.flooferland.bizlib.bits.AnimCommand
+import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -16,6 +17,7 @@ import software.bernie.geckolib.animatable.stateless.StatelessAnimationControlle
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import software.bernie.geckolib.cache.`object`.GeoBone
+import kotlin.math.sin
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
@@ -30,7 +32,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     // Spring properties -- methods so I can hot reload code to modify them >:)
     fun getSpringStiff() = 0.1f
     fun getSpringDamp() = 0.88f
-    fun getSpringImpulse() = 0.5f
+    fun getSpringImpulse() = 0.1f
+    fun getSpringScale() = 2.0f
 
     // var reelToReel: ReelToReelBlockEntity? = null
     // var greybox: GreyboxBlockEntity? = null
@@ -76,6 +79,10 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             Showbiz.log.warn("Mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
             return
         }
+        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId()) ?: run {
+            Showbiz.log.warn("Bitmap file for mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
+            return
+        }
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -113,9 +120,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             return
         }
 
-
         // Driving animation
-        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
+        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtLeast(0.0001f)
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.show.data.signal
@@ -166,19 +172,19 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.01f, 10.0f)),
                 0.0f, 1.0f
             )
-            storage.bitSmooths[bit] = bitSmooth
+            storage.bitSmooths[bit] = bitSmooth.let { if (it.isNaN()) 0f else it }
 
             // Spring
             val (springVel, springOffset) = run {
-                val diff = (bitSmooth - oldSmooth) / delta.coerceAtLeast(0.001f)
+                val diff = (bitSmooth - oldSmooth) / delta
                 var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
-                var springVel= storage.bitSpringVelocity.getOrDefault(bit, 0f)
+                var springVel = storage.bitSpringVelocity.getOrDefault(bit, 0f)
                 springVel = (springVel + diff * getSpringImpulse() - springOffset * getSpringStiff()) * getSpringDamp()
                 springOffset += springVel * delta
                 Pair(springVel, springOffset)
             }
-            storage.bitSpringOffset[bit] = springOffset
-            storage.bitSpringVelocity[bit] = springVel
+            storage.bitSpringOffset[bit] = springOffset.let { if (it.isNaN()) 0f else it }
+            storage.bitSpringVelocity[bit] = springVel.let { if (it.isNaN()) 0f else it }
 
             // Manual rotation
             for (rotate in data.rotates) {
@@ -190,18 +196,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
 
                 // Applying wiggle
-                val boneSize = run {
-                    var size = 0f
-                    fun recurse(bone: GeoBone) {
-                        size += (bone.cubes.map { it.size.length() }.average() / bone.cubes.size).toFloat()
-                        bone.childBones.forEach { recurse(it) }
-                    }
-                    recurse(bone)
-                    size
-                }
-                var boneSizeMul = boneSize / 2f
+                var boneSizeMul = getBoneSize(bone) / 2f
                 boneSizeMul = boneSizeMul.coerceIn(0f..1.5f)
-                val affect = (springOffset * boneSizeMul).coerceIn(0.5f, 2f).let { if (it.isNaN()) 1f else it }
+                val affect = (springOffset * boneSizeMul * getSpringScale()).coerceIn(-2f, 2f).let { if (it.isNaN()) 1f else it }
                 bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * affect
                 bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * affect
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * affect
@@ -212,10 +209,35 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying movement
-                bone.posX += (move.target.x.toDouble() * bitSmooth).toFloat()
-                bone.posY += (move.target.y.toDouble() * bitSmooth).toFloat()
-                bone.posZ += (move.target.z.toDouble() * bitSmooth).toFloat()
+                bone.posX += move.target.x * bitSmooth
+                bone.posY += move.target.y * bitSmooth
+                bone.posZ += move.target.z * bitSmooth
+
+                // Looney wiggle
+                when (bot.getId()) {
+                    "looney_bird" if movements["raise"] == bit -> {
+                        val affect = (springVel * getSpringScale()).coerceIn(-1f, 1f) * 1.4f
+                        val time = System.currentTimeMillis() * 0.01f
+                        val bone = animationProcessor.getBone("head") ?: bone
+                        bone.rotX += (((move.target.y * 3f) * (sin(time + 2.123f) * 2f)) * Mth.DEG_TO_RAD) * affect
+                        bone.rotY += (((move.target.y * 2f) * (sin(time + 9.124f) * 2f)) * Mth.DEG_TO_RAD) * affect
+                        bone.rotZ += (((move.target.y * 1.2f) * (sin(time) * 2f)) * Mth.DEG_TO_RAD) * affect
+                    }
+                }
+
+                // TODO: Add move wiggle
             }
         }
+    }
+
+    /** Gets how large a bone is based off cubes */
+    fun getBoneSize(bone: GeoBone): Float {
+        var size = 0f
+        fun recurse(bone: GeoBone) {
+            size += (bone.cubes.map { it.size.length() }.average() / bone.cubes.size).toFloat()
+            bone.childBones.forEach { recurse(it) }
+        }
+        recurse(bone)
+        return size
     }
 }

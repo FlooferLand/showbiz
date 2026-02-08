@@ -17,7 +17,7 @@ rae body_twist_right, faz body_turn_r {
 }
 
 any head_up {
-    flow 0.85
+    flow 0.7
     rotate "head" x:13
 }
 
@@ -44,17 +44,17 @@ rae head_tip_right {
 # arms
 
 rae right_arm_raise {
-    flow 0.6
+    flow 0.2
     anim "right_arm_raise"
 }
 
 rae right_arm_twist {
-    flow 0.6
+    flow 0.4
     anim "right_arm_twist"
 }
 
 rae right_elbow_twist {
-    flow 0.6
+    flow 0.4
     anim "right_elbow_twist"
 }
 
