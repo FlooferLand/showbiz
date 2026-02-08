@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 1076,
+	"activity_tracker": 1122,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\billy_bob\\models\\billy_bob.geo.json",
@@ -1657,7 +1657,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a",
@@ -2502,9 +2502,9 @@
 			"name": "animation.billy_bob.right_arm_raise.on",
 			"loop": "hold",
 			"override": false,
-			"length": 0.625,
+			"length": 1,
 			"snapping": 24,
-			"selected": false,
+			"selected": true,
 			"saved": true,
 			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
 			"anim_time_update": "",
@@ -2614,7 +2614,7 @@
 								}
 							],
 							"uuid": "a5136869-9c42-1f32-4577-35b784bc05f4",
-							"time": 0.625,
+							"time": 1,
 							"color": -1,
 							"interpolation": "linear"
 						}
@@ -2655,6 +2655,12 @@
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
 				}
 			}
 		},
@@ -2663,7 +2669,7 @@
 			"name": "animation.billy_bob.right_arm_raise.off",
 			"loop": "hold",
 			"override": false,
-			"length": 0.625,
+			"length": 1,
 			"snapping": 24,
 			"selected": false,
 			"saved": true,
@@ -2761,7 +2767,7 @@
 								}
 							],
 							"uuid": "1e12be80-a0e1-fb1b-a4df-dc2a1974cd26",
-							"time": 0.625,
+							"time": 1,
 							"color": -1,
 							"interpolation": "linear"
 						},
@@ -2813,6 +2819,12 @@
 				},
 				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
 					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false
@@ -2944,6 +2956,12 @@
 				},
 				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
 					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
+					"name": "snout",
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false

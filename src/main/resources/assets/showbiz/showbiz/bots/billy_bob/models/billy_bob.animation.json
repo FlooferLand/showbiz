@@ -60,14 +60,14 @@
 		},
 		"animation.billy_bob.right_arm_raise.on": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.625,
+			"animation_length": 1,
 			"bones": {
 				"arm_r": {
 					"rotation": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
-						"0.625": {
+						"1.0": {
 							"vector": [-95.30087, 37.98837, 89.35585]
 						}
 					}
@@ -76,14 +76,14 @@
 		},
 		"animation.billy_bob.right_arm_raise.off": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.625,
+			"animation_length": 1,
 			"bones": {
 				"arm_r": {
 					"rotation": {
 						"0.0": {
 							"vector": [-95.30087, 37.98837, 89.35585]
 						},
-						"0.625": {
+						"1.0": {
 							"vector": [0, 0, 0]
 						}
 					}
