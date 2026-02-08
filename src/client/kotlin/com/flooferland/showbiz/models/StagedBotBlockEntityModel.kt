@@ -124,7 +124,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.show.data.signal
-            val flowSpeed = (data.flow.toFloat() * 0.2f)
+            val flowSpeed = (data.flow.toFloat() * 0.3f)
             val bitOn = frame.frameHas(bit)
 
             // Animation
