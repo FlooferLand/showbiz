@@ -120,7 +120,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         }
 
         // Driving animation
-        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtLeast(0.0001f)
+        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.show.data.signal
@@ -168,14 +168,14 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             // Manual smoothing
             val oldSmooth = storage.bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
             val bitSmooth = clamp(
-                lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.01f, 10.0f)),
+                lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.0f, 10.0f)),
                 0.0f, 1.0f
             )
             storage.bitSmooths[bit] = bitSmooth.let { if (it.isNaN()) 0f else it }
 
             // Spring
             val (springVel, springOffset) = run {
-                val diff = (bitSmooth - oldSmooth) / delta
+                val diff = (bitSmooth - oldSmooth)
                 var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
                 var springVel = storage.bitSpringVelocity.getOrDefault(bit, 0f)
                 springVel = (springVel + diff * getSpringImpulse() - springOffset * getSpringStiff()) * getSpringDamp()
