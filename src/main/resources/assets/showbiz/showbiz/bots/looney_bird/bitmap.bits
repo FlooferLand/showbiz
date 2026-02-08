@@ -11,7 +11,7 @@ rae jaw {
 }
 
 rae raise {
-    flow 0.4
-    move "looney" y:16
+    flow 0.25
+    move "looney" y:11
     #wigglemul 2.0
 }

@@ -44,7 +44,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
     fun isEmpty() = !isLoaded
 
-    fun load(filename: String, onLoad: (() -> Unit)? = null) {
+    fun load(filename: String, onLoad: ((ShowData?) -> Unit)? = null) {
         reset()
         loading = true
         name = filename
@@ -104,13 +104,15 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             isLoaded = (audio.isNotEmpty() && signal.isNotEmpty())
             if (!isLoaded) {
                 Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size})")
+                onLoad?.invoke(null)
                 return@invokeOnCompletion
             }
             if (err == null) {
                 Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
-                onLoad?.invoke()
+                onLoad?.invoke(this)
             } else {
                 Showbiz.log.error(err.toString())
+                onLoad?.invoke(null)
             }
         }
     }

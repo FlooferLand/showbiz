@@ -75,5 +75,5 @@ rae left_eye_lid, rae right_eye_lid {
 }
 rae earl_eyebrow {
     flow 0.6
-    move "earl_eyebrow" y:-1
+    move "earl_eyebrow" y:1
 }

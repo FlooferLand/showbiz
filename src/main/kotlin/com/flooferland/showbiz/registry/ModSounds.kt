@@ -13,6 +13,9 @@ enum class ModSounds {
     End("end", folder = "interface"),
     PneumaticFire("pneumatic_fire"),
     PneumaticRelease("pneumatic_release"),
+    ReelEnter("reel_enter"),
+    ReelExit("reel_exit"),
+    ReelPlay("reel_play"),
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {

@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.blocks
 
+import net.minecraft.ChatFormatting
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.ReelItem
@@ -10,6 +11,8 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
+import net.minecraft.network.chat.Component
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
@@ -21,6 +24,8 @@ import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.level.storage.loot.*
 import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.utils.Extensions.getHeldItem
 
 class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
     val codec: MapCodec<ReelToReelBlock> = simpleCodec(::ReelToReelBlock)
@@ -56,12 +61,14 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         val entity = level.getBlockEntity(pos)
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
 
+        // Playing
         if (!entity.show.isEmpty() && !player.isCrouching) {
             val isOn = !entity.playing
             entity.applyChange(true) {
                 entity.setPlaying(isOn)
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, isOn))
+            if (isOn) player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 1f, 1f)
             return ItemInteractionResult.SUCCESS
         }
 
@@ -69,19 +76,31 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         if (stack.item is ReelItem) {
             val filename = stack.components.get(ModComponents.FileName.type)
             if (filename != null) {
+                val stackCopy = stack.copy()
                 player.setItemInHand(hand, Items.AIR.defaultInstance)
+                player.displayClientMessage(Component.literal("Loading.."), true)
+                player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
 
                 // Playback
                 entity.resetPlayback()
-                entity.show.load(filename) {
+                entity.show.load(filename) { data ->
                     entity.markDirtyNotifyAll()
+                    if (!player.isRemoved) {
+                        if (data == null) {  // Error happened, giving back the reel
+                            if (player.mainHandItem.isEmpty) player.setItemInHand(InteractionHand.MAIN_HAND, stackCopy) else player.addItem(stackCopy)
+                            player.displayClientMessage(Component.literal("Failed to load show. Check the server logs.").withStyle(ChatFormatting.RED), true)
+                            return@load
+                        }
+                        player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 0.4f, 1.5f)
+                        player.displayClientMessage(Component.empty(), true)
+                    }
                 }
             }
-        } else if (stack.isEmpty && !entity.show.isEmpty()) {
+        } else if (stack.isEmpty && !entity.show.isEmpty()) {  // Removing
             val showName = entity.show.name
             showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+            player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
 
-            // Playback
             entity.applyChange(true) {
                 entity.resetPlayback()
             }

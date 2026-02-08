@@ -64,8 +64,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
 
         // Checking chunk order
         if (packet.id <= lastReceivedChunkId && packet.id > 1) {
-            Showbiz.log.warn("Ignoring out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
-            return
+            Showbiz.log.warn("Found out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
         }
         lastReceivedChunkId = packet.id
 

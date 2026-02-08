@@ -17,6 +17,7 @@ import software.bernie.geckolib.animatable.stateless.StatelessAnimationControlle
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import software.bernie.geckolib.cache.`object`.GeoBone
+import kotlin.math.PI
 import kotlin.math.sin
 
 /** Responsible for fancy animation */
@@ -185,14 +186,18 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             storage.bitSpringOffset[bit] = springOffset.let { if (it.isNaN()) 0f else it }
             storage.bitSpringVelocity[bit] = springVel.let { if (it.isNaN()) 0f else it }
 
+            // TODO: Add a way to set easing per-movement in the Bitsmap format (flow 1.0 ease-in)
+
             // Manual rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * bitSmooth
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * bitSmooth
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
+                // Easing: https://easings.net/#easeOutSine
+                val eased = sin((bitSmooth * PI) / 2).toFloat()
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
 
                 // Applying wiggle
                 var boneSizeMul = getBoneSize(bone) / 2f

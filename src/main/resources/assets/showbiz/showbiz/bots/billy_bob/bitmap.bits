@@ -22,13 +22,13 @@ any head_up {
 }
 
 rae head_left {
-    flow 0.4
-    rotate "head" y:35
+    flow 0.3
+    rotate "head" y:40
 }
 
 rae head_right {
-    flow 0.4
-    rotate "head" y:-35
+    flow 0.3
+    rotate "head" y:-40
 }
 
 rae head_tip_left {
@@ -45,17 +45,41 @@ rae head_tip_right {
 
 rae right_arm_raise {
     flow 0.2
-    anim "right_arm_raise"
+    #rotate "arm_r" z:80
 }
 
 rae right_arm_twist {
-    flow 0.4
-    anim "right_arm_twist"
+    flow 0.3
+    #rotate "arm_r" x:80
 }
 
-rae right_elbow_twist {
+rae right_elbow_twist {  # guitar strum
+    flow 1.2
+    rotate "hand_r" y:-35
+    #wigglemul 2.0
+}
+
+rae left_arm_slide {
     flow 0.4
-    anim "right_elbow_twist"
+    rotate "arm_l" x:-15
+}
+
+rae right_wrist {
+    flow 0.5
+    rotate "hand_r" z:30
+}
+
+rae guitar_raise {
+    flow 0.4
+    rotate "banjo" z:-15
+    rotate "arm_l" y:-20
+}
+
+# legs
+
+rae foot_tap {
+    flow 0.4
+    rotate "toes_r" x:20
 }
 
 # face

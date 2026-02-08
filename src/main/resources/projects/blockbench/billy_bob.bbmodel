@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 1122,
+	"activity_tracker": 1807,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\billy_bob\\models\\billy_bob.geo.json",
@@ -891,15 +891,16 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [13, 22, -2],
-			"to": [22, 26, 2],
+			"from": [19.74335, 22.18388, -2.03154],
+			"to": [22.74335, 26.18388, 1.96846],
 			"autouv": 0,
 			"color": 2,
-			"origin": [19, 23, -1],
+			"rotation": [-15, 0, 0],
+			"origin": [19.74335, 23.18388, -1.03154],
 			"uv_offset": [52, 8],
 			"faces": {
 				"north": {
-					"uv": [56, 12, 65, 16],
+					"uv": [56, 12, 59, 16],
 					"texture": 0
 				},
 				"east": {
@@ -907,19 +908,19 @@
 					"texture": 0
 				},
 				"south": {
-					"uv": [69, 12, 78, 16],
+					"uv": [63, 12, 66, 16],
 					"texture": 0
 				},
 				"west": {
-					"uv": [65, 12, 69, 16],
+					"uv": [59, 12, 63, 16],
 					"texture": 0
 				},
 				"up": {
-					"uv": [65, 12, 56, 8],
+					"uv": [59, 12, 56, 8],
 					"texture": 0
 				},
 				"down": {
-					"uv": [74, 8, 65, 12],
+					"uv": [62, 8, 59, 12],
 					"texture": 0
 				}
 			},
@@ -932,11 +933,12 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [22, 23, -2],
-			"to": [25, 24, 2],
+			"from": [22.74335, 24.18388, -2.53154],
+			"to": [25.74335, 25.18388, 1.46846],
 			"autouv": 0,
 			"color": 0,
-			"origin": [24, 24, 0],
+			"rotation": [-17.5, 0, 0],
+			"origin": [24.74335, 25.18388, -0.53154],
 			"uv_offset": [54, 65],
 			"faces": {
 				"north": {
@@ -1422,6 +1424,47 @@
 			},
 			"type": "cube",
 			"uuid": "093bcd0f-26e4-6d55-e066-f24b9cbb5429"
+		},
+		{
+			"name": "cube",
+			"box_uv": true,
+			"render_order": "default",
+			"locked": false,
+			"allow_mirror_modeling": true,
+			"from": [12.75228, 22.06504, -2.1393],
+			"to": [20.75228, 26.06504, 1.8607],
+			"autouv": 0,
+			"color": 2,
+			"origin": [19, 23, -1],
+			"uv_offset": [53, 8],
+			"faces": {
+				"north": {
+					"uv": [57, 12, 65, 16],
+					"texture": 0
+				},
+				"east": {
+					"uv": [53, 12, 57, 16],
+					"texture": 0
+				},
+				"south": {
+					"uv": [69, 12, 77, 16],
+					"texture": 0
+				},
+				"west": {
+					"uv": [65, 12, 69, 16],
+					"texture": 0
+				},
+				"up": {
+					"uv": [65, 12, 57, 8],
+					"texture": 0
+				},
+				"down": {
+					"uv": [73, 8, 65, 12],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "8e7514a3-e04a-819d-af53-68482fd22ffb"
 		}
 	],
 	"groups": [
@@ -1602,7 +1645,7 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1657,7 +1700,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"uuid": "03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a",
@@ -1681,8 +1724,8 @@
 			"uuid": "1f827fbd-2b4d-cf44-0590-90b033a12f9c",
 			"export": true,
 			"locked": false,
-			"origin": [22, 24, 0],
-			"rotation": [-30, 0, -35],
+			"origin": [19.7494, 24.539, -0.54223],
+			"rotation": [-25, 0, -35],
 			"color": 0,
 			"name": "hand_r",
 			"children": [],
@@ -1693,7 +1736,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "b37c533d-908b-b5b8-5a42-0f6916291ee9",
@@ -1848,7 +1891,7 @@
 				"0aabb1c8-eebf-d1d5-8351-e35849269a83",
 				{
 					"uuid": "4bc74d04-8df7-def2-da1d-b3b46f242927",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						"94defde9-918b-1986-2ed6-78a576f9c4f9",
 						{
@@ -1874,11 +1917,11 @@
 							"uuid": "03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a",
 							"isOpen": true,
 							"children": [
-								"c9bc7cdb-cfd7-2a3b-d451-0a5c3f52e5b1",
+								"8e7514a3-e04a-819d-af53-68482fd22ffb",
 								{
 									"uuid": "1f827fbd-2b4d-cf44-0590-90b033a12f9c",
 									"isOpen": true,
-									"children": ["e85c6dcf-8383-cd73-9b86-34d6676d89f8"]
+									"children": ["c9bc7cdb-cfd7-2a3b-d451-0a5c3f52e5b1", "e85c6dcf-8383-cd73-9b86-34d6676d89f8"]
 								}
 							]
 						}
@@ -2494,934 +2537,6 @@
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "27559187-ad91-c6fc-3570-9824a5324c42",
-			"name": "animation.billy_bob.right_arm_raise.on",
-			"loop": "hold",
-			"override": false,
-			"length": 1,
-			"snapping": 24,
-			"selected": true,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "1e12be80-a0e1-fb1b-a4df-dc2a1974cd26",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "95.3008684015",
-									"y": "-37.9883679223",
-									"z": "89.3558509197"
-								}
-							],
-							"uuid": "a5136869-9c42-1f32-4577-35b784bc05f4",
-							"time": 1,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
-					"name": "snout",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "840bab02-32e6-211d-e501-44eb60137701",
-			"name": "animation.billy_bob.right_arm_raise.off",
-			"loop": "hold",
-			"override": false,
-			"length": 1,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "1e12be80-a0e1-fb1b-a4df-dc2a1974cd26",
-							"time": 1,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "95.3008684015",
-									"y": "-37.9883679223",
-									"z": "89.3558509197"
-								}
-							],
-							"uuid": "609167ca-18ef-4109-5d42-50af6c021457",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
-					"name": "snout",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "1b4d1142-6374-365e-18c7-e8cdd0de8664",
-			"name": "animation.billy_bob.right_arm_twist.on",
-			"loop": "hold",
-			"override": false,
-			"length": 0.5,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e090fdb7-6e26-92d2-e08c-4cd02f15f466": {
-					"name": "snout",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "72e8d332-e7f5-d27b-a281-047b33dee68a",
-			"name": "animation.billy_bob.right_arm_twist.off",
-			"loop": "hold",
-			"override": false,
-			"length": 0.5,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "26e0e7b7-86f2-16dd-5dd5-d3d51c7e9018",
-			"name": "animation.billy_bob.right_elbow_twist.on",
-			"loop": "hold",
-			"override": false,
-			"length": 0.5,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "f728b3e1-4a9b-13ce-3df6-55ae0eb50c60",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "41.1596324263",
-									"y": "-60.5750318181",
-									"z": "38.686011384"
-								}
-							],
-							"uuid": "874c8ae1-935b-4892-a5be-406fd945a8c7",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "dec188a9-22c9-2992-927d-a5893db01c1d",
-			"name": "animation.billy_bob.right_elbow_twist.off",
-			"loop": "hold",
-			"override": false,
-			"length": 0.5,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"36842fd1-e64f-5973-cd5f-bcc1b16117ba": {
-					"name": "torso",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"77fcc5fd-a16f-c4c6-e527-6a9efd18f0e2": {
-					"name": "head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ae4b7c01-d0af-2c9d-0aad-aa630b1600fb": {
-					"name": "jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b4ccdd5d-fafa-fc73-8520-9ef709fd4aa0": {
-					"name": "leg_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7402bd62-d827-8114-bd81-b14808f5a751": {
-					"name": "toes_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bd23a91-d73e-c146-fa26-0c309b40372b": {
-					"name": "leg_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4e456776-4ab6-6a28-7a3a-e9c1f2cd7cb6": {
-					"name": "toes_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"a6e1d020-e22d-215c-a645-e065f40855b8": {
-					"name": "ear_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3351970d-fc18-c7fe-d817-415a322348b3": {
-					"name": "ear_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"4bc74d04-8df7-def2-da1d-b3b46f242927": {
-					"name": "arm_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"705c4b94-d09a-8da8-d0e0-1988c7849d69": {
-					"name": "arm2_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"fe0c2ad0-5ae3-208d-4970-8d08787d376f": {
-					"name": "hand_l",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"30253daf-d12c-8bf8-ad4f-4f82a73a55bd": {
-					"name": "arm_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03d9d8f5-62d7-559e-69d1-1ea4b76c5b3a": {
-					"name": "arm2_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "f728b3e1-4a9b-13ce-3df6-55ae0eb50c60",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "41.1596324263",
-									"y": "-60.5750318181",
-									"z": "38.686011384"
-								}
-							],
-							"uuid": "874c8ae1-935b-4892-a5be-406fd945a8c7",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"1f827fbd-2b4d-cf44-0590-90b033a12f9c": {
-					"name": "hand_r",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"b37c533d-908b-b5b8-5a42-0f6916291ee9": {
-					"name": "banjo",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"657d22d3-3bec-1920-3398-7e3dc73048d2": {
-					"name": "face",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cd95126f-d5f9-a57a-7e2c-710ffab8e0c5": {
-					"name": "eyelids",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"43e0e492-e1c6-3ddf-f0f0-0939ec322d68": {
-					"name": "eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"effects": {
-					"name": "Effects",
-					"type": "effect"
 				}
 			}
 		}

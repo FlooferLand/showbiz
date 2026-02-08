@@ -3,6 +3,7 @@ package com.flooferland.showbiz.types
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.sounds.SoundSource
+import net.minecraft.util.Mth.clamp
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import com.flooferland.showbiz.ShowbizClient
@@ -34,13 +35,13 @@ class BotSoundHandler : IBotSoundHandler {
             if (prevState != null && prevState != bitOn) {
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
                 val flow = data.flow.toFloat().coerceIn(0.1f, 1.0f)
-                val pitch = 0.5f + (flow * 0.7f)
+                val pitch = 0.4f + (flow * 0.8f)
                 val volume = 0.5f + (flow * 0.5f)
                 level.playLocalSound(
                     entity.blockPos.above().above(),
                     sound.event,
                     SoundSource.BLOCKS,
-                    volume * 0.1f, pitch, false
+                    clamp(volume * 0.05f, 0.005f, 0.05f), pitch, false
                 )
             }
 

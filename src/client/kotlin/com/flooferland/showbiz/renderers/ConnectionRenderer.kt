@@ -9,7 +9,6 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.connection.GlobalConnections
-import com.flooferland.showbiz.types.connection.GlobalConnections.entries
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.*
@@ -27,7 +26,7 @@ object ConnectionRenderer {
 
     fun render(player: Player, source: MultiBufferSource.BufferSource, partialTick: Float) {
         if (!isHoldingWand(player)) return
-        for ((pos, points) in entries) {
+        for ((pos, points) in GlobalConnections.entries) {
             for (point in points) {
                 val yOffset = getYOffset(point.index, points.size)
                 val pointPos = pos.center.add(0.0, yOffset, 0.0)
@@ -38,7 +37,7 @@ object ConnectionRenderer {
                 // Connections
                 for (connection in point.connections) {
                     val targetPoint = connection.point
-                    val endYOffset = getYOffset(targetPoint.index, entries[connection.pos]?.size ?: 1)
+                    val endYOffset = getYOffset(targetPoint.index, GlobalConnections.entries[connection.pos]?.size ?: 1)
                     val end = connection.pos.center.add(0.0, endYOffset, 0.0)
                     deferRender { pose, consumer -> renderConnection(pose, consumer, pointPos, end) }
                 }
@@ -120,10 +119,12 @@ object ConnectionRenderer {
         pose.pushPose()
 
         val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-        for (consumer in queued) {
+        val queuedSnapshot = queued.toList()
+        for (consumer in queuedSnapshot) {
             consumer(pose, builder)
         }
         builder.build()?.let { mesh -> BufferUploader.drawWithShader(mesh) }
+
         run { // Render text
             val mc = Minecraft.getInstance() ?: return@run
             val camera = mc.gameRenderer?.mainCamera ?: return@run
@@ -132,7 +133,9 @@ object ConnectionRenderer {
 
             RenderSystem.disableDepthTest()
             RenderSystem.depthMask(false)
-            for (text in queuedText) {
+
+            val textSnapshot = queuedText.toList()
+            for (text in textSnapshot) {
                 pose.pushPose()
                 pose.translate(text.x, text.y, text.z)
                 pose.mulPose(camera.rotation())
@@ -147,7 +150,6 @@ object ConnectionRenderer {
             bufferSource.endBatch()
             RenderSystem.enableDepthTest()
             RenderSystem.depthMask(true)
-            queuedText.clear()
         }
 
         pose.popPose()
@@ -157,7 +159,9 @@ object ConnectionRenderer {
         RenderSystem.depthMask(true)
 
         mc.mainRenderTarget.bindWrite(false)
+
         queued.clear()
+        queuedText.clear()
     }
 
     private fun deferRender(callback: (pose: PoseStack, consumer: BufferBuilder) -> Unit) {
