@@ -1,0 +1,160 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"test": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": [-12.5, -25, 0]
+					}
+				},
+				"jaw": {
+					"rotation": {
+						"vector": [40, 0, 0]
+					}
+				},
+				"ArmL4": {
+					"rotation": {
+						"vector": [0, 32.5, 0]
+					}
+				},
+				"Earl_eyebrow": {
+					"rotation": {
+						"vector": [0, 0, 0]
+					}
+				},
+				"jaw2": {
+					"rotation": {
+						"vector": [-25, 0, 0]
+					}
+				},
+				"EarlBody": {
+					"rotation": {
+						"vector": [-34.68679, -35.84458, 19.24381]
+					}
+				}
+			}
+		},
+		"pose": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": [-12.5, -25, 0]
+					}
+				},
+				"jaw": {
+					"rotation": {
+						"vector": [40, 0, 0]
+					}
+				},
+				"arm_r_inner": {
+					"rotation": {
+						"vector": [0, 32.5, 0]
+					}
+				},
+				"earl_eyebrow": {
+					"rotation": {
+						"vector": [0, 0, 0]
+					}
+				},
+				"earl_jaw": {
+					"rotation": {
+						"vector": [-25, 0, 0]
+					}
+				},
+				"earl_body": {
+					"rotation": {
+						"vector": [-34.68679, -35.84458, 19.24381]
+					}
+				}
+			}
+		},
+		"animation.rolfe_dewolfe.eyelids.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"eyelid_l": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [11, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, -0.606, -0.04916]
+						}
+					}
+				},
+				"eyelid_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [11, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, -0.606, -0.04916]
+						}
+					}
+				}
+			}
+		},
+		"animation.rolfe_dewolfe.eyelids.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"eyelid_l": {
+					"rotation": {
+						"0.0": {
+							"vector": [11, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, -0.606, -0.04916]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"eyelid_r": {
+					"rotation": {
+						"0.0": {
+							"vector": [11, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, -0.606, -0.04916]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

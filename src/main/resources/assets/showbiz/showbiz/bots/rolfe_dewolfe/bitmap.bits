@@ -1,0 +1,79 @@
+set rae rolfe
+
+rae body_lean {
+    flow 0.2
+    rotate "torso" x:-5
+}
+
+rae body_twist_left {
+    flow 0.2
+    rotate "torso" y:25
+}
+
+rae body_twist_right {
+    flow 0.2
+    rotate "torso" y:-25
+}
+
+rae head_up {
+    flow 0.7
+    rotate "head" x:13
+}
+
+rae head_left {
+    flow 0.4
+    rotate "head" y:35
+}
+
+rae head_right {
+    flow 0.4
+    rotate "head" y:-35
+}
+
+# arms
+rae right_arm_raise {
+    flow 0.2
+    rotate "arm_r" z:50
+}
+
+rae right_arm_twist {
+    flow 0.4
+    rotate "arm_r" y:22
+}
+
+rae right_elbow_twist {
+    flow 0.4
+    rotate "arm_r_inner" y:-75
+}
+
+rae left_arm_raise {
+    flow 0.4
+    rotate "arm_l_up_pivot" z:-60
+}
+
+# face
+rae jaw {
+    flow 3.0
+    rotate "jaw" x:-15
+    rotate "snout" x:5
+}
+rae earl_jaw {
+    flow 3.0
+    rotate "earl_jaw" x:15
+}
+rae eyes_left {
+    flow 0.5
+    move "eyes" x:1
+}
+rae eyes_right {
+    flow 0.5
+    move "eyes" x:-1
+}
+rae left_eye_lid, rae right_eye_lid {
+    flow 0.8
+    anim "eyelids"
+}
+rae earl_eyebrow {
+    flow 0.6
+    move "earl_eyebrow" y:-1
+}

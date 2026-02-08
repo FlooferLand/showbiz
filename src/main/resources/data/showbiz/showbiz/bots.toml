@@ -15,3 +15,9 @@ name = "Looney Bird"
 authors = ["Creative Engineering", "FlooferLand", "FizzGoose"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[rolfe_dewolfe]
+name = "Rolfe DeWolfe"
+authors = ["Creative Engineering", "LBN"]
+accepts.rockafire = true
+accepts.fnaf1 = false

@@ -79,10 +79,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             Showbiz.log.warn("Mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
             return
         }
-        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId()) ?: run {
-            Showbiz.log.warn("Bitmap file for mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
-            return
-        }
+
+        // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
+        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId())
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -215,7 +214,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
                 // Looney wiggle
                 when (bot.getId()) {
-                    "looney_bird" if movements["raise"] == bit -> {
+                    "looney_bird" if movements?.get("raise") == bit -> {
                         val affect = (springVel * getSpringScale()).coerceIn(-1f, 1f) * 1.4f
                         val time = System.currentTimeMillis() * 0.01f
                         val bone = animationProcessor.getBone("head") ?: bone
