@@ -13,7 +13,7 @@
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
 
-    "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\nRight-click to change models",
+    "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\n- Right-click to change models\n- Place a block on top to hide the block",
     "tooltip.showbiz.block.reel_to_reel": "Plays back reels",
     "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
