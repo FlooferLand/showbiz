@@ -1,0 +1,58 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.looney_bird.eyes_cross.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.1667,
+			"bones": {
+				"eye_l": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.1667": {
+							"vector": [-0.5, 0, 0]
+						}
+					}
+				},
+				"eye_r": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.1667": {
+							"vector": [0.5, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.looney_bird.eyes_cross.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.1667,
+			"bones": {
+				"eye_l": {
+					"position": {
+						"0.0": {
+							"vector": [-0.5, 0, 0]
+						},
+						"0.1667": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"eye_r": {
+					"position": {
+						"0.0": {
+							"vector": [0.5, 0, 0]
+						},
+						"0.1667": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

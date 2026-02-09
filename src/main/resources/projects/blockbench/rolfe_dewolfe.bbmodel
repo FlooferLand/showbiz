@@ -11,7 +11,7 @@
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 937,
+	"activity_tracker": 1346,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"animation": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\rolfe_dewolfe\\models\\rolfe_dewolfe.animation.json",
@@ -397,7 +397,7 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [-4, 33.54026, -3.49572],
+			"from": [-4, 33.29026, -3.49572],
 			"to": [4, 35.54026, 2.50428],
 			"autouv": 0,
 			"color": 9,
@@ -438,7 +438,7 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [-6, 17.54026, -3.99572],
+			"from": [-6, 17.54026, -4.24572],
 			"to": [6, 33.54026, 3.00428],
 			"autouv": 0,
 			"color": 3,
@@ -478,11 +478,11 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [-6, 0, -3],
-			"to": [0, 18, 3],
+			"from": [-6, 0, -3.5],
+			"to": [0, 18, 2.5],
 			"autouv": 0,
 			"color": 9,
-			"origin": [-3, 0, 0],
+			"origin": [-3, 0, -0.5],
 			"uv_offset": [36, 23],
 			"faces": {
 				"north": {
@@ -519,11 +519,11 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [-6, 0, -5],
-			"to": [0, 3, -3],
+			"from": [-6, 0, -5.5],
+			"to": [0, 3, -3.5],
 			"autouv": 0,
 			"color": 2,
-			"origin": [-3, 0, 0],
+			"origin": [-3, 0, -0.5],
 			"uv_offset": [60, 41],
 			"faces": {
 				"north": {
@@ -560,11 +560,11 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [0, 0, -3],
-			"to": [6, 18, 3],
+			"from": [0, 0, -3.5],
+			"to": [6, 18, 2.5],
 			"autouv": 0,
 			"color": 9,
-			"origin": [3, 0, 0],
+			"origin": [3, 0, -0.5],
 			"uv_offset": [0, 41],
 			"faces": {
 				"north": {
@@ -601,11 +601,11 @@
 			"render_order": "default",
 			"locked": false,
 			"allow_mirror_modeling": true,
-			"from": [0, 0, -5],
-			"to": [6, 3, -3],
+			"from": [0, 0, -5.5],
+			"to": [6, 3, -3.5],
 			"autouv": 0,
 			"color": 2,
-			"origin": [3, 0, 0],
+			"origin": [3, 0, -0.5],
 			"uv_offset": [68, 55],
 			"faces": {
 				"north": {
@@ -1750,7 +1750,7 @@
 			"uuid": "1c1bd8d1-d97f-fe7d-a5c0-b5f6ceb9eb48",
 			"export": true,
 			"locked": false,
-			"origin": [-3, 0, 0],
+			"origin": [-3, 0, -0.5],
 			"rotation": [0, 5, 0],
 			"color": 0,
 			"name": "left_leg",
@@ -1762,13 +1762,13 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "03892ec5-fadd-8066-4f87-ed6071ef1943",
 			"export": true,
 			"locked": false,
-			"origin": [3, 0, 0],
+			"origin": [3, 0, -0.5],
 			"rotation": [0, -5, 0],
 			"color": 0,
 			"name": "right_leg",
@@ -1780,14 +1780,14 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"uuid": "545ea7e1-338a-3542-7391-bb7a561ceabd",
 			"export": true,
 			"locked": false,
 			"origin": [-7, 30.54026, -0.49572],
-			"rotation": [0, -40, -35],
+			"rotation": [-5, -47.5, -35],
 			"color": 0,
 			"name": "ArmL",
 			"children": [],
@@ -1870,7 +1870,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"uuid": "70dfb584-79ec-782f-e682-449271d41532",
@@ -2013,7 +2013,7 @@
 			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -2166,7 +2166,7 @@
 								},
 								{
 									"uuid": "0749f8e1-3571-5db5-2fbc-8be4745e7f06",
-									"isOpen": false,
+									"isOpen": true,
 									"children": ["f91766a9-b814-70e7-6eab-5bbef3e5695e"]
 								},
 								{
@@ -2814,7 +2814,7 @@
 			"override": false,
 			"length": 0.5,
 			"snapping": 24,
-			"selected": true,
+			"selected": false,
 			"saved": true,
 			"path": "../../assets/showbiz/showbiz/bots/rolfe_dewolfe/models/rolfe_dewolfe.animation.json",
 			"anim_time_update": "",

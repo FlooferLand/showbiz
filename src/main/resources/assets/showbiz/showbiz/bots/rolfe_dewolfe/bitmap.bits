@@ -47,8 +47,8 @@ rae right_elbow_twist {
 }
 
 rae left_arm_raise {
-    flow 0.4
-    rotate "arm_l_up_pivot" z:-60
+    flow 0.3
+    rotate "arm_l_up_pivot" z:-65
 }
 
 # face
@@ -76,4 +76,12 @@ rae left_eye_lid, rae right_eye_lid {
 rae earl_eyebrow {
     flow 0.6
     move "earl_eyebrow" y:1
+}
+rae left_ear {
+    flow 1.3
+    rotate "ear_l" x:25
+}
+rae right_ear {
+    flow 1.3
+    rotate "ear_r" x:25
 }

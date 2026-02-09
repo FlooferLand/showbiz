@@ -1,8 +1,9 @@
 set rae looney_bird
 
 rae head_right {
-    flow 0.5
-    rotate "head" y:-45
+    flow 0.25
+    rotate "head" y:-78
+    wigglemul 2.0
 }
 
 rae jaw {
@@ -11,7 +12,22 @@ rae jaw {
 }
 
 rae raise {
-    flow 0.25
+    flow linear 0.25
     move "looney" y:11
-    #wigglemul 2.0
+    wigglemul 2.0
+}
+
+rae left_eyelid {
+    flow 0.8
+    move "eyelid_l" y:-2
+}
+
+rae right_eyelid {
+    flow 0.8
+    move "eyelid_r" y:-2
+}
+
+rae eye_cross {
+    flow 1.0
+    anim "eyes_cross"
 }

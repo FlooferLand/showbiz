@@ -4,7 +4,9 @@ import net.minecraft.client.*
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
 import com.flooferland.bizlib.bits.AnimCommand
+import com.flooferland.bizlib.bits.BitMappingData
 import com.flooferland.bizlib.bits.BitUtils
+import com.flooferland.bizlib.bits.Easing
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -18,6 +20,7 @@ import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.PI
+import kotlin.math.min
 import kotlin.math.sin
 
 /** Responsible for fancy animation */
@@ -34,7 +37,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     fun getSpringStiff() = 0.1f
     fun getSpringDamp() = 0.88f
     fun getSpringImpulse() = 0.1f
-    fun getSpringScale() = 2.0f
+    fun getSpringScale(data: BitMappingData) = 2.0f + data.wiggleMul.toFloat()
 
     // var reelToReel: ReelToReelBlockEntity? = null
     // var greybox: GreyboxBlockEntity? = null
@@ -113,6 +116,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
         }
 
+        // Getting bot storage & show playing guard
         val storage = if (animatable.show.data.playing) {
             localStorage.getOrPut(instanceId) { LocalBotStorage() }
         } else {
@@ -125,7 +129,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.show.data.signal
-            val flowSpeed = (data.flow.toFloat() * 0.3f)
+            val flowSpeed = (data.flow.speed.toFloat() * 0.3f)
+            val flowEase = data.flow.easing
             val bitOn = frame.frameHas(bit)
 
             // Animation
@@ -138,7 +143,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 animManager?.let {
                     if (!animManager.animationControllers.contains(controllerKey)) {
                         val controller = StatelessAnimationController(animatable, controllerKey)
-                        controller.transitionLength(5 + (data.flow * 5f).toInt())
+                        controller.transitionLength(5 + (flowSpeed * 10f).toInt())
                         animManager.addController(controller)
                     }
                 }
@@ -188,13 +193,17 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
             // TODO: Add a way to set easing per-movement in the Bitsmap format (flow 1.0 ease-in)
 
+            // Easing: https://easings.net/#easeOutSine
+            val eased = when (flowEase) {
+                Easing.Default, Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
+                Easing.Linear -> bitSmooth
+            }
+
             // Manual rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                // Easing: https://easings.net/#easeOutSine
-                val eased = sin((bitSmooth * PI) / 2).toFloat()
                 bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
                 bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
@@ -202,7 +211,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 // Applying wiggle
                 var boneSizeMul = getBoneSize(bone) / 2f
                 boneSizeMul = boneSizeMul.coerceIn(0f..1.5f)
-                val affect = (springOffset * boneSizeMul * getSpringScale()).coerceIn(-2f, 2f).let { if (it.isNaN()) 1f else it }
+                val affect = (springVel * boneSizeMul * getSpringScale(data))
+                    .coerceIn(-2f, 2f)
+                    .let { if (it.isNaN()) 0f else it }
                 bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * affect
                 bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * affect
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * affect
@@ -213,14 +224,14 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying movement
-                bone.posX += move.target.x * bitSmooth
-                bone.posY += move.target.y * bitSmooth
-                bone.posZ += move.target.z * bitSmooth
+                bone.posX += move.target.x * eased
+                bone.posY += move.target.y * eased
+                bone.posZ += move.target.z * eased
 
                 // Looney wiggle
                 when (bot.getId()) {
                     "looney_bird" if movements?.get("raise") == bit -> {
-                        val affect = (springVel * getSpringScale()).coerceIn(-1f, 1f) * 1.4f
+                        val affect = (springVel * getSpringScale(data)).coerceIn(-2f, 2f) * 2.0f
                         val time = System.currentTimeMillis() * 0.01f
                         val bone = animationProcessor.getBone("head") ?: bone
                         bone.rotX += (((move.target.y * 3f) * (sin(time + 2.123f) * 2f)) * Mth.DEG_TO_RAD) * affect
