@@ -265,5 +265,9 @@ publishMods {
         requires { slug = "geckolib" }
         optional { slug = "modmenu" }
     }
+
+    discord {
+        webhookUrl = providers.environmentVariable("discord.webhook")
+    }
 }
 
