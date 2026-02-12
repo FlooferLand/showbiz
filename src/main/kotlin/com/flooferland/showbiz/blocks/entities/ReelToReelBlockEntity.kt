@@ -6,6 +6,8 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
+import com.flooferland.showbiz.blocks.entities.state.ReelToReelBlockEntityRenderState
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.ShowData
@@ -37,7 +39,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     public var seek = 0.0
     public val signal = SignalFrame()
 
+    public var rendererState = ReelToReelBlockEntityRenderState()
+
     var playing = false
+        public get private set
+    var paused = false
         public get private set
     private val tickDelta = (50 * 0.001) // ms
     private val fps = 60  // Tied to rshw
@@ -76,6 +82,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
         }
 
+        // TODO: Set playing to false when the show ends.
+
         // Updating the block entity (sends network packet)
         if (shouldUpdate) markDirtyNotifyAll()
     }
@@ -89,11 +97,25 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = playing
         if (!playing) resetPlayback()
         showOut.send(PackedShowData(playing, signal, show.mapping))
+        //level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing))  // Visual
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
         for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing)
+            val state = PlaybackStatePacket(blockPos, playing = playing, paused = this.paused)
+            ServerPlayNetworking.send(player, state)
+        }
+    }
+
+    fun setPaused(paused: Boolean) {
+        this.playing = !paused
+        this.paused = paused
+        showOut.send(PackedShowData(playing, signal, show.mapping))
+
+        // TODO: Find only near players
+        val serverLevel = level as? ServerLevel ?: return
+        for (player in serverLevel.players()) {
+            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused)
             ServerPlayNetworking.send(player, state)
         }
     }
@@ -105,6 +127,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Save other
         tag.putBoolean("playing", playing)
+        tag.putBoolean("paused", paused)
         tag.putDouble("seek", seek)
         tag.putIntArray("signal_frame", signal.save())
         connectionManager.save(tag)
@@ -116,6 +139,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Load other
         playing = tag.getBooleanOrNull("playing") ?: false
+        paused = tag.getBooleanOrNull("paused") ?: false
         seek = tag.getDoubleOrNull("seek") ?: 0.0
         signal.load(tag.getIntArrayOrNull("signal_frame"))
         connectionManager.load(tag)
@@ -138,5 +162,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (playing) setPlaying(false)
         signal.reset()
         show.reset()
+        rendererState.visualSeek = 0f
     }
 }

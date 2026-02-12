@@ -28,7 +28,7 @@ object ShowbizShowAudio {
         ClientPlayNetworking.registerGlobalReceiver(PlaybackStatePacket.type) { payload, context ->
             context.client().execute {
                 val state = sources[payload.blockPos] ?: return@execute
-                when (payload.playing) {
+                when (payload.playing && !payload.paused) {
                     true -> state.open()
                     false -> state.close()
                 }

@@ -6,7 +6,7 @@ import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 
-class PlaybackStatePacket(val blockPos: BlockPos, val playing: Boolean = false) : CustomPacketPayload {
+class PlaybackStatePacket(val blockPos: BlockPos, val playing: Boolean, val paused: Boolean) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -15,13 +15,16 @@ class PlaybackStatePacket(val blockPos: BlockPos, val playing: Boolean = false) 
             { buf, state ->
                 buf.writeBlockPos(state.blockPos)
                 buf.writeBoolean(state.playing)
+                buf.writeBoolean(state.paused)
             },
             { buf ->
                 val blockPos = buf.readBlockPos()
                 val playing = buf.readBoolean()
+                val paused = buf.readBoolean()
                 PlaybackStatePacket(
                     blockPos = blockPos,
-                    playing = playing
+                    playing = playing,
+                    paused = paused
                 )
             }
         )!!

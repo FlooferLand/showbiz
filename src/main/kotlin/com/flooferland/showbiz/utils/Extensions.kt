@@ -9,7 +9,9 @@ import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.*
 import net.minecraft.util.FastColor
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.Vec3
@@ -80,6 +82,11 @@ object Extensions {
             filter(offhandItem) -> offhandItem
             else -> null
         }
+    fun Player.handItem(stack: ItemStack) = when {
+        mainHandItem.isEmpty -> setItemInHand(InteractionHand.MAIN_HAND, stack)
+        offhandItem.isEmpty -> setItemInHand(InteractionHand.OFF_HAND, stack)
+        else -> inventory.add(stack)
+    }
 
     //region Component
     fun MutableComponent.hover(text: String) = hover(Component.literal(text))

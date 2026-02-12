@@ -64,6 +64,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
         }
 
+        Showbiz.log.debug("Loading tape '${name}' ($mapping)")
+
         val coro = CoroutineScope(Dispatchers.IO).launch {
             val loaded = run {
                 val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))

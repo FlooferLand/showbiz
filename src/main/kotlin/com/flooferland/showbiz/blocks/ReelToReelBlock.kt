@@ -24,8 +24,9 @@ import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.level.storage.loot.*
 import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.utils.Extensions.getHeldItem
+import com.flooferland.showbiz.utils.Extensions.handItem
 
 class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
     val codec: MapCodec<ReelToReelBlock> = simpleCodec(::ReelToReelBlock)
@@ -48,46 +49,36 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         builder.add(PLAYING)
     }
 
-    override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
+    override fun useItemOn(heldStack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
         if (level.isClientSide) return ItemInteractionResult.CONSUME
-        if (stack.item is WandItem) {
+        if (heldStack.item is WandItem) {
             return ItemInteractionResult.FAIL
         }
 
         // Hand stack
-        if (player.getItemInHand(hand) != stack) return ItemInteractionResult.FAIL
+        if (player.getItemInHand(hand) != heldStack) return ItemInteractionResult.FAIL
 
         // Finding the BE
         val entity = level.getBlockEntity(pos)
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
 
-        // Playing
-        if (!entity.show.isEmpty() && !player.isCrouching) {
-            val isOn = !entity.playing
-            entity.applyChange(true) {
-                entity.setPlaying(isOn)
-            }
-            level.setBlockAndUpdate(pos, state.setValue(PLAYING, isOn))
-            if (isOn) player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 1f, 1f)
-            return ItemInteractionResult.SUCCESS
-        }
+        if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
+            // Adding / removing
+            if (heldStack.item is ReelItem) {
+                val filename = heldStack.components.get(ModComponents.FileName.type)
+                if (filename != null) {
+                    val stackCopy = heldStack.copy()
+                    player.setItemInHand(hand, Items.AIR.defaultInstance)
+                    player.displayClientMessage(Component.literal("Loading.."), true)
+                    player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
 
-        // Adding / removing
-        if (stack.item is ReelItem) {
-            val filename = stack.components.get(ModComponents.FileName.type)
-            if (filename != null) {
-                val stackCopy = stack.copy()
-                player.setItemInHand(hand, Items.AIR.defaultInstance)
-                player.displayClientMessage(Component.literal("Loading.."), true)
-                player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
-
-                // Playback
-                entity.resetPlayback()
-                entity.show.load(filename) { data ->
-                    entity.markDirtyNotifyAll()
-                    if (!player.isRemoved) {
+                    // Playback
+                    entity.resetPlayback()
+                    entity.show.load(filename) { data ->
+                        entity.markDirtyNotifyAll()
+                        if (player.isRemoved) return@load
                         if (data == null) {  // Error happened, giving back the reel
-                            if (player.mainHandItem.isEmpty) player.setItemInHand(InteractionHand.MAIN_HAND, stackCopy) else player.addItem(stackCopy)
+                            player.handItem(stackCopy)
                             player.displayClientMessage(Component.literal("Failed to load show. Check the server logs.").withStyle(ChatFormatting.RED), true)
                             return@load
                         }
@@ -95,17 +86,39 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                         player.displayClientMessage(Component.empty(), true)
                     }
                 }
+            } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
+                val showName = entity.show.name
+                showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+                player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+                entity.applyChange(true) {
+                    entity.setPlaying(false)
+                }
             }
-        } else if (stack.isEmpty && !entity.show.isEmpty()) {  // Removing
-            val showName = entity.show.name
-            showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-            player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+            level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
+        } else {
+            // Pausing
+            if (!entity.show.isEmpty()) {
+                var paused = entity.paused
 
-            entity.applyChange(true) {
-                entity.resetPlayback()
+                entity.applyChange(true) {
+                    if (!entity.playing) {
+                        entity.setPlaying(true)
+                        entity.setPaused(false)
+                    } else {
+                        paused = !entity.paused
+                        entity.setPaused(paused)
+                    }
+                }
+
+                if (!paused)
+                    player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 1f, 1f)
+                else
+                    player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 0.5f, 0.8f)
+                return ItemInteractionResult.SUCCESS
+            } else {
+                player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 0.4f, 0.4f)
             }
         }
-        level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
         return ItemInteractionResult.SUCCESS
     }
 
