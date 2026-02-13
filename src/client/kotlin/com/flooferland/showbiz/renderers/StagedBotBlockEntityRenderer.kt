@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.shapes.CollisionContext
+import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.mojang.math.Axis
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
@@ -78,12 +80,12 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         }
     }
 
-    override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity?, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+    override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         poseStack.translate(0.0, 1.0, 0.0)
 
         // Handling carpets
         run {
-            val level = animatable?.level ?: return@run
+            val level = animatable.level ?: return@run
             val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
             if (above.isAir) return@run
             val shape = above.getShape(level, animatable.blockPos.above())
@@ -94,5 +96,17 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         }
 
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
+    }
+
+    override fun actuallyRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel?, renderType: RenderType?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int
+    ) {
+        // GigaDirection rotation
+        run {
+            val facing = animatable.blockState.getValue(StagedBotBlock.facing) ?: return@run
+            // (((context.rotation + 180.0) * 8) / 360).roundToInt() % 8
+            val angle = (360f - facing.angle) % 360f
+            poseStack.mulPose(Axis.YP.rotationDegrees(angle))
+        }
+        super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
 }

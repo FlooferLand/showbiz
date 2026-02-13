@@ -16,20 +16,20 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape
 import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.shapes.VoxelShape
+import com.flooferland.showbiz.types.GigaDirectionProperty
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     companion object {
-        val facing = BlockStateProperties.HORIZONTAL_FACING!!
+        val facing = GigaDirectionProperty("facing")
     }
     val codec: MapCodec<StagedBotBlock> = simpleCodec(::StagedBotBlock)
 
     init {
-        registerDefaultState(stateDefinition.any().setValue(facing, Direction.NORTH))
+        registerDefaultState(stateDefinition.any().setValue(facing, GigaDirectionProperty.Enum.North))
     }
 
     override fun codec(): MapCodec<out BaseEntityBlock> = codec
@@ -66,8 +66,12 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
         builder.add(facing)
     }
 
-    override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
-        return defaultBlockState().setValue(facing, context.horizontalDirection.opposite)
+    override fun getStateForPlacement(context: BlockPlaceContext): BlockState {
+        if (context.level.isClientSide) return defaultBlockState().setValue(facing, GigaDirectionProperty.Enum.North)
+
+        val valueInt = ((((context.rotation + 180.0) * 8) / 360) + 180f).roundToInt() % 8
+        val value = GigaDirectionProperty.values.getOrNull(valueInt) ?: GigaDirectionProperty.Enum.North
+        return defaultBlockState().setValue(facing, value)
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
