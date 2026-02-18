@@ -56,7 +56,7 @@ rae right_arm_twist {
 rae right_elbow_twist {  # guitar strum
     flow 1.2
     rotate "hand_r" y:-35
-    #wigglemul 2.0
+    wigglemul 2.0
 }
 
 rae left_arm_slide {

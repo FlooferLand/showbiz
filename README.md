@@ -13,6 +13,12 @@ I made this since Minecraft lets you combine tons of different mods and situatio
 
 _Not affiliated nor associated with Aaron Fechter, Rock-afire Explosion, or Creative Engineering. This is purely a fan project._
 
+Note that this project is split into several different components:
+- [Showbiz Mod](https://github.com/FlooferLand/showbiz) - The Minecraft mod
+- [Showbiz (VSCode)](https://github.com/FlooferLand/showbiz-vscode) - Visual Studio Code extension aimed at addon developers
+- [BizLib](https://github.com/FlooferLand/bizlib) - Handles format reading, parsing, and other low level things.
+  - [BizLibNative](https://github.com/FlooferLand/bizlib/tree/main/BizlibNative) - C#-based library I wrote to maximize engine compatibility, as it reads shows roughly the same way RR Engine does _(except using NRBF instead of BinaryFormatter since it's more secure)_
+
 ## Building
 
 1. Clone this project _(or [fork it](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo#forking-a-repository) if you want to contribute changes)_

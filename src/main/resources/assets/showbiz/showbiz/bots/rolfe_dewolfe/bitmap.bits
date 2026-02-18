@@ -33,27 +33,32 @@ rae head_right {
 rae earl_head_tilt {
     flow 0.5
     rotate "earl_head" z:-25
+    wigglemul 1.5
 }
 
 # arms
 rae right_arm_raise {
     flow 0.15
     rotate "arm_r" z:50
+    wigglemul 1.5
 }
 
 rae right_arm_twist {
     flow 0.35
     rotate "arm_r" y:22
+    wigglemul 1.5
 }
 
 rae right_elbow_twist {
     flow 0.35
     rotate "arm_r_inner" y:-75
+    wigglemul 1.5
 }
 
 rae left_arm_raise {
     flow 0.3
     rotate "arm_l_up_pivot" z:-65
+    wigglemul 1.5
 }
 
 # face

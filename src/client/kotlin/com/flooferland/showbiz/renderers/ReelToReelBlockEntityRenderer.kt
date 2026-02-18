@@ -22,11 +22,7 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         }
 
         // Time
-        val rotationAngle = run {
-            val target = entity.seek.toFloat() * 200f
-            state.visualSeek += (target - state.visualSeek)
-            state.visualSeek
-        }
+        val rotationAngle = entity.seek.toFloat() * 200f
 
         // Rendering a temporary reel holder
         runCatching {

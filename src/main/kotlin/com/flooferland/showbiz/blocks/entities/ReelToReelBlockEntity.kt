@@ -51,12 +51,12 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var audioBytesWritten = 0
 
     fun tick() {
-        if (level?.isClientSide ?: true) return
         if (!playing || show.isEmpty()) return
         var shouldUpdate = false
 
         seek += tickDelta
         val seekInt = (seek * fps).roundToInt()
+        if (level?.isClientSide ?: true) return
 
         // Signal
         run {
@@ -163,6 +163,5 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (playing) setPlaying(false)
         signal.reset()
         show.reset()
-        rendererState.visualSeek = 0f
     }
 }
