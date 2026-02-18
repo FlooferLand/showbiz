@@ -97,7 +97,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = playing
         if (!playing) resetPlayback()
         showOut.send(PackedShowData(playing, signal, show.mapping))
-        //level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing))  // Visual
+        level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing && !paused))  // Visual
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -111,6 +111,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = !paused
         this.paused = paused
         showOut.send(PackedShowData(playing, signal, show.mapping))
+        level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing && !paused))  // Visual
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return

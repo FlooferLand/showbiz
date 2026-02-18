@@ -253,6 +253,7 @@ publishMods {
     }
 
     curseforge {
+        projectSlug = "showbiz"
         projectId = property("mod.curseforgeId") as String
         accessToken = providers.environmentVariable("tokens.curseforge")
         minecraftVersions.add(minecraft)

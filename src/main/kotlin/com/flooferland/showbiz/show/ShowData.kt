@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.nbt.*
+import com.flooferland.bizlib.formats.LegacyRshowFormat
 import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.util.UUID
@@ -68,10 +69,12 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
             val loaded = run {
-                val stream = Files.newInputStream(Path("${FileStorage.SHOWS_DIR}/$filename"))
-                val out = RshowFormat().read(stream)
-                stream.close()
-                out
+                val path = Path("${FileStorage.SHOWS_DIR}/$filename")
+                val out = runCatching { RshowFormat().read(Files.newInputStream(path)) }
+                out.onFailure { throwable ->
+                    Showbiz.log.error("BizlibNative failed to load '${path}'", throwable)
+                }
+                out.getOrNull() ?: LegacyRshowFormat().read(Files.newInputStream(path))
             }
 
             // Audio and conversion
