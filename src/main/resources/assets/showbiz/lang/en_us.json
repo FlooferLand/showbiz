@@ -8,7 +8,8 @@
     "block.showbiz.greybox": "Greybox",
     "block.showbiz.speaker": "Speaker",
     "block.showbiz.show_parser": "Show Parser",
-    "block.showbiz.show_selector": "Show Selector",
+    "block.showbiz.show_selector": "Show Selector (W.I.P)",
+    "block.showbiz.curtain_block": "Curtain Railing (W.I.P)",
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
@@ -18,5 +19,6 @@
     "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
-    "tooltip.showbiz.block.show_selector": "Sends out a trigger signal\nwhen one of the buttons is pressed"
+    "tooltip.showbiz.block.show_selector": "Work in progress\nSends out a trigger signal\nwhen one of the buttons is pressed",
+    "tooltip.showbiz.block.curtain_block": "Work in progress\nPlace at the top of a stage\nto droop curtains down"
 }

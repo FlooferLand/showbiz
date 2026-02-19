@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.connection.GlobalConnections
+import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.*
@@ -35,7 +36,8 @@ object ConnectionRenderer {
                 deferRender { pose, consumer -> renderPoint(pose, consumer, point, pointPos) }
 
                 // Connections
-                for (connection in point.connections) {
+                val connectionSnapshot = point.connections.toList()
+                for (connection in connectionSnapshot) {
                     val targetPoint = connection.point
                     val endYOffset = getYOffset(targetPoint.index, GlobalConnections.entries[connection.pos]?.size ?: 1)
                     val end = connection.pos.center.add(0.0, endYOffset, 0.0)
@@ -57,9 +59,8 @@ object ConnectionRenderer {
         run {
             pose.pushPose()
             pose.translate(pos.x, pos.y, pos.z)
-            val matrix = pose.last().pose()
-            drawColouredBox(matrix, consumer, bound.inflate(-0.032), color, 1.0f)
-            drawColouredBox(matrix, consumer, bound, darkColor, 0.6f)
+            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.032), color, alpha = 1.0f)
+            DrawUtils.drawBox(pose, consumer, bound, darkColor, alpha = 0.6f)
             pose.popPose()
         }
 
@@ -86,9 +87,8 @@ object ConnectionRenderer {
         pose.translate(startPos.x, startPos.y, startPos.z)
         pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
         pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
-        val matrix = pose.last().pose()
-        drawColouredBox(matrix, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125), color, 0.6f)
-        drawColouredBox(matrix, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125).inflate(0.032), darkColor, 0.2f)
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125), color, alpha = 0.6f)
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125).inflate(0.032), darkColor, alpha = 0.2f)
         pose.popPose()
     }
 
@@ -179,103 +179,4 @@ object ConnectionRenderer {
 
     fun isHoldingWand(player: Player) =
         player.isHolding(ModItems.Wand.item)
-
-    @Suppress("DuplicatedCode")
-    fun drawColouredBox(matrix: Matrix4f, consumer: VertexConsumer, box: AABB, colour: Int, alpha: Float) {
-        val red = FastColor.ARGB32.red(colour) / 255f
-        val green = FastColor.ARGB32.green(colour) / 255f
-        val blue = FastColor.ARGB32.blue(colour) / 255f
-        val minU = 0.0f
-        val minV = 0.25f
-        val maxU = minU + 0.25f
-        val maxV = minV + 0.25f
-
-        // North
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-
-        // South
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-
-        // West
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-
-        // East
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-
-        // Up
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-
-        // Down
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(maxU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(minU, minV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(minU, maxV).setColor(red, green, blue, alpha)
-        consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(maxU, maxV).setColor(red, green, blue, alpha)
-    }
-
-    @Suppress("DuplicatedCode")
-    private fun drawBox(pose: PoseStack, consumer: VertexConsumer, box: AABB) {
-        val matrix = pose.last().pose()
-
-        var width = (box.maxX - box.minX).toFloat()
-        var height = (box.maxY - box.minY).toFloat()
-        if (width > 0.01) {
-            // North
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(0f, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(width, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(width, 0f)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(0f, 0f)
-
-            // South
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(0f, height)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(width, height)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(width, 0f)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(0f, 0f)
-        }
-
-        width = (box.maxZ - box.minZ).toFloat()
-        if (width > 0.01) {
-            // West
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(0f, height)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(width, height)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(width, 0f)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(0f, 0f)
-
-            // East
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(0f, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(width, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(width, 0f)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(0f, 0f)
-        }
-
-        width = (box.maxX - box.minX).toFloat()
-        height = (box.maxZ - box.minZ).toFloat()
-        if (width > 0.01) {
-            // Up
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(0f, width)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(height, width)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.maxZ.toFloat()).setUv(height, 0f)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.maxY.toFloat(), box.minZ.toFloat()).setUv(0f, 0f)
-
-            // Down
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(0f, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.minZ.toFloat()).setUv(width, height)
-            consumer.addVertex(matrix, box.maxX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(width, 0f)
-            consumer.addVertex(matrix, box.minX.toFloat(), box.minY.toFloat(), box.maxZ.toFloat()).setUv(0f, 0f)
-        }
-    }
 }

@@ -19,9 +19,11 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
+import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
+import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 
@@ -83,6 +85,15 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = ::ShowSelectorBlockEntity
+    ),
+    CurtainBlock(
+        "curtain_block", ::CurtainBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.WOOL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::CurtainBlockEntity
     )
     ;
 

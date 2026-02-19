@@ -14,6 +14,7 @@ import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
+import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -90,6 +91,10 @@ object ShowbizClient : ClientModInitializer {
                 ModBlocks.ShowSelector.entityType!! as BlockEntityType<ShowSelectorBlockEntity>,
                 ::ShowSelectorBlockEntityRenderer
             )
+            BlockEntityRenderers.register(
+                ModBlocks.CurtainBlock.entityType!! as BlockEntityType<CurtainBlockEntity>,
+                ::CurtainBlockEntityRenderer
+            )
             EntityRendererRegistry.register(
                 ModClientEntities.ModelPart.type,
                 ::ModelPartEntityRenderer
@@ -124,6 +129,7 @@ object ShowbizClient : ClientModInitializer {
             pose.translate(-view.x, -view.y, -view.z)
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
+
             pose.popPose()
         }
 

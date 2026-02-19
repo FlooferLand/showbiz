@@ -7,6 +7,7 @@ import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
@@ -62,7 +63,13 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
 
         if (first.pos.isEmpty) {
             when (lastEntity) {
-                is ReelToReelBlockEntity, is GreyboxBlockEntity, is StagedBotBlockEntity, is ShowParserBlockEntity, is SpeakerBlockEntity -> {
+                is ReelToReelBlockEntity,
+                is GreyboxBlockEntity,
+                is StagedBotBlockEntity,
+                is ShowParserBlockEntity,
+                is SpeakerBlockEntity,
+                is CurtainBlockEntity
+                -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
                     return InteractionResult.SUCCESS
@@ -108,6 +115,18 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Speaker added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is CurtainBlockEntity -> {
+                    val (greybox, curtain) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        show.bindListener(curtain)
+                    }
+                    curtain.applyChange(true) {
+                        curtain.isOpen = false
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Curtain added")
                     return InteractionResult.SUCCESS
                 }
                 else -> { reset(error = "Unknown order"); return InteractionResult.CONSUME }

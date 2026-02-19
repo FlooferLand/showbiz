@@ -6,12 +6,13 @@
 	},
 	"name": "show_selector",
 	"model_identifier": "show_selector",
+	"front_gui_light": false,
 	"visible_box": [2, 2.5, 0.75],
 	"variable_placeholders": "",
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 1629,
+	"activity_tracker": 1739,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\block\\show_selector.geo.json",
@@ -2807,5 +2808,32 @@
 			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAFF0lEQVR4AeycDY4bIQyFs73L5v7nyWXS8UqWEIoxAzbB5lU7IsE/2M9fNLNR23+Px+NtdF1pXH+0Ol0Pz5qcAMjaG/rqUIAA+Ln8LK4rjeuPVqPr4VmTEwBZe0NfHQoQANq9tdfecdyUi1bHVPJTgwmAU3tH35cCBIB2b+21X+lcf7Q6XA/PmpwAyNob+moowKZIAOAZgKdmuEYCwLBtpGIFIgGAZwCemuEaCQDDtpGKFYgEAJ4BeGqGayQADNtGKlYgEgB4BuCpGa6RADBs+9xUdecAoFbksPcA4LCB1+0CgFqRw94DgMMGXrcrAaD9zs32Op/0nv21VYrHvpMCJQDlcHqPa8W0bFL+kRgpF/Y7FGAASPgO96ZLmaN83QxqGC1yNNLDRAoQAJZCUy66KLfFZZnLop6wOaTCCQC2ad+0aXbOw6vmr9k5T70SFK2r9sf7hgIlAA03mLIqEAkA/tRrs2A/bdXyHGGPBIB2y7hrP2LAWpORANB6gX1AAQAwIFqmEACQaZoDvQCAAdEihWi1AgBNoeR2AJB8wFp7kQDA7/XaNAfskQAYaA8hmgIAQFMouR0AJB+w1h4A0BRKbgcASQfc2xYA6FUqqR8ASDrY3rYAQK9SSf0AQNLB9rYFAHqVSuoHAJIOtretEgDtu3bNXp+p+Wv2Oh/eOyhQAuCQHilXK3D3PAsA7v5lzLv+d3uC/w0FLAC4cRxcd1NgJQDaPV+za9pp8Zpdy5/SvhKAlAJGbwoARJ/gZP0AYFLA6OEAIPoEJ+sHAJMC7hI+WgcAGFUuSRwASDLI0TYAwKhySeIAQJJBjrYBAEaVSxIHAJIMcrQNADCqXJI4ABB8kLPlA4BZBYPHA4DgA5wtHwDMKhg8HgAEH+Bs+QBgVsHg8QAg+ABnywcAswoGjwcAQQdoVfZKAO7+e4DV/laahsqzEoBQwpxSLAA4ZdJCnwBAEOaUbQBwyqSFPgGAIMwp2wDglEkLfQIAQZhdt63rAgDWigbLBwCCDcy6XABgrWiwfAAg2MCsyyUAZr9zt64J+RYqQAAsPA5H7aYAANhtIovrAQCLBR89ziuuBQD/r1peZyPvBgq0AODyCAR+jTWZAj0AUMszEFAsXZQH12YK9AKwWdkox0qBFgD19wOjZ3Ke0XjEOSrQAsDxWKTeRYEWAHTfLq9dakYdhgq0ADA8BqlGFfCOawHA925evWtB/i8o0ALgC+XgyNUKtAAo7//0+k5t7M+rFMt2Xmf9pHjsCwq0ABBCsJ1JAU8A+FPNq6Qb23md9ZPisf9BgRYA9PDHIeVr3sOaQIEWANQeDZ4uen3nopjykmJLH3o96yfFY19QQANACMO2twKr8msA8H2Z19662J9XKY7tvM76SfHYFxTQABDCsJ1FgR4A+NPJa2/v7M+rFMd2Xmf9pHjsf1CgB4APYdjKooAGAD2Zl1dv32UMvZbiyFZes35SPPYFBTQAhDBsZ1HABYDX6/V3P+dVEovtvM76SfHYlxVwAUA+DhZNgdV2NwDe15/f39+H9um+3N6WfqsFjH6eGwDRhTmlfhcAns/nD/+h15KYZLP0k87BvqyACwDycbDspoALAHzf51Vqmu28zvpJ8diXFXABQD4Olt0UcAPA+um+N99uAu9ejxsAuze+W33fqscFAOun+9583xIx8rkuAEQW5LTaAcBpE6/6BQCVIKe9BQCnTbzqFwBUgpz2FgCcNvGqXwBQCbL67bfP+w8AAP//BmbIHgAAAAZJREFUAwB8+FMQoH1I0QAAAABJRU5ErkJggg=="
 		}
 	],
+	"display": {
+		"thirdperson_righthand": {
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"thirdperson_lefthand": {
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_righthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"firstperson_lefthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"ground": {
+			"translation": [0, -1.25, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"gui": {
+			"rotation": [0, 153, 0],
+			"translation": [0, -7, 0],
+			"scale": [0.7, 0.7, 0.7]
+		},
+		"fixed": {
+			"translation": [0, -4.5, -1],
+			"scale": [0.4, 0.4, 0.4]
+		}
+	},
 	"geckolib_model_type": "Block"
 }
