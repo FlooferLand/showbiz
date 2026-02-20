@@ -9,12 +9,12 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.connection.GlobalConnections
+import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.*
 import com.mojang.math.Axis
-import org.joml.Matrix4f
 import kotlin.math.atan2
 
 // Thank god for https://github.com/MrCrayfish/MrCrayfishFurnitureMod-Refurbished/tree/1.21.1
@@ -118,7 +118,7 @@ object ConnectionRenderer {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         pose.pushPose()
 
-        val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
+        val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL)
         val queuedSnapshot = queued.toList()
         for (consumer in queuedSnapshot) {
             consumer(pose, builder)

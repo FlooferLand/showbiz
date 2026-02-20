@@ -15,10 +15,10 @@
     "item.showbiz.reel": "Reel",
 
     "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\n- Right-click to change models\n- Place a block on top to hide the block",
-    "tooltip.showbiz.block.reel_to_reel": "Plays back reels",
+    "tooltip.showbiz.block.reel_to_reel": "Plays back reels\nSlot in a reel at the top\nStart/pause playback by right-clicking on the sides",
     "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
-    "tooltip.showbiz.block.show_selector": "Work in progress\nSends out a trigger signal\nwhen one of the buttons is pressed",
-    "tooltip.showbiz.block.curtain_block": "Work in progress\nPlace at the top of a stage\nto droop curtains down"
+    "tooltip.showbiz.block.show_selector": "Sends out a trigger signal\nwhen one of the buttons is pressed",
+    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse a dye to change the colour"
 }

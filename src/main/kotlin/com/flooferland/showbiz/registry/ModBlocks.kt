@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.CurtainBlock
+import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
@@ -94,6 +95,25 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = ::CurtainBlockEntity
+    ),
+    CurtainBlockShadow(
+        "curtain_block_shadow", ::CurtainShadowBlock,
+        Properties.of()
+            .strength(100f)
+            .sound(SoundType.EMPTY)
+            .replaceable()
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        hideFromSearch = true
+    ),
+    WojackBlock(
+        "wojack_block", ::Block,
+        Properties.of()
+        .strength(5f)
+        .sound(SoundType.AMETHYST)
+        .noOcclusion(),
+        modelPreset = BlockModelId.CubeAll,
+        hideFromSearch = true
     )
     ;
 
@@ -102,9 +122,11 @@ enum class ModBlocks {
     val item: BlockItem
     var model: BlockModelId? = null
     var entityType: BlockEntityType<*>? = null
-    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null) {
+    var hideFromSearch: Boolean = false
+    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null, hideFromSearch: Boolean = false) {
         this.id = rl(name)
         this.model = modelPreset;
+        this.hideFromSearch = hideFromSearch
 
         this.block = Blocks.register(
             ResourceKey.create(BuiltInRegistries.BLOCK.key(), this.id),

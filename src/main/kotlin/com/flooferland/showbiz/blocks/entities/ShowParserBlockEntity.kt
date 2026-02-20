@@ -1,22 +1,18 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.HolderLookup
-import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.phys.Vec3
+import net.minecraft.core.*
+import net.minecraft.core.particles.*
+import net.minecraft.nbt.*
+import net.minecraft.network.chat.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.server.level.*
+import net.minecraft.sounds.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.inventory.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.PLAYING_POWERED
 import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.SIGNAL_POWERED
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
@@ -24,6 +20,7 @@ import com.flooferland.showbiz.menus.ShowParserMenu
 import com.flooferland.showbiz.network.packets.ShowParserDataPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -76,7 +73,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider?) {
         connectionManager.load(tag)
-        bitFilter = (tag.getIntArrayOrNull("bit_filter") ?: intArrayOf()).map { it.toShort() }.toMutableList()
+        bitFilter = (tag.getIntArrayOrNull("bit_filter") ?: intArrayOf()).map { it.toBitId() }.toMutableList()
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {

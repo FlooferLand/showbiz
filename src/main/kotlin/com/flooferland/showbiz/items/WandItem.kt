@@ -11,6 +11,7 @@ import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
+import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
@@ -52,7 +53,9 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
             triggerAnim<WandItem>(player, GeoItem.getOrAssignId(ctx.itemInHand, level), "main", anim)
             player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
             message?.let {
-                player.displayClientMessage(Component.literal(it), true)
+                val message = Component.empty()
+                for (string in it.lines()) message.append(Component.literal(string))
+                player.displayClientMessage(message, true)
             }
         }
 
@@ -61,6 +64,16 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
             finish(sound = ModSounds.Deselect, anim = "retract", message = "Deselected" + (error?.let { "; $it" } ?: ""))
         }
 
+        // Clearing connections
+        /*if (player.isCrouching) {
+            lastEntity.applyChange(true) {
+                (lastEntity as? IConnectable)?.connectionManager?.clear()
+            }
+            finish(sound = ModSounds.End, anim = "retract", message = "Ports were reset")
+            return InteractionResult.CONSUME
+        }*/
+
+        // First part
         if (first.pos.isEmpty) {
             when (lastEntity) {
                 is ReelToReelBlockEntity,
@@ -68,7 +81,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is StagedBotBlockEntity,
                 is ShowParserBlockEntity,
                 is SpeakerBlockEntity,
-                is CurtainBlockEntity
+                is CurtainBlockEntity,
+                is ShowSelectorBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -123,13 +137,22 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                         show.bindListener(curtain)
                     }
                     curtain.applyChange(true) {
-                        curtain.isOpen = false
+                        curtain.closeCurtains()
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Curtain added")
                     return InteractionResult.SUCCESS
                 }
-                else -> { reset(error = "Unknown order"); return InteractionResult.CONSUME }
+                is ShowSelectorBlockEntity if firstEntity is ShowParserBlockEntity -> {
+                    val (showSelector, showParser) = Pair(lastEntity, firstEntity)
+                    showSelector.applyChange(true) {
+                        show.bindListener(showParser)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Show selector added")
+                    return InteractionResult.SUCCESS
+                }
+                else -> { reset(error = "Unknown order.\nTry linking them the other way around"); return InteractionResult.CONSUME }
             }
         }
     }

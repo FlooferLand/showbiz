@@ -9,7 +9,7 @@ import net.minecraft.world.item.*
 enum class ModItemGroups {
     Main("main", { params, out ->
         for (block in ModBlocks.entries) {
-            out.accept(block.item)
+            if (!block.hideFromSearch) out.accept(block.item)
         }
         for (item in ModItems.entries) {
             out.accept(item.item)

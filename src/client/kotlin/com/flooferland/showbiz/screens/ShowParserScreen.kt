@@ -1,14 +1,14 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.ChatFormatting
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.*
+import net.minecraft.client.*
+import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.gui.screens.inventory.MenuAccess
-import net.minecraft.network.chat.Component
-import net.minecraft.util.CommonColors
-import net.minecraft.world.entity.player.Inventory
+import net.minecraft.client.gui.screens.*
+import net.minecraft.client.gui.screens.inventory.*
+import net.minecraft.network.chat.*
+import net.minecraft.util.*
+import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.menus.ShowParserMenu
 import com.flooferland.showbiz.registry.ModCommands
