@@ -16,12 +16,13 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<CurtainBlockEntity> {
+    val curtainRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block.png"))!!
+    val curtainRenderTypeCull = RenderType.entityTranslucentCull(rl("textures/block/curtain_block.png"))!!
+    val endRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block_end.png"))!!
+    val endRenderTypeCull = RenderType.entityTranslucentCull(rl("textures/block/curtain_block_end.png"))!!
+
     override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val level = blockEntity.level ?: return
-        val mainConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(rl("textures/block/curtain_block.png")))
-        val mainConsumerCull = bufferSource.getBuffer(RenderType.entityTranslucentCull(rl("textures/block/curtain_block.png")))
-        val endConsumerCull = bufferSource.getBuffer(RenderType.entityTranslucentCull(rl("textures/block/curtain_block_end.png")))
-        val endConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(rl("textures/block/curtain_block_end.png")))
         var color = blockEntity.color // 0xff6767
 
         val (drawSouth, drawNorth, drawWest, drawEast) = arrayOf(
@@ -39,7 +40,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
             poseStack.pushPose()
             poseStack.translate(0f, 0.0f, 0f)
             DrawUtils.drawBox(
-                poseStack, mainConsumer,
+                poseStack, bufferSource.getBuffer(curtainRenderType),
                 AABB(0.0, 0.5, 0.0, 1.0, 1.0, 1.0),
                 packedLight = packedLight,
                 packedOverlay = packedOverlay,
@@ -51,7 +52,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                 drawEast = drawEast
             )
             DrawUtils.drawBox(
-                poseStack, endConsumer,
+                poseStack, bufferSource.getBuffer(endRenderType),
                 AABB(0.0, 0.0, 0.0, 1.0, 0.5, 1.0),
                 packedLight = packedLight,
                 packedOverlay = packedOverlay,
@@ -72,7 +73,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         val playerInside = worldBox.inflate(0.4).contains(camera.position)
         poseStack.pushPose()
         DrawUtils.drawBox(
-            poseStack, if (camera.position.y > worldBox.maxY) mainConsumer else mainConsumerCull,
+            poseStack, if (camera.position.y > worldBox.maxY) bufferSource.getBuffer(curtainRenderType) else bufferSource.getBuffer(curtainRenderTypeCull),
             box,
             packedLight = packedLight,
             packedOverlay = packedOverlay,
@@ -86,7 +87,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         )
         poseStack.translate(0f, voxelSnap(randomY * 0.05f), 0f)
         DrawUtils.drawBox(
-            poseStack, endConsumerCull,
+            poseStack, bufferSource.getBuffer(endRenderTypeCull),
             AABB(0.0, (1f - length).toDouble() - 1.0, 0.0, 1.0, (1f - length).toDouble() - 1.5, 1.0).inflate(0.001),
             packedLight = packedLight,
             packedOverlay = packedOverlay,
