@@ -1,7 +1,6 @@
 package com.flooferland.showbiz
 
 import net.minecraft.ChatFormatting
-import net.minecraft.core.component.DataComponentPatch
 import net.minecraft.network.chat.Component
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
@@ -10,17 +9,12 @@ import com.flooferland.showbiz.registry.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.minecraft.server.packs.*
-import com.flooferland.showbiz.items.ReelItem
-import com.flooferland.showbiz.network.packets.ShowFileListPacket
-import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.types.connection.GlobalConnections
-import com.flooferland.showbiz.utils.Extensions.getHeldItem
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.io.path.name
 import kotlin.jvm.optionals.getOrNull
 
 object Showbiz : ModInitializer {
@@ -28,7 +22,6 @@ object Showbiz : ModInitializer {
     val log: Logger = LoggerFactory.getLogger(MOD_ID)
 
     var addons = listOf<AddonData>()
-
     var bots = mapOf<String, AddonBotEntry>()
 
     override fun onInitialize() {
@@ -44,6 +37,11 @@ object Showbiz : ModInitializer {
             ModCommands
             ModScreenHandlers
             GlobalConnections
+            FileStorage
+            FileServer
+        }
+        ServerTickEvents.START_SERVER_TICK.register { server ->
+            FileServer.update(server)
         }
 
         // Server addons
@@ -78,23 +76,6 @@ object Showbiz : ModInitializer {
                     ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
                 false
             )*/
-        }
-
-        // Server/common packets
-        ServerPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { packet, ctx ->
-            val files = FileStorage.fetchShows().map { it.name }.toTypedArray()
-            ServerPlayNetworking.send(ctx.player(), ShowFileListPacket(isResponse = true, files = files))
-        }
-        ServerPlayNetworking.registerGlobalReceiver(ShowFileSelectPacket.type) { packet, ctx ->
-            val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@registerGlobalReceiver
-            val filename = packet.selected
-            val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-            if (shows?.find { it.name == filename } == null) return@registerGlobalReceiver
-            reel.applyComponentsAndValidate(
-                DataComponentPatch.builder()
-                    .set(ModComponents.FileName.type, filename)
-                    .build()
-            )
         }
     }
 }
