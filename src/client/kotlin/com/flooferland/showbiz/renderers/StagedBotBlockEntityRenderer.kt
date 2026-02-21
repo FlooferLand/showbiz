@@ -13,6 +13,7 @@ import net.minecraft.network.chat.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.shapes.CollisionContext
 import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.mojang.math.Axis
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
@@ -72,11 +73,17 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             }
         }
         render.onFailure { throwable ->
+            if (renderExceptionCountdown > 0) {
+                renderExceptionCountdown -= Minecraft.getInstance().timer.gameTimeDeltaTicks
+                return@onFailure
+            }
             Showbiz.log.error("RENDER EXCEPTION FOR '${animatable.botId}': ", throwable)
             Minecraft.getInstance()?.player?.displayClientMessage(
-                Component.literal("RENDER EXCEPTION FOR '${animatable.botId}': ${throwable}").withStyle(ChatFormatting.RED),
+                Component.literal("RENDER EXCEPTION FOR '${animatable.botId}': $throwable\n").withStyle(ChatFormatting.RED)
+                    .append("This is usually caused by other errors, please check the game logs."),
                 false
             )
+            renderExceptionCountdown = 20.secsToTicks().toFloat()
         }
     }
 
@@ -108,5 +115,9 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             poseStack.mulPose(Axis.YP.rotationDegrees(angle))
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
+    }
+
+    companion object {
+        var renderExceptionCountdown = 0f
     }
 }

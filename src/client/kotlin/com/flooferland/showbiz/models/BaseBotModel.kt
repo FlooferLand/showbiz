@@ -15,17 +15,26 @@ import software.bernie.geckolib.model.GeoModel
 open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     protected var currentModel: BotModelData? = null
 
-    override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
+    enum class Error {
+        MissingModel,
+        MissingTexture
+    }
+
+    override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation? {
         val botId = animatable.botId
         val model = ShowbizClient.bots[botId]?.getDefaultModel() ?: run {
+            if (errorsTriggered.contains(Error.MissingModel)) return null
+            errorsTriggered.add(Error.MissingModel)
             error("Failed to get model. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly")
         }
         return model
     }
 
-    override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation {
+    override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation? {
         val botId = animatable.botId
         return ShowbizClient.bots[botId]?.getDefaultTexture() ?: run {
+            if (errorsTriggered.contains(Error.MissingTexture)) return null
+            errorsTriggered.add(Error.MissingTexture)
             error("Failed to get texture. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]")
         }
     }
@@ -41,8 +50,15 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     // For some reason GeckoLib seems to require setting the active model every single time?
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel? {
-        if (location == null) error("Couldn't get baked model (null)")
-        val model = ShowbizClient.botModels[location] ?: error("Couldn't find bot model for $location")
+        if (location == null) {
+            if (errorsTriggered.contains(Error.MissingModel)) return null
+            error("Couldn't get baked model (null)")
+        }
+        val model = ShowbizClient.botModels[location] ?: run {
+            if (errorsTriggered.contains(Error.MissingModel)) return null
+            error("Couldn't find bot model for $location")
+        }
+
         if (model != currentModel) {
             currentModel = model
             animationProcessor.setActiveModel(model.bakedModel)
@@ -59,5 +75,9 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
             Showbiz.log.error("Couldn't find animation '$name' in '$res' (bot=${animatable.botId})")
             null
         }
+    }
+
+    companion object {
+        val errorsTriggered = mutableSetOf<Error>()
     }
 }

@@ -22,6 +22,7 @@ import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
 import net.minecraft.util.*
 import net.minecraft.util.profiling.*
+import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.json.raw.Model
@@ -39,7 +40,6 @@ data class LoadedAssets(
     val animations: MutableMap<ResourceLocation, BakedAnimations> = mutableMapOf()
 )
 
-
 @Environment(EnvType.CLIENT)
 object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(), IdentifiableResourceReloadListener {
     const val ASSETS_TOML_NAME = "assets.toml"
@@ -52,11 +52,15 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
             if (pack.packId().startsWith("fabric-")) continue
-            for (namespace in pack.getNamespaces(PackType.SERVER_DATA)) {
+            for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
                 fun err(msg: String, throwable: Throwable? = null) =
                     Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
+
+                if (pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "showbiz")) != null) {
+                    Showbiz.log.info("Attempting to load addon '${namespace}'")
+                }
 
                 // Finding assets
                 data class BotLoadAssets(
@@ -140,11 +144,12 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
     override fun apply(loaded: LoadedAssets, manager: ResourceManager, profiler: ProfilerFiller) {
         ShowbizClient.addons = loaded.addons
+        ShowbizClient.resetAssetErrors()
 
         // Collecting bots
         val bots = mutableMapOf<String, AddonBot>()
         for (addon in loaded.addons) {
-            Showbiz.log.info("Loaded addon '${addon.id}' (client-side)")
+            Showbiz.log.info("Loaded addon '${addon.id}' (resource pack)")
             for ((id, bot) in addon.bots) {
                 bots[id] = bot
             }
