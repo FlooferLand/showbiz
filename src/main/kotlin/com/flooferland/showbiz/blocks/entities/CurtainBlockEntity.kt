@@ -109,11 +109,13 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        connectionManager.load(tag)
         tag.getBooleanOrNull("is_open")?.let { isOpen = it }
         tag.getIntOrNull("color")?.let { color = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        connectionManager.save(tag)
         tag.putBoolean("is_open", isOpen)
         tag.putInt("color", color)
     }

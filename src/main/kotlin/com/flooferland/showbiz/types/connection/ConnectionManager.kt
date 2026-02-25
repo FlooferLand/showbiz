@@ -4,6 +4,9 @@ import net.minecraft.nbt.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import com.flooferland.showbiz.utils.ShowbizUtils
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 
 class ConnectionManager(val entity: BlockEntity) {
     /** Ports that take in information */
@@ -11,6 +14,9 @@ class ConnectionManager(val entity: BlockEntity) {
 
     /** Ports that put out information; Includes listeners */
     val outputs = hashMapOf<String, ConnectionPort<*>>()
+
+    var saveCalled = false;
+    var loadCalled = false;
 
     fun <T: ConnectionData> addInput(port: ConnectionPort<T>) {
         if (port.direction == PortDirection.Out)
@@ -28,6 +34,8 @@ class ConnectionManager(val entity: BlockEntity) {
 
     /** Saves connections to a tag */
     fun save(tag: CompoundTag) {
+        saveCalled = true
+
         val tag = CompoundTag().also { tag.put("connections", it) }
         inputs.forEach { (id, port) ->
             val saved = runCatching { tag.put(id, CompoundTag().also { port.saveOrThrow(it) }) }
@@ -45,6 +53,8 @@ class ConnectionManager(val entity: BlockEntity) {
 
     /** Loads connections from a tag */
     fun load(tag: CompoundTag) {
+        loadCalled = true
+
         val tag = tag.getCompoundOrNull("connections") ?: return
         inputs.forEach { (id, port) ->
             val loaded = runCatching { tag.getCompoundOrNull(id)?.let { port.loadOrThrow(it) } }

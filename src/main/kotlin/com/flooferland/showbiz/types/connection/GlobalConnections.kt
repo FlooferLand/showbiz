@@ -1,8 +1,11 @@
 package com.flooferland.showbiz.types.connection
 
 import net.minecraft.core.*
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.*
+import com.flooferland.showbiz.Showbiz
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 
@@ -53,6 +56,17 @@ object GlobalConnections {
 
                 entries[connectable.blockPos] = points
                 queued.add(connectable)
+
+                // Checking that I didn't forget to use the save/load functions of ConnectionManager
+                if (Showbiz.log.isDebugEnabled) {
+                    val tag = connectable.saveCustomOnly(level.registryAccess())
+                    connectable.loadCustomOnly(tag, level.registryAccess())
+                    val blockId = BlockEntityType.getKey(connectable.type)?.path
+                    if (!manager.saveCalled)
+                        Showbiz.log.error("${GlobalConnections::class.simpleName}: Forgot to add the save function to the '$blockId' block")
+                    if (!manager.loadCalled)
+                        Showbiz.log.error("${GlobalConnections::class.simpleName}: Forgot to add the load function to the '$blockId' block")
+                }
             }
             for (connectable in queued) {
                 updateConnections(connectable)
