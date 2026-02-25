@@ -83,6 +83,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
 
         val bots = mutableMapOf<String, AddonBotEntry>()
         for (addon in addons) {
+            Showbiz.log.info("Loaded addon '${addon.manifest.id}' (data pack)")
             for ((id, bot) in addon.bots) {
                 bots[id] = bot
             }

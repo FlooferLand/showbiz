@@ -20,6 +20,7 @@ import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
+import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
@@ -32,6 +33,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
@@ -117,6 +120,7 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // World
+        ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft -> resetAssetErrors() }
         WorldRenderEvents.LAST.register { context ->
             if (context == null) return@register
             val mc = Minecraft.getInstance() ?: return@register
@@ -129,11 +133,15 @@ object ShowbizClient : ClientModInitializer {
             pose.translate(-view.x, -view.y, -view.z)
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
-
             pose.popPose()
         }
 
         // DARN YOU SPLIT SOURCESETS
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelUploadScreen(stack)) }
+    }
+
+    fun resetAssetErrors() {
+        BaseBotModel.errorsTriggered.clear()
+        StagedBotBlockEntityRenderer.renderExceptionCountdown = 0f
     }
 }

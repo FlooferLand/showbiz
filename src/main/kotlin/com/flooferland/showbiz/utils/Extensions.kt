@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
+import kotlin.math.roundToInt
 
 @Suppress("unused")
 object Extensions {
@@ -105,4 +106,7 @@ object Extensions {
     //endregion
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
+    fun Int.secsToTicks(): Int = this * 20
+    fun Float.secsToTicks(): Int = (this * 20).roundToInt()
+    fun Double.secsToTicks(): Int = (this * 20).roundToInt()
 }

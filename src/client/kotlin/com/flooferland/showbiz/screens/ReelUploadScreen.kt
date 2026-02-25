@@ -5,15 +5,12 @@ import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
 import com.flooferland.showbiz.utils.PlatformUtils
-import java.awt.Desktop
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
@@ -76,7 +73,7 @@ class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Ree
         addRenderableWidget(openDirButton)
     }
 
-    fun setFiles(paths: Array<String>) {
+    fun updateFiles(paths: Array<String>) {
         loading = false
         files.clear()
         files.addAll(paths)
@@ -94,7 +91,8 @@ class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Ree
     companion object {
         init {
             ClientPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { packet, _ ->
-                (Minecraft.getInstance().screen as? ReelUploadScreen)?.setFiles(packet.files)
+                val screen = (Minecraft.getInstance().screen as? ReelUploadScreen) ?: return@registerGlobalReceiver
+                screen.updateFiles(packet.files)
             }
         }
     }
