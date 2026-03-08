@@ -10,6 +10,7 @@
     "block.showbiz.show_parser": "Show Parser",
     "block.showbiz.show_selector": "Show Selector (W.I.P)",
     "block.showbiz.curtain_block": "Curtain Railing (W.I.P)",
+    "block.showbiz.spotlight": "Spotlight (W.I.P)",
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
@@ -20,5 +21,6 @@
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
     "tooltip.showbiz.block.show_selector": "Sends out a trigger signal\nwhen one of the buttons is pressed",
-    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse a dye to change the colour"
+    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse a dye to change the colour",
+    "tooltip.showbiz.block.spotlight": "Work-in-progress"
 }

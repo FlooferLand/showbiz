@@ -36,7 +36,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             else -> false
         }
 
-        if (shouldOpen || shouldClose) {
+        if ((shouldOpen && !isOpen) || (shouldClose && isOpen)) {
             applyChange(true) { setCurtains(shouldOpen && !shouldClose) }
         }
     }

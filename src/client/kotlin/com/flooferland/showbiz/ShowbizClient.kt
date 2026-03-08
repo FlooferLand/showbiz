@@ -17,6 +17,7 @@ import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
+import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
@@ -25,7 +26,8 @@ import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
 import com.flooferland.showbiz.screens.ReelUploadScreen
-import com.flooferland.showbiz.screens.ShowParserScreen
+import com.flooferland.showbiz.screens.ShowParserEditScreen
+import com.flooferland.showbiz.screens.SpotlightEditScreen
 import com.flooferland.showbiz.types.BotSoundHandler
 import com.flooferland.showbiz.types.ModelPartInstance
 import com.flooferland.showbiz.types.ModelPartManager
@@ -33,7 +35,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -71,13 +72,15 @@ object ShowbizClient : ClientModInitializer {
             ModPackets
             ModClientEntities
             ModClientCommands
+            ModClientVeil
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
         ModelPartManager.modelPartInstancer = { owner, block -> ModelPartInstance(owner, block.id) }
 
         // Screens
-        MenuScreens.register(ModScreenHandlers.ShowParser.type, ::ShowParserScreen)
+        MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
+        MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
 
         // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
@@ -97,6 +100,10 @@ object ShowbizClient : ClientModInitializer {
             BlockEntityRenderers.register(
                 ModBlocks.CurtainBlock.entityType!! as BlockEntityType<CurtainBlockEntity>,
                 ::CurtainBlockEntityRenderer
+            )
+            BlockEntityRenderers.register(
+                ModBlocks.SpotlightBlock.entityType!! as BlockEntityType<SpotlightBlockEntity>,
+                ::SpotlightBlockEntityRenderer
             )
             EntityRendererRegistry.register(
                 ModClientEntities.ModelPart.type,

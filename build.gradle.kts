@@ -28,7 +28,7 @@ plugins {
     kotlin("plugin.serialization") version "2.3.0"
     id("com.google.devtools.ksp") version "2.3.4"
     id("dev.kikugie.stonecutter")
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    id("fabric-loom") version "1.15-SNAPSHOT"
     id("com.gradleup.shadow") version "9.2.2"
     id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 }
@@ -40,6 +40,7 @@ repositories {
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") { name = "GeckoLib" }
     maven("https://www.jitpack.io") { name = "Jitpack" }
     maven("https://maven.terraformersmc.com/") { name = "Terraformers" }
+    maven("https://maven.blamejared.com") { name = "BlameJared Maven (CrT / Bookshelf)" }
 
     exclusiveContent {
         forRepository {
@@ -88,13 +89,18 @@ dependencies {
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
+    // Veil
+    modImplementation("foundry.veil:veil-$loader-$minecraft:${dep("veil")}") {
+        exclude(group="maven.modrinth")
+        exclude(group="me.fallenbreath")
+    }
+
     // Modmenu
     modApi("com.terraformersmc:modmenu:${dep("modmenu")}")
 
     // Useful dev tools (not included in the mod, helps me ensure mod compatibility and other things)
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")
     modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("devonly.sodium")}-$loader")
-    modRuntimeOnly("maven.modrinth:iris:${dep("devonly.iris")}+$minecraft-$loader")
 }
 
 tasks.shadowJar {
@@ -171,6 +177,7 @@ tasks.withType<ProcessResources>().configureEach {
         "fabric_loader" to dep("fabric_loader"),
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),
+        "veil" to dep("veil"),
         "geckolib" to vers("geckolib"),
         "archivesName" to modId,
         "archivesBaseName" to modId
@@ -210,6 +217,9 @@ tasks.remapSourcesJar {
 }
 kotlin {
     jvmToolchain(java.ordinal + 1)
+    sourceSets.all {
+        languageSettings.optIn("kotlin.ExperimentalUnsignedTypes")
+    }
 }
 tasks.withType<KotlinCompile>() {
     compilerOptions {
@@ -245,26 +255,11 @@ publishMods {
         accessToken = providers.environmentVariable("tokens.modrinth")
         minecraftVersions.add(minecraft)
 
-        // TODO: Figure out a nice/safe way to add versions to the dependencies
         requires { slug = "fabric-api" }
         requires { slug = "fabric-language-kotlin" }
         requires { slug = "geckolib" }
         optional { slug = "modmenu" }
-    }
-
-    curseforge {
-        projectSlug = "showbiz"
-        projectId = property("mod.curseforgeId") as String
-        accessToken = providers.environmentVariable("tokens.curseforge")
-        minecraftVersions.add(minecraft)
-        clientRequired = true
-        serverRequired = true
-
-        // TODO: Figure out a nice/safe way to add versions to the dependencies
-        requires { slug = "fabric-api" }
-        requires { slug = "fabric-language-kotlin" }
-        requires { slug = "geckolib" }
-        optional { slug = "modmenu" }
+        optional { slug = "veil" }
     }
 
     discord {

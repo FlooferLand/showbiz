@@ -1,0 +1,126 @@
+set rae mitzi
+
+# mouth
+rae jaw {
+    flow 1.2
+    rotate "jaw" x:-15
+}
+
+# eyes turn right
+rae eyes_right {
+    flow 0.2
+    move "Eyes" x:0.3
+}
+
+# eyes turn left
+rae eyes_left {
+    flow 0.2
+    move "Eyes" x:0.3
+}
+
+# left eye lids
+rae left_eyelid {
+    flow 0.4
+    move "LidL" y:-1.5
+}
+
+# right eye lids
+rae right_eyelid {
+    flow 0.4
+    move "LidR" y:-1.5
+}
+
+
+
+# head turn left
+rae head_left {
+    flow 0.2
+    rotate "head" y:30
+}
+
+# head turn right
+rae head_right {
+    flow 0.2
+    rotate "head" y:-30
+}
+
+# head up
+rae head_up {
+    flow 0.2
+    rotate "head" x:10
+}
+
+# body twist left
+rae body_twist_left {
+    flow 0.2
+    rotate "chest" y:15
+}
+
+
+# body twist right
+rae body_twist_right {
+    flow 0.2
+    rotate "chest" y:-15
+}
+
+# body lean
+rae body_lean {
+    flow 0.2
+    rotate "chest" x:-10
+}
+
+
+# body lean
+rae body_lean {
+    flow 0.2
+    rotate "chest" x:-10
+}
+
+# arm left twist
+rae left_arm_twist {
+    flow 0.2
+    rotate "ArmL" y:45
+}
+
+# arm left elbow
+rae left_elbow {
+    flow 0.2
+    rotate "ArmL2" x:40
+}
+
+# arm left raise
+rae left_arm_raise {
+    flow 0.2
+    rotate "ArmL" z:-50
+}
+
+# arm right twist
+rae right_arm_twist {
+    flow 0.2
+    rotate "ArmR" y:-45
+}
+
+# arm right elbow
+rae right_elbow {
+    flow 0.2
+    rotate "ArmR1" x:40
+}
+
+# arm right raise
+rae right_arm_raise {
+    flow 0.2
+    rotate "ArmR" z:50
+}
+
+
+# ear l
+rae left_ear {
+    flow 0.3
+    rotate "earL" x:25
+}
+
+# ear r
+rae right_ear {
+    flow 0.3
+    rotate "earR" x:25
+}

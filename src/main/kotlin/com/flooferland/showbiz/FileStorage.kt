@@ -11,6 +11,10 @@ object FileStorage {
     val SHOWBIZ_DIR = Path(Showbiz.MOD_ID)
     val SHOWS_DIR = SHOWBIZ_DIR / "shows"
 
+    init {
+        SHOWS_DIR.toFile().mkdirs()
+    }
+
     private var cachedShows = arrayOf<Path>()
 
     fun fetchShows(recache: Boolean = false): Array<Path> {

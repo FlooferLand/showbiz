@@ -13,6 +13,7 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
+import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
@@ -82,7 +83,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is ShowParserBlockEntity,
                 is SpeakerBlockEntity,
                 is CurtainBlockEntity,
-                is ShowSelectorBlockEntity
+                is ShowSelectorBlockEntity,
+                is SpotlightBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -120,6 +122,15 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Show parser added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is SpotlightBlockEntity -> {
+                    val (greybox, spotlight) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        show.bindListener(spotlight)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Spotlight added")
                     return InteractionResult.SUCCESS
                 }
                 is GreyboxBlockEntity if firstEntity is SpeakerBlockEntity -> {

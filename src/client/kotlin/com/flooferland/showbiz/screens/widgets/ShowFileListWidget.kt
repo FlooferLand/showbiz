@@ -3,11 +3,7 @@ package com.flooferland.showbiz.screens.widgets
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
-import net.minecraft.core.Vec3i
 import net.minecraft.network.chat.*
-import net.minecraft.world.phys.Vec2
-import com.flooferland.showbiz.types.Vec3f
-import com.mojang.blaze3d.systems.RenderSystem
 import kotlin.math.roundToInt
 
 /** Lists shw files mainly for [com.flooferland.showbiz.screens.ReelUploadScreen] (or anything that requires a show file listing) */

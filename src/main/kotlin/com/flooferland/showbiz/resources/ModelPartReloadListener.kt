@@ -7,7 +7,6 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.ModelPart
 import com.flooferland.showbiz.types.ModelPartManager
 import com.flooferland.showbiz.types.ModelPartMap
-import com.flooferland.showbiz.types.Vec3f
 import com.flooferland.showbiz.utils.Extensions.divide
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl

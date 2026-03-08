@@ -2,15 +2,12 @@ package com.flooferland.showbiz.show
 
 /** One frame of signal data, split per drawer */
 class SignalFrame {
-    var raw: BitIdArray = bitIdArrayOf(0)
-
-    companion object {
-        /** To convert from/to bottom and top drawer bits, this is added to them */
-        val NEXT_DRAWER: BitId = 150.toBitId()
-    }
+    var raw: BitIdArray = bitIdArrayOf(0u)
 
     fun frameHas(id: BitId): Boolean =
         raw.contains(id)
+    fun frameHas(id: Int): Boolean =
+        raw.contains(id.toBitId())
 
     fun reset() {
         raw = bitIdArrayOf()

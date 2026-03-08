@@ -7,12 +7,11 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.types.ResourcePath
-import com.flooferland.showbiz.types.Vec3f
+import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
-import com.google.gson.JsonObject
 import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -20,16 +19,10 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
-import net.minecraft.util.*
 import net.minecraft.util.profiling.*
-import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
-import software.bernie.geckolib.loading.json.raw.Model
-import software.bernie.geckolib.loading.json.typeadapter.KeyFramesAdapter
 import software.bernie.geckolib.loading.`object`.BakedAnimations
-import software.bernie.geckolib.loading.`object`.BakedModelFactory
-import software.bernie.geckolib.loading.`object`.GeometryTree
 
 // TODO: Optimize this class loads.
 //       Currently loading and storing a ton of unnecessary models, and is not async
@@ -159,15 +152,15 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         // TODO: Add these to GeckoLib cache, and compare the existing assets with the loaded ones to tell what to remove/add to the Gecko cache
         val models = mutableMapOf<ResourceLocation, BotModelData>()
         for ((id, model) in loaded.models) {
-            val initBoneRots = mutableMapOf<String, Vec3f>()
-            val initBoneMoves = mutableMapOf<String, Vec3f>()
+            val initBoneRots = mutableMapOf<String, Vec3fc>()
+            val initBoneMoves = mutableMapOf<String, Vec3fc>()
             for (bone in model.getAllBones()) {
-                initBoneRots[bone.name] = Vec3f(
+                initBoneRots[bone.name] = Vec3fc(
                     bone.rotX,
                     bone.rotY,
                     bone.rotZ
                 )
-                initBoneMoves[bone.name] = Vec3f(
+                initBoneMoves[bone.name] = Vec3fc(
                     bone.posX,
                     bone.posY,
                     bone.posZ

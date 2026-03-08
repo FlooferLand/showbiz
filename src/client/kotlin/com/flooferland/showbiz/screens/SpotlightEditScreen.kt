@@ -9,29 +9,30 @@ import net.minecraft.client.gui.screens.inventory.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
-import com.flooferland.showbiz.blocks.ShowParserBlock
-import com.flooferland.showbiz.menus.ShowParserMenu
+import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.registry.ModCommands
+import com.flooferland.showbiz.show.toBitIdOrNull
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.math.roundToInt
 
-class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, title: Component) : Screen(title), MenuAccess<ShowParserMenu> {
-    enum class WidgetSide { Playing, Signal }
-    data class WidgetInfo(val name: String?, val widget: AbstractWidget, val side: WidgetSide = WidgetSide.Signal)
-    val showParserBackground = rl("textures/gui/show_parser.png")
-    val showParserPorts = rl("textures/gui/show_parser_ports.png")
+// TODO: Merge ShowParserScreen and SpotlightEditScreen
+class SpotlightEditScreen(val editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : Screen(title), MenuAccess<SpotlightEditMenu> {
+    data class WidgetInfo(val name: String?, val widget: AbstractWidget)
+    val background = rl("textures/gui/spotlight.png")
 
     val texSize = 256
     val size get() = (texSize * 1.5).roundToInt()
     val textureX get() = (width / 2) - (size / 2)
     val textureY get() = (height / 2) - (size / 2)
 
-    override fun getMenu() = parserMenu
+    override fun getMenu() = editMenu
     override fun isPauseScreen() = false
 
-    var filterBox: EditBox? = null
+    var selectBox: EditBox? = null
+    var turnX: EditBox? = null
+    var turnY: EditBox? = null
 
     override fun init() {
         super.init()
@@ -50,7 +51,7 @@ class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, tit
                 }.let { Component.literal(it).withStyle(ChatFormatting.GRAY) }
                 player.displayClientMessage(
                     Component.literal("-- ").withStyle(ChatFormatting.DARK_RED)
-                        .append(Component.literal("Show parser").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.literal("Spotlight").withStyle(ChatFormatting.DARK_GRAY)
                         ), false)
                 player.displayClientMessage(Component.literal("Use ").append(command).append(" to view all the bits you can filter for"), false)
                 client.setScreen(null)
@@ -61,7 +62,7 @@ class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, tit
 
     override fun resize(minecraft: Minecraft?, width: Int, height: Int) {
         super.resize(minecraft, width, height)
-        filterBox = null
+        selectBox = null
         clearWidgets()
         init()
     }
@@ -71,10 +72,10 @@ class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, tit
 
         // Filter box
         run {
-            filterBox = EditBox(font, 200, 20, Component.literal("Filter"))
-            filterBox!!.tooltip = Tooltip.create(Component.literal("Enter one or more bit numbers that the 'signal' end of the show parser will trigger for (comma-separated)"))
-            filterBox!!.value = menu.data.bitFilter.joinToString(",")
-            filterBox!!.setFormatter { text, i ->
+            selectBox = EditBox(font, 200, 20, Component.literal("Filter"))
+            selectBox!!.tooltip = Tooltip.create(Component.literal("Enter one or more bit numbers (comma-separated)"))
+            selectBox!!.value = menu.data.bitFilter.joinToString(",")
+            selectBox!!.setFormatter { text, i ->
                 val result = Component.empty()
                 if (text.contains(',')) {
                     for (char in text) {
@@ -89,19 +90,31 @@ class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, tit
                 }
                 result.visualOrderText
             }
-            widgets.add(WidgetInfo("Bit filter", filterBox!!))
+            widgets.add(WidgetInfo("Bit selector", selectBox!!))
+        }
+
+        // Turn X
+        run {
+            turnX = EditBox(font, 40, 20, Component.literal("Turn X"))
+            turnX!!.value = editMenu.data.turn.x.toString().replace(".0", "")
+            turnX!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
+            widgets.add(WidgetInfo("Turn X", turnX!!))
+        }
+
+        // Turn Y
+        run {
+            turnY = EditBox(font, 40, 20, Component.literal("Turn Y"))
+            turnY!!.value = editMenu.data.turn.y.toString().replace(".0", "")
+            turnY!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
+            widgets.add(WidgetInfo("Turn Y", turnY!!))
         }
 
         // Placing the UI
-        widgets.firstOrNull()?.widget?.isFocused = true
         for ((i, entry) in widgets.withIndex()) {
             val (name, widget) = entry
             val spacing = 40
             val x = textureX + (size / 2) - (widget.width / 2)
-            val y = when (entry.side) {
-                WidgetSide.Playing -> textureY + (size * 0.2f).toInt() + (i * spacing)
-                WidgetSide.Signal -> textureY + (size * 0.6f).toInt() - (i * spacing)
-            }
+            val y = textureY + (size * 0.5f).toInt() + (i * spacing)
 
             val nameHeight = name?.let { (font.lineHeight * 1.65f).toInt() } ?: 0
             if (name != null) {
@@ -119,42 +132,26 @@ class ShowParserScreen(val parserMenu: ShowParserMenu, inventory: Inventory, tit
         super.onClose()
 
         menu.data.bitFilter.clear()
-        filterBox?.let { filterBox ->
+        selectBox?.let { filterBox ->
             filterBox.value.split(',').forEach { entry ->
-                entry.toShortOrNull()?.let {
+                entry.toBitIdOrNull()?.let {
                     menu.data.bitFilter.add(it)
                 }
             }
         }
+        turnX?.value?.toFloatOrNull()?.let { menu.data.turn.x = it }
+        turnY?.value?.toFloatOrNull()?.let { menu.data.turn.y = it }
         ClientPlayNetworking.send(menu.data)
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
 
-        val menuOwner = Minecraft.getInstance()?.level?.getBlockState(parserMenu.data.blockPos)
         RenderSystem.enableBlend()
         guiGraphics.setColor(0.5f, 0.5f, 0.5f, 0.8f)
-        guiGraphics.blit(showParserBackground, textureX, textureY, 0f, 0f, size, size, size, size)
-        fun drawPort(top: Boolean) {
-            val active = when (top) {
-                true -> menuOwner?.getValue(ShowParserBlock.PLAYING_POWERED)
-                false -> menuOwner?.getValue(ShowParserBlock.SIGNAL_POWERED)
-            } ?: false
-            val lightness = if (active) 0.8f else 0.2f
-            guiGraphics.setColor(lightness, lightness, lightness, 0.8f)
-            when (top) {
-                true ->
-                    guiGraphics.blit(showParserPorts, textureX, textureY, 0f, 0f, size, size / 2, size, size)
-                false ->
-                    guiGraphics.blit(showParserPorts, textureX, textureY + (size / 2), 0f, size / 2f, size, size / 2, size, size)
-            }
-        }
-        drawPort(true)
-        drawPort(false)
+        guiGraphics.blit(background, textureX, textureY, 0f, 0f, size, size, size, size)
         guiGraphics.setColor(1f, 1f, 1f, 1f)
-        guiGraphics.drawCenteredString(font, "Signal", textureX + (size / 2), textureY + (size * 0.84).toInt(), CommonColors.WHITE)
-        guiGraphics.drawCenteredString(font, "Playing", textureX + (size / 2), textureY + (size * 0.15).toInt(), CommonColors.WHITE)
+        guiGraphics.drawCenteredString(font, title, textureX + (size / 2), textureY + (size * 0.15).toInt(), CommonColors.WHITE)
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {

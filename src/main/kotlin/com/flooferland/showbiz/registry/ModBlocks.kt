@@ -23,10 +23,12 @@ import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
+import com.flooferland.showbiz.blocks.SpotlightBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
+import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 
 enum class ModBlocks {
     StagedBot(
@@ -114,6 +116,15 @@ enum class ModBlocks {
         .noOcclusion(),
         modelPreset = BlockModelId.CubeAll,
         hideFromSearch = true
+    ),
+    SpotlightBlock(
+        "spotlight", ::SpotlightBlock,
+        Properties.of()
+        .strength(1.0f)
+        .sound(SoundType.METAL)
+        .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::SpotlightBlockEntity
     )
     ;
 

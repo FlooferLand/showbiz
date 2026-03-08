@@ -66,6 +66,7 @@ object Extensions {
     fun CompoundTag.getCompoundOrNull(key: String)  = if (contains(key)) getCompound(key) else null
     fun CompoundTag.getBooleanOrNull(key: String)   = if (contains(key)) getBoolean(key) else null
     fun CompoundTag.getByteOrNull(key: String)      = if (contains(key)) getByte(key) else null
+    fun CompoundTag.getShortOrNull(key: String)     = if (contains(key)) getShort(key) else null
     fun CompoundTag.getIntOrNull(key: String)       = if (contains(key)) getInt(key) else null
     fun CompoundTag.getLongOrNull(key: String)      = if (contains(key)) getLong(key) else null
     fun CompoundTag.getFloatOrNull(key: String)     = if (contains(key)) getFloat(key) else null

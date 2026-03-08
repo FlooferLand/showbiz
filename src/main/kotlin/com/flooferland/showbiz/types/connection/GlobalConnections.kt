@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 
 /** Common object for handling entity connections/links (See the client-side object) */
 object GlobalConnections {
-    private val loaded = mutableListOf<IConnectable>()
+    val loaded = mutableListOf<IConnectable>()
     val entries = mutableMapOf<BlockPos, MutableList<Point>>()
 
     enum class PointType { Input, Output }

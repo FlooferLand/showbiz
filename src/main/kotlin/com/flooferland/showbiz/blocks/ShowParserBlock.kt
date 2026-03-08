@@ -22,7 +22,7 @@ import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.WandItem
-import com.flooferland.showbiz.network.packets.ShowParserDataPacket
+import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -101,7 +101,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         val PLAYING_POWERED = BooleanProperty.create("powered_playing")!!
 
         init {
-            ServerPlayNetworking.registerGlobalReceiver(ShowParserDataPacket.type) { packet, context ->
+            ServerPlayNetworking.registerGlobalReceiver(ShowParserEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@registerGlobalReceiver
                 val blockEntity = player.serverLevel().getBlockEntity(packet.blockPos) as? ShowParserBlockEntity ?: return@registerGlobalReceiver
                 blockEntity.applyChange(true) {

@@ -16,8 +16,8 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.PLAYING_POWERED
 import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.SIGNAL_POWERED
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
-import com.flooferland.showbiz.menus.ShowParserMenu
-import com.flooferland.showbiz.network.packets.ShowParserDataPacket
+import com.flooferland.showbiz.menus.ShowParserEditMenu
+import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
@@ -28,19 +28,22 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 
-class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<ShowParserDataPacket> {
+class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<ShowParserEditPacket> {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
         level.updateNeighborsAt(blockPos, blockState.block)
     }
 
+    // TODO: Make bitFilter filter bits per map (ex: make it a HashMap of show mappings to BitIds). Same with SpotlightBlockEntity
     var bitFilter = mutableListOf<BitId>()
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
-        return ShowParserMenu(i, getScreenOpeningData(player))
+        return ShowParserEditMenu(i, getScreenOpeningData(player))
     }
+    override fun getScreenOpeningData(player: ServerPlayer) =
+        ShowParserEditPacket(worldPosition, bitFilter, show.data.mapping)
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         val level = level as? ServerLevel ?: return
@@ -89,7 +92,4 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
-
-    override fun getScreenOpeningData(player: ServerPlayer) =
-        ShowParserDataPacket(worldPosition, bitFilter, show.data.mapping)
 }

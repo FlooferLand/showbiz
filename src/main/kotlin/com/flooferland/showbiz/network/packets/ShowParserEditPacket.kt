@@ -8,12 +8,12 @@ import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.utils.rl
 
-class ShowParserDataPacket(val blockPos: BlockPos, val bitFilter: MutableList<BitId>, val mapping: String?) : CustomPacketPayload {
+class ShowParserEditPacket(val blockPos: BlockPos, val bitFilter: MutableList<BitId>, val mapping: String?) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
-        val type = CustomPacketPayload.Type<ShowParserDataPacket>(rl("show_parser_data"))
-        val codec = StreamCodec.of<FriendlyByteBuf, ShowParserDataPacket>(
+        val type = CustomPacketPayload.Type<ShowParserEditPacket>(rl("show_parser_edit"))
+        val codec = StreamCodec.of<FriendlyByteBuf, ShowParserEditPacket>(
             { buf, conf ->
                 buf.writeBlockPos(conf.blockPos)
                 buf.writeVarIntArray(conf.bitFilter.map { it.toInt() }.toIntArray())
@@ -23,7 +23,7 @@ class ShowParserDataPacket(val blockPos: BlockPos, val bitFilter: MutableList<Bi
                 val blockPos = buf.readBlockPos()
                 val bitFilter = buf.readVarIntArray().map { it.toBitId() }.toMutableList()
                 val mapping = buf.readUtf()
-                ShowParserDataPacket(blockPos = blockPos, bitFilter = bitFilter, mapping = mapping)
+                ShowParserEditPacket(blockPos = blockPos, bitFilter = bitFilter, mapping = mapping)
             }
         )!!
     }
