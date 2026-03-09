@@ -1,9 +1,11 @@
 package com.flooferland.showbiz
 
+import net.minecraft.ChatFormatting
 import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.network.chat.Component
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
@@ -42,6 +44,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
+import kotlin.jvm.optionals.getOrNull
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -127,7 +130,6 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // World
-        ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft -> resetAssetErrors() }
         WorldRenderEvents.LAST.register { context ->
             if (context == null) return@register
             val mc = Minecraft.getInstance() ?: return@register
@@ -141,6 +143,34 @@ object ShowbizClient : ClientModInitializer {
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
+        }
+        ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft ->
+            resetAssetErrors()
+
+            // Temporary beta warning
+            val player = minecraft.player ?: return@register
+            val logo = Component.literal("Showbiz").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+            val version = Component.literal(UpdateChecker.currentVersion).withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE, ChatFormatting.BOLD)
+            player.displayClientMessage(logo.append(" ").append(version).append("\n"), false)
+            player.displayClientMessage(
+                Component.literal("WARNING: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
+                    .append(Component.literal(
+                        "Showbiz is still in very early access.\n" +
+                                "Expect the mod's blocks, items, and other things to vanish or break when you update the mod.\n"
+                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
+                false
+            )
+            /*player.displayClientMessage(
+                Component.literal("KNOWN BUGS: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
+                    .append(Component.literal(
+                        "- None"
+                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
+                false
+            )*/
+
+            // Version check
+            if (UpdateChecker.newerVersion != null)
+                minecraft.player?.displayClientMessage(UpdateChecker.getMessage(), false)
         }
 
         // DARN YOU SPLIT SOURCESETS

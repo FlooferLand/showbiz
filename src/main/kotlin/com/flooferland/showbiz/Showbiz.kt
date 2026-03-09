@@ -1,21 +1,16 @@
 package com.flooferland.showbiz
 
-import net.minecraft.ChatFormatting
-import net.minecraft.network.chat.Component
+import net.minecraft.server.packs.*
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.registry.*
-import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper
-import net.minecraft.server.packs.*
 import com.flooferland.showbiz.types.connection.GlobalConnections
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
+import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.loader.api.FabricLoader
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.jvm.optionals.getOrNull
 
 object Showbiz : ModInitializer {
     const val MOD_ID = "showbiz"
@@ -39,7 +34,11 @@ object Showbiz : ModInitializer {
             GlobalConnections
             FileStorage
             FileServer
+            UpdateChecker
         }
+
+        // Services
+        UpdateChecker.check()
         ServerTickEvents.START_SERVER_TICK.register { server ->
             FileServer.update(server)
         }
@@ -50,32 +49,5 @@ object Showbiz : ModInitializer {
         // Finished
         log.info("Enjoy the show!")
         log.debug("Debugging log level enabled! More information will be printed (bogos binted 👽)")
-
-        // Temporary beta warning
-        ServerPlayerEvents.JOIN.register { player ->
-            val mod = FabricLoader.getInstance()?.getModContainer(MOD_ID)?.getOrNull() ?: return@register
-            val modInfo = mod.metadata
-            val logo = Component.literal("Showbiz").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
-            val version = Component.literal(modInfo.version.friendlyString).withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE, ChatFormatting.BOLD)
-            player.displayClientMessage(
-                logo.append(" ").append(version).append("\n"),
-                false
-            )
-            player.displayClientMessage(
-                Component.literal("WARNING: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
-                    .append(Component.literal(
-                        "Showbiz is still in very early access.\n" +
-                                "Expect the mod's blocks, items, and other things to vanish or break when you update the mod."
-                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
-                false
-            )
-            /*player.displayClientMessage(
-                Component.literal("KNOWN BUGS: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
-                    .append(Component.literal(
-                        "- None"
-                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
-                false
-            )*/
-        }
     }
 }
