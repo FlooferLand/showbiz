@@ -27,3 +27,9 @@ name = "Mitzi Mozzarella"
 authors = ["Creative Engineering", "LBN", "FizzGoose"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[dook_larue]
+name = "Dook LaRue"
+authors = ["Creative Engineering", "xion_no.i"]
+accepts.rockafire = true
+accepts.fnaf1 = false
