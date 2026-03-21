@@ -108,7 +108,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             }
 
             if (!animatable.show.data.playing) {
-                data.anim?.let { anim ->
+                for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
@@ -136,8 +136,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             // Animation
             // TODO: Fix animations sometimes snapping
             // TODO: Fix animations sometimes holding for no reason
-            data.anim?.let { anim ->
-                val controllerKey = "ctrl_$bit"
+           for (anim in data.anim) {
+                val controllerKey = "ctrl_${bit}_${anim.id}"
 
                 // Adding controllers
                 animManager?.let {

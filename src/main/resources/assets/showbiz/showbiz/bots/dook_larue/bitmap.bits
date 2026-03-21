@@ -6,70 +6,70 @@ any jaw {
 }
 rae right_arm_swing {
     flow 0.7
-    rotate "Right Arm" y=-45
+    rotate "Right Arm" y:-45
 }
 rae left_arm_swing {
     flow 0.7
-    rotate "Left Arm" y=30
+    rotate "Left Arm" y:30
 }
 rae right_foot_bass_drum {
     flow 1.2
-    rotate "Right Foot" x=-15
+    rotate "Right Foot" x:-15
 }
 rae right_elbow {
     flow 1.2
-    rotate "RightElbow" x=-22.5
+    rotate "RightElbow" x:-22.5
 }
 rae left_elbow {
     flow 1.2
-    rotate "LeftElbow" x=-22.5
+    rotate "LeftElbow" x:-22.5
 }
 rae head_up {
     flow 0.7
-    rotate "Head" x=25
+    rotate "Head" x:25
 }
 rae left_foot_hihat {
     flow 1.2
-    rotate "Left Foot" x=-15
-    move "HiHat" y=1
+    rotate "Left Foot" x:-15
+    anim "hihat"
 }
 rae head_right {
     flow ease-in 0.28
-    rotate "Head" y=-40
+    rotate "Head" y:-40
 }
 rae head_left {
     flow ease-in 0.28
-    rotate "Head" y=40
+    rotate "Head" y:40
 }
 rae body_lean {
     flow 0.3
-    rotate "Waist" x=10
-    rotate "RightElbow" x=-10
-    rotate "LeftElbow" x=-10
+    rotate "Waist" x:10
+    rotate "RightElbow" x:-10
+    rotate "LeftElbow" x:-10
 }
 rae right_ear {
-    flow 0.3
-    rotate "EarR" z=50
+    flow 0.6
+    rotate "EarR" z:50
 }
 rae left_ear {
-    flow 0.3
-    rotate "EarL" z=-50
+    flow 0.6
+    rotate "EarL" z:-50
 }
 rae eyes_left {
     flow 0.8
-    move "Left Eye" x=0.3
-    move "Right Eye" x=0.3
+    move "Left Eye" x:0.3
+    move "Right Eye" x:0.3
 }
 rae eyes_right {
     flow 0.8
-    move "Left Eye" x=-0.3
-    move "Right Eye" x=-0.3
+    move "Left Eye" x:-0.3
+    move "Right Eye" x:-0.3
 }
 rae left_eyelid {
     flow 3.0
-    move "Left Eyelid" y=0.2
+    move "Left Eyelid" y:0.2
 }
 rae right_eyelid {
     flow 3.0
-    move "Right Eyelid" y=0.2
+    move "Right Eyelid" y:0.2
 }
