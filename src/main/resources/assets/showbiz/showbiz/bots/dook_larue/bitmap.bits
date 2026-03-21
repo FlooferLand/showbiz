@@ -33,11 +33,11 @@ rae left_foot_hihat {
     rotate "Left Foot" x=-15
     move "HiHat" y=1
 }
-rae head_left {
+rae head_right {
     flow ease-in 0.28
     rotate "Head" y=-40
 }
-rae head_right {
+rae head_left {
     flow ease-in 0.28
     rotate "Head" y=40
 }
