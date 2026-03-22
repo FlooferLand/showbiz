@@ -227,6 +227,10 @@ tasks.withType<KotlinCompile>() {
     }
 }
 
+tasks.named("publishMods") {
+    dependsOn(tasks.named("runDatagen"))
+}
+
 publishMods {
     // Utils
     fun versionList(prop: String) = (property(prop) as String)

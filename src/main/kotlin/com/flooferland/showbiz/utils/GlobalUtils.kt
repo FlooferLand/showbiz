@@ -19,6 +19,11 @@ fun rlCustom(namespace: String, path: String): ResourceLocation {
     return ResourceLocation.fromNamespaceAndPath(namespace, path)
 }
 
+/** Creates a [ResourceLocation] from a `namespace:path` string */
+fun rlString(string: String): ResourceLocation {
+    return ResourceLocation.bySeparator(string, ':')
+}
+
 fun <E> MutableList<E>.copy(): MutableList<E> {
     return ArrayList(this)
 }

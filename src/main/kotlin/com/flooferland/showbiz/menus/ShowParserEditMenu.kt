@@ -7,8 +7,7 @@ import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModScreenHandlers
 
-class
-ShowParserEditMenu(containerId: Int, val data: ShowParserEditPacket) : AbstractContainerMenu(ModScreenHandlers.ShowParserEdit.type, containerId) {
+class ShowParserEditMenu(containerId: Int, val data: ShowParserEditPacket) : AbstractContainerMenu(ModScreenHandlers.ShowParserEdit.type, containerId) {
     val pos = data.blockPos
 
     override fun quickMoveStack(player: Player?, index: Int) = ItemStack.EMPTY!!

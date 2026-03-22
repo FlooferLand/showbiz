@@ -38,7 +38,8 @@ enum class ModBlocks {
             .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
-        entity = ::StagedBotBlockEntity
+        entity = ::StagedBotBlockEntity,
+        recipe = ModRecipes.StagedBot
     ),
     ReelToReel(
         "reel_to_reel", ::ReelToReelBlock,
@@ -47,7 +48,8 @@ enum class ModBlocks {
             .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
-        entity = ::ReelToReelBlockEntity
+        entity = ::ReelToReelBlockEntity,
+        recipe = ModRecipes.ReelToReel
     ),
     Greybox(
         "greybox", ::GreyboxBlock,
@@ -57,7 +59,8 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
-        entity = ::GreyboxBlockEntity
+        entity = ::GreyboxBlockEntity,
+        recipe = ModRecipes.Greybox
     ),
     Speaker(
         "speaker", ::SpeakerBlock,
@@ -67,7 +70,8 @@ enum class ModBlocks {
             .sound(SoundType.WOOD)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::SpeakerBlockEntity
+        entity = ::SpeakerBlockEntity,
+        recipe = ModRecipes.Speaker
     ),
     ShowParser(
         "show_parser", ::ShowParserBlock,
@@ -77,7 +81,8 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::ShowParserBlockEntity
+        entity = ::ShowParserBlockEntity,
+        recipe = ModRecipes.ShowParser
     ),
     ShowSelector(
         "show_selector", ::ShowSelectorBlock,
@@ -87,7 +92,8 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::ShowSelectorBlockEntity
+        entity = ::ShowSelectorBlockEntity,
+        recipe = ModRecipes.ShowSelector
     ),
     CurtainBlock(
         "curtain_block", ::CurtainBlock,
@@ -96,7 +102,8 @@ enum class ModBlocks {
             .sound(SoundType.WOOL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::CurtainBlockEntity
+        entity = ::CurtainBlockEntity,
+        recipe = ModRecipes.CurtainBlock
     ),
     CurtainBlockShadow(
         "curtain_block_shadow", ::CurtainShadowBlock,
@@ -106,7 +113,8 @@ enum class ModBlocks {
             .replaceable()
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        hideFromSearch = true
+        hideFromPlayer = true,
+        recipe = null
     ),
     WojackBlock(
         "wojack_block", ::Block,
@@ -115,7 +123,8 @@ enum class ModBlocks {
         .sound(SoundType.AMETHYST)
         .noOcclusion(),
         modelPreset = BlockModelId.CubeAll,
-        hideFromSearch = true
+        hideFromPlayer = true,
+        recipe = null
     ),
     SpotlightBlock(
         "spotlight", ::SpotlightBlock,
@@ -124,7 +133,8 @@ enum class ModBlocks {
         .sound(SoundType.METAL)
         .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::SpotlightBlockEntity
+        entity = ::SpotlightBlockEntity,
+        recipe = ModRecipes.SpotlightBlock
     )
     ;
 
@@ -133,11 +143,13 @@ enum class ModBlocks {
     val item: BlockItem
     var model: BlockModelId? = null
     var entityType: BlockEntityType<*>? = null
-    var hideFromSearch: Boolean = false
-    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null, hideFromSearch: Boolean = false) {
+    var recipe: ModRecipes? = null
+    var hideFromPlayer: Boolean = false
+    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null, recipe: ModRecipes?, hideFromPlayer: Boolean = false) {
         this.id = rl(name)
         this.model = modelPreset;
-        this.hideFromSearch = hideFromSearch
+        this.hideFromPlayer = hideFromPlayer
+        this.recipe = recipe
 
         this.block = Blocks.register(
             ResourceKey.create(BuiltInRegistries.BLOCK.key(), this.id),

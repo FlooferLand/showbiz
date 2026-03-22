@@ -9,10 +9,10 @@ import net.minecraft.world.item.*
 enum class ModItemGroups {
     Main("main", { params, out ->
         for (block in ModBlocks.entries) {
-            if (!block.hideFromSearch) out.accept(block.item)
+            if (!block.hideFromPlayer) out.accept(block.item)
         }
         for (item in ModItems.entries) {
-            out.accept(item.item)
+            if (!item.hideFromPlayer) out.accept(item.item)
         }
     });
 

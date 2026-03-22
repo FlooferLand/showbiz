@@ -15,21 +15,27 @@ enum class ModItems {
     Wand(
         "wand", ::WandItem,
         { stacksTo(1).component(ModComponents.WandBind.type, OptionBlockPos.EMPTY) },
-        model = ItemModelId.Custom
+        model = ItemModelId.Custom,
+        recipe = ModRecipes.Wand
     ),
     Reel(
         "reel", ::ReelItem,
         { stacksTo(1).component(ModComponents.FileName.type, "") },
-        model = ItemModelId.Custom
+        model = ItemModelId.Custom,
+        recipe = ModRecipes.Reel
     )
     ;
 
     val id: ResourceLocation
     lateinit var item: Item
     var model: ItemModelId? = null
-    constructor(name: String, constructor: (Properties) -> Item, properties: Properties.() -> Properties, model: ItemModelId = ItemModelId.Generated) {
+    var hideFromPlayer: Boolean = false
+    var recipe: ModRecipes? = null
+    constructor(name: String, constructor: (Properties) -> Item, properties: Properties.() -> Properties, model: ItemModelId = ItemModelId.Generated, hideFromPlayer: Boolean = false, recipe: ModRecipes?) {
         this.id = rl(name)
         this.model = model;
+        this.hideFromPlayer = hideFromPlayer
+        this.recipe = recipe
         if (DataGenerator.engaged) return
 
         val baseProps = Properties()
