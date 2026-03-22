@@ -1,7 +1,7 @@
 set rae duke
 
 any jaw {
-    flow 3.0
+    flow 2.0
     rotate "jaw" x:-25
 }
 rae right_arm_swing {
@@ -48,11 +48,11 @@ rae body_lean {
     rotate "LeftElbow" x:-10
 }
 rae right_ear {
-    flow 0.6
+    flow 0.8
     rotate "EarR" z:50
 }
 rae left_ear {
-    flow 0.6
+    flow 0.8
     rotate "EarL" z:-50
 }
 rae eyes_left {

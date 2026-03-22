@@ -195,8 +195,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
             // Easing: https://easings.net/#easeOutSine
             val eased = when (flowEase) {
-                Easing.Default, Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
-                Easing.Linear -> bitSmooth
+                Easing.Default,  Easing.Linear -> bitSmooth
+                Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
             }
 
             // Manual rotation

@@ -63,12 +63,12 @@ rae left_arm_raise {
 
 # face
 rae jaw {
-    flow 3.0
+    flow 2.0
     rotate "jaw" x:-15
     rotate "snout" x:5
 }
 rae earl_jaw {
-    flow 3.0
+    flow 2.0
     rotate "earl_jaw" x:15
 }
 rae eyes_left {

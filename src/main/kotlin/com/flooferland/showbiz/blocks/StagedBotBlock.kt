@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.blocks
 
+import net.minecraft.ChatFormatting
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
@@ -8,6 +9,10 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.network.chat.*
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
@@ -18,6 +23,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.Shapes
+import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -41,6 +47,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
         if (level.isClientSide) return InteractionResult.PASS
         if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
         if (player.isHolding({ s -> !s.isEmpty })) return InteractionResult.PASS
+        if (player !is ServerPlayer) return InteractionResult.PASS;
 
         val entity = level.getBlockEntity(pos) as? StagedBotBlockEntity
         if (entity != null) {
@@ -51,8 +58,17 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
                 val newId = if (index == -1 || index == ids.lastIndex) ids.firstOrNull() else ids[index + 1]
                 newId?.let { entity.botId = newId }
             }
-            player.playNotifySound(SoundEvents.NOTE_BLOCK_HARP.value(), SoundSource.PLAYERS, 1.0f, 1.0f)
-            player.displayClientMessage(Component.literal("Switched to animatronic ${entity.botId}!"), true)
+            val botInfo = Showbiz.bots[entity.botId]
+            val botAuthors = (botInfo?.authors?.joinToString(", ")?.let { "by $it" }) ?: ""
+            player.playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
+            player.connection.send(ClientboundSetTitleTextPacket(Component.empty()))
+            player.connection.send(ClientboundSetSubtitleTextPacket(
+                Component.literal("Switched to ").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal("${botInfo?.name}").withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE))
+                    .append(Component.literal("!").withStyle(ChatFormatting.GRAY))
+            ))
+            player.displayClientMessage(Component.literal("${entity.botId} $botAuthors").withStyle(ChatFormatting.GRAY), true)
+            player.connection.send(ClientboundSetTitlesAnimationPacket(3, 15, 5))
             return InteractionResult.SUCCESS
         }
         return super.useWithoutItem(state, level, pos, player, hitResult)
