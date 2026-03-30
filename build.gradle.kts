@@ -248,9 +248,9 @@ publishMods {
     dryRun = System.getenv("dryrun") == "1"
 
     fun addGeneralDeps(m: Modrinth) {
-        m.requires { slug = "fabric-language-kotlin"; version = fabricLanguageKotlin }
-        m.requires { slug = "geckolib"; version = dep("geckolib") }
-        m.requires { slug = "veil"; version = dep("veil") }
+        m.requires { slug = "fabric-language-kotlin" }
+        m.requires { slug = "geckolib" }
+        m.requires { slug = "veil" }
     }
 
     val sharedOptions = modrinthOptions {
@@ -269,7 +269,7 @@ publishMods {
         modLoaders.add("fabric")
 
         addGeneralDeps(this)
-        requires { slug = "fabric-api"; version = dep("fabric_api") }
+        requires { slug = "fabric-api" }
         optional { slug = "modmenu" }
     }
 
@@ -286,10 +286,10 @@ publishMods {
     // Discord server release
     discord {
         val url = providers.environmentVariable("discord.webhook").orNull ?: return@discord
-        val downloadLink = "https://modrinth.com/mod/showbiz/version/$version"
         webhookUrl = url
         username = "Showbiz release $versionName"
-        content = "<@1441107556264312874> Grab the new update [here](<$downloadLink>)! \n# Changelog\n$changelog"
+        content = "<@&1441107556264312874>\nGrab the new update [here](<https://modrinth.com/mod/showbiz/versions>)!\n# Changelog\n${changelog.get()}"
+
     }
 }
 
