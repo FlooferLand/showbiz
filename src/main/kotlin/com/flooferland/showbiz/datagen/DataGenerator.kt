@@ -19,8 +19,6 @@ import kotlinx.serialization.json.buildJsonObject
 import net.minecraft.*
 import net.minecraft.core.registries.*
 import net.minecraft.server.*
-import net.minecraft.tags.TagKey
-import net.minecraft.world.item.crafting.ShapedRecipe
 import com.flooferland.showbiz.datagen.providers.LootTableProvider
 import com.flooferland.showbiz.datagen.providers.RecipeProvider
 import com.flooferland.showbiz.registry.ModPackets
@@ -31,6 +29,7 @@ import java.time.Duration
 import java.time.Instant
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.div
+import kotlin.io.path.exists
 import kotlin.io.path.relativeTo
 
 object DataGenerator {
@@ -71,15 +70,23 @@ object DataGenerator {
     }
 
     fun generate() {
-        val rootPath = Path.of("src", "main", "generated", "resources")
-        val dataRoot = rootPath / "data" / Showbiz.MOD_ID
-        val assetsRoot = rootPath / "assets" / Showbiz.MOD_ID
-        val fileListPath = rootPath / "generated.txt"
+        val rootPath = Path.of("..", "..", "src", "main", "resources")
+        val generatedPath = Path.of("src", "main", "generated", "resources")
+        val dataRoot = generatedPath / "data" / Showbiz.MOD_ID
+        val assetsRoot = generatedPath / "assets" / Showbiz.MOD_ID
+        val fileListPath = generatedPath / "generated.txt"
         val json = Json { prettyPrint = true }
         val fileList = mutableListOf<Path>()
+        fun log(message: String, tag: String? = null) = println((tag?.let { "[ ${it} ] " } ?: "") + message)
+        fun warn(message: String) = log(message, tag = "/!\\")
         fun writeAsset(path: Path, data: JsonObject) {
             path.createParentDirectories()
-            println("Writing '${path.relativeTo(rootPath)}'")
+            val override = (rootPath / path.relativeTo(generatedPath)).normalize()
+            if (override.exists()) {
+                log("Skipping '${path.relativeTo(generatedPath)}' (already exists in src/main)", tag = "-->")
+                return
+            }
+            log("Writing '${path.relativeTo(generatedPath)}'", tag = "...")
             fileList.add(path)
             Files.write(
                 path.toAbsolutePath(),
@@ -114,7 +121,7 @@ object DataGenerator {
         for (modBlock in ModBlocks.entries) {
             // Recipe
             if (modBlock.recipe == null && !modBlock.hideFromPlayer)
-                println("Warning: No recipe provided for '${modBlock.id}'")
+                warn("No recipe provided for '${modBlock.id}'")
             else
                 modBlock.recipe?.let { recipe ->
                     val recipe = RecipeProvider.buildRecipe(recipe, modBlock.id)
@@ -132,7 +139,7 @@ object DataGenerator {
                 if (stateJson != null) {
                     val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
                     writeAsset(statePath, stateJson)
-                } else println("States JSON is null for block ${modBlock.id}")
+                } else warn("States JSON is null for block ${modBlock.id}")
 
                 // Write a block model for every state
                 for (state in builder.states) {
@@ -146,14 +153,14 @@ object DataGenerator {
                 if (stateJson != null) {
                     val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
                     writeAsset(statePath, stateJson)
-                } else println("States JSON is null for block ${modBlock.id}")
+                } else warn("States JSON is null for block ${modBlock.id}")
 
                 // Default / empty model
                 val modelJson = BlockProvider.generateBlockModel(modBlock, Model(builder).texture(modBlock.id))
                 if (modelJson != null) {
                     val modelPath = assetsRoot / "models" / "block" / "${modBlock.id.path}.json"
                     writeAsset(modelPath, modelJson)
-                } else println("Model JSON is null for block ${modBlock.id}")
+                } else warn("Model JSON is null for block ${modBlock.id}")
             }
 
             // Item model
@@ -162,14 +169,14 @@ object DataGenerator {
             if (itemModelJson != null) {
                 val itemModelPath = assetsRoot / "models" / "item" / "${modBlock.id.path}.json"
                 writeAsset(itemModelPath, itemModelJson)
-            } else println("Item model JSON is null for block ${modBlock.id}")
+            } else warn("Item model JSON is null for block ${modBlock.id}")
 
             // Item ('items/' entry)
             val itemJson = ItemProvider.generateItem(defaultState.itemPath())
             if (itemJson != null) {
                 val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
                 writeAsset(itemPath, itemJson)
-            } else println("Item JSON is null for block ${modBlock.id}")
+            } else warn("Item JSON is null for block ${modBlock.id}")
 
             // Loot table (block drops)
             val blockDrop = LootTableProvider.generateBlockDrops(modBlock)
@@ -179,7 +186,7 @@ object DataGenerator {
         for (modItem in ModItems.entries) {
             // Recipe
             if (modItem.recipe == null && !modItem.hideFromPlayer)
-                println("Warning: No recipe provided for '${modItem.id}'")
+                warn("No recipe provided for '${modItem.id}'")
             else
                 modItem.recipe?.let { recipe ->
                     val recipe = RecipeProvider.buildRecipe(recipe, modItem.id)
@@ -192,14 +199,14 @@ object DataGenerator {
             if (modelJson != null) {
                 val modelPath = assetsRoot / "models" / "item" / "${modItem.id.path}.json"
                 writeAsset(modelPath, modelJson)
-            } else println("Model JSON is null for item ${modItem.id}")
+            } else warn("Model JSON is null for item ${modItem.id}")
 
             // Item
             val itemJson = ItemProvider.generateItem(modItem.id.itemPath())
             if (itemJson != null) {
                 val itemPath = assetsRoot / "items" / "${modItem.id.path}.json"
                 writeAsset(itemPath, itemJson)
-            } else println("Model JSON is null for item ${modItem.id}")
+            } else warn("Model JSON is null for item ${modItem.id}")
         }
 
         // Sounds
@@ -219,7 +226,7 @@ object DataGenerator {
             for (line in Files.readAllLines(fileListPath)) {
                 val path = Path.of(line)
                 if (!fileList.any { p -> p == path }) {
-                    print("Removing '$path'")
+                    log("Removing '$path'", "x-x")
                     val path = path.toAbsolutePath()
                     Files.deleteIfExists(path)
                 }

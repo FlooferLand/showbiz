@@ -1,3 +1,4 @@
+import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
@@ -8,6 +9,7 @@ val loader = "fabric"
 val minecraft = stonecutter.current.version
 val modId = property("mod.id") as String
 val modVersion = property("mod.version") as String
+val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
 group = "com.flooferland"
 version = "${modVersion}+$minecraft"
 base {
@@ -167,7 +169,6 @@ tasks.withType<ProcessResources>().configureEach {
     exclude(".assets_helper")
 
     // Inserting strings into what-not
-    val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
     val properties = mapOf(
         "minecraft" to vers("minecraft"),
         "version" to modVersion,
@@ -178,7 +179,7 @@ tasks.withType<ProcessResources>().configureEach {
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),
         "veil" to dep("veil"),
-        "geckolib" to vers("geckolib"),
+        "geckolib" to dep("geckolib"),
         "archivesName" to modId,
         "archivesBaseName" to modId
     )
@@ -232,13 +233,6 @@ tasks.named("publishMods") {
 }
 
 publishMods {
-    // Utils
-    fun versionList(prop: String) = (property(prop) as String)
-        .split(',')
-        .map { it.trim() }
-
-    // Release
-    displayName.set("Showbiz $modVersion+$minecraft")
     file.set(tasks.remapJar.get().archiveFile)
     changelog.set(
         rootProject.file("changelogs/$modVersion.md")
@@ -251,23 +245,44 @@ publishMods {
         isBeta -> BETA
         else -> STABLE
     })
-    modLoaders.add("fabric")
     dryRun = System.getenv("dryrun") == "1"
 
-    modrinth {
+    fun addGeneralDeps(m: Modrinth) {
+        m.requires { slug = "fabric-language-kotlin"; version = fabricLanguageKotlin }
+        m.requires { slug = "geckolib"; version = dep("geckolib") }
+        m.requires { slug = "veil"; version = dep("veil") }
+    }
+
+    val sharedOptions = modrinthOptions {
         projectId = property("mod.modrinthId") as String
         accessToken = providers.environmentVariable("tokens.modrinth")
         minecraftVersions.add(minecraft)
+    }
 
-        requires { slug = "fabric-api" }
-        requires { slug = "fabric-language-kotlin" }
-        requires { slug = "geckolib" }
+    // Modrinth releases
+    // Temporarily using Sinytra
+    modrinth("modrinthFabric") {
+        from(sharedOptions)
+        displayName.set("Showbiz $modVersion+$minecraft (Fabric)")
+        modLoaders.add("fabric")
+
+        addGeneralDeps(this)
+        requires { slug = "fabric-api"; version = dep("fabric_api") }
         optional { slug = "modmenu" }
-        optional { slug = "veil" }
     }
 
-    discord {
-        webhookUrl = providers.environmentVariable("discord.webhook")
+    modrinth("modrinthNeoforge") {
+        from(sharedOptions)
+        displayName.set("Showbiz $modVersion+$minecraft (Neoforge w/ Sinytra)")
+        modLoaders.add("neoforge")
+
+        addGeneralDeps(this)
+        requires { slug = "connector" }
+        requires { slug = "forgified-fabric-api" }
     }
+
+    // Discord server release
+    if (!dryRun.get())
+        discord { webhookUrl = providers.environmentVariable("discord.webhook") }
 }
 
