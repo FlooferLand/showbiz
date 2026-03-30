@@ -259,11 +259,13 @@ publishMods {
         minecraftVersions.add(minecraft)
     }
 
+    val versionName = "Showbiz $modVersion+$minecraft"
+
     // Modrinth releases
     // Temporarily using Sinytra
     modrinth("modrinthFabric") {
         from(sharedOptions)
-        displayName.set("Showbiz $modVersion+$minecraft (Fabric)")
+        displayName.set("$versionName (Fabric)")
         modLoaders.add("fabric")
 
         addGeneralDeps(this)
@@ -273,7 +275,7 @@ publishMods {
 
     modrinth("modrinthNeoforge") {
         from(sharedOptions)
-        displayName.set("Showbiz $modVersion+$minecraft (Neoforge w/ Sinytra)")
+        displayName.set("$versionName (Neoforge w/ Sinytra)")
         modLoaders.add("neoforge")
 
         addGeneralDeps(this)
@@ -282,7 +284,11 @@ publishMods {
     }
 
     // Discord server release
-    if (!dryRun.get())
-        discord { webhookUrl = providers.environmentVariable("discord.webhook") }
+    discord {
+        val url = providers.environmentVariable("discord.webhook").orNull ?: return@discord
+        webhookUrl = url
+        username = "Showbiz release $versionName"
+        content = "<@1441107556264312874>\n$changelog"
+    }
 }
 
