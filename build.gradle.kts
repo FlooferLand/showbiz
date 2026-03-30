@@ -9,7 +9,6 @@ val loader = "fabric"
 val minecraft = stonecutter.current.version
 val modId = property("mod.id") as String
 val modVersion = property("mod.version") as String
-val fabricLanguageKotlin = "${dep("fabric_language_kotlin")}+kotlin.$kotlinVersion"
 group = "com.flooferland"
 version = "${modVersion}+$minecraft"
 base {
@@ -55,6 +54,7 @@ repositories {
 
 fun vers(name: String): String = property("vers.${name}") as String
 fun dep(name: String): String = property("deps.${name}") as String
+val fabricLanguageKotlin = dep("fabric_language_kotlin")
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
@@ -286,9 +286,10 @@ publishMods {
     // Discord server release
     discord {
         val url = providers.environmentVariable("discord.webhook").orNull ?: return@discord
+        val downloadLink = "https://modrinth.com/mod/showbiz/version/$version"
         webhookUrl = url
         username = "Showbiz release $versionName"
-        content = "<@1441107556264312874>\n$changelog"
+        content = "<@1441107556264312874> Grab the new update [here](<$downloadLink>)! \n# Changelog\n$changelog"
     }
 }
 
