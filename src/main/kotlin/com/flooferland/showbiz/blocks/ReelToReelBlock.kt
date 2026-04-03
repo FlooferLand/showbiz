@@ -24,7 +24,6 @@ import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.level.storage.loot.*
 import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.handItem
 
@@ -92,6 +91,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                 player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
                 entity.applyChange(true) {
                     entity.setPlaying(false)
+                    entity.show.free()
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))

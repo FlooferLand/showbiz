@@ -60,14 +60,14 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         }
     }
 
-    override fun getShape(state: BlockState?, level: BlockGetter?, pos: BlockPos?, context: CollisionContext?) = shape
-    override fun getCollisionShape(state: BlockState?, level: BlockGetter?, pos: BlockPos?, context: CollisionContext?) = shape
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext) = shape
+    override fun getCollisionShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext) = shape
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
         return ModBlocks.ShowParser.entityType!!.create(pos, state)!!
     }
 
-    override fun getRenderShape(state: BlockState?) = RenderShape.MODEL
+    override fun getRenderShape(state: BlockState) = RenderShape.MODEL
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
         if (level.isClientSide) return InteractionResult.PASS
@@ -103,9 +103,9 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         init {
             ServerPlayNetworking.registerGlobalReceiver(ShowParserEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@registerGlobalReceiver
-                val blockEntity = player.serverLevel().getBlockEntity(packet.blockPos) as? ShowParserBlockEntity ?: return@registerGlobalReceiver
+                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? ShowParserBlockEntity ?: return@registerGlobalReceiver
                 blockEntity.applyChange(true) {
-                    blockEntity.bitFilter = packet.bitFilter
+                    blockEntity.menuData = packet.base
                 }
             }
         }

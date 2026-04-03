@@ -46,7 +46,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     fun isEmpty() = !isLoaded
 
     fun load(filename: String, onLoad: ((ShowData?) -> Unit)? = null) {
-        reset()
+        free()
         loading = true
         name = filename
         id = UUID.randomUUID()
@@ -148,7 +148,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         tag.putBoolean("is_loaded", isLoaded)
     }
 
-    fun reset() {
+    /** Deletes and resets everything regarding the show data */
+    fun free() {
         signal.clear()
         audio = ByteArray(0)
         isLoaded = false

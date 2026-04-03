@@ -3,13 +3,7 @@ package com.flooferland.showbiz.registry
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
-import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
-import com.flooferland.showbiz.network.packets.PlaybackStatePacket
-import com.flooferland.showbiz.network.packets.ShowFileListPacket
-import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
-import com.flooferland.showbiz.network.packets.ShowParserEditPacket
-import com.flooferland.showbiz.network.packets.SpotlightEditPacket
+import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 
@@ -21,6 +15,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
     data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)
     data object ShowFileSelect : ModPackets<ShowFileSelectPacket>(ClientToServer, ShowFileSelectPacket.type, ShowFileSelectPacket.codec)
+    data object CurtainControllerEdit: ModPackets<CurtainControllerEditPacket>(ClientToServer, CurtainControllerEditPacket.type, CurtainControllerEditPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

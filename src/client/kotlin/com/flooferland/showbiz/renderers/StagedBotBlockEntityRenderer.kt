@@ -1,26 +1,30 @@
 package com.flooferland.showbiz.renderers
 
-import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.models.StagedBotBlockEntityModel
-import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.level.*
-import net.minecraft.world.phys.shapes.CollisionContext
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.StagedBotBlock
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.models.StagedBotBlockEntityModel
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
+import java.lang.Math.clamp
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
-import java.lang.Math.clamp
+import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
+    init {
+        addRenderLayer(AutoGlowingGeoLayer(this))
+    }
+
     override fun render(animatable: StagedBotBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val level = animatable.level
         val packedLight = if (level != null) {
@@ -40,6 +44,7 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         }
 
         val render = runCatching {
+            val botModel = model as StagedBotBlockEntityModel
             if (animatable.botId == null) return@runCatching
             this.animatable = animatable
 
@@ -56,12 +61,19 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
                 val buffer = bufferSource.getBuffer(renderType)
                 preRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
                 if (firePreRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)) {
-                    preApplyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, packedLight.toFloat(), packedLight, packedOverlay)
+                    val hasGlow = botModel.hasGlowTexture(animatable)
+                    for (renderLayer in getRenderLayers()) {
+                        if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
+                        renderLayer.preRender(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
+                    }
                     actuallyRender(
                         poseStack, animatable, model, renderType,
                         bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor
                     )
-                    applyRenderLayers(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
+                    for (renderLayer in getRenderLayers()) {
+                        if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
+                        renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
+                    }
                     postRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
                     firePostRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)
                 }
@@ -88,29 +100,28 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
     }
 
     override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        poseStack.translate(0.0, 1.0, 0.0)
+        if (!isReRender) {
+            poseStack.translate(0.0, 1.0, 0.0)
 
-        // Handling carpets
-        run {
-            val level = animatable.level ?: return@run
-            val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
-            if (above.isAir) return@run
-            val shape = above.getShape(level, animatable.blockPos.above())
-            if (!shape.isEmpty) {
-                val top = clamp(shape.bounds().maxY, 0.0, 1.0)
-                poseStack.translate(0.0, top, 0.0)
+            // Handling carpets
+            run {
+                val level = animatable.level ?: return@run
+                val above = level.getBlockState(animatable.blockPos.above()) ?: return@run
+                if (above.isAir) return@run
+                val shape = above.getShape(level, animatable.blockPos.above())
+                if (!shape.isEmpty) {
+                    val top = clamp(shape.bounds().maxY, 0.0, 1.0)
+                    poseStack.translate(0.0, top, 0.0)
+                }
             }
         }
-
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
 
-    override fun actuallyRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel?, renderType: RenderType?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int
-    ) {
+    override fun actuallyRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel?, renderType: RenderType?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         // GigaDirection rotation
-        run {
+        if (!isReRender) run {
             val facing = animatable.blockState.getValue(StagedBotBlock.facing) ?: return@run
-            // (((context.rotation + 180.0) * 8) / 360).roundToInt() % 8
             val angle = (360f - facing.angle) % 360f
             poseStack.mulPose(Axis.YP.rotationDegrees(angle))
         }

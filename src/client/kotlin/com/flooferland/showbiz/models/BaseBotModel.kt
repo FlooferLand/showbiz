@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.models
 
+import net.minecraft.client.Minecraft
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import net.minecraft.resources.*
+import com.flooferland.showbiz.utils.rlCustom
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.model.GeoModel
@@ -46,6 +48,15 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
             bot.animations?.let { anims -> return anims }
         }
         return null
+    }
+
+    fun hasGlowTexture(animatable: StagedBotBlockEntity): Boolean {
+        val texture = getTextureResource(animatable) ?: return false
+        val glowTexture = rlCustom(
+            texture.namespace,
+            texture.path.replace(".png", "_glowmask.png")
+        )
+        return Minecraft.getInstance().resourceManager.getResource(glowTexture).isPresent
     }
 
     // For some reason GeckoLib seems to require setting the active model every single time?

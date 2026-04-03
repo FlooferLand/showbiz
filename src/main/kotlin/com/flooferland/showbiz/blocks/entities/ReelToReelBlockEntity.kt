@@ -82,7 +82,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
         }
 
-        // TODO: Set playing to false when the show ends.
+        // Setting playing to false when the show ends
+        if (audioBytesWritten >= show.audio.size - 1) {
+            setPlaying(false)
+            shouldUpdate = true
+        }
 
         // Updating the block entity (sends network packet)
         if (shouldUpdate) markDirtyNotifyAll()
@@ -97,7 +101,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = playing
         if (!playing) resetPlayback()
         showOut.send(PackedShowData(playing, signal, show.mapping))
-        level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing && !paused))  // Visual
+        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -111,7 +115,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = !paused
         this.paused = paused
         showOut.send(PackedShowData(playing, signal, show.mapping))
-        level?.setBlockAndUpdate(blockPos, blockState.setValue(PLAYING, playing && !paused))  // Visual
+        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -162,6 +166,5 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         audioOut.data.chunkId = 0
         if (playing) setPlaying(false)
         signal.reset()
-        show.reset()
     }
 }

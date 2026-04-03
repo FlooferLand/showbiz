@@ -9,38 +9,44 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.menus.SpotlightEditMenu
+import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
+import com.flooferland.showbiz.types.EditScreenOwner
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.types.math.Vec2f
+import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.SpotlightBlock.entityType!!, pos, blockState), IConnectable, GeoBlockEntity, ExtendedScreenHandlerFactory<SpotlightEditPacket> {
+class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.SpotlightBlock.entityType!!, pos, blockState), IConnectable, GeoBlockEntity, EditScreenOwner<SpotlightEditPacket> {
     override val connectionManager = ConnectionManager(this)
 
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
-        isOn = bitFilter.any { show.signal.frameHas(it) }
+        isOn = menuData.bitFilter.any { show.signal.frameHas(it) }
     }
 
     var isOn: Boolean = false
     var color: Int = 0xffffff
-    var turn: Vec2f = Vec2f.ZERO
-    var bitFilter = mutableListOf<BitId>()
+
+    override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
+    var turn = Vec2f.ZERO
 
     val geckoCache = GeckoLibUtil.createInstanceCache(this)!!
 
@@ -53,11 +59,11 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(worldPosition, bitFilter, turn, show.data.mapping)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping))
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
-        bitFilter = (tag.getIntArrayOrNull("bit_filter") ?: intArrayOf()).map { it.toBitId() }.toMutableList()
+        menuData.loadAdditional(tag)
         tag.getBooleanOrNull("is_on")?.let { isOn = it }
         tag.getIntOrNull("color")?.let { color = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
@@ -66,7 +72,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
-        tag.putIntArray("bit_filter", bitFilter.map { it.toInt() })
+        menuData.saveAdditional(tag)
         tag.putBoolean("is_on", isOn)
         tag.putInt("color", color)
         tag.putFloat("turn_x", turn.x)

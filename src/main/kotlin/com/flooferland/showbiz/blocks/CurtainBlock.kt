@@ -1,17 +1,12 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
-import net.minecraft.core.component.DataComponents
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.ItemInteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.DyeItem
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.component.DyedItemColor
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.*

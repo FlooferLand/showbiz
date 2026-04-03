@@ -1,0 +1,70 @@
+set rae fats
+
+rae jaw {
+    flow 1.8
+    rotate "Jaw" x:-45
+}
+rae right_arm_swing {
+    flow 0.7
+    rotate "Right Arm" y:25
+}
+rae right_elbow {
+    flow 0.7
+    rotate "Right Elbow" x:-25
+}
+rae head_right {
+    flow ease-in 0.28
+    rotate "Head" y:-25
+}
+rae head_tip_right {
+    flow ease-in 0.28
+    rotate "Head" z:-15
+}
+rae left_arm_swing {
+    flow 0.7
+    rotate "Left Arm" y:-25
+}
+rae left_elbow {
+    flow 0.7
+    rotate "Left Elbow" x:-25
+}
+rae head_left {
+    flow ease-in 0.28
+    rotate "Head" y:25
+}
+rae head_tip_left {
+    flow ease-in 0.28
+    rotate "Head" z:15
+}
+rae head_up {
+    flow ease-in 0.28
+    rotate "Head" x:15
+}
+rae body_lean {
+    flow 0.3
+    rotate "Waist" x:10
+    rotate "Right Elbow" x:-10
+    rotate "Left Elbow" x:-10
+}
+rae eyes_left {
+    flow 0.8
+    move "Left Eye" x:0.5
+    move "Right Eye" x:0.5
+}
+rae eyes_right {
+    flow 0.8
+    move "Left Eye" x:-0.5
+    move "Right Eye" x:-0.5
+}
+rae left_eyelid {
+    flow 3.0
+    move "Left Eyelid" y:-1.6
+}
+rae right_eyelid {
+    flow 3.0
+    move "Right Eyelid" y:-1.6
+}
+rae foot_tap {
+    flow 0.7
+    rotate "Foot" x:10
+}

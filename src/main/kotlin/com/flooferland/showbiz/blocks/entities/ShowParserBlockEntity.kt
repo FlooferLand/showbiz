@@ -19,35 +19,33 @@ import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.show.toBitId
+import com.flooferland.showbiz.types.EditScreenMenu
+import com.flooferland.showbiz.types.EditScreenOwner
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 
-class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<ShowParserEditPacket> {
+class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, EditScreenOwner<ShowParserEditPacket> {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
         level.updateNeighborsAt(blockPos, blockState.block)
     }
 
-    // TODO: Make bitFilter filter bits per map (ex: make it a HashMap of show mappings to BitIds). Same with SpotlightBlockEntity
-    var bitFilter = mutableListOf<BitId>()
+    override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
+
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
         return ShowParserEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        ShowParserEditPacket(worldPosition, bitFilter, show.data.mapping)
+        ShowParserEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping))
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         val level = level as? ServerLevel ?: return
-        if (bitFilter.isEmpty()) {
+        if (menuData.bitFilter.isEmpty()) {
             if (level.gameTime % 25 == 0L) {
                 val facing = state.getValue(FacingEntityBlock.FACING)
                 val forward = Vec3(facing.normal.x.toDouble(), facing.normal.y.toDouble(), facing.normal.z.toDouble())
@@ -61,7 +59,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
              true -> {
                  val newState = state
                      .setValue(PLAYING_POWERED, true)
-                     .setValue(SIGNAL_POWERED, show.data.signal.raw.any { bitId -> bitFilter.contains(bitId) })
+                     .setValue(SIGNAL_POWERED, show.data.signal.raw.any { bitId -> menuData.bitFilter.contains(bitId) })
                  level.setBlockAndUpdate(blockPos, newState)
              }
             false if (state.getValue(PLAYING_POWERED) || state.getValue(SIGNAL_POWERED)) -> {
@@ -74,14 +72,14 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
     }
 
-    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider?) {
+    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
-        bitFilter = (tag.getIntArrayOrNull("bit_filter") ?: intArrayOf()).map { it.toBitId() }.toMutableList()
+        menuData.loadAdditional(tag)
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
-        tag.putIntArray("bit_filter", bitFilter.map { it.toInt() })
+        menuData.saveAdditional(tag)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {

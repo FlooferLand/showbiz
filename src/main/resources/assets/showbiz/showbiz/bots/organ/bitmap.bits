@@ -1,0 +1,38 @@
+set rae organ
+
+rae top_blue {
+    flow 99.0
+    move "Top Blue" z:-1
+}
+rae top_red {
+    flow 30.0
+    move "Top Red" z:-1
+}
+rae top_amber {
+    flow 30.0
+    move "Top Amber" z:-1
+}
+rae top_green {
+    flow 30.0
+    move "Top Green" z:-1
+}
+rae leg_top {
+    flow 30.0
+    move "Leg Top" z:-1
+}
+rae leg_mid {
+    flow 30.0
+    move "Leg Mid" z:-1
+}
+rae leg_bottom {
+    flow 30.0
+    move "Leg Bottom" z:-1 
+}
+rae flash_strobe {
+    flow 30.0
+    move "Top White" z:-1
+}
+rae cont_strobe {
+    flow 30.0
+    move "Top White" z:-1
+}

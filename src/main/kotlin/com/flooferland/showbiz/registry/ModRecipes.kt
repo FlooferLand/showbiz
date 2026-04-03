@@ -68,6 +68,16 @@ enum class ModRecipes {
             "W" to Ingredient(tag="wool")
         )
     ),
+    CurtainControllerBlock(
+        "I-I",
+        "IOI",
+        "I I",
+        mapOf(
+            "-" to Ingredient("chain"),
+            "O" to Ingredient("iron_ingot"),
+            "I" to Ingredient("stick")
+        )
+    ),
     SpotlightBlock(
         arrayOf(
             Ingredient("redstone_lamp"),

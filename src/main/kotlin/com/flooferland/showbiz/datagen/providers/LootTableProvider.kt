@@ -14,11 +14,13 @@ object LootTableProvider {
             putJsonArray("pools") {
                 addJsonObject {
                     put("rolls", 1)
-                    putJsonObject("entries") {
-                        put("type", "minecraft:item")
-                        put("name", block.id.toString())
-                        putJsonArray("conditions") {
-                            addJsonObject { put("condition", "minecraft:survives_explosion") }
+                    putJsonArray("entries") {
+                        addJsonObject {
+                            put("type", "minecraft:item")
+                            put("name", block.id.toString())
+                            putJsonArray("conditions") {
+                                addJsonObject { put("condition", "minecraft:survives_explosion") }
+                            }
                         }
                     }
                 }

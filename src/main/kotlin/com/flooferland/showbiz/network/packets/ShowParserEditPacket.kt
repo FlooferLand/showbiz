@@ -1,29 +1,22 @@
 package com.flooferland.showbiz.network.packets
 
-import net.minecraft.core.BlockPos
-import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.show.toBitId
+import net.minecraft.network.*
+import net.minecraft.network.codec.*
+import net.minecraft.network.protocol.common.custom.*
+import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.utils.rl
 
-class ShowParserEditPacket(val blockPos: BlockPos, val bitFilter: MutableList<BitId>, val mapping: String?) : CustomPacketPayload {
+class ShowParserEditPacket(editScreen: EditScreenMenu.EditScreenBuf) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
     override fun type() = type
 
     companion object {
         val type = CustomPacketPayload.Type<ShowParserEditPacket>(rl("show_parser_edit"))
         val codec = StreamCodec.of<FriendlyByteBuf, ShowParserEditPacket>(
             { buf, conf ->
-                buf.writeBlockPos(conf.blockPos)
-                buf.writeVarIntArray(conf.bitFilter.map { it.toInt() }.toIntArray())
-                buf.writeUtf(conf.mapping ?: "")
+                conf.base.encode(buf)
             },
             { buf ->
-                val blockPos = buf.readBlockPos()
-                val bitFilter = buf.readVarIntArray().map { it.toBitId() }.toMutableList()
-                val mapping = buf.readUtf()
-                ShowParserEditPacket(blockPos = blockPos, bitFilter = bitFilter, mapping = mapping)
+                ShowParserEditPacket(EditScreenMenu.EditScreenBuf.decode(buf))
             }
         )!!
     }

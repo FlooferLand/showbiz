@@ -33,3 +33,15 @@ name = "Dook LaRue"
 authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[fatz_geronimo]
+name = "Fatz Geronimo"
+authors = ["Creative Engineering", "xion_no.i"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[organ]
+name = "Fatz' Organ"
+authors = ["Creative Engineering", "xion_no.i"]
+accepts.rockafire = true
+accepts.fnaf1 = false

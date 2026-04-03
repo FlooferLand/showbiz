@@ -8,6 +8,7 @@ import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
+import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
@@ -84,7 +85,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is SpeakerBlockEntity,
                 is CurtainBlockEntity,
                 is ShowSelectorBlockEntity,
-                is SpotlightBlockEntity
+                is SpotlightBlockEntity,
+                is CurtainControllerBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -142,16 +144,22 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     finish(sound = ModSounds.End, anim = "retract", message = "Speaker added")
                     return InteractionResult.SUCCESS
                 }
-                is GreyboxBlockEntity if firstEntity is CurtainBlockEntity -> {
-                    val (greybox, curtain) = Pair(lastEntity, firstEntity)
+                is GreyboxBlockEntity if firstEntity is CurtainControllerBlockEntity -> {
+                    val (greybox, curtainController) = Pair(lastEntity, firstEntity)
                     greybox.applyChange(true) {
-                        show.bindListener(curtain)
-                    }
-                    curtain.applyChange(true) {
-                        curtain.closeCurtains()
+                        show.bindListener(curtainController)
                     }
                     first.pos = Optional.empty()
-                    finish(sound = ModSounds.End, anim = "retract", message = "Curtain added")
+                    finish(sound = ModSounds.End, anim = "retract", message = "Curtain controller added")
+                    return InteractionResult.SUCCESS
+                }
+                is CurtainControllerBlockEntity if firstEntity is CurtainBlockEntity -> {
+                    val (curtainController, curtain) = Pair(lastEntity, firstEntity)
+                    curtainController.applyChange(true) {
+                        control.bindListener(curtain)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Bound the curtain")
                     return InteractionResult.SUCCESS
                 }
                 is ShowSelectorBlockEntity if firstEntity is ShowParserBlockEntity -> {

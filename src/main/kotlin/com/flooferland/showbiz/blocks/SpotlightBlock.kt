@@ -32,9 +32,9 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
         init {
             ServerPlayNetworking.registerGlobalReceiver(SpotlightEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@registerGlobalReceiver
-                val blockEntity = player.serverLevel().getBlockEntity(packet.blockPos) as? SpotlightBlockEntity ?: return@registerGlobalReceiver
+                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? SpotlightBlockEntity ?: return@registerGlobalReceiver
                 blockEntity.applyChange(true) {
-                    blockEntity.bitFilter = packet.bitFilter
+                    blockEntity.menuData = packet.base
                     blockEntity.turn = packet.turn
                 }
             }

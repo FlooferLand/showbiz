@@ -20,22 +20,25 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.CurtainBlock
+import com.flooferland.showbiz.blocks.CurtainControllerBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.SpotlightBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
+import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+
+// TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
 enum class ModBlocks {
     StagedBot(
         "staged_bot", ::StagedBotBlock,
         Properties.of()
             .strength(5.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
         entity = ::StagedBotBlockEntity,
@@ -45,7 +48,6 @@ enum class ModBlocks {
         "reel_to_reel", ::ReelToReelBlock,
         Properties.of()
             .strength(5.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
         entity = ::ReelToReelBlockEntity,
@@ -55,7 +57,6 @@ enum class ModBlocks {
         "greybox", ::GreyboxBlock,
         Properties.of()
             .strength(3.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
@@ -66,7 +67,6 @@ enum class ModBlocks {
         "speaker", ::SpeakerBlock,
         Properties.of()
             .strength(3.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.WOOD)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -77,7 +77,6 @@ enum class ModBlocks {
         "show_parser", ::ShowParserBlock,
         Properties.of()
             .strength(3.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -88,7 +87,6 @@ enum class ModBlocks {
         "show_selector", ::ShowSelectorBlock,
         Properties.of()
             .strength(3.0f)
-            .requiresCorrectToolForDrops()
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -115,6 +113,16 @@ enum class ModBlocks {
         modelPreset = BlockModelId.Custom,
         hideFromPlayer = true,
         recipe = null
+    ),
+    CurtainControllerBlock(
+        "curtain_controller", ::CurtainControllerBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.STONE)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::CurtainControllerBlockEntity,
+        recipe = ModRecipes.CurtainControllerBlock
     ),
     WojackBlock(
         "wojack_block", ::Block,

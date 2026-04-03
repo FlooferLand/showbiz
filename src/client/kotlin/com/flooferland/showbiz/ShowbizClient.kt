@@ -27,6 +27,7 @@ import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
+import com.flooferland.showbiz.screens.CurtainControllerEditScreen
 import com.flooferland.showbiz.screens.ReelUploadScreen
 import com.flooferland.showbiz.screens.ShowParserEditScreen
 import com.flooferland.showbiz.screens.SpotlightEditScreen
@@ -44,7 +45,6 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
-import kotlin.jvm.optionals.getOrNull
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -84,6 +84,7 @@ object ShowbizClient : ClientModInitializer {
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
+        MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)
 
         // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")

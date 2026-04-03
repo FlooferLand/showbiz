@@ -1,12 +1,11 @@
 package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.level.block.Blocks
+import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.server.level.*
+import net.minecraft.sounds.*
+import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.blocks.CurtainBlock
@@ -15,7 +14,7 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
-import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
@@ -23,22 +22,9 @@ import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainBlock.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
 
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
-        // TODO: Add a nicer way of chosing the bit for the curtains
-        val shouldOpen = when (it.mapping) {
-            "rae" -> it.signal.frameHas(91)  // Stage center
-            "faz" -> it.signal.frameHas(89)  // Stage main
-            else -> false
-        }
-        val shouldClose = when (it.mapping) {
-            "rae" -> it.signal.frameHas(92)  // Stage center
-            "faz" -> it.signal.frameHas(90)  // Stage main
-            else -> false
-        }
-
-        if ((shouldOpen && !isOpen) || (shouldClose && isOpen)) {
-            applyChange(true) { setCurtains(shouldOpen && !shouldClose) }
-        }
+    val control = connectionManager.port("control", PackedControlData(), PortDirection.In) {
+        val open = it.readCurtain() ?: return@port
+        if (open != isOpen) applyChange(true) { setCurtains(open) }
     }
 
     var color: Int = 0xffffff
@@ -98,7 +84,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             length = y
             for (y2 in 1..2) {
                 val below = blockPos.below(y + y2)
-                if ((level?.getBlockState(below)?.isSolidRender(level, below) ?: true)) {
+                if ((level?.getBlockState(below)?.isSolidRender(level!!, below) ?: true)) {
                     isLast = true
                     break
                 }
