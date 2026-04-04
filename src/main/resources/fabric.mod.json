@@ -33,9 +33,7 @@
             }
         ]
     },
-    "mixins": [
-        "showbiz.client.mixins.json"
-    ],
+    "mixins": ["showbiz.mixins.json"],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "minecraft": "$minecraft",

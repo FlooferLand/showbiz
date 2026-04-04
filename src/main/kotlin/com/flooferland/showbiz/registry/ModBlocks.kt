@@ -38,7 +38,7 @@ enum class ModBlocks {
     StagedBot(
         "staged_bot", ::StagedBotBlock,
         Properties.of()
-            .strength(5.0f)
+            .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
         entity = ::StagedBotBlockEntity,
@@ -47,7 +47,7 @@ enum class ModBlocks {
     ReelToReel(
         "reel_to_reel", ::ReelToReelBlock,
         Properties.of()
-            .strength(5.0f)
+            .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
         entity = ::ReelToReelBlockEntity,
@@ -56,7 +56,7 @@ enum class ModBlocks {
     Greybox(
         "greybox", ::GreyboxBlock,
         Properties.of()
-            .strength(3.0f)
+            .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
@@ -66,7 +66,7 @@ enum class ModBlocks {
     Speaker(
         "speaker", ::SpeakerBlock,
         Properties.of()
-            .strength(3.0f)
+            .strength(0.5f)
             .sound(SoundType.WOOD)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -76,7 +76,7 @@ enum class ModBlocks {
     ShowParser(
         "show_parser", ::ShowParserBlock,
         Properties.of()
-            .strength(3.0f)
+            .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -86,7 +86,7 @@ enum class ModBlocks {
     ShowSelector(
         "show_selector", ::ShowSelectorBlock,
         Properties.of()
-            .strength(3.0f)
+            .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -96,7 +96,7 @@ enum class ModBlocks {
     CurtainBlock(
         "curtain_block", ::CurtainBlock,
         Properties.of()
-            .strength(0.5f)
+            .strength(0.3f)
             .sound(SoundType.WOOL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
@@ -137,7 +137,7 @@ enum class ModBlocks {
     SpotlightBlock(
         "spotlight", ::SpotlightBlock,
         Properties.of()
-        .strength(1.0f)
+        .strength(0.5f)
         .sound(SoundType.METAL)
         .noOcclusion(),
         modelPreset = BlockModelId.Custom,
