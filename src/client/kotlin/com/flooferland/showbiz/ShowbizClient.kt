@@ -27,6 +27,7 @@ import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
+import com.flooferland.showbiz.screens.BotSelectScreen
 import com.flooferland.showbiz.screens.CurtainControllerEditScreen
 import com.flooferland.showbiz.screens.ReelUploadScreen
 import com.flooferland.showbiz.screens.ShowParserEditScreen
@@ -85,6 +86,7 @@ object ShowbizClient : ClientModInitializer {
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
         MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)
+        MenuScreens.register(ModScreenHandlers.BotSelect.type, ::BotSelectScreen)
 
         // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")

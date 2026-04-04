@@ -1,19 +1,7 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.ChatFormatting
-import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.utils.Extensions.applyChange
-import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.*
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.context.*
@@ -22,16 +10,19 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.network.packets.BotListSelectPacket
+import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
-import kotlin.math.floor
+import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.mojang.serialization.MapCodec
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
-    companion object {
-        val facing = GigaDirectionProperty("facing")
-    }
     val codec: MapCodec<StagedBotBlock> = simpleCodec(::StagedBotBlock)
 
     init {
@@ -44,33 +35,9 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
         Shapes.box(-0.5, 0.0, -0.5, 1.5, 4.0, 1.5)!!
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
-        if (level.isClientSide) return InteractionResult.PASS
         if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
-        if (player.isHolding({ s -> !s.isEmpty })) return InteractionResult.PASS
-        if (player !is ServerPlayer) return InteractionResult.PASS;
-
-        val entity = level.getBlockEntity(pos) as? StagedBotBlockEntity
-        if (entity != null) {
-            val oldId = entity.botId
-            entity.applyChange(true) {
-                val ids = Showbiz.bots.keys.sorted()
-                val index = ids.indexOf(oldId)
-                val newId = if (index == -1 || index == ids.lastIndex) ids.firstOrNull() else ids[index + 1]
-                newId?.let { entity.botId = newId }
-            }
-            val botInfo = Showbiz.bots[entity.botId]
-            val botAuthors = (botInfo?.authors?.joinToString(", ")?.let { "by $it" }) ?: ""
-            player.playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
-            player.connection.send(ClientboundSetTitleTextPacket(Component.empty()))
-            player.connection.send(ClientboundSetSubtitleTextPacket(
-                Component.literal("Switched to ").withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal("${botInfo?.name}").withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE))
-                    .append(Component.literal("!").withStyle(ChatFormatting.GRAY))
-            ))
-            player.displayClientMessage(Component.literal("${entity.botId} $botAuthors").withStyle(ChatFormatting.GRAY), true)
-            player.connection.send(ClientboundSetTitlesAnimationPacket(3, 15, 5))
-            return InteractionResult.SUCCESS
-        }
+        if (player.isHolding { s -> !s.isEmpty }) return InteractionResult.PASS
+        player.openMenu(state.getMenuProvider(level, pos))
         return super.useWithoutItem(state, level, pos, player, hitResult)
     }
 
@@ -92,4 +59,18 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? StagedBotBlockEntity)?.tick(level, pos, blockState) }
+
+    companion object {
+        val facing = GigaDirectionProperty("facing")
+
+        init {
+            ServerPlayNetworking.registerGlobalReceiver(BotListSelectPacket.type) { packet, ctx ->
+                val blockEntity = ctx.player().level().getBlockEntity(packet.blockPos) as? StagedBotBlockEntity ?: return@registerGlobalReceiver
+                blockEntity.applyChange(true) {
+                    botId = packet.id
+                }
+                ctx.player().playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
+            }
+        }
+    }
 }

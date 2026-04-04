@@ -1,5 +1,6 @@
 {
-    "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand!",
+    "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand and Monsterwaill!",
+    "config.prop.playPneumaticSounds": "Play pneumatic sounds",
 
     "itemGroup.showbiz.main": "Showbiz",
 

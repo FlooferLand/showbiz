@@ -15,6 +15,8 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
     data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)
     data object ShowFileSelect : ModPackets<ShowFileSelectPacket>(ClientToServer, ShowFileSelectPacket.type, ShowFileSelectPacket.codec)
+    data object BotList : ModPackets<BotListPacket>(Bidirectional, BotListPacket.type, BotListPacket.codec)
+    data object ShowListSelect : ModPackets<BotListSelectPacket>(ClientToServer, BotListSelectPacket.type, BotListSelectPacket.codec)
     data object CurtainControllerEdit: ModPackets<CurtainControllerEditPacket>(ClientToServer, CurtainControllerEditPacket.type, CurtainControllerEditPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {

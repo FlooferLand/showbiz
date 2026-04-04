@@ -46,7 +46,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 val y = (location * spacing)
 
                 val nameHeight = (font.lineHeight * 1.65f).toInt()
-                val nameWidget = StringWidget(x, y, width - x, 20, Component.literal(name), font).alignLeft()
+                val nameWidget = StringWidget(x, y, width - x, 20, Component.translatable("config.prop.$name"), font).alignLeft()
                 addRenderableWidget(nameWidget)
 
                 widget.x = x
