@@ -13,6 +13,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
 
     var turnX: EditBox? = null
     var turnY: EditBox? = null
+    var angle: EditBox? = null
 
     override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
         // Turn X
@@ -30,10 +31,20 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
             turnY!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
             widgets.add(WidgetInfo("Turn Y", turnY!!))
         }
+
+        // Angle (radius)
+        run {
+            angle = EditBox(font, 40, 20, Component.literal("Angle"))
+            angle!!.tooltip = Tooltip.create(Component.literal("Angular radius"))
+            angle!!.value = editMenu.data.angle.toString().replace(".0", "")
+            angle!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() }
+            widgets.add(WidgetInfo("Angle", angle!!))
+        }
     }
 
     override fun saveCustom(data: SpotlightEditPacket) {
         turnX?.value?.toFloatOrNull()?.let { data.turn.x = it }
         turnY?.value?.toFloatOrNull()?.let { data.turn.y = it }
+        angle?.value?.toFloatOrNull()?.let { data.angle = it }
     }
 }

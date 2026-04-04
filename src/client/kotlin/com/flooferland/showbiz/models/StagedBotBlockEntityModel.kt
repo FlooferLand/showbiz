@@ -14,6 +14,7 @@ import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
+import org.joml.Vector3d
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
@@ -134,8 +135,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             val bitOn = frame.frameHas(bit)
 
             // Animation
-            // TODO: Fix animations sometimes snapping
-            // TODO: Fix animations sometimes holding for no reason
            for (anim in data.anim) {
                 val controllerKey = "ctrl_${bit}_${anim.id}"
 
@@ -228,8 +227,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.posY += move.target.y * eased
                 bone.posZ += move.target.z * eased
 
-                // Looney wiggle
+                // Manual overrides
                 when (bot.getId()) {
+                    // Looney wiggle
                     "looney_bird" if movements?.get("raise") == bit -> {
                         val affect = (springVel * getSpringScale(data)).coerceIn(-2f, 2f) * 2.0f
                         val time = System.currentTimeMillis() * 0.01f

@@ -1,7 +1,7 @@
 set rae fats
 
 rae jaw {
-    flow 1.8
+    flow 1.5
     rotate "Jaw" x:-45
 }
 rae right_arm_swing {

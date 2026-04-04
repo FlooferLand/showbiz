@@ -36,6 +36,7 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                     blockEntity.turn = packet.turn
+                    blockEntity.angle = packet.angle
                 }
             }
         }

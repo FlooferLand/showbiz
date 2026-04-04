@@ -22,12 +22,12 @@ any head_up {
 }
 
 rae head_left {
-    flow ease-in 0.18
+    flow 0.15
     rotate "head" y:45
 }
 
 rae head_right {
-    flow ease-in 0.18
+    flow 0.15
     rotate "head" y:-45
 }
 
@@ -85,7 +85,7 @@ rae foot_tap {
 # face
 
 any jaw {
-    flow 2.0
+    flow 1.2
     rotate "jaw" x:-15
     rotate "snout" x:5
 }

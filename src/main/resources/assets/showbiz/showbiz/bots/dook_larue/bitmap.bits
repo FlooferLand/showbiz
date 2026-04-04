@@ -1,7 +1,7 @@
 set rae duke
 
 any jaw {
-    flow 2.0
+    flow 1.4
     rotate "jaw" x:-25
 }
 rae right_arm_swing {
