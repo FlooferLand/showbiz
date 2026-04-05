@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.screens
 
+import net.minecraft.ChatFormatting
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
@@ -40,18 +41,20 @@ class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Ree
                 StringWidget(width / 2 - 50, height / 2 - 50, 100, 20, Component.literal("No shows found"), font)
             )
             run {
-                val text = "Upload an ${FileStorage.SUPPORTED_FORMATS.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"
+                val message = Component.literal("Upload an ${FileStorage.SUPPORTED_FORMATS.joinToString("/")} show file to your ")
+                if (!isLocalServer()) message.append("server's ")
+                message.append(Component.literal(FileStorage.SHOWS_DIR.pathString).withStyle(ChatFormatting.BOLD))
                 addRenderableWidget(
                     MultiLineTextWidget(
                         (width - maxWidth) / 2,
                         height / 2 - 20,
-                        Component.literal(text),
+                        message,
                         font
                     ).setCentered(true).setMaxWidth(maxWidth).also { it.setPosition((width - it.width) / 2, height / 2 - 20) }
                 )
             }
             openDirButton.setPosition(width / 2 - 50, height / 2 + 20)
-            addRenderableWidget(openDirButton)
+            if (isLocalServer()) addRenderableWidget(openDirButton)
             return
         }
 
@@ -70,8 +73,10 @@ class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Ree
             StringWidget(fileListWidget.x, fileListWidget.y - 20, fileListWidget.width, 20, Component.literal("Upload a show to this reel"), font).alignCenter()
         )
         openDirButton.setPosition(width / 2 - 50, fileListWidget.bottom + 10)
-        addRenderableWidget(openDirButton)
+        if (isLocalServer()) addRenderableWidget(openDirButton)
     }
+
+    fun isLocalServer() = Minecraft.getInstance().isLocalServer
 
     fun updateFiles(paths: Array<String>) {
         loading = false

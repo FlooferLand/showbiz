@@ -203,6 +203,7 @@ sourceSets {
         resources {
             srcDir("src/main/generated/resources")
             srcDir("src/main/resources-fnaf")
+            srcDir("src/main/resources-cec")
         }
     }
 }
