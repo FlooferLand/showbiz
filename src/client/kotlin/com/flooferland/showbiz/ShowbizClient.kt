@@ -27,6 +27,7 @@ import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
+import com.flooferland.showbiz.screens.BitViewScreen
 import com.flooferland.showbiz.screens.BotSelectScreen
 import com.flooferland.showbiz.screens.CurtainControllerEditScreen
 import com.flooferland.showbiz.screens.ReelUploadScreen
@@ -89,6 +90,7 @@ object ShowbizClient : ClientModInitializer {
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
         MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)
         MenuScreens.register(ModScreenHandlers.BotSelect.type, ::BotSelectScreen)
+        MenuScreens.register(ModScreenHandlers.BitView.type, ::BitViewScreen)
 
         // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
@@ -110,7 +112,7 @@ object ShowbizClient : ClientModInitializer {
                 ::CurtainBlockEntityRenderer
             )
             BlockEntityRenderers.register(
-                ModBlocks.SpotlightBlock.entityType!! as BlockEntityType<SpotlightBlockEntity>,
+                ModBlocks.Spotlight.entityType!! as BlockEntityType<SpotlightBlockEntity>,
                 ::SpotlightBlockEntityRenderer
             )
             EntityRendererRegistry.register(

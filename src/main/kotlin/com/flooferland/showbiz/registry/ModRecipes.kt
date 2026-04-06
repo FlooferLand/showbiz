@@ -85,6 +85,17 @@ enum class ModRecipes {
             Ingredient("copper_ingot")
         )
     ),
+    BitViewBlock(
+        "O-O",
+        "-S-",
+        "ORO",
+        mapOf(
+            "O" to Ingredient("copper_ingot"),
+            "-" to Ingredient("stick"),
+            "R" to Ingredient("redstone"),
+            "S" to Ingredient("amethyst_shard"),
+        )
+    ),
     Wand(
         " I ",
         " I ",

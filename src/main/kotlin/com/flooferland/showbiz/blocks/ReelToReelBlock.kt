@@ -49,7 +49,6 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
     }
 
     override fun useItemOn(heldStack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        if (level.isClientSide) return ItemInteractionResult.CONSUME
         if (heldStack.item is WandItem) {
             return ItemInteractionResult.FAIL
         }
@@ -63,7 +62,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
-            if (heldStack.item is ReelItem) {
+            if (heldStack.item is ReelItem && entity.show.isEmpty()) {
                 val filename = heldStack.components.get(ModComponents.FileName.type)
                 if (filename != null) {
                     val stackCopy = heldStack.copy()
@@ -72,30 +71,36 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                     player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
 
                     // Playback
-                    entity.resetPlayback()
-                    entity.show.load(filename) { data ->
-                        entity.markDirtyNotifyAll()
-                        if (player.isRemoved) return@load
-                        if (data == null) {  // Error happened, giving back the reel
-                            player.handItem(stackCopy)
-                            player.displayClientMessage(Component.literal("Failed to load show. Check the server logs.").withStyle(ChatFormatting.RED), true)
-                            return@load
+                    if (!level.isClientSide) {
+                        entity.resetPlayback()
+                        entity.show.load(filename) { data ->
+                            entity.markDirtyNotifyAll()
+                            if (player.isRemoved) return@load
+                            if (data == null) {  // Error happened, giving back the reel
+                                player.handItem(stackCopy)
+                                player.displayClientMessage(
+                                    Component.literal("Failed to load show. Check the server logs.").withStyle(ChatFormatting.RED), true
+                                )
+                                return@load
+                            }
+                            level.playSound(player, pos, ModSounds.ReelEnter.event, SoundSource.MASTER, 0.4f, 1.5f)
+                            player.displayClientMessage(Component.empty(), true)
                         }
-                        player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 0.4f, 1.5f)
-                        player.displayClientMessage(Component.empty(), true)
                     }
                 }
             } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
                 val showName = entity.show.name
                 showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-                player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
-                entity.applyChange(true) {
-                    entity.setPlaying(false)
-                    entity.show.free()
+                level.playSound(player, pos, ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+                if (!level.isClientSide) {
+                    entity.applyChange(true) {
+                        entity.setPlaying(false)
+                        entity.show.free()
+                    }
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
-        } else {
+        } else if (!level.isClientSide) {
             // Pausing
             if (!entity.show.isEmpty()) {
                 var paused = entity.paused

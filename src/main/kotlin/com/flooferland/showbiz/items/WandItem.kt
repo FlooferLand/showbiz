@@ -7,6 +7,7 @@ import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
@@ -86,7 +87,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is CurtainBlockEntity,
                 is ShowSelectorBlockEntity,
                 is SpotlightBlockEntity,
-                is CurtainControllerBlockEntity
+                is CurtainControllerBlockEntity,
+                is BitViewBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -150,7 +152,16 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                         show.bindListener(curtainController)
                     }
                     first.pos = Optional.empty()
-                    finish(sound = ModSounds.End, anim = "retract", message = "Curtain controller added")
+                    finish(sound = ModSounds.End, anim = "retract", message = "Curtain Controller added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is BitViewBlockEntity -> {
+                    val (greybox, bitView) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        show.bindListener(bitView)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Bit View added")
                     return InteractionResult.SUCCESS
                 }
                 is CurtainControllerBlockEntity if firstEntity is CurtainBlockEntity -> {

@@ -13,6 +13,7 @@
     "block.showbiz.curtain_block": "Curtain Railing",
     "block.showbiz.curtain_controller": "Curtain Controller",
     "block.showbiz.spotlight": "Spotlight (W.I.P)",
+    "block.showbiz.bit_view": "Bit View",
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
@@ -25,5 +26,6 @@
     "tooltip.showbiz.block.show_selector": "Sends out a trigger signal\nwhen one of the buttons is pressed",
     "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse with a Curtain Controller\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
-    "tooltip.showbiz.block.spotlight": "Work-in-progress"
+    "tooltip.showbiz.block.spotlight": "Work-in-progress",
+    "tooltip.showbiz.block.bit_view": "View bits"
 }

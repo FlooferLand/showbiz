@@ -20,7 +20,7 @@ class CurtainControllerBlock(props: Properties) : FacingEntityBlock(props) {
 
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.CurtainControllerBlock.entityType!!.create(pos, state)!!
+        ModBlocks.CurtainController.entityType!!.create(pos, state)!!
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (level.isClientSide) return InteractionResult.PASS

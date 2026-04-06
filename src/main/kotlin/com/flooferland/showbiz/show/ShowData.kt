@@ -103,7 +103,6 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 }
             }
         }
-
         coro.invokeOnCompletion { err ->
             loading = false
             isLoaded = (audio.isNotEmpty() && signal.isNotEmpty())

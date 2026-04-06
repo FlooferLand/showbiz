@@ -2,8 +2,8 @@
 	"format_version": "1.9.0",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "showbiz:block/speaker",
-		"particle": "showbiz:block/speaker"
+		"0": "showbiz:block/bit_view",
+		"particle": "showbiz:block/bit_view"
 	},
 	"elements": [
 		{
@@ -28,7 +28,7 @@
 				"east": {"uv": [0, 8.25, 0.25, 11.75], "texture": "#0"},
 				"west": {"uv": [3.75, 8.25, 4, 11.75], "texture": "#0"},
 				"up": {"uv": [3.75, 8.25, 0.25, 8], "texture": "#0"},
-				"down": {"uv": [3.75, 11.75, 0.25, 12], "texture": "#0"}
+				"down": {"uv": [7.25, 8, 3.75, 8.25], "texture": "#0"}
 			}
 		}
 	],

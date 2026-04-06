@@ -19,7 +19,7 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::SpotlightBlock)!!
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.INVISIBLE
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
-        ModBlocks.SpotlightBlock.entityType!!.create(pos, state)!!
+        ModBlocks.Spotlight.entityType!!.create(pos, state)!!
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
         if (level.isClientSide) return InteractionResult.PASS

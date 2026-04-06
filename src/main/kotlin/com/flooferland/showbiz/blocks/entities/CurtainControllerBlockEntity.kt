@@ -23,7 +23,7 @@ import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 
-class CurtainControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainControllerBlock.entityType!!, pos, blockState), IConnectable, EditScreenOwner<CurtainControllerEditPacket> {
+class CurtainControllerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainController.entityType!!, pos, blockState), IConnectable, EditScreenOwner<CurtainControllerEditPacket> {
     override val connectionManager = ConnectionManager(this)
 
     val control = connectionManager.port("control", PackedControlData(), PortDirection.Out)

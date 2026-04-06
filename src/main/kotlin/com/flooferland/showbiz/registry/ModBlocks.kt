@@ -24,8 +24,10 @@ import com.flooferland.showbiz.blocks.CurtainControllerBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
+import com.flooferland.showbiz.blocks.BitViewBlock
 import com.flooferland.showbiz.blocks.SpotlightBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
+import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
@@ -114,7 +116,7 @@ enum class ModBlocks {
         hideFromPlayer = true,
         recipe = null
     ),
-    CurtainControllerBlock(
+    CurtainController(
         "curtain_controller", ::CurtainControllerBlock,
         Properties.of()
             .strength(0.5f)
@@ -134,15 +136,25 @@ enum class ModBlocks {
         hideFromPlayer = true,
         recipe = null
     ),
-    SpotlightBlock(
+    Spotlight(
         "spotlight", ::SpotlightBlock,
         Properties.of()
-        .strength(0.5f)
-        .sound(SoundType.METAL)
-        .noOcclusion(),
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = ::SpotlightBlockEntity,
         recipe = ModRecipes.SpotlightBlock
+    ),
+    BitView(
+        "bit_view", ::BitViewBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::BitViewBlockEntity,
+        recipe = ModRecipes.BitViewBlock
     )
     ;
 
