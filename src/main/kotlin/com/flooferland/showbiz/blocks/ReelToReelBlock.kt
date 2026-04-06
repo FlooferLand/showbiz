@@ -63,8 +63,8 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
             if (heldStack.item is ReelItem && entity.show.isEmpty()) {
-                val filename = heldStack.components.get(ModComponents.FileName.type)
-                if (filename != null) {
+                val filename = heldStack.components.get(ModComponents.FileName.type) ?: ""
+                if (filename.isNotEmpty()) {
                     val stackCopy = heldStack.copy()
                     player.setItemInHand(hand, Items.AIR.defaultInstance)
                     player.displayClientMessage(Component.literal("Loading.."), true)
@@ -79,7 +79,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                             if (data == null) {  // Error happened, giving back the reel
                                 player.handItem(stackCopy)
                                 player.displayClientMessage(
-                                    Component.literal("Failed to load show. Check the server logs.").withStyle(ChatFormatting.RED), true
+                                    Component.translatable("message.showbiz.show_load_fail").withStyle(ChatFormatting.RED), true
                                 )
                                 return@load
                             }
@@ -87,6 +87,10 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                             player.displayClientMessage(Component.empty(), true)
                         }
                     }
+                } else {
+                    player.displayClientMessage(
+                        Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
+                    )
                 }
             } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
                 val showName = entity.show.name

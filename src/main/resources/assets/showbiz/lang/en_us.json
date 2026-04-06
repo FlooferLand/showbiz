@@ -27,5 +27,8 @@
     "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse with a Curtain Controller\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
     "tooltip.showbiz.block.spotlight": "Work-in-progress",
-    "tooltip.showbiz.block.bit_view": "View bits"
+    "tooltip.showbiz.block.bit_view": "View bits",
+
+    "message.showbiz.show_load_fail": "Failed to load show. Check the server logs.",
+    "message.showbiz.empty_reel_warning": "This reel has no show on it!"
 }
