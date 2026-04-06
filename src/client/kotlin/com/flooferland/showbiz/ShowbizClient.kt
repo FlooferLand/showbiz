@@ -33,6 +33,7 @@ import com.flooferland.showbiz.screens.ReelUploadScreen
 import com.flooferland.showbiz.screens.ShowParserEditScreen
 import com.flooferland.showbiz.screens.SpotlightEditScreen
 import com.flooferland.showbiz.types.BotSoundHandler
+import com.flooferland.showbiz.types.ClientConnections
 import com.flooferland.showbiz.types.ModelPartInstance
 import com.flooferland.showbiz.types.ModelPartManager
 import kotlinx.serialization.decodeFromString
@@ -77,6 +78,7 @@ object ShowbizClient : ClientModInitializer {
             ModClientEntities
             ModClientCommands
             ModClientVeil
+            ClientConnections
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()

@@ -1,8 +1,10 @@
 package com.flooferland.showbiz.renderers
 
 import net.minecraft.client.Minecraft
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.core.BlockPos
 import net.minecraft.util.FastColor
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.CurtainBlock
@@ -10,7 +12,6 @@ import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.utils.DrawUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.voxelSnap
-import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import kotlin.math.abs
 import kotlin.math.sin
@@ -21,15 +22,19 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
     val endRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block_end.png"))!!
     val endRenderTypeCull = RenderType.entityTranslucentCull(rl("textures/block/curtain_block_end.png"))!!
 
+    fun canDraw(level: ClientLevel, pos: BlockPos) = level.getBlockState(pos)?.let { state ->
+        state.block !is CurtainBlock && !state.isSolidRender(level, pos)
+    } ?: false
+
     override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
-        val level = blockEntity.level ?: return
+        val level = blockEntity.level as? ClientLevel ?: return
         var color = blockEntity.color // 0xff6767
 
         val (drawSouth, drawNorth, drawWest, drawEast) = arrayOf(
-            level.getBlockState(blockEntity.blockPos.south())?.block !is CurtainBlock,
-            level.getBlockState(blockEntity.blockPos.north())?.block !is CurtainBlock,
-            level.getBlockState(blockEntity.blockPos.west())?.block !is CurtainBlock,
-            level.getBlockState(blockEntity.blockPos.east())?.block !is CurtainBlock
+            canDraw(level, blockEntity.blockPos.south()),
+            canDraw(level, blockEntity.blockPos.north()),
+            canDraw(level, blockEntity.blockPos.west()),
+            canDraw(level, blockEntity.blockPos.east())
         )
         val randomY = abs(sin((blockEntity.blockPos.x + blockEntity.blockPos.y + blockEntity.blockPos.z).toFloat()))
         val randomColor = FastColor.ARGB32.color(255 - (randomY * 30).toInt(), 255 - (randomY * 30).toInt(), 255 - (randomY * 30).toInt())

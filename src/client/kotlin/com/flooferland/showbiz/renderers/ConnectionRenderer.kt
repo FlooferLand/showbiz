@@ -8,8 +8,9 @@ import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.types.connection.GlobalConnections
-import com.flooferland.showbiz.types.connection.IConnectable
+import com.flooferland.showbiz.types.ClientConnections
+import com.flooferland.showbiz.types.connection.ServerConnections.Point
+import com.flooferland.showbiz.types.connection.ServerConnections.PointType
 import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
@@ -27,7 +28,7 @@ object ConnectionRenderer {
 
     fun render(player: Player, source: MultiBufferSource.BufferSource, partialTick: Float) {
         if (!isHoldingWand(player)) return
-        for ((pos, points) in GlobalConnections.entries) {
+        for ((pos, points) in ClientConnections.entries) {
             for (point in points) {
                 val yOffset = getYOffset(point.index, points.size)
                 val pointPos = pos.center.add(0.0, yOffset, 0.0)
@@ -39,7 +40,7 @@ object ConnectionRenderer {
                 val connectionSnapshot = point.connections.toList()
                 for (connection in connectionSnapshot) {
                     val targetPoint = connection.point
-                    val endYOffset = getYOffset(targetPoint.index, GlobalConnections.entries[connection.pos]?.size ?: 1)
+                    val endYOffset = getYOffset(targetPoint.index, ClientConnections.entries[connection.pos]?.size ?: 1)
                     val end = connection.pos.center.add(0.0, endYOffset, 0.0)
                     deferRender { pose, consumer -> renderConnection(pose, consumer, pointPos, end) }
                 }
@@ -47,10 +48,10 @@ object ConnectionRenderer {
         }
     }
 
-    fun renderPoint(pose: PoseStack, consumer: BufferBuilder, point: GlobalConnections.Point, pos: Vec3) {
+    fun renderPoint(pose: PoseStack, consumer: BufferBuilder, point: Point, pos: Vec3) {
         val color = when (point.type) {
-            GlobalConnections.PointType.Input -> FastColor.ARGB32.color(255, 20, 200, 255)   // Blue
-            GlobalConnections.PointType.Output -> FastColor.ARGB32.color(255, 10, 255, 30)   // Green
+            PointType.Input -> FastColor.ARGB32.color(255, 20, 200, 255)   // Blue
+            PointType.Output -> FastColor.ARGB32.color(255, 10, 255, 30)   // Green
         }
         val darkColor = FastColor.ARGB32.color(255, 10, 10, 10)
         val bound = getPointBoundingBox()
@@ -66,8 +67,8 @@ object ConnectionRenderer {
 
         // Rendering the text
         val textSign = when (point.type) {
-            GlobalConnections.PointType.Input -> "in"
-            GlobalConnections.PointType.Output -> "out"
+            PointType.Input -> "in"
+            PointType.Output -> "out"
         }
         val text = Component.literal(textSign).withColor(color)
             .append(Component.literal(" ").withColor(0xFFFFFFFF.toInt()))

@@ -1,27 +1,18 @@
 package com.flooferland.showbiz
 
-import net.minecraft.core.component.DataComponentPatch
 import net.minecraft.server.packs.*
-import com.flooferland.showbiz.FileServer.sendShowsToClient
-import com.flooferland.showbiz.FileStorage.fetchShows
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
-import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.BotListPacket
-import com.flooferland.showbiz.network.packets.BotListSelectPacket
-import com.flooferland.showbiz.network.packets.ShowFileListPacket
-import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.registry.*
-import com.flooferland.showbiz.types.connection.GlobalConnections
-import com.flooferland.showbiz.utils.Extensions.getHeldItem
+import com.flooferland.showbiz.types.connection.ServerConnections
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.io.path.name
 
 object Showbiz : ModInitializer {
     const val MOD_ID = "showbiz"
@@ -42,7 +33,7 @@ object Showbiz : ModInitializer {
             ModSounds.entries
             ModCommands
             ModScreenHandlers
-            GlobalConnections
+            ServerConnections
             FileStorage
             FileServer
             UpdateChecker
