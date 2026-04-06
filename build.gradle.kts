@@ -16,9 +16,7 @@ base {
 }
 val isAlpha = "alpha" in modVersion
 val isBeta = "beta" in modVersion
-val excludedFromJar = arrayOf(
-    "**/showbiz-fnaf/**"
-)
+val excludedFromJar = arrayOf("**/.vscode/**")
 
 stonecutter {
     constants["fabric"] = (loader == "fabric")
@@ -202,8 +200,6 @@ sourceSets {
     main {
         resources {
             srcDir("src/main/generated/resources")
-            srcDir("src/main/resources-fnaf")
-            srcDir("src/main/resources-cec")
         }
     }
 }
