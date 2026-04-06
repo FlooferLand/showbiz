@@ -1,7 +1,7 @@
 set rae mitzi
 
 rae jaw {
-    flow 1.7
+    flow 1.8
     rotate "jaw" x:-18
 }
 
@@ -16,12 +16,12 @@ rae eyes_left {
 }
 
 rae left_eyelid {
-    flow 0.4
+    flow 0.6
     move "LidL" y:-1.5
 }
 
 rae right_eyelid {
-    flow 0.4
+    flow 0.6
     move "LidR" y:-1.5
 }
 
@@ -36,61 +36,61 @@ rae head_right {
 }
 
 rae head_up {
-    flow 0.45
+    flow 0.5
     rotate "head" x:13
 }
 
 rae body_twist_left {
-    flow 0.35
+    flow 0.3
     rotate "chest" y:15
 }
 
 rae body_twist_right {
-    flow 0.35
+    flow 0.3
     rotate "chest" y:-15
 }
 
 rae body_lean {
-    flow 0.25
+    flow 0.3
     rotate "chest" x:-10
 }
 
 rae left_arm_twist {
-    flow 0.3
+    flow 0.4
     rotate "ArmL" y:45
 }
 
 rae left_elbow {
-    flow 0.3
+    flow 0.4
     rotate "ArmL2" x:40
 }
 
 rae left_arm_raise {
-    flow 0.3
+    flow 0.4
     rotate "ArmL" z:-50
 }
 
 rae right_arm_twist {
-    flow 0.3
+    flow 0.4
     rotate "ArmR" y:-45
 }
 
 rae right_elbow {
-    flow 0.3
+    flow 0.4
     rotate "ArmR1" x:40
 }
 
 rae right_arm_raise {
-    flow 0.3
+    flow 0.4
     rotate "ArmR" z:50
 }
 
 rae left_ear {
-    flow 0.3
+    flow 0.4
     rotate "earL" x:25
 }
 
 rae right_ear {
-    flow 0.3
+    flow 0.4
     rotate "earR" x:25
 }

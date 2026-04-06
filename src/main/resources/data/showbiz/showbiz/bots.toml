@@ -45,3 +45,9 @@ name = "Fatz' Organ"
 authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[beach_bear]
+name = "Beach Bear"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false

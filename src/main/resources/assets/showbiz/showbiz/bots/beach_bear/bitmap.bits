@@ -1,0 +1,82 @@
+set rae beach_bear
+
+rae body_lean {
+    flow 0.4
+    rotate "Upper Body" x:10
+}
+
+# Face
+rae jaw {
+    flow 0.8
+    rotate "Jaw" x:-30
+    rotate "Snout" x:8
+}
+
+# Head
+rae head_left {
+    flow 0.45
+    rotate "Head" y:35
+}
+rae head_right {
+    flow 0.45
+    rotate "Head" y:-35
+}
+rae head_up {
+    flow 0.7
+    rotate "Head" x:20
+}
+
+# Eyes
+rae left_eyelid {
+    flow 1.5
+    move "Left Eyelid" y:0.5
+}
+rae right_eyelid {
+    flow 1.5
+    move "Right Eyelid" y:0.5
+}
+rae eye_cross {
+    flow 1.6
+    move "Left Eye" x:-0.5
+    move "Right Eye" x:0.5
+}
+
+# Arms
+rae right_arm_raise {
+    flow 0.45
+    rotate "Right Arm" z:60
+}
+rae right_wrist {
+    flow 1.0
+    rotate "Right Hand" y:50
+}
+rae right_elbow_twist {  # Guitar strum
+    flow ease-in 1.3
+    rotate "Right Hand" z:45
+    wigglemul 3.0
+}
+rae guitar_raise {
+    flow 0.4
+    rotate "Guitar" z:-17
+    rotate "Left Arm" x:7
+    rotate "Left Lower Arm" x:25
+    rotate "Left Hand" x:-25
+}
+rae left_hand_slide {
+    flow 0.9
+    rotate "Left Lower Arm" y:-25
+}
+
+# Legs
+rae right_leg_kick {
+    flow ease-in 0.4
+    rotate "Right Leg" x:18
+    rotate "Right Foot" x:10
+    wigglemul 3.0
+}
+rae left_leg_kick {
+    flow ease-in 0.4
+    rotate "Left Leg" x:18
+    rotate "Left Foot" x:10
+    wigglemul 3.0
+}
