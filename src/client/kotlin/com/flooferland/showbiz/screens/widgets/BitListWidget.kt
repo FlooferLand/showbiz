@@ -50,16 +50,21 @@ class BitListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick)
         val font = Minecraft.getInstance().font
-        guiGraphics.drawString(font, Component.literal("Bit View (${frame?.mapping})"), x, 10, 0xFFFFFFFF.toInt())
+
+        // Title
+        run {
+            val title = Component.literal("Bit View")
+            frame?.mapping?.let { if (it.isNotEmpty()) title.append(" ($it)") }
+            guiGraphics.drawString(font, title, x, 10, 0xFFFFFFFF.toInt())
+        }
 
         hoveredBit?.let { bit ->
             val color = if (hoveredBitOn) ChatFormatting.GREEN else ChatFormatting.WHITE
             val bitInfo = frame?.mapping?.let {
-                val bitMap = BitUtils.readBitmap(it)
-                for ((fixture, movements) in bitMap?.entries!!) {
-                    for ((name, moveBit) in movements) {
+                val bitMap = BitUtils.readBitmap(it) ?: return@let null
+                for ((fixture, movements) in bitMap.entries) {
+                    for ((name, moveBit) in movements)
                         if (moveBit == bit.toBitId()) return@let "$fixture.$name"
-                    }
                 }
                 return@let null
             } ?: "n/a"

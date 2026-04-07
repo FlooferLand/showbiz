@@ -152,6 +152,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         signal.clear()
         audio = ByteArray(0)
         isLoaded = false
+        loading = false
         id = null
         name = null
         mapping = null

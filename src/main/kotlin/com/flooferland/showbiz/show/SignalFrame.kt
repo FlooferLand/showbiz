@@ -2,7 +2,7 @@ package com.flooferland.showbiz.show
 
 /** One frame of signal data, split per drawer */
 class SignalFrame {
-    var raw: BitIdArray = bitIdArrayOf(0u)
+    var raw: BitIdArray = bitIdArrayOf()
 
     fun frameHas(id: BitId): Boolean =
         raw.contains(id)

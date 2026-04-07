@@ -8,12 +8,16 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.*
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.FastColor
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
@@ -43,6 +47,10 @@ object Extensions {
         change(this)
         markDirtyNotifyAll()
     }
+
+    //region Level
+    fun Level.getNearbyPlayers(area: AABB) = this.players().filter { area.contains(it.position()) }
+    //endregion
 
     //region GeckoLib
     fun GeoBone.getChildrenFlattened(): HashSet<GeoBone> {

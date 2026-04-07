@@ -54,6 +54,11 @@ class ReelItem(properties: Properties) : Item(properties) {
     companion object {
         var openScreenClient: (ItemStack) -> Unit = { }
 
+        fun getFilename(stack: ItemStack): String? {
+            if (stack.item !is ReelItem) return null
+            return stack.components.get(ModComponents.FileName.type)
+        }
+
         fun makeItem(filename: String): ItemStack {
             val reelStack = ItemStack(ModItems.Reel.item)
             reelStack.applyComponent(ModComponents.FileName.type, filename)

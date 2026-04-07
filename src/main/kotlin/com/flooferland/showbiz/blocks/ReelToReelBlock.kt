@@ -63,7 +63,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
             if (heldStack.item is ReelItem && entity.show.isEmpty()) {
-                val filename = heldStack.components.get(ModComponents.FileName.type) ?: ""
+                val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
                     val stackCopy = heldStack.copy()
                     player.setItemInHand(hand, Items.AIR.defaultInstance)
@@ -92,15 +92,13 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                         Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
+            } else if (!level.isClientSide && heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
                 val showName = entity.show.name
                 showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-                level.playSound(player, pos, ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
-                if (!level.isClientSide) {
-                    entity.applyChange(true) {
-                        entity.setPlaying(false)
-                        entity.show.free()
-                    }
+                player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+                entity.applyChange(true) {
+                    entity.setPlaying(false)
+                    entity.show.free()
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
@@ -131,16 +129,8 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
         return ItemInteractionResult.SUCCESS
     }
 
-    // TODO: Make drops work
-    override fun getDrops(state: BlockState, params: LootParams.Builder): List<ItemStack> {
-        val entity = (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) as? ReelToReelBlockEntity) ?: return super.getDrops(state, params)
-
-        val name = entity.show.name
-        if (name != null && !entity.show.isEmpty()) {
-            return mutableListOf(ReelItem.makeItem(filename = name))
-        }
-
-        return super.getDrops(state, params)
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        Containers.dropContentsOnDestroy(state, newState, level, pos)
     }
 
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
