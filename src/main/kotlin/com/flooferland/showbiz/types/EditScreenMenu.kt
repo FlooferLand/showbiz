@@ -45,5 +45,9 @@ where P: EditScreenMenu.EditScreenPacketPayload {
 
     override fun quickMoveStack(player: Player, index: Int) = ItemStack.EMPTY!!
     override fun stillValid(player: Player) =
-        (player.level().getBlockEntity(this.pos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(pos.center) < 12.0f
+        (player.level().getBlockEntity(this.pos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(pos.center) < reachDistanceSqr
+
+    companion object {
+        val reachDistanceSqr = 12.0f.let { it * it }
+    }
 }
