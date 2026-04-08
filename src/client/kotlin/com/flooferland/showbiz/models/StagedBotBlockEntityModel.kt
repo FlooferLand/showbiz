@@ -50,7 +50,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             anim.on ?: "${anim.id}.on"
         else
             anim.off ?: "${anim.id}.off"
-        return "animation.${animatable.botId}.${id}"
+        return "animation.${animatable.botId?.path}.${id}"
     }
 
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
