@@ -5,6 +5,7 @@ import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.addons.data.AddonBotEntry
+import com.flooferland.showbiz.types.ResourceId
 import kotlin.math.roundToInt
 
 /** Lists bots mainly for [com.flooferland.showbiz.screens.BotSelectScreen] (or anything that requires a bot selection list) */
@@ -25,7 +26,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
         return x + width - 5
     }
 
-    public fun setBots(bots: Map<String, AddonBotEntry>, click: (id: String) -> Unit) {
+    public fun setBots(bots: Map<ResourceId, AddonBotEntry>, click: (id: ResourceId) -> Unit) {
         clearEntries()
         bots.forEach { addEntry(BotEntry(it.value) { click(it.key) }) }
     }

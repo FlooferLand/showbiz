@@ -37,6 +37,7 @@ import com.flooferland.showbiz.types.BotSoundHandler
 import com.flooferland.showbiz.types.ClientConnections
 import com.flooferland.showbiz.types.ModelPartInstance
 import com.flooferland.showbiz.types.ModelPartManager
+import com.flooferland.showbiz.types.ResourceId
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
@@ -51,7 +52,7 @@ import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
-    var bots: Map<String, AddonBot> = mapOf()
+    var bots: Map<ResourceId, AddonBot> = mapOf()
     var botModels: Map<ResourceLocation, BotModelData> = mapOf()
     var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
     var config = ShowbizClientConfig()

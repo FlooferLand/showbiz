@@ -51,8 +51,9 @@ rae right_wrist {
     rotate "Right Hand" y:-50
 }
 rae right_elbow_twist {  # Guitar strum
-    flow ease-in 1.3
-    rotate "Right Hand" z:45
+    flow ease-in 1.1
+    rotate "Right Lower Arm" z:45
+    rotate "Right Hand" z:10
     wigglemul 3.0
 }
 rae guitar_raise {

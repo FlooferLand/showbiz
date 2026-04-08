@@ -12,10 +12,11 @@ import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.screens.widgets.BotListWidget
+import com.flooferland.showbiz.types.ResourceId
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 
 class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title: Component) : Screen(title), MenuAccess<BotSelectMenu> {
-    var bots = mutableMapOf<String, AddonBotEntry>()
+    var bots = mutableMapOf<ResourceId, AddonBotEntry>()
     var loading = true
 
     override fun getMenu() = selectMenu
@@ -47,7 +48,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         )
     }
 
-    fun updateBots(elements: Map<String, AddonBotEntry>) {
+    fun updateBots(elements: Map<ResourceId, AddonBotEntry>) {
         loading = false
         bots.clear()
         bots.putAll(elements)

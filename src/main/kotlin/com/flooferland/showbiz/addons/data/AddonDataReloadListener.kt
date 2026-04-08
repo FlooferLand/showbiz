@@ -12,6 +12,7 @@ import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
 import net.minecraft.util.profiling.*
+import com.flooferland.showbiz.types.ResourceId
 import java.io.InputStream
 import kotlin.jvm.optionals.getOrNull
 
@@ -65,6 +66,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
                             err("Failed to parse $MANIFEST_NAME for addon '$namespace'", err)
                             continue
                         }
+                        .mapKeys { (key, _) -> ResourceId(namespace, key) }
                 }
 
                 // Adding the addon to the addon adding adder
@@ -81,7 +83,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
     override fun apply(addons: List<AddonData>, manager: ResourceManager, profiler: ProfilerFiller) {
         Showbiz.addons = addons
 
-        val bots = mutableMapOf<String, AddonBotEntry>()
+        val bots = mutableMapOf<ResourceId, AddonBotEntry>()
         for (addon in addons) {
             Showbiz.log.info("Loaded addon '${addon.manifest.id}' (data pack)")
             for ((id, bot) in addon.bots) {

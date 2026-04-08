@@ -4,6 +4,7 @@ import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.*
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
@@ -16,6 +17,7 @@ import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.IBotSoundHandler
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -32,7 +34,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In)
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
-    var botId: String? = findFirstBot()
+    var botId: ResourceId? = null
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
@@ -44,17 +46,17 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun getDisplayName() = Component.literal("Staged Bot")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
-        return BotSelectMenu(i, getScreenOpeningData(player)!!)
+        return BotSelectMenu(i, getScreenOpeningData(player))
     }
-    override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket? =
-        botId?.let { BotListSelectPacket(worldPosition, it) }
+    override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket =
+        BotListSelectPacket(worldPosition, botId)
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
         connectionManager.save(tag)
 
         if (level?.isClientSide == false) {
-            botId?.let { tag.putString("bot_id", it) }
+            botId?.let { tag.putString("bot_id", it.toString()) }
         }
     }
 
@@ -62,14 +64,15 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         super.loadAdditional(tag, registries)
         connectionManager.load(tag)
 
-        var botId = tag.getStringOrNull("bot_id")
-        if (botId == null && level?.isClientSide == false) {
-            botId = findFirstBot()
+        tag.getStringOrNull("bot_id")?.let { botId ->
+            var id = ResourceId.of(botId)
+            if (id == null) {  // Converting old bot ids (no namespace)
+                id = Showbiz.bots.keys.firstOrNull() { it.path == botId }
+                Showbiz.log.debug("Converted old bot '{}' to the new resource id '{}'", botId, id)
+            }
+            this.botId = id
         }
-        botId?.let { this.botId = it }
     }
-
-    fun findFirstBot() = Showbiz.addons.firstOrNull()?.bots?.entries?.firstOrNull()?.key
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {
         val tag = super.getUpdateTag(registries)

@@ -20,6 +20,7 @@ import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
 import net.minecraft.util.profiling.*
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.`object`.BakedAnimations
@@ -125,7 +126,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 if (bots.isNotEmpty()) {
                     val assets = AddonAssets(
                         id = namespace,
-                        bots = bots
+                        bots = bots.mapKeys { (key, _) -> ResourceId(namespace, key) }
                     )
                     addons.add(assets)
                 }
@@ -140,7 +141,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         ShowbizClient.resetAssetErrors()
 
         // Collecting bots
-        val bots = mutableMapOf<String, AddonBot>()
+        val bots = mutableMapOf<ResourceId, AddonBot>()
         for (addon in loaded.addons) {
             Showbiz.log.info("Loaded addon '${addon.id}' (resource pack)")
             for ((id, bot) in addon.bots) {

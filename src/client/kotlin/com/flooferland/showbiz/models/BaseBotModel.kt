@@ -23,7 +23,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     }
 
     override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation? {
-        val botId = animatable.botId
+        val botId = animatable.botId ?: return null
         val model = ShowbizClient.bots[botId]?.getDefaultModel() ?: run {
             if (errorsTriggered.contains(Error.MissingModel)) return null
             errorsTriggered.add(Error.MissingModel)
@@ -33,7 +33,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     }
 
     override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation? {
-        val botId = animatable.botId
+        val botId = animatable.botId ?: return null
         return ShowbizClient.bots[botId]?.getDefaultTexture() ?: run {
             if (errorsTriggered.contains(Error.MissingTexture)) return null
             errorsTriggered.add(Error.MissingTexture)
@@ -43,7 +43,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     // TODO: QUICK: Make this cache the animation based on the bot ID, loading the cached version if cached
     override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? {
-        val botId = animatable.botId
+        val botId = animatable.botId ?: return null
         ShowbizClient.bots[botId]?.let { bot ->
             bot.animations?.let { anims -> return anims }
         }

@@ -6,6 +6,7 @@ import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.registry.*
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -19,7 +20,7 @@ object Showbiz : ModInitializer {
     val log: Logger = LoggerFactory.getLogger(MOD_ID)
 
     var addons = listOf<AddonData>()
-    var bots = mapOf<String, AddonBotEntry>()
+    var bots = mapOf<ResourceId, AddonBotEntry>()
 
     override fun onInitialize() {
         // Making sure the JVM compiles these
