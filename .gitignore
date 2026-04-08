@@ -111,6 +111,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# gradle
+.kotlin/
 .gradle
 build/
 

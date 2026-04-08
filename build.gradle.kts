@@ -285,8 +285,9 @@ publishMods {
         val url = providers.environmentVariable("discord.webhook").orNull ?: return@discord
         webhookUrl = url
         username = "Showbiz release $versionName"
-        content = "<@&1441107556264312874>\nGrab the new update [here](<https://modrinth.com/mod/showbiz/versions>)!\n# Changelog\n${changelog.get()}"
-
+        content = "<@&1441107556264312874>\nGrab the new update [here](<https://modrinth.com/mod/showbiz/versions>)!\n" +
+                "If you encounter any bugs, report them in the <#1253489687020966049> channel!\n" +
+                "# Changelog\n${changelog.get()}"
     }
 }
 
