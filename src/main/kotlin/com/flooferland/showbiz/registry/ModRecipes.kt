@@ -5,25 +5,26 @@ import com.flooferland.showbiz.utils.rlString
 
 enum class ModRecipes {
     StagedBot(
-        "X_X",
-        "XIX",
-        "XRX",
+        "I_I",
+        "I-I",
+        "IRI",
         mapOf(
             "_" to Ingredient(tag="wooden_pressure_plates"),
-            "X" to Ingredient("iron_block"),
-            "I" to Ingredient("iron_bars"),
+            "I" to Ingredient("iron_ingot"),
+            "-" to Ingredient("iron_bars"),
             "R" to Ingredient("redstone"),
         )
     ),
     ReelToReel(
-        " C ",
-        "IRI",
-        " X ",
+        "I I",
+        "FCF",
+        "XRX",
         mapOf(
             "C" to Ingredient("copper_ingot"),
             "I" to Ingredient("iron_bars"),
             "R" to Ingredient("redstone"),
-            "X" to Ingredient("iron_block"),
+            "F" to Ingredient(tag="fences"),
+            "X" to Ingredient(tag="planks"),
         )
     ),
     Greybox(
@@ -36,12 +37,13 @@ enum class ModRecipes {
         )
     ),
     Speaker(
-        "WWW",
-        "WRW",
         "WIW",
+        "W_W",
+        "WRW",
         mapOf(
-            "W" to Ingredient("oak_log"),
+            "W" to Ingredient(tag="logs"),
             "R" to Ingredient("redstone"),
+            "_" to Ingredient("dried_kelp"),
             "I" to Ingredient("iron_ingot"),
         )
     ),
@@ -98,10 +100,10 @@ enum class ModRecipes {
     ),
     Wand(
         " I ",
-        " I ",
-        "RiC",
+        " IR",
+        " iC",
         mapOf(
-            "I" to Ingredient("iron_bars"),
+            "I" to Ingredient("chain"),
             "R" to Ingredient("redstone"),
             "i" to Ingredient("lightning_rod"),
             "C" to Ingredient("copper_ingot")
@@ -109,11 +111,11 @@ enum class ModRecipes {
     ),
     Reel(
         "KKK",
-        "KFK",
+        "KOK",
         "KKK",
         mapOf(
             "K" to Ingredient("dried_kelp"),
-            "F" to Ingredient(tag="fences"),
+            "O" to Ingredient("iron_nugget"),
         )
     ),
     ;
