@@ -28,7 +28,10 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
     public fun setBots(bots: Map<ResourceId, AddonBotEntry>, click: (id: ResourceId) -> Unit) {
         clearEntries()
-        bots.forEach { addEntry(BotEntry(it.value) { click(it.key) }) }
+        bots.forEach { (botId, bot) ->
+            if (botId.toString() == "showbiz:conner") return@forEach
+            addEntry(BotEntry(bot) { click(botId) })
+        }
     }
 
     inner class BotEntry(val bot: AddonBotEntry, val click: () -> Unit) : Entry<BotEntry>() {
