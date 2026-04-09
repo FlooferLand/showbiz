@@ -8,6 +8,7 @@ import net.minecraft.sounds.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import net.minecraft.world.phys.AABB
 import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.registry.ModBlocks
@@ -17,7 +18,9 @@ import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import com.flooferland.showbiz.utils.lerp
 
 class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainBlock.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
@@ -28,53 +31,69 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     }
 
     var color: Int = 0xffffff
+    var openAmount: Float = 0f
     var isOpen: Boolean = true
         public get
         private set
 
     fun closeCurtains() = setCurtains(false)
     fun openCurtains() = setCurtains(true)
-    fun setCurtains(isOpen: Boolean, alreadyEdited: MutableSet<BlockPos> = mutableSetOf(), callCounter: Int = 0) {
+    fun setCurtains(isOpen: Boolean) {
         val level = level ?: return
         this.isOpen = isOpen
-        val callCounter = callCounter + 1
-        if (callCounter > 20) return
-
-        // Sounds
-        if (callCounter == 1) {
-            if (level is ServerLevel)
-                level.playSound(null, blockPos, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1f, 1f)
-        }
-
-        // Filling blocks
-        for (y in 1..findLength()) {
-            val pos = blockPos.offset(0, -y, 0)
-            val state = level.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
-            if (isOpen) {  // Should open
-                if (state.block is CurtainShadowBlock)
-                    level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
-            } else {  // Should close
-                if (state.isAir)
-                    level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
-            }
-        }
 
         // Searching for other curtain rails
-        for (x in -1..1) {
-            for (z in -1..1) {
-                val pos = blockPos.offset(x, 0, z)
-                if (level.getBlockState(pos).block !is CurtainBlock) continue
-                val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: continue
-                if (alreadyEdited.contains(pos)) {
-                    continue
-                } else {
-                    alreadyEdited.add(pos)
+        val rails = findConnectedCurtains()
+        rails.forEach { pos ->
+            val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: return@forEach
+            blockEntity.isOpen = isOpen
+            for (y in 1..blockEntity.findLength()) {
+                val pos = blockEntity.blockPos.offset(0, -y, 0)
+                val state = level.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
+                if (isOpen) {  // Should open
+                    if (state.block is CurtainShadowBlock)
+                        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
+                } else {  // Should close
+                    if (state.isAir)
+                        level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
                 }
-                blockEntity.applyChange(true) {
-                    setCurtains(isOpen, alreadyEdited, callCounter)
+            }
+            blockEntity.setChanged()
+        }
+
+        // Finding the center curtain
+        val center = findCenter(rails) ?: blockPos
+
+        // Sounds
+        if (level is ServerLevel)
+            level.playSound(null, center, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1f, 1f)
+    }
+
+    fun findConnectedCurtains(): Set<BlockPos> {
+        val level = level ?: return emptySet()
+        val connected = mutableSetOf<BlockPos>()
+        val queue = ArrayDeque<BlockPos>()
+        queue.add(blockPos)
+
+        var callCounter = 0
+        while (queue.isNotEmpty() && callCounter < 30) {
+            callCounter += 1
+            val current = queue.removeFirstOrNull() ?: continue
+            if (!connected.add(current)) continue
+            for (x in -1..1) {
+                for (z in -1..1) {
+                    val pos = current.offset(x, 0, z)
+                    if (level.getBlockState(pos).block is CurtainBlock && !connected.contains(pos)) {
+                        queue.add(pos)
+                    }
                 }
             }
         }
+        return connected
+    }
+
+    fun findCenter(rails: Set<BlockPos>) = rails.minByOrNull { pos ->
+        rails.sumOf { otherPos -> pos.distSqr(otherPos) }
     }
 
     fun findLength(): Int {
@@ -94,14 +113,26 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         return length
     }
 
+    fun tick() {
+        if (isOpen && openAmount < 1.0f) {
+            openAmount += 0.05f
+            setChanged()
+        } else if (!isOpen && openAmount > 0.0f) {
+            openAmount -= 0.05f
+            setChanged()
+        }
+    }
+
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
+        tag.getFloatOrNull("open_amount")?.let { openAmount = it }
         tag.getBooleanOrNull("is_open")?.let { isOpen = it }
         tag.getIntOrNull("color")?.let { color = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
+        tag.putFloat("open_amount", openAmount)
         tag.putBoolean("is_open", isOpen)
         tag.putInt("color", color)
     }

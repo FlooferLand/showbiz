@@ -1,6 +1,8 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.util.RandomSource
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.ItemInteractionResult
@@ -10,12 +12,16 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -52,6 +58,10 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
         }
         return InteractionResult.SUCCESS
     }
+
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
+        BlockEntityTicker { _, _, _, entity -> (entity as? CurtainBlockEntity)?.tick() }
+
 
     fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos): VoxelShape {
         val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity

@@ -23,7 +23,9 @@ object DrawUtils {
         drawSouth: Boolean = true,
         drawNorth: Boolean = true,
         drawWest: Boolean = true,
-        drawEast: Boolean = true
+        drawEast: Boolean = true,
+        drawTop: Boolean = true,
+        drawBottom: Boolean = true
     ) {
         val matrix = poseStack.last().pose()
         val color = if (color != null) FastColor.ARGB32.color(((alpha ?: 1f) * 255).toInt(), color) else null
@@ -88,17 +90,20 @@ object DrawUtils {
         }
 
         if (!sidesOnly) {
-            // Up (positive y)
-            addVertex(matrix, minX, maxY, minZ, 0f, 0f, 0f, 1f, 0f)
-            addVertex(matrix, minX, maxY, maxZ, 0f, depth, 0f, 1f, 0f)
-            addVertex(matrix, maxX, maxY, maxZ, width, depth, 0f, 1f, 0f)
-            addVertex(matrix, maxX, maxY, minZ, width, 0f, 0f, 1f, 0f)
-
-            // Down (negative y)
-            addVertex(matrix, minX, minY, minZ, 0f, 0f, 0f, -1f, 0f)
-            addVertex(matrix, maxX, minY, minZ, width, 0f, 0f, -1f, 0f)
-            addVertex(matrix, maxX, minY, maxZ, width, depth, 0f, -1f, 0f)
-            addVertex(matrix, minX, minY, maxZ, 0f, depth, 0f, -1f, 0f)
+            if (drawTop) {
+                // Up (positive y)
+                addVertex(matrix, minX, maxY, minZ, 0f, 0f, 0f, 1f, 0f)
+                addVertex(matrix, minX, maxY, maxZ, 0f, depth, 0f, 1f, 0f)
+                addVertex(matrix, maxX, maxY, maxZ, width, depth, 0f, 1f, 0f)
+                addVertex(matrix, maxX, maxY, minZ, width, 0f, 0f, 1f, 0f)
+            }
+            if (drawBottom) {
+                // Down (negative y)
+                addVertex(matrix, minX, minY, minZ, 0f, 0f, 0f, -1f, 0f)
+                addVertex(matrix, maxX, minY, minZ, width, 0f, 0f, -1f, 0f)
+                addVertex(matrix, maxX, minY, maxZ, width, depth, 0f, -1f, 0f)
+                addVertex(matrix, minX, minY, maxZ, 0f, depth, 0f, -1f, 0f)
+            }
         }
     }
 }

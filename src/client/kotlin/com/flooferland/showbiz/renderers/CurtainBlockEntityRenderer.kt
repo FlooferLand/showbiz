@@ -15,6 +15,7 @@ import com.flooferland.showbiz.utils.voxelSnap
 import com.mojang.blaze3d.vertex.PoseStack
 import kotlin.math.abs
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<CurtainBlockEntity> {
     val curtainRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block.png"))!!
@@ -22,26 +23,49 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
     val endRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block_end.png"))!!
     val endRenderTypeCull = RenderType.entityTranslucentCull(rl("textures/block/curtain_block_end.png"))!!
 
-    fun canDraw(level: ClientLevel, pos: BlockPos) = level.getBlockState(pos)?.let { state ->
-        state.block !is CurtainBlock && !state.isSolidRender(level, pos)
-    } ?: false
+    fun isVisuallyOpen(pos: BlockPos, center: BlockPos, openAmount: Float, maxDist: Float): Boolean {
+        val dist = maxOf(
+            abs(pos.x - center.x),
+            maxOf(abs(pos.y - center.y), abs(pos.z - center.z))
+        ).toFloat()
+        val movingWaveMax = maxOf(0f, maxDist - 2f) + 0.1f
+        val wavePos = openAmount * movingWaveMax
+        return wavePos > dist && dist < (maxDist - 1.5f)
+    }
+
+    fun canDrawColumn(level: ClientLevel, blockEntity: CurtainBlockEntity, pos: BlockPos, center: BlockPos?, maxDist: Float) = level.getBlockState(pos)?.let { state ->
+        if (state.block !is CurtainBlock) return@let !state.isSolidRender(level, pos)
+        if (center == null) return@let false
+
+        val isOpen = isVisuallyOpen(blockEntity.blockPos, center, blockEntity.openAmount, maxDist)
+        val neighbourOpen = isVisuallyOpen(pos, center, blockEntity.openAmount, maxDist)
+        return@let isOpen != neighbourOpen
+    } ?: true
 
     override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val level = blockEntity.level as? ClientLevel ?: return
-        var color = blockEntity.color // 0xff6767
+        var color = blockEntity.color
+
+        val rails = blockEntity.findConnectedCurtains()
+        val center = blockEntity.findCenter(rails)
+        var isOpen = false
+        var maxDist = 1f
+        if (center != null) {
+            maxDist = rails.maxOfOrNull { maxOf(abs(it.x - center.x), maxOf(abs(it.y - center.y), abs(it.z - center.z))) }?.toFloat() ?: 1f
+            isOpen = isVisuallyOpen(blockEntity.blockPos, center, blockEntity.openAmount, maxDist)
+        }
 
         val (drawSouth, drawNorth, drawWest, drawEast) = arrayOf(
-            canDraw(level, blockEntity.blockPos.south()),
-            canDraw(level, blockEntity.blockPos.north()),
-            canDraw(level, blockEntity.blockPos.west()),
-            canDraw(level, blockEntity.blockPos.east())
+            canDrawColumn(level, blockEntity, blockEntity.blockPos.south(), center, maxDist),
+            canDrawColumn(level, blockEntity, blockEntity.blockPos.north(), center, maxDist),
+            canDrawColumn(level, blockEntity, blockEntity.blockPos.west(), center, maxDist),
+            canDrawColumn(level, blockEntity, blockEntity.blockPos.east(), center, maxDist)
         )
         val randomY = abs(sin((blockEntity.blockPos.x + blockEntity.blockPos.y + blockEntity.blockPos.z).toFloat()))
         val randomColor = FastColor.ARGB32.color(255 - (randomY * 30).toInt(), 255 - (randomY * 30).toInt(), 255 - (randomY * 30).toInt())
         color = FastColor.ARGB32.multiply(color, randomColor)
 
-        // TODO: Add a nicer open animation to the curtains
-        if (blockEntity.isOpen) {
+        if (isOpen) {
             poseStack.pushPose()
             poseStack.translate(0f, 0.0f, 0f)
             DrawUtils.drawBox(
@@ -49,7 +73,6 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                 AABB(0.0, 0.5, 0.0, 1.0, 1.0, 1.0),
                 packedLight = packedLight,
                 packedOverlay = packedOverlay,
-                sidesOnly = true,
                 color = color,
                 drawSouth = drawSouth,
                 drawNorth = drawNorth,
@@ -82,13 +105,14 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
             box,
             packedLight = packedLight,
             packedOverlay = packedOverlay,
-            sidesOnly = true,
             color = color,
             alpha = if (playerInside) 0.5f else null,
             drawSouth = drawSouth,
             drawNorth = drawNorth,
             drawWest = drawWest,
-            drawEast = drawEast
+            drawEast = drawEast,
+            drawTop = camera.position.y > worldBox.maxY,
+            drawBottom = camera.position.y < worldBox.minY
         )
         poseStack.translate(0f, voxelSnap(randomY * 0.05f), 0f)
         DrawUtils.drawBox(
