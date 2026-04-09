@@ -188,10 +188,14 @@ enum class ModBlocks {
             //?}
         )
 
-        this.geckoLib = entity?.let { factory ->
-            val returnType = (factory as KFunction<*>).returnType.classifier as KClass<*>
-            GeoAnimatable::class.java.isAssignableFrom(returnType.java)
-        } == true
+        // hell
+        // TODO: Fix this always being false; Makes the show selector invisible
+        this.geckoLib = runCatching {
+            entity?.let { factory ->
+                val returnType = (factory as? KFunction<*>)?.returnType?.classifier as? KClass<*> ?: return@let false
+                GeoAnimatable::class.java.isAssignableFrom(returnType.java)
+            } == true
+        }.getOrNull() ?: false
 
         var blockItem = when {
             geckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())

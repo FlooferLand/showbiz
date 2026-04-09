@@ -2,14 +2,12 @@ package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.*
 import net.minecraft.network.protocol.game.*
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.level.Level
+import net.minecraft.server.level.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.inventory.*
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.Showbiz
