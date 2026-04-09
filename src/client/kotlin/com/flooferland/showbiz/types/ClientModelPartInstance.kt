@@ -14,6 +14,8 @@ import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
+import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import software.bernie.geckolib.model.GeoModel
 import kotlin.collections.iterator
@@ -21,9 +23,10 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: ResourceLocation) : ModelPartManager.IInstance {
+class ClientModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: ResourceLocation) : ModelPartManager.IInstance {
     val interactableParts = mutableMapOf<String, ModelPart>()
     val interactionMapping = owner.getInteractionMapping()
+    var nameMapping = owner.getNameMapping()
     val trackedEntities = mutableListOf<Int>()
 
     val ownerEntity get() = owner as BlockEntity
@@ -66,7 +69,7 @@ class ModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: Re
                     part.pos.x * sin(angle) + part.pos.z * cos(angle)
                 )
             } ?: part.pos
-            val displayName = interactionMapping[partId]?.toString() ?: partId
+            val displayName = (interactionMapping[partId]?.let { nameMapping[it] }) ?: partId
             val entity = ModelPartEntity(level, partId, displayName, pos, part.size, ownerEntity.blockPos)
             level.addEntity(entity)
             trackedEntities.add(entity.id)
@@ -116,6 +119,13 @@ class ModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: Re
                     val key = blockEntity.getInteractionMapping()[packet.name] ?: return@execute
                     blockEntity.onInteract(key, level, player)
                 }
+            }
+            ClientPlayNetworking.registerGlobalReceiver(ModelPartNamesPacket.type) { packet, context ->
+                val player = context.player()
+                val level = player.level() as ClientLevel
+                val owner = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@registerGlobalReceiver
+                val self = owner.modelPartInstance.clientInstance as? ClientModelPartInstance ?: return@registerGlobalReceiver
+                self.nameMapping = packet.names
             }
         }
     }

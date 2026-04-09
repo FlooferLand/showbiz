@@ -23,7 +23,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 /**
  * Similar to Minecraft's InteractionEntity / DisplayEntity. <br/>
  * Simple light-weight entityType to register physical interactions. <br/>
- * Spawned and filled out by [com.flooferland.showbiz.types.ModelPartInstance]
+ * Spawned and filled out by [com.flooferland.showbiz.types.ClientModelPartInstance]
  */
 class ModelPartEntity(level: Level, val partId: String? = null, val displayName: String? = null, pos: Vec3? = null, var size: Vec3? = null, val parent: BlockPos? = null) : Entity(ModClientEntities.ModelPart.type, level) {
     override fun defineSynchedData(builder: SynchedEntityData.Builder) = Unit

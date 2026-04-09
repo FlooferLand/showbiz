@@ -1,26 +1,22 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.Container
-import net.minecraft.world.WorldlyContainer
-import net.minecraft.world.entity.ai.targeting.TargetingConditions
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.item.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.blocks.entities.state.ReelToReelBlockEntityRenderState
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
@@ -28,13 +24,13 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
+import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
-import com.flooferland.showbiz.utils.Extensions.handItem
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
@@ -43,6 +39,21 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override val connectionManager = ConnectionManager(this)
     val showOut = connectionManager.port("show", PackedShowData(), PortDirection.Out)
     val audioOut = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
+    val showSelectIn = connectionManager.port("select", PackedControlData(), PortDirection.In) { data ->
+        val level = level as? ServerLevel ?: return@port
+        val reelToReel = this@ReelToReelBlockEntity
+
+        val id = data.readShowSelect() ?: return@port
+        val container = getNearbyContainer() ?: return@port
+        if (id >= container.containerSize) return@port
+        val containerStack = container.getItem(id)
+            .also { if (it.item !is ReelItem) return@port }
+
+        if (reelToReel.canPlaceItemThroughFace(0, containerStack, null)) {
+            val stack = container.removeItem(id, 1)
+            reelToReel.setItem(0, stack)
+        }
+    }
 
     val aFrameMs: Int
         get() = 50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
@@ -187,6 +198,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         hasFinished = false
         signal.reset()
     }
+
+    fun getNearbyContainer() =
+        arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south()).firstNotNullOfOrNull { level?.getBlockEntity(it) as? Container }
 
     // region | Container
     override fun getContainerSize() = 1

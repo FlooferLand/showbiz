@@ -13,6 +13,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ShowParserData : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
     data object SpotlightEdit : ModPackets<SpotlightEditPacket>(Bidirectional, SpotlightEditPacket.type, SpotlightEditPacket.codec)
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
+    data object ModelPartNames : ModPackets<ModelPartNamesPacket>(ServerToClient, ModelPartNamesPacket.type, ModelPartNamesPacket.codec)
     data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)
     data object ShowFileSelect : ModPackets<ShowFileSelectPacket>(ClientToServer, ShowFileSelectPacket.type, ShowFileSelectPacket.codec)
     data object BotList : ModPackets<BotListPacket>(Bidirectional, BotListPacket.type, BotListPacket.codec)

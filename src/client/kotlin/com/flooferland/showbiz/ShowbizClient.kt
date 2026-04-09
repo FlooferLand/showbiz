@@ -23,6 +23,7 @@ import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
+import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
@@ -35,7 +36,7 @@ import com.flooferland.showbiz.screens.ShowParserEditScreen
 import com.flooferland.showbiz.screens.SpotlightEditScreen
 import com.flooferland.showbiz.types.BotSoundHandler
 import com.flooferland.showbiz.types.ClientConnections
-import com.flooferland.showbiz.types.ModelPartInstance
+import com.flooferland.showbiz.types.ClientModelPartInstance
 import com.flooferland.showbiz.types.ModelPartManager
 import com.flooferland.showbiz.types.ResourceId
 import kotlinx.serialization.decodeFromString
@@ -49,6 +50,9 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
+import software.bernie.geckolib.model.DefaultedBlockGeoModel
+import software.bernie.geckolib.model.DefaultedItemGeoModel
+import software.bernie.geckolib.renderer.GeoItemRenderer
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -84,7 +88,7 @@ object ShowbizClient : ClientModInitializer {
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
-        ModelPartManager.modelPartInstancer = { owner, block -> ModelPartInstance(owner, block.id) }
+        ModelPartManager.clientModelPartInstancer = { owner, block -> ClientModelPartInstance(owner, block.id) }
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
@@ -123,11 +127,24 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // GeckoLib renderers
+        // TODO: Automate GeckoLib item renderers, the same way I did for the block ones
         (ModItems.Wand.item as WandItem).renderProviderHolder.value = object : GeoRenderProvider {
             var renderer: WandItemRenderer? = null
             override fun getGeoItemRenderer(): WandItemRenderer {
                 if (renderer == null) renderer = WandItemRenderer()
                 return renderer!!
+            }
+        }
+        for (block in ModBlocks.entries) {
+            if (!block.geckoLib) continue
+            val item = block.item as? GeoBlockItem ?: continue
+            item.renderProviderHolder.value = object : GeoRenderProvider {
+                inner class Renderer : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id))
+                var renderer: Renderer? = null
+                override fun getGeoItemRenderer(): Renderer {
+                    if (renderer == null) renderer = Renderer()
+                    return renderer!!
+                }
             }
         }
 

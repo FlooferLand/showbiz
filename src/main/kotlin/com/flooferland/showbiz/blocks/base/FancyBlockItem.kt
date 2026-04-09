@@ -9,7 +9,7 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.block.Block
 
 /** Like [BlockItem], but with proper custom tooltip support */
-class FancyBlockItem(val id: ResourceLocation, block: Block, properties: Properties) : BlockItem(block, properties) {
+open class FancyBlockItem(val id: ResourceLocation, block: Block, properties: Properties) : BlockItem(block, properties) {
     override fun appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: MutableList<Component>, tooltipFlag: TooltipFlag) {
         super.appendHoverText(stack, context, tooltip, tooltipFlag)
 

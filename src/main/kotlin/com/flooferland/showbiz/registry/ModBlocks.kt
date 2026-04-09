@@ -33,6 +33,13 @@ import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.items.base.GeoBlockItem
+import software.bernie.geckolib.animatable.GeoAnimatable
+import software.bernie.geckolib.animatable.client.GeoRenderProvider
+import software.bernie.geckolib.model.DefaultedItemGeoModel
+import software.bernie.geckolib.renderer.GeoItemRenderer
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
@@ -164,6 +171,7 @@ enum class ModBlocks {
     var model: BlockModelId? = null
     var entityType: BlockEntityType<*>? = null
     var recipe: ModRecipes? = null
+    var geckoLib: Boolean = false
     var hideFromPlayer: Boolean = false
     constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null, recipe: ModRecipes?, hideFromPlayer: Boolean = false) {
         this.id = rl(name)
@@ -180,7 +188,15 @@ enum class ModBlocks {
             //?}
         )
 
-        var blockItem = FancyBlockItem(this.id, this.block, Item.Properties())
+        this.geckoLib = entity?.let { factory ->
+            val returnType = (factory as KFunction<*>).returnType.classifier as KClass<*>
+            GeoAnimatable::class.java.isAssignableFrom(returnType.java)
+        } == true
+
+        var blockItem = when {
+            geckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())
+            else -> FancyBlockItem(this.id, this.block, Item.Properties())
+        }
         this.item = Items.registerBlock(blockItem) as BlockItem
 
         if (entity != null && !DataGenerator.engaged) {

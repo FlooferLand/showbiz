@@ -68,7 +68,11 @@ data class ConnectionPort<T: ConnectionData>(val owner: IConnectable, val id: St
                 val listener = entity.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
 
                 listener.data = data
-                runCatching { listener.react(listener, data) }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
+                runCatching {
+                    val be = (listener.owner as? BlockEntity)
+                    if (be?.level == null || be.isRemoved) return@runCatching
+                    listener.react(listener, data)
+                }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
                 if (!level.isClientSide && entity is BlockEntity) {
                     entity.markDirtyNotifyAll()
                 }

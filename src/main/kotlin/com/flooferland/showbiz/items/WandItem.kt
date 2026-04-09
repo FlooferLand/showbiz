@@ -182,6 +182,15 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     finish(sound = ModSounds.End, anim = "retract", message = "Show selector added")
                     return InteractionResult.SUCCESS
                 }
+                is ShowSelectorBlockEntity if firstEntity is ReelToReelBlockEntity -> {
+                    val (showSelector, reelToReel) = Pair(lastEntity, firstEntity)
+                    showSelector.applyChange(true) {
+                        showSelect.bindListener(reelToReel)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Show selector added")
+                    return InteractionResult.SUCCESS
+                }
                 else -> { reset(error = "Unknown order.\nTry linking them the other way around"); return InteractionResult.CONSUME }
             }
         }
