@@ -38,6 +38,7 @@ import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.model.DefaultedItemGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
+import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
@@ -188,24 +189,25 @@ enum class ModBlocks {
             //?}
         )
 
-        // hell
-        // TODO: Fix this always being false; Makes the show selector invisible
-        this.geckoLib = runCatching {
-            entity?.let { factory ->
-                val returnType = (factory as? KFunction<*>)?.returnType?.classifier as? KClass<*> ?: return@let false
-                GeoAnimatable::class.java.isAssignableFrom(returnType.java)
-            } == true
-        }.getOrNull() ?: false
-
+        // Item
         var blockItem = when {
             geckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())
             else -> FancyBlockItem(this.id, this.block, Item.Properties())
         }
         this.item = Items.registerBlock(blockItem) as BlockItem
 
+        // Entity
         if (entity != null && !DataGenerator.engaged) {
             this.entityType = BlockEntityType.Builder.of(entity, this.block).build()
             Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entityType!!)
         }
+
+        // Hell
+        this.geckoLib = runCatching {
+            entity?.let { factory ->
+                val returnType = factory.javaClass.methods.firstOrNull { it.name == "invoke" && !it.isBridge }?.returnType
+                returnType != null && GeoAnimatable::class.java.isAssignableFrom(returnType)
+            } == true
+        }.getOrNull() ?: false
     }
 }
