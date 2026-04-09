@@ -60,6 +60,7 @@ enum class ModBlocks {
             .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
+        modelPreset = BlockModelId.Custom.transparent(),
         entity = ::ReelToReelBlockEntity,
         recipe = ModRecipes.ReelToReel
     ),

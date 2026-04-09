@@ -24,62 +24,30 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         // Time
         val rotationAngle = entity.seek.toFloat() * 200f
 
-        // Rendering a temporary reel holder
-        runCatching {
-            val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("polished_blackstone_pressure_plate"), "inventory")) ?: return@runCatching
-            poseStack.pushPose()
-            poseStack.translate(0.5, 1.43, 0.5)
-            poseStack.scale(0.86f, 0.86f, 0.86f)
-            Minecraft.getInstance().itemRenderer.render(
-                Items.POLISHED_BLACKSTONE_PRESSURE_PLATE.defaultInstance,
-                ItemDisplayContext.NONE,
-                false,
-                poseStack,
-                bufferSource,
-                packedLight,
-                packedOverlay,
-                model
-            )
-            poseStack.popPose()
-        }
-        runCatching {
-            val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("polished_blackstone"), "inventory")) ?: return@runCatching
-            poseStack.pushPose()
-            poseStack.translate(0.5, 1.1, 0.5)
-            poseStack.scale(0.1f, 0.2f, 0.1f)
-            poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 1f, 0f), rotationAngle))
-            Minecraft.getInstance().itemRenderer.render(
-                Items.POLISHED_BLACKSTONE.defaultInstance,
-                ItemDisplayContext.NONE,
-                false,
-                poseStack,
-                bufferSource,
-                packedLight,
-                packedOverlay,
-                model
-            )
-            poseStack.popPose()
-        }
-
         // Rendering the reel
-        runCatching {
-            val itemStack = ModItems.Reel.item.defaultInstance
-            val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
-            if (entity.show.isLoaded) {
-                poseStack.pushPose()
-                poseStack.translate(0.5, 1.555, 0.5)
-                poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 1f, 0f), rotationAngle))
-                Minecraft.getInstance().itemRenderer.render(
-                    itemStack,
-                    ItemDisplayContext.NONE,
-                    false,
-                    poseStack,
-                    bufferSource,
-                    packedLight,
-                    packedOverlay,
-                    model
-                )
-                poseStack.popPose()
+        for (i in 0..1) {
+            val offset = if (i == 0) -1f else 1f
+            runCatching {
+                val itemStack = ModItems.Reel.item.defaultInstance
+                val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
+                if (entity.show.isLoaded) {
+                    poseStack.pushPose()
+                    poseStack.translate(0.5 + (offset * 0.3), 0.7, 0.58)
+                    poseStack.scale(0.6f, 0.6f, 0.6f)
+                    poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 0f, 1f), rotationAngle))  // Real
+                    poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(1f, 0f, 0f), 90.0f))
+                    Minecraft.getInstance().itemRenderer.render(
+                        itemStack,
+                        ItemDisplayContext.NONE,
+                        false,
+                        poseStack,
+                        bufferSource,
+                        packedLight,
+                        packedOverlay,
+                        model
+                    )
+                    poseStack.popPose()
+                }
             }
         }
     }
