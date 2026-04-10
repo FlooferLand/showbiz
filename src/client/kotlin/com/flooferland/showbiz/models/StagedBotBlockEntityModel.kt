@@ -1,6 +1,10 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
 import com.flooferland.bizlib.bits.AnimCommand
@@ -10,18 +14,18 @@ import com.flooferland.bizlib.bits.Easing
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
-import org.joml.Vector3d
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
+import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
 import software.bernie.geckolib.cache.`object`.GeoBone
+import software.bernie.geckolib.util.ClientUtil
 import kotlin.math.PI
-import kotlin.math.min
 import kotlin.math.sin
 
 /** Responsible for fancy animation */
@@ -142,7 +146,8 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 animManager?.let {
                     if (!animManager.animationControllers.contains(controllerKey)) {
                         val controller = StatelessAnimationController(animatable, controllerKey)
-                        controller.transitionLength(5 + (flowSpeed * 10f).toInt())
+                        controller.transitionLength(1)
+                        controller.setSoundKeyframeHandler { state -> soundKeyframeHandler(animatable, state) }
                         animManager.addController(controller)
                     }
                 }
@@ -243,6 +248,19 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 // TODO: Add move wiggle
             }
         }
+    }
+
+    fun soundKeyframeHandler(animatable: StagedBotBlockEntity, state: SoundKeyframeEvent<GeoAnimatable>) {
+        if (!ShowbizClient.config.audio.playBotEffects) return
+        if (animatable.isRemoved) return
+        val sound = ResourceLocation.parse(state.keyframeData.sound)
+        if (!BuiltInRegistries.SOUND_EVENT.containsKey(sound)) {
+            Showbiz.log.warn("Sound event '$sound' was not found for bot '${animatable.botId}'")
+            return
+        }
+        val soundEvent = SoundEvent.createVariableRangeEvent(sound)
+        val level = animatable.level as? ClientLevel ?: return
+        level.playSound(ClientUtil.getClientPlayer(), animatable.blockPos, soundEvent, SoundSource.BLOCKS, 0.5f, 1.0f)
     }
 
     /** Gets how large a bone is based off cubes */

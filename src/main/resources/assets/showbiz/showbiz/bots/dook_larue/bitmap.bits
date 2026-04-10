@@ -30,8 +30,7 @@ rae head_up {
 }
 rae left_foot_hihat {
     flow 1.2
-    rotate "Left Foot" x:-15
-    move "HiHat" y:-0.4
+    anim "hihat"
 }
 rae head_right {
     flow ease-in 0.28

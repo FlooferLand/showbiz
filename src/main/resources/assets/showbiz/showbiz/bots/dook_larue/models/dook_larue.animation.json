@@ -3,17 +3,30 @@
 	"animations": {
 		"animation.dook_larue.hihat.on": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.1667,
+			"animation_length": 0.25,
 			"bones": {
+				"Left Foot": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [15, 0, 0]
+						}
+					}
+				},
 				"HiHat": {
 					"rotation": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
 						"0.0833": {
-							"vector": [0, 0, 5]
+							"vector": [0, 0, -2]
 						},
 						"0.1667": {
+							"vector": [0, 0, 0.25]
+						},
+						"0.25": {
 							"vector": [0, 0, 0]
 						}
 					},
@@ -21,88 +34,52 @@
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
-						"0.1667": {
-							"vector": [0, -0.4, 0]
+						"0.25": {
+							"vector": [0, -0.45, 0]
 						}
 					}
+				}
+			},
+			"sound_effects": {
+				"0.0": {
+					"effect": "showbiz:hihat_closed"
 				}
 			}
 		},
 		"animation.dook_larue.hihat.off": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.1667,
+			"animation_length": 0.25,
 			"bones": {
-				"HiHat": {
+				"Left Foot": {
 					"rotation": {
 						"0.0": {
-							"vector": [0, 0, 0]
+							"vector": [15, 0, 0]
 						},
-						"0.0833": {
-							"vector": [0, 0, 5]
-						},
-						"0.1667": {
-							"vector": [0, 0, 0]
-						}
-					},
-					"position": {
-						"0.0": {
-							"vector": [0, -0.4, 0]
-						},
-						"0.1667": {
+						"0.2083": {
 							"vector": [0, 0, 0]
 						}
 					}
-				}
-			}
-		},
-		"animation.new_dook_larue.hihat.on": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.1667,
-			"bones": {
+				},
 				"HiHat": {
 					"rotation": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
 						"0.0833": {
-							"vector": [0, 0, 5]
+							"vector": [0, 0, 4.5]
 						},
 						"0.1667": {
+							"vector": [0, 0, -4.25]
+						},
+						"0.25": {
 							"vector": [0, 0, 0]
 						}
 					},
 					"position": {
 						"0.0": {
-							"vector": [0, 0, 0]
+							"vector": [0, -0.45, 0]
 						},
-						"0.1667": {
-							"vector": [0, -0.4, 0]
-						}
-					}
-				}
-			}
-		},
-		"animation.new_dook_larue.hihat.off": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.1667,
-			"bones": {
-				"HiHat": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.0833": {
-							"vector": [0, 0, 5]
-						},
-						"0.1667": {
-							"vector": [0, 0, 0]
-						}
-					},
-					"position": {
-						"0.0": {
-							"vector": [0, -0.4, 0]
-						},
-						"0.1667": {
+						"0.25": {
 							"vector": [0, 0, 0]
 						}
 					}
