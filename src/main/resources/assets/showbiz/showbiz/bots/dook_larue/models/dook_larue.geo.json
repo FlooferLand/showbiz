@@ -3,7 +3,7 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.billy_bob",
+				"identifier": "geometry.dook_larue",
 				"texture_width": 128,
 				"texture_height": 128,
 				"visible_bounds_width": 5,
@@ -171,7 +171,7 @@
 					"name": "Left Leg",
 					"pivot": [2.9, 12, 0],
 					"cubes": [
-						{"origin": [2.9, 0, -7], "size": [4, 12, 4], "pivot": [3, 0, -5], "rotation": [0, -15, 0], "uv": [32, 0]},
+						{"origin": [2.775, 0, -7], "size": [4.25, 12, 4], "pivot": [3, 0, -5], "rotation": [0, -15, 0], "uv": [32, 0]},
 						{"origin": [2.83526, 10.2, -5.30824], "size": [4, 11.8, 3.8], "pivot": [4.83526, 12, -4.50824], "rotation": [-65, -15, 0], "uv": [0, 38]}
 					]
 				},
@@ -188,7 +188,7 @@
 					"name": "Right Leg",
 					"pivot": [-2.9, 12, 0],
 					"cubes": [
-						{"origin": [-6.9, 0, -7], "size": [4, 12, 4], "pivot": [-3, 0, -5], "rotation": [0, 15, 0], "uv": [32, 0]},
+						{"origin": [-6.975, 0, -7], "size": [4.15, 12, 4], "pivot": [-3, 0, -5], "rotation": [0, 15, 0], "uv": [32, 0]},
 						{"origin": [-6.83526, 10.2, -5.30824], "size": [4, 11.8, 3.8], "pivot": [-4.83526, 12, -4.50824], "rotation": [-65, 15, 0], "uv": [0, 38]}
 					]
 				},
