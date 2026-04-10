@@ -2,6 +2,7 @@ package com.flooferland.showbiz.types.connection
 
 import net.minecraft.core.*
 import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.*
@@ -13,6 +14,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
+// TODO: Fix Reel-To-Reel's connections somehow remaining even after it's destroyed
 // TODO: Add connection support for multiple levels/dimensions
 
 /** Server-only object for handling entity connections/links (See the client-side object -> ClientConnections) */
@@ -77,6 +79,17 @@ object ServerConnections {
             for (connectable in queued) {
                 updateConnections(connectable)
             }
+
+            if (Showbiz.log.isDebugEnabled) {
+                for (connectable in loaded.toList()) {
+                    if (connectable !is BlockEntity) continue
+                    val state = level.getBlockState(connectable.blockPos)
+                    if (state.isAir || level.getBlockEntity(connectable.blockPos) != connectable) {
+                        Showbiz.log.error("Connection block has no block entity! Make sure you call the parent onRemove function")
+                        loaded.remove(connectable)
+                    }
+                }
+            }
         }
     }
 
@@ -86,7 +99,10 @@ object ServerConnections {
 
         // Clearing invalid listeners
         for ((_, port) in manager.outputs) {
-            port.removeListeners { connectable.level?.getBlockEntity(it) !is IConnectable }
+            port.removeListeners {
+                val entity = connectable.level?.getBlockEntity(it) ?: return@removeListeners true
+                entity !is IConnectable || entity.isRemoved
+            }
         }
 
         // Cleaning connections

@@ -26,11 +26,11 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
 
         // Rendering the reel
         for (i in 0..1) {
-            val offset = if (i == 0) -1f else 1f
+            val offset = if (i == 0) 1f else -1f
             runCatching {
                 val itemStack = ModItems.Reel.item.defaultInstance
                 val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
-                if (entity.show.isLoaded) {
+                if (entity.show.isLoaded || i == 1) {
                     poseStack.pushPose()
                     poseStack.translate(0.5 + (offset * 0.3), 0.7, 0.58)
                     poseStack.scale(0.6f, 0.6f, 0.6f)

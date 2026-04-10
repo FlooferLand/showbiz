@@ -136,6 +136,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
     }
 
     override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        super.onRemove(state, level, pos, newState, movedByPiston)
         Containers.dropContentsOnDestroy(state, newState, level, pos)
     }
 
