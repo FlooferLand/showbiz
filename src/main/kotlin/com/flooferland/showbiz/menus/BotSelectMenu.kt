@@ -10,5 +10,5 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 class BotSelectMenu(containerId: Int, val data: BotListSelectPacket) : AbstractContainerMenu(ModScreenHandlers.BotSelect.type, containerId) {
     override fun quickMoveStack(player: Player, index: Int) = ItemStack.EMPTY!!
     override fun stillValid(player: Player) =
-        (player.level().getBlockEntity(data.blockPos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(data.blockPos.center) < 12.0f
+        (player.level().getBlockEntity(data.blockPos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(data.blockPos.center) < 12.0f * 12.0f
 }
