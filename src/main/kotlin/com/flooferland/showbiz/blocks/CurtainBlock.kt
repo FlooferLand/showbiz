@@ -53,9 +53,7 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
     fun use(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: return InteractionResult.FAIL
         if (player.isHolding { it.item is WandItem }) return InteractionResult.FAIL
-        blockEntity.applyChange(true) {
-            blockEntity.setCurtains(!blockEntity.isOpen)
-        }
+        blockEntity.setCurtains(!blockEntity.isOpen)
         return InteractionResult.SUCCESS
     }
 

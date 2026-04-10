@@ -36,29 +36,35 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         public get
         private set
 
+    var connectedCurtains = mutableSetOf<BlockPos>()
+    var centerCurtain: BlockPos? = null
+
     fun closeCurtains() = setCurtains(false)
     fun openCurtains() = setCurtains(true)
     fun setCurtains(isOpen: Boolean) {
-        val level = level ?: return
-        this.isOpen = isOpen
+        val level = level as? ServerLevel ?: return
+        applyChange(true) {
+            this.isOpen = isOpen
+        }
 
         // Searching for other curtain rails
         val rails = findConnectedCurtains()
         rails.forEach { pos ->
             val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: return@forEach
-            blockEntity.isOpen = isOpen
-            for (y in 1..blockEntity.findLength()) {
-                val pos = blockEntity.blockPos.offset(0, -y, 0)
-                val state = level.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
-                if (isOpen) {  // Should open
-                    if (state.block is CurtainShadowBlock)
-                        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
-                } else {  // Should close
-                    if (state.isAir)
-                        level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
+            blockEntity.applyChange(true) {
+                blockEntity.isOpen = isOpen
+                for (y in 1..blockEntity.findLength()) {
+                    val pos = blockEntity.blockPos.offset(0, -y, 0)
+                    val state = level.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
+                    if (isOpen) {  // Should open
+                        if (state.block is CurtainShadowBlock)
+                            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
+                    } else {  // Should close
+                        if (state.isAir)
+                            level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
+                    }
                 }
             }
-            blockEntity.setChanged()
         }
 
         // Finding the center curtain
@@ -89,12 +95,15 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
                 }
             }
         }
+
+        connectedCurtains.clear()
+        connectedCurtains.addAll(connected)
         return connected
     }
 
     fun findCenter(rails: Set<BlockPos>) = rails.minByOrNull { pos ->
         rails.sumOf { otherPos -> pos.distSqr(otherPos) }
-    }
+    }.also { centerCurtain = it }
 
     fun findLength(): Int {
         var isLast = false
@@ -114,12 +123,16 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     }
 
     fun tick() {
+        if (level?.isClientSide == true) {
+            // Caches stuff for rendering
+            findCenter(findConnectedCurtains())
+            return
+        }
+
         if (isOpen && openAmount < 1.0f) {
-            openAmount += 0.05f
-            setChanged()
+            applyChange(true) { openAmount += 0.025f }
         } else if (!isOpen && openAmount > 0.0f) {
-            openAmount -= 0.05f
-            setChanged()
+            applyChange(true) { openAmount -= 0.025f }
         }
     }
 

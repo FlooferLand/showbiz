@@ -46,8 +46,8 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         val level = blockEntity.level as? ClientLevel ?: return
         var color = blockEntity.color
 
-        val rails = blockEntity.findConnectedCurtains()
-        val center = blockEntity.findCenter(rails)
+        val rails = blockEntity.connectedCurtains
+        val center = blockEntity.centerCurtain
         var isOpen = false
         var maxDist = 1f
         if (center != null) {

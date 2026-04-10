@@ -12,6 +12,7 @@ import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
@@ -71,7 +72,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                     player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
 
                     // Playback
-                    if (!level.isClientSide) {
+                    if (player is ServerPlayer) {
                         entity.resetPlayback()
                         entity.show.load(filename) { data ->
                             entity.markDirtyNotifyAll()
@@ -81,10 +82,12 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                                 player.displayClientMessage(
                                     Component.translatable("message.showbiz.show_load_fail").withStyle(ChatFormatting.RED), true
                                 )
+                                player.inventoryMenu.broadcastChanges()
                                 return@load
                             }
                             level.playSound(player, pos, ModSounds.ReelEnter.event, SoundSource.MASTER, 0.4f, 1.5f)
                             player.displayClientMessage(Component.empty(), true)
+                            player.inventoryMenu.broadcastChanges()
                         }
                     }
                 } else {
@@ -92,13 +95,16 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                         Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (!level.isClientSide && heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
-                val showName = entity.show.name
-                showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-                player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
-                entity.applyChange(true) {
-                    entity.setPlaying(false)
-                    entity.show.free()
+            } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
+                if (player is ServerPlayer) {
+                    val showName = entity.show.name
+                    showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+                    player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+                    entity.applyChange(true) {
+                        entity.setPlaying(false)
+                        entity.show.free()
+                        player.inventoryMenu.broadcastChanges()
+                    }
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
