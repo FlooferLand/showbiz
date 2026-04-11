@@ -8,8 +8,7 @@ import com.flooferland.showbiz.entities.ModelPartEntity
 import com.mojang.blaze3d.vertex.PoseStack
 
 class ModelPartEntityRenderer(val context: EntityRendererProvider.Context) : EntityRenderer<ModelPartEntity>(context) {
-    override fun getTextureLocation(entity: ModelPartEntity?) = null
-
+    override fun getTextureLocation(entity: ModelPartEntity) = null
     override fun render(entity: ModelPartEntity, entityYaw: Float, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int) {
         val dispatcher = entityRenderDispatcher
         if (dispatcher.crosshairPickEntity != entity) return

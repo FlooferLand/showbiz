@@ -6,6 +6,7 @@ import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.registry.*
+import com.flooferland.showbiz.types.AbstractBotPart
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import net.fabricmc.api.ModInitializer

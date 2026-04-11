@@ -27,7 +27,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
  */
 class ModelPartEntity(level: Level, val partId: String? = null, val displayName: String? = null, pos: Vec3? = null, var size: Vec3? = null, val parent: BlockPos? = null) : Entity(ModClientEntities.ModelPart.type, level) {
     override fun defineSynchedData(builder: SynchedEntityData.Builder) = Unit
-    override fun readAdditionalSaveData(compound: CompoundTag?) = Unit
+    override fun readAdditionalSaveData(compound: CompoundTag) = Unit
     override fun addAdditionalSaveData(compound: CompoundTag) = Unit
 
     init {

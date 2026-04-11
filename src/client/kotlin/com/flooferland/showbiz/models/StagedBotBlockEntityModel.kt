@@ -7,19 +7,24 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
+import net.minecraft.world.phys.Vec3
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.bizlib.bits.BitMappingData
 import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.bizlib.bits.Easing
+import com.flooferland.bizlib.bits.Movements
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.BotPartId
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
+import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
@@ -131,6 +136,37 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
+        driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
+        
+        // Bot collisions
+        driveCollisions(animatable)
+    }
+
+    fun driveCollisions(animatable: StagedBotBlockEntity) {
+        when (animatable.botId.toString()) {
+            "showbiz:rolfe_dewolfe" -> {
+                val player = Minecraft.getInstance().player!!
+                // TODO: FIGURE OUT WHY THESE ARE SO FUCKING OFF
+                run {
+                    val stickBone = animationProcessor.getBone("stick") ?: return@run
+                    val stickEntity = animatable.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return@run
+                    stickBone.worldPosition?.let {
+                        stickEntity.targetPos = Vec3(it.x, it.y, it.z)
+                    }
+                }
+                run {
+                    val cymbalBone = animationProcessor.getBone("cymbal") ?: return@run
+                    val cymbalEntity = animatable.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return@run
+                    cymbalBone.worldPosition?.let {
+                        cymbalEntity.targetPos = Vec3(it.x, it.y, it.z)
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO: Make this function not a mess
+    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: StagedBotBlockEntity, animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot, movements: Movements?) {
         for ((bit, data) in bitmapBits) {
             // Getting things
             val frame = animatable.show.data.signal
@@ -139,7 +175,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             val bitOn = frame.frameHas(bit)
 
             // Animation
-           for (anim in data.anim) {
+            for (anim in data.anim) {
                 val controllerKey = "ctrl_${bit}_${anim.id}"
 
                 // Adding controllers
@@ -153,7 +189,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 }
 
                 // Driving controllers
-                val controller = animManager.animationControllers[controllerKey] as? StatelessAnimationController
+                val controller = animManager?.animationControllers[controllerKey] as? StatelessAnimationController
                 val animId = getAnimId(animatable, bitOn, anim)
                 if (controller != null && controller.currentAnimation?.animation?.name != animId) {
                     // Checking if the animation exists
@@ -199,7 +235,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
             // Easing: https://easings.net/#easeOutSine
             val eased = when (flowEase) {
-                Easing.Default,  Easing.Linear -> bitSmooth
+                Easing.Default, Easing.Linear -> bitSmooth
                 Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
             }
 

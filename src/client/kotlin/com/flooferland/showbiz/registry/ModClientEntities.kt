@@ -9,11 +9,13 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
 import net.minecraft.world.level.Level
+import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.utils.rl
 
 sealed class ModClientEntities<T: Entity> {
     object ModelPart : ModClientEntities<ModelPartEntity>("model_part", ::ModelPartEntity)
+    object BotPart : ModClientEntities<BotPartEntity>("bot_part", ::BotPartEntity)
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>
@@ -21,7 +23,7 @@ sealed class ModClientEntities<T: Entity> {
     constructor(id: String, factory: EntityFactory<T>) {
         this.id = rl(id)
         this.key = ResourceKey.create(Registries.ENTITY_TYPE, this.id)
-        this.type = EntityType.Builder.of<T>({ type, level -> factory.factory(level) }, MobCategory.MISC)
+        this.type = EntityType.Builder.of({ _, level -> factory.factory(level) }, MobCategory.MISC)
             .build(id)
         Registry.register(BuiltInRegistries.ENTITY_TYPE, this.id, this.type)
     }

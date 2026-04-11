@@ -3,6 +3,7 @@ package com.flooferland.showbiz
 import net.minecraft.ChatFormatting
 import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.Component
@@ -21,6 +22,7 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -34,6 +36,7 @@ import com.flooferland.showbiz.screens.CurtainControllerEditScreen
 import com.flooferland.showbiz.screens.ReelUploadScreen
 import com.flooferland.showbiz.screens.ShowParserEditScreen
 import com.flooferland.showbiz.screens.SpotlightEditScreen
+import com.flooferland.showbiz.types.AbstractBotPart
 import com.flooferland.showbiz.types.BotSoundHandler
 import com.flooferland.showbiz.types.ClientConnections
 import com.flooferland.showbiz.types.ClientModelPartInstance
@@ -124,6 +127,10 @@ object ShowbizClient : ClientModInitializer {
                 ModClientEntities.ModelPart.type,
                 ::ModelPartEntityRenderer
             )
+            EntityRendererRegistry.register(
+                ModClientEntities.BotPart.type,
+                ::BotPartEntityRenderer
+            )
         }
 
         // GeckoLib renderers
@@ -200,6 +207,11 @@ object ShowbizClient : ClientModInitializer {
 
         // DARN YOU SPLIT SOURCESETS
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelUploadScreen(stack)) }
+        AbstractBotPart.clientSpawn = { level, id, owner, size ->
+            val entity = BotPartEntity(level, id, owner, size)
+            (level as? ClientLevel)?.addEntity(entity)
+            entity
+        }
     }
 
     fun resetAssetErrors() {
