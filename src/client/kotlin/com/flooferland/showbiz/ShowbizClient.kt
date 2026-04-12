@@ -207,8 +207,8 @@ object ShowbizClient : ClientModInitializer {
 
         // DARN YOU SPLIT SOURCESETS
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelUploadScreen(stack)) }
-        AbstractBotPart.clientSpawn = { level, id, owner, size ->
-            val entity = BotPartEntity(level, id, owner, size)
+        AbstractBotPart.clientSpawn = { level, id, owner ->
+            val entity = BotPartEntity(level, id, owner)
             (level as? ClientLevel)?.addEntity(entity)
             entity
         }

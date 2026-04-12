@@ -62,7 +62,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         }
         for (id in ids) {
             val spawn = AbstractBotPart.clientSpawn ?: continue
-            val entity = spawn(level, id, this, Vec3(0.1, 0.1, 0.1))
+            val entity = spawn(level, id, this)
             entity.setPos(blockPos.center)
             clientBotParts[id] = entity
         }

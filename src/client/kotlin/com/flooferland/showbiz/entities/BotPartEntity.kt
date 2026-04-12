@@ -16,7 +16,7 @@ import com.flooferland.showbiz.types.AbstractBotPart
 import com.flooferland.showbiz.types.BotPartId
 import com.flooferland.showbiz.types.math.Vec3f
 
-class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedBotBlockEntity? = null, size: Vec3? = null) : AbstractBotPart(ModClientEntities.BotPart.type, level, id, owner, size) {
+class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedBotBlockEntity? = null) : AbstractBotPart(ModClientEntities.BotPart.type, level, id, owner) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -29,10 +29,11 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
     override fun canBeCollidedWith() = false
     override fun canCollideWith(entity: Entity) = (entity is BotPartEntity)
     override fun getDimensions(pose: Pose): EntityDimensions =
-        size?.let { EntityDimensions.fixed(it.x.toFloat(), it.y.toFloat()) } ?: EntityDimensions.fixed(0.1f, 0.1f)
+        targetSize.let { EntityDimensions.fixed(it.x.toFloat(), it.y.toFloat()) }
 
     val colliding = mutableListOf<BotPartEntity>()
     var targetPos = Vec3.ZERO!!
+    var targetSize = Vec3(0.1, 0.1, 0.1)
 
     init {
         if (id == BotPartId.None) remove(RemovalReason.DISCARDED)
@@ -40,7 +41,12 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
 
     override fun tick() {
         val level = level() ?: return
-        setPos(targetPos)
+
+        refreshDimensions()
+        val blockPos = owner?.blockPos!!.let { Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()) }
+        val newPos = blockPos.add(targetPos.add(0.0, 1.0, 0.0))
+        setPos(newPos)
+
         val area = boundingBox
         val collisions = level.getEntitiesOfClass(BotPartEntity::class.java, area).filter { it != this }
         colliding.clear()
