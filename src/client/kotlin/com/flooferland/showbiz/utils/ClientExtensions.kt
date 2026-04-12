@@ -6,15 +6,6 @@ import org.joml.Vector4f
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
-    fun GeoBone.getReal(): Vec3 {
-        val pos = worldPosition.run { Vec3(x, y, z) }
-        var parent = parent
-        while (parent != null) {
-            pos.add(parent.worldPosition.run { Vec3(x, y, z) })
-            parent = parent.parent
-        }
-        return pos.divide(16.0)
-    }
     fun GeoBone.calculateBounds(): Vec3 {
         val min = Vector4f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 1f)
         val max = Vector4f(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE, 1f)

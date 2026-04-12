@@ -17,11 +17,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.types.BotPartId
-import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
-import com.flooferland.showbiz.utils.ClientExtensions.getReal
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
 import software.bernie.geckolib.animatable.GeoAnimatable
@@ -139,31 +135,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
-        
-        // Bot collisions
-        driveCollisions(animatable)
-    }
-
-    fun driveCollisions(animatable: StagedBotBlockEntity) {
-        when (animatable.botId.toString()) {
-            "showbiz:rolfe_dewolfe" -> {
-                val player = Minecraft.getInstance().player!!
-                run {
-                    val stickBone = animationProcessor.getBone("stick") ?: return@run
-                    val stickEntity = animatable.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return@run
-                    stickBone.markPositionAsChanged()
-                    stickBone.getReal().let { stickEntity.targetPos = Vec3(it.x, it.y, it.z) }
-                    stickEntity.targetSize = stickBone.calculateBounds()
-                }
-                run {
-                    val cymbalBone = animationProcessor.getBone("cymbal") ?: return@run
-                    val cymbalEntity = animatable.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return@run
-                    cymbalBone.markPositionAsChanged()
-                    cymbalBone.getReal().let { cymbalEntity.targetPos = Vec3(it.x, it.y, it.z) }
-                    cymbalEntity.targetSize = cymbalBone.calculateBounds()
-                }
-            }
-        }
     }
 
     // TODO: Make this function not a mess

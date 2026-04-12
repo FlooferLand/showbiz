@@ -44,7 +44,7 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
 
         refreshDimensions()
         val blockPos = owner?.blockPos!!.let { Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()) }
-        val newPos = blockPos.add(targetPos.add(0.0, 1.0, 0.0))
+        val newPos = targetPos.add(0.0, 1.0, 0.0)
         setPos(newPos)
 
         val area = boundingBox
