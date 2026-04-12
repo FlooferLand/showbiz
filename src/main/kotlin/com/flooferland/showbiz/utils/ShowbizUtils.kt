@@ -11,6 +11,10 @@ import software.bernie.geckolib.loading.`object`.BakedModelFactory
 import software.bernie.geckolib.loading.`object`.GeometryTree
 
 object ShowbizUtils {
+    fun isSilly() = when (System.getProperty("user.name").lowercase()) {
+        "flooferland", "monsterwaill", "creativious" -> true
+        else -> false
+    }
     fun loadBakedModel(location: ResourceLocation, json: String) = runCatching {
         val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
         val geo = GeometryTree.fromModel(model)
