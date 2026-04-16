@@ -103,59 +103,58 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             LightTexture.FULL_BRIGHT
         }
 
-        val render = runCatching {
+        try {
             val botModel = model as StagedBotBlockEntityModel
-            if (animatable.botId == null) return@runCatching
+            if (animatable.botId == null) error("Bot id is null")
             this.animatable = animatable
 
             poseStack.pushPose()
-            try {
-                val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
-                val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
-                val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
-                val renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick)
-                if (model == null || renderType == null) {
-                    return@runCatching
-                }
+            val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
+            val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
+            val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
+            val renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick)
+            if (model == null || renderType == null) {
+                error("No model or render type found")
+            }
 
-                val buffer = bufferSource.getBuffer(renderType)
-                preRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
-                if (firePreRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)) {
-                    val hasGlow = botModel.hasGlowTexture(animatable)
-                    for (renderLayer in getRenderLayers()) {
-                        if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
-                        renderLayer.preRender(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
-                    }
-                    actuallyRender(
-                        poseStack, animatable, model, renderType,
-                        bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor
-                    )
-                    for (renderLayer in getRenderLayers()) {
-                        if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
-                        renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
-                    }
-                    postRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
-                    firePostRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)
+            val buffer = bufferSource.getBuffer(renderType)
+            preRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
+            if (firePreRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)) {
+                val hasGlow = botModel.hasGlowTexture(animatable)
+                for (renderLayer in getRenderLayers()) {
+                    if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
+                    renderLayer.preRender(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
                 }
-                renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, renderColor)
-                doPostRenderCleanup()
-                MolangQueries.clearActor()
-            } finally {
-                poseStack.popPose()
+                actuallyRender(
+                    poseStack, animatable, model, renderType,
+                    bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor
+                )
+                for (renderLayer in getRenderLayers()) {
+                    if (renderLayer is AutoGlowingGeoLayer && !hasGlow) continue
+                    renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
+                }
+                postRender(poseStack, animatable, model, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, renderColor)
+                firePostRenderEvent(poseStack, model, bufferSource, partialTick, packedLight)
             }
-        }
-        render.onFailure { throwable ->
-            if (renderExceptionCountdown > 0) {
-                renderExceptionCountdown -= Minecraft.getInstance().timer.gameTimeDeltaTicks
-                return@onFailure
+            renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, renderColor)
+            doPostRenderCleanup()
+            MolangQueries.clearActor()
+        } catch (throwable: Throwable) {
+            run {
+                if (renderExceptionCountdown > 0) {
+                    renderExceptionCountdown -= Minecraft.getInstance().timer.gameTimeDeltaTicks
+                    return@run
+                }
+                Showbiz.log.error("RENDER EXCEPTION FOR '${animatable.botId}': ", throwable)
+                Minecraft.getInstance()?.player?.displayClientMessage(
+                    Component.literal("RENDER EXCEPTION FOR '${animatable.botId}': $throwable\n").withStyle(ChatFormatting.RED)
+                        .append("This is usually caused by other errors, please check the game logs."),
+                    false
+                )
+                renderExceptionCountdown = 20.secsToTicks().toFloat()
             }
-            Showbiz.log.error("RENDER EXCEPTION FOR '${animatable.botId}': ", throwable)
-            Minecraft.getInstance()?.player?.displayClientMessage(
-                Component.literal("RENDER EXCEPTION FOR '${animatable.botId}': $throwable\n").withStyle(ChatFormatting.RED)
-                    .append("This is usually caused by other errors, please check the game logs."),
-                false
-            )
-            renderExceptionCountdown = 20.secsToTicks().toFloat()
+        } finally {
+            poseStack.popPose()
         }
     }
 
