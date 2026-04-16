@@ -10,9 +10,11 @@ import net.minecraft.network.chat.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.entities.BotPartEntity
+import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
 import com.flooferland.showbiz.types.BotPartId
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
@@ -103,15 +105,19 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             LightTexture.FULL_BRIGHT
         }
 
+        if (animatable.botId == null) return
+        poseStack.pushPose()
         try {
-            poseStack.pushPose()
             val botModel = model as StagedBotBlockEntityModel
-            if (animatable.botId == null) error("Bot id is null")
             this.animatable = animatable
 
             val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
             val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
-            val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
+            val modelLocation = getGeoModel().getModelResource(animatable, this)
+            if (modelLocation == null || !ShowbizClient.botModels.containsKey(modelLocation)) {
+                error("No model found for bot '${animatable.botId}'")
+            }
+            val model = getGeoModel().getBakedModel(modelLocation)
             val renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick)
             if (model == null || renderType == null) {
                 error("No model or render type found")
@@ -140,22 +146,12 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             doPostRenderCleanup()
             MolangQueries.clearActor()
         } catch (throwable: Throwable) {
-            run {
-                if (renderExceptionCountdown > 0) {
-                    renderExceptionCountdown -= Minecraft.getInstance().timer.gameTimeDeltaTicks
-                    return@run
-                }
-                Showbiz.log.error("RENDER EXCEPTION FOR '${animatable.botId}': ", throwable)
-                Minecraft.getInstance()?.player?.displayClientMessage(
-                    Component.literal("RENDER EXCEPTION FOR '${animatable.botId}': $throwable\n").withStyle(ChatFormatting.RED)
-                        .append("This is usually caused by other errors, please check the game logs."),
-                    false
-                )
-                renderExceptionCountdown = 20.secsToTicks().toFloat()
+            val message = throwable.toString()
+            if (!BaseBotModel.errorsTriggered.any { it.context == message }) {
+                BaseBotModel.errorsTriggered.add(BaseBotModel.Error.RenderException.withBot(animatable).withContext(message))
             }
-        } finally {
-            poseStack.popPose()
         }
+        poseStack.popPose()
     }
 
     override fun actuallyRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel?, renderType: RenderType?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {

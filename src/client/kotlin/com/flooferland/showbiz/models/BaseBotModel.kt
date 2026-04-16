@@ -1,11 +1,12 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.client.Minecraft
+import net.minecraft.client.*
+import net.minecraft.resources.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import net.minecraft.resources.*
+import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -19,25 +20,46 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     enum class Error {
         MissingModel,
-        MissingTexture
+        MissingTexture,
+        RenderException;
+        var context: String? = null
+        var botId: String? = null
+        fun withContext(context: String): Error {
+            this.context = context
+            return this
+        }
+        fun withBot(animatable: StagedBotBlockEntity): Error {
+            this.botId = animatable.botId.toString()
+            return this
+        }
     }
 
-    override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation? {
-        val botId = animatable.botId ?: return null
+    override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
+        val botId = animatable.botId ?: return emptyModel
         val model = ShowbizClient.bots[botId]?.getDefaultModel() ?: run {
-            if (errorsTriggered.contains(Error.MissingModel)) return null
-            errorsTriggered.add(Error.MissingModel)
-            error("Failed to get model. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly")
+            if (!errorsTriggered.contains(Error.MissingModel)) {
+                errorsTriggered.add(
+                    Error.MissingModel.withBot(animatable).withContext(
+                        "Failed to get model. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
+                    )
+                )
+            }
+            emptyModel
         }
         return model
     }
 
-    override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation? {
-        val botId = animatable.botId ?: return null
+    override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation {
+        val botId = animatable.botId ?: return emptyTexture
         return ShowbizClient.bots[botId]?.getDefaultTexture() ?: run {
-            if (errorsTriggered.contains(Error.MissingTexture)) return null
-            errorsTriggered.add(Error.MissingTexture)
-            error("Failed to get texture. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]")
+            if (!errorsTriggered.contains(Error.MissingTexture)) {
+                errorsTriggered.add(
+                    Error.MissingTexture.withBot(animatable).withContext(
+                        "Failed to get texture. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]"
+                    )
+                )
+            }
+            emptyModel
         }
     }
 
@@ -51,7 +73,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     }
 
     fun hasGlowTexture(animatable: StagedBotBlockEntity): Boolean {
-        val texture = getTextureResource(animatable) ?: return false
+        val texture = getTextureResource(animatable)
         val glowTexture = rlCustom(
             texture.namespace,
             texture.path.replace(".png", "_glowmask.png")
@@ -60,14 +82,14 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     }
 
     // For some reason GeckoLib seems to require setting the active model every single time?
-    override fun getBakedModel(location: ResourceLocation?): BakedGeoModel? {
+    override fun getBakedModel(location: ResourceLocation?): BakedGeoModel {
         if (location == null) {
-            if (errorsTriggered.contains(Error.MissingModel)) return null
-            error("Couldn't get baked model (null)")
+            errorsTriggered.add(Error.MissingModel.withContext("Bot model failed to bake"))
+            return super.getBakedModel(emptyModel)
         }
         val model = ShowbizClient.botModels[location] ?: run {
-            if (errorsTriggered.contains(Error.MissingModel)) return null
-            error("Couldn't find bot model for $location")
+            errorsTriggered.add(Error.MissingModel.withContext("Bot model failed to bake"))
+            return super.getBakedModel(emptyModel)
         }
 
         if (model != currentModel) {
@@ -90,5 +112,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     companion object {
         val errorsTriggered = mutableSetOf<Error>()
+        val emptyModel = rl("geo/entity/empty.geo.json")
+        val emptyTexture = rl("textures/empty.png")
     }
 }

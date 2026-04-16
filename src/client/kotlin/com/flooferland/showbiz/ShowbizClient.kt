@@ -42,10 +42,12 @@ import com.flooferland.showbiz.types.ClientConnections
 import com.flooferland.showbiz.types.ClientModelPartInstance
 import com.flooferland.showbiz.types.ModelPartManager
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -56,6 +58,7 @@ import software.bernie.geckolib.loading.`object`.BakedAnimations
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
 import software.bernie.geckolib.model.DefaultedItemGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
+import kotlin.math.min
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -175,6 +178,22 @@ object ShowbizClient : ClientModInitializer {
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
+        }
+        ClientTickEvents.END_WORLD_TICK.register { level ->
+            if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
+                for (err in BaseBotModel.errorsTriggered) {
+                    val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
+                    Showbiz.log.error(message)
+                    Minecraft.getInstance()?.player?.displayClientMessage(
+                        Component.literal(message + "\n").withStyle(ChatFormatting.RED).append("Please check the game logs."),
+                        false
+                    )
+                }
+                StagedBotBlockEntityRenderer.renderExceptionCountdown = 5f.secsToTicks().toFloat()
+            } else {
+                StagedBotBlockEntityRenderer.renderExceptionCountdown -= 1
+            }
+            BaseBotModel.errorsTriggered.clear()
         }
         ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft ->
             resetAssetErrors()
