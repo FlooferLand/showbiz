@@ -104,11 +104,11 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         }
 
         try {
+            poseStack.pushPose()
             val botModel = model as StagedBotBlockEntityModel
             if (animatable.botId == null) error("Bot id is null")
             this.animatable = animatable
 
-            poseStack.pushPose()
             val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()
             val packedOverlay = getPackedOverlay(animatable, 0f, partialTick)
             val model = getGeoModel().getBakedModel(getGeoModel().getModelResource(animatable, this))
