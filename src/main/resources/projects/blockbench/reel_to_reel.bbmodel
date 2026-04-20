@@ -132,7 +132,7 @@
 				},
 				"east": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": null
 				},
 				"south": {
 					"uv": [0, 13, 14, 26],
@@ -140,15 +140,15 @@
 				},
 				"west": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": null
 				},
 				"up": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": null
 				},
 				"down": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": null
 				}
 			},
 			"type": "cube",
@@ -488,27 +488,27 @@
 			"faces": {
 				"north": {
 					"uv": [0, 26, 4, 28],
-					"texture": 0
+					"texture": 1
 				},
 				"east": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": 1
 				},
 				"south": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": 1
 				},
 				"west": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": 1
 				},
 				"up": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": 1
 				},
 				"down": {
 					"uv": [0, 0, 0, 0],
-					"texture": 0
+					"texture": 1
 				}
 			},
 			"type": "cube",

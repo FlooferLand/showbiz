@@ -6,7 +6,7 @@
     "itemGroup.showbiz.main": "Showbiz",
 
     "block.showbiz.staged_bot": "Staged Bot",
-    "block.showbiz.reel_to_reel": "Reel to reel",
+    "block.showbiz.reel_to_reel": "Reel To Reel",
     "block.showbiz.greybox": "Greybox",
     "block.showbiz.speaker": "Speaker",
     "block.showbiz.show_parser": "Show Parser",
@@ -25,10 +25,10 @@
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
     "tooltip.showbiz.block.show_selector": "Allows people to select a reel to be played\nwhen hooked up to a reel-to-reel",
-    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nUse with a Curtain Controller\nUse a dye to change the colour",
+    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nConnect one of them to a Curtain Controller\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
     "tooltip.showbiz.block.spotlight": "Work-in-progress",
-    "tooltip.showbiz.block.bit_view": "View bits",
+    "tooltip.showbiz.block.bit_view": "Shows bits and their names live when plugged into a show",
 
     "message.showbiz.show_load_fail": "Failed to load show. Check the server logs.",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!"

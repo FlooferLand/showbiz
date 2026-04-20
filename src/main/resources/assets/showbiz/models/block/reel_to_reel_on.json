@@ -4,7 +4,7 @@
 	"texture_size": [32, 32],
 	"textures": {
 		"0": "showbiz:block/reel_to_reel_on",
-		"particle": "showbiz:block/reel_to_reel_on"
+		"particle": "showbiz:block/reel_to_reel_off"
 	},
 	"elements": [
 		{
@@ -13,11 +13,7 @@
 			"rotation": {"angle": 0, "axis": "y", "origin": [3, 1, 7]},
 			"faces": {
 				"north": {"uv": [0, 0, 7, 6.5], "texture": "#0"},
-				"east": {"uv": [0, 0, 0, 0], "texture": "#0"},
-				"south": {"uv": [0, 6.5, 7, 13], "texture": "#0"},
-				"west": {"uv": [0, 0, 0, 0], "texture": "#0"},
-				"up": {"uv": [0, 0, 0, 0], "texture": "#0"},
-				"down": {"uv": [0, 0, 0, 0], "texture": "#0"}
+				"south": {"uv": [0, 6.5, 7, 13], "texture": "#0"}
 			}
 		},
 		{

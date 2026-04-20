@@ -20,8 +20,8 @@ enum class Drawer {
     /** Similar to [toStringDrawer] but adds a neat hover thingy */
     fun toCompDrawer() = Component.literal(toStringDrawer())
         .withStyle { style ->
-            style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("${toStringEnglish().capitalize()} drawer")))
-        }
+            style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("$name drawer")))
+        }!!
 
     fun toStringEnglish() = when (this) {
         Top -> "top"
@@ -29,10 +29,10 @@ enum class Drawer {
     }
 
     @Deprecated("Use the more verbose toString variants instead")
-    override fun toString() = toStringDrawer()
+    override fun toString() = toStringEnglish()
 
     companion object {
         fun fromBit(bit: BitId): Drawer =
-            if (bit < BitUtils.NEXT_DRAWER) Drawer.Bottom else Drawer.Top
+            if (bit < BitUtils.NEXT_DRAWER) Drawer.Top else Drawer.Bottom
     }
 }

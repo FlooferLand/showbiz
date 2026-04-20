@@ -1927,14 +1927,15 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
-			"export": true,
+			"export": false,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-11, 0, -11],
-			"to": [-9, 19, -9],
+			"from": [-13, 0, -13],
+			"to": [-11, 19, -11],
 			"autouv": 0,
 			"color": 6,
-			"origin": [-10, 0, -10],
+			"visibility": false,
+			"origin": [-12, 0, -12],
 			"uv_offset": [21, 1],
 			"faces": {
 				"north": {
@@ -1970,14 +1971,15 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
-			"export": true,
+			"export": false,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-13, 17, -13],
-			"to": [-7, 18, -7],
+			"from": [-15, 17, -15],
+			"to": [-9, 18, -9],
 			"autouv": 0,
 			"color": 6,
-			"origin": [-10, -1, -10],
+			"visibility": false,
+			"origin": [-12, -1, -12],
 			"uv_offset": [15, -3],
 			"faces": {
 				"north": {
@@ -2657,7 +2659,7 @@
 		{
 			"name": "cymbal",
 			"uuid": "63287d6c-b180-a2da-6847-31b350c82fe7",
-			"export": true,
+			"export": false,
 			"locked": false,
 			"scope": 0,
 			"selected": false,
@@ -2665,17 +2667,17 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [3, 0, 3],
+			"origin": [-12, 13.5, -12],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
+			"visibility": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "stickInner",
@@ -2698,7 +2700,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		}
 	],
 	"outliner": [
