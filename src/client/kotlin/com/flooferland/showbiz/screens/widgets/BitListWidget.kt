@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.narration.NarratableEntry
 import net.minecraft.network.chat.*
 import com.flooferland.bizlib.bits.BitUtils
+import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 
@@ -69,6 +70,7 @@ class BitListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 return@let null
             } ?: "n/a"
             val bitIdComp = Component.literal("Bit $bit").withStyle(color)
+                .append(Component.literal(" (${Drawer.formatBit(bit.toBitId())})").withStyle(ChatFormatting.GRAY))
             val bitInfoComp = Component.literal(bitInfo).withStyle(ChatFormatting.GRAY)
             guiGraphics.renderComponentTooltip(font, listOf(bitIdComp, bitInfoComp), mouseX, mouseY)
             hoveredBit = null

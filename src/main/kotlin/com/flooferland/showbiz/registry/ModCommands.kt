@@ -62,8 +62,7 @@ object ModCommands {
                                         moveComp.append(Component.literal(": ").withStyle(ChatFormatting.RESET))
                                         moveComp.append(Component.literal("$moveBit ").withStyle(ChatFormatting.BLUE))
                                         moveComp.append(Component.literal("(").withStyle(ChatFormatting.DARK_GRAY))
-                                        moveComp.append(Component.literal((if (moveBit > BitUtils.NEXT_DRAWER) moveBit - BitUtils.NEXT_DRAWER else moveBit).toString() + " ").withStyle(ChatFormatting.DARK_GRAY))
-                                        moveComp.append(Drawer.fromBit(moveBit).toCompDrawer().withStyle(ChatFormatting.DARK_GRAY))
+                                        moveComp.append(Drawer.formatBitAsComp(moveBit).withStyle(ChatFormatting.DARK_GRAY))
                                         moveComp.append(Component.literal(")\n").withStyle(ChatFormatting.DARK_GRAY))
                                         built.append(moveComp)
                                     }
