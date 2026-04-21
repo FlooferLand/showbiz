@@ -130,9 +130,9 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         }
 
         if (isOpen && openAmount < 1.0f) {
-            applyChange(true) { openAmount += 0.025f }
+            applyChange(true) { openAmount += 0.01f }
         } else if (!isOpen && openAmount > 0.0f) {
-            applyChange(true) { openAmount -= 0.025f }
+            applyChange(true) { openAmount -= 0.01f }
         }
     }
 
