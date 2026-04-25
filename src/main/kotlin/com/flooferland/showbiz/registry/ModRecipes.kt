@@ -98,6 +98,19 @@ enum class ModRecipes {
             "S" to Ingredient("amethyst_shard"),
         )
     ),
+    ProgrammerBlock(
+        "IAI",
+        "FCF",
+        "XRX",
+        mapOf(
+            "A" to Ingredient("amethyst_shard"),
+            "C" to Ingredient("copper_ingot"),
+            "I" to Ingredient("iron_bars"),
+            "R" to Ingredient("redstone"),
+            "F" to Ingredient(tag="fences"),
+            "X" to Ingredient(tag="planks"),
+        )
+    ),
     Wand(
         " I ",
         " IR",

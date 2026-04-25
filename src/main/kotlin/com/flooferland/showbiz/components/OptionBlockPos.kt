@@ -8,6 +8,7 @@ import net.minecraft.network.codec.*
 import java.util.Optional
 
 data class OptionBlockPos(var pos: Optional<BlockPos>) {
+    constructor(pos: BlockPos) : this(Optional.of(pos))
     companion object {
         val CODEC: Codec<OptionBlockPos> = RecordCodecBuilder.create { instance ->
             instance.group(BlockPos.CODEC.optionalFieldOf("pos").forGetter { it.pos }).apply(instance, ::OptionBlockPos)

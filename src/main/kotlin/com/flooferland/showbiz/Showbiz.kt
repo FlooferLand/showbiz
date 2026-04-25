@@ -5,10 +5,12 @@ import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.network.packets.BotListPacket
+import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
+import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
 import com.flooferland.showbiz.registry.*
-import com.flooferland.showbiz.types.AbstractBotPart
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
+import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -33,6 +35,7 @@ object Showbiz : ModInitializer {
             ModItems.entries
             ModItemGroups.entries
             ModSounds.entries
+            ModPlayerSynchedData
             ModCommands
             ModScreenHandlers
             ServerConnections
@@ -53,6 +56,20 @@ object Showbiz : ModInitializer {
         // Bot selection
         ServerPlayNetworking.registerGlobalReceiver(BotListPacket.type) { _, ctx ->
             ServerPlayNetworking.send(ctx.player(), BotListPacket(toClient = true, bots = Showbiz.bots))
+        }
+
+        // Programming
+        ServerPlayNetworking.registerGlobalReceiver(ProgrammerKeyPressPacket.type) { packet, ctx ->
+            val player = ctx.player()
+            val data = PlayerProgrammingData.getFromPlayer(player)
+            data.heldKeys[packet.key] = packet.pressed
+            data.saveToPlayer(player)
+        }
+        ServerPlayNetworking.registerGlobalReceiver(ProgrammerPlayerUpdatePacket.type) { packet, ctx ->
+            val player = ctx.player()
+            val data = PlayerProgrammingData.getFromPlayer(player)
+            data.keysToBits = packet.keysToBits
+            data.saveToPlayer(player)
         }
         
         // Finished

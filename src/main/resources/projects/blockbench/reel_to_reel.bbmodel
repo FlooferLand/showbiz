@@ -4,7 +4,7 @@
 		"model_format": "java_block",
 		"box_uv": false
 	},
-	"name": "reel_to_reel_off",
+	"name": "reel_to_reel",
 	"parent": "",
 	"java_block_version": "1.9.0",
 	"ambientocclusion": false,
@@ -482,7 +482,7 @@
 			"allow_mirror_modeling": true,
 			"from": [2, 2, 5.95],
 			"to": [6, 4, 5.95],
-			"autouv": 1,
+			"autouv": 0,
 			"color": 4,
 			"origin": [3, 2, 3.95],
 			"faces": {
@@ -992,5 +992,36 @@
 			"uuid": "45807b6c-9271-20d4-f4ef-731cfd9b6990",
 			"source": "data:image/png;base64,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"
 		}
-	]
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"thirdperson_lefthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"firstperson_righthand": {
+			"rotation": [9, 0, 0],
+			"translation": [0, 2.75, 0.25],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"firstperson_lefthand": {
+			"rotation": [9, 0, 0],
+			"translation": [0, 2.75, 0.25],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"ground": {
+			"translation": [0, 1.25, 0],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"gui": {
+			"rotation": [16.19, 21.06, 2.23],
+			"translation": [0, 0.5, 0],
+			"scale": [0.9, 0.9, 0.9]
+		},
+		"head": {
+			"translation": [0, 1, -6],
+			"scale": [1.2, 1.2, 1.2]
+		}
+	}
 }

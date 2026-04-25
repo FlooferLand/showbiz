@@ -1,20 +1,20 @@
 package com.flooferland.showbiz.registry
 
+import net.minecraft.core.registries.*
+import net.minecraft.resources.*
+import net.minecraft.world.item.*
+import net.minecraft.world.item.Item.*
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.utils.rl
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
-import net.minecraft.world.item.Item.*
 
 enum class ModItems {
     Wand(
         "wand", ::WandItem,
-        { stacksTo(1).component(ModComponents.WandBind.type, OptionBlockPos.EMPTY) },
+        { stacksTo(1).component(ModComponents.BlockOwner.type, OptionBlockPos.EMPTY) },
         model = ItemModelId.Custom,
         recipe = ModRecipes.Wand
     ),

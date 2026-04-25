@@ -11,6 +11,7 @@ import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
+import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
@@ -48,11 +49,11 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
         val player = ctx.player ?: return InteractionResult.CONSUME
         val level = ctx.level as? ServerLevel ?: return InteractionResult.CONSUME
 
-        val first = ctx.itemInHand.components.get(ModComponents.WandBind.type)!!
+        val first = ctx.itemInHand.components.get(ModComponents.BlockOwner.type)!!
         val lastEntity = level.getBlockEntity(ctx.clickedPos) ?: return InteractionResult.CONSUME
 
         fun finish(sound: ModSounds, anim: String, message: String? = null) {
-            ctx.itemInHand.applyComponent(ModComponents.WandBind.type, first)
+            ctx.itemInHand.applyComponent(ModComponents.BlockOwner.type, first)
             triggerAnim<WandItem>(player, GeoItem.getOrAssignId(ctx.itemInHand, level), "main", anim)
             player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
             message?.let {
@@ -88,7 +89,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is ShowSelectorBlockEntity,
                 is SpotlightBlockEntity,
                 is CurtainControllerBlockEntity,
-                is BitViewBlockEntity
+                is BitViewBlockEntity,
+                is ProgrammerBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -112,8 +114,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is GreyboxBlockEntity if firstEntity is ReelToReelBlockEntity -> {
                     val (greybox, reelToReel) = Pair(lastEntity, firstEntity)
                     reelToReel.applyChange(true) {
-                        showOut.bindListener(greybox)
-                        audioOut.bindListener(greybox)
+                        show.bindListener(greybox)
+                        audio.bindListener(greybox)
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
@@ -189,6 +191,36 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Show selector added")
+                    return InteractionResult.SUCCESS
+                }
+                is ReelToReelBlockEntity if firstEntity is ProgrammerBlockEntity -> {
+                    val (reelToReel, programmer) = Pair(lastEntity, firstEntity)
+                    reelToReel.applyChange(true) {
+                        show.bindListener(programmer)
+                    }
+                    programmer.applyChange(true) {
+                        show.bindListener(reelToReel)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Programmer connected")
+                    return InteractionResult.SUCCESS
+                }
+                is ProgrammerBlockEntity if firstEntity is ShowParserBlockEntity -> {
+                    val (programmer, showParser) = Pair(lastEntity, firstEntity)
+                    programmer.applyChange(true) {
+                        show.bindListener(showParser)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Programmer connected")
+                    return InteractionResult.SUCCESS
+                }
+                is ProgrammerBlockEntity if firstEntity is StagedBotBlockEntity -> {
+                    val (programmer, bot) = Pair(lastEntity, firstEntity)
+                    programmer.applyChange(true) {
+                        show.bindListener(bot)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Programmer connected")
                     return InteractionResult.SUCCESS
                 }
                 else -> { reset(error = "Unknown order.\nTry linking them the other way around"); return InteractionResult.CONSUME }

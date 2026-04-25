@@ -10,8 +10,8 @@ import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 
 sealed class ModComponents<T> {
-    data object WandBind : ModComponents<OptionBlockPos>(
-        "wand_bind",
+    data object BlockOwner : ModComponents<OptionBlockPos>(
+        "block_owner",
         { b -> b.persistent(OptionBlockPos.CODEC).networkSynchronized(OptionBlockPos.STREAM_CODEC) }
     )
     data object FileName : ModComponents<String>(

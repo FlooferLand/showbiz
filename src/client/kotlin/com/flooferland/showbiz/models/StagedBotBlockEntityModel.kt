@@ -85,8 +85,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (greybox == null || reelToReel == null) return*/
 
         // Getting the bits via the mapping
-        val mapping = animatable.show.data.mapping ?: return
-        if (mapping.isEmpty()) return
+        // TODO: Make bots work when they receive any mapping, even an empty one
+        val mapping = animatable.show.data.mapping
+        if (mapping.isNullOrBlank()) return
         val bitmapBits = bot.bitmap.bits[mapping] ?: run {
             Showbiz.log.warn("Mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
             return

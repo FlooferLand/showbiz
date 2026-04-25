@@ -6,10 +6,8 @@ import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
-import com.mojang.serialization.MapCodec
 import net.minecraft.core.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -22,15 +20,13 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.level.storage.loot.*
-import net.minecraft.world.level.storage.loot.parameters.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.handItem
 
-class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockModel {
-    val codec: MapCodec<ReelToReelBlock> = simpleCodec(::ReelToReelBlock)
-    override fun codec() = codec
+class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
+    override val codec = simpleCodec(::ReelToReelBlock)!!
 
     init {
         registerDefaultState(stateDefinition.any().setValue(PLAYING, false))
@@ -63,7 +59,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
-            if (heldStack.item is ReelItem && entity.show.isEmpty()) {
+            if (heldStack.item is ReelItem && entity.showData.isEmpty()) {
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
                     val stackCopy = heldStack.copy()
@@ -74,7 +70,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                     // Playback
                     if (player is ServerPlayer) {
                         entity.resetPlayback()
-                        entity.show.load(filename) { data ->
+                        entity.showData.load(filename) { data ->
                             entity.markDirtyNotifyAll()
                             if (player.isRemoved) return@load
                             if (data == null) {  // Error happened, giving back the reel
@@ -95,14 +91,14 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
                         Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.show.isEmpty()) {  // Removing
+            } else if (heldStack.isEmpty && !entity.showData.isEmpty()) {  // Removing
                 if (player is ServerPlayer) {
-                    val showName = entity.show.name
+                    val showName = entity.showData.name
                     showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
                     player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
                     entity.applyChange(true) {
                         entity.setPlaying(false)
-                        entity.show.free()
+                        entity.showData.free()
                         player.inventoryMenu.broadcastChanges()
                     }
                 }
@@ -110,7 +106,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
         } else if (!level.isClientSide) {
             // Pausing
-            if (!entity.show.isEmpty()) {
+            if (!entity.showData.isEmpty()) {
                 var paused = entity.paused
 
                 entity.applyChange(true) {
@@ -141,7 +137,7 @@ class ReelToReelBlock(props: Properties) : BaseEntityBlock(props), CustomBlockMo
     }
 
     override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
-        super.modelBlockStates(builder)
+        super<FacingEntityBlock>.modelBlockStates(builder)
         builder.defaultState(suffix = "off")
         builder.bool(PLAYING) {
             trueState(suffix = "on") {

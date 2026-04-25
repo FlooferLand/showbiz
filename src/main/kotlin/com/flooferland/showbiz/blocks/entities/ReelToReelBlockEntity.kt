@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
-import com.flooferland.showbiz.blocks.entities.state.ReelToReelBlockEntityRenderState
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -37,9 +36,11 @@ import kotlin.math.roundToInt
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer {
     override val connectionManager = ConnectionManager(this)
-    val showOut = connectionManager.port("show", PackedShowData(), PortDirection.Out)
-    val audioOut = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
-    val showSelectIn = connectionManager.port("select", PackedControlData(), PortDirection.In) { data ->
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { received ->
+        signal += received.signal
+    }
+    val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
+    val showSelect = connectionManager.port("select", PackedControlData(), PortDirection.In) { data ->
         val level = level as? ServerLevel ?: return@port
         val reelToReel = this@ReelToReelBlockEntity
 
@@ -60,11 +61,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     val aBufferSize: Int
         get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
 
-    public var show: ShowData = ShowData(this)
+    public var showData: ShowData = ShowData(this)
     public var seek = 0.0
     public val signal = SignalFrame()
-
-    public var rendererState = ReelToReelBlockEntityRenderState()
 
     var playing = false
         public get private set
@@ -78,7 +77,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var audioBytesWritten = 0
 
     fun tick() {
-        if (!playing || show.isEmpty()) return
+        if (!playing || showData.isEmpty()) return
         var shouldUpdate = false
 
         seek += tickDelta
@@ -87,30 +86,30 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Signal
         run {
-            val entry = show.signal.getOrNull(seekInt) ?: bitIdArrayOf()
+            val entry = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             signal.set(entry)
             shouldUpdate = signal.raw.isNotEmpty()
-            showOut.send(PackedShowData(playing, signal, show.mapping))
+            show.send(PackedShowData(playing, signal, showData.mapping))
         }
 
         // Audio
         val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
-        if (audioBytesWritten < targetBytes && audioBytesWritten < show.audio.size) {
+        if (audioBytesWritten < targetBytes && audioBytesWritten < showData.audio.size) {
             var toWrite = aBufferSize
             toWrite -= toWrite % getFormat().frameSize
 
-            val remain = show.audio.size - audioBytesWritten
+            val remain = showData.audio.size - audioBytesWritten
             if (toWrite > remain) toWrite = remain
 
             if (toWrite > 0) {
-                val chunk = show.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
+                val chunk = showData.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
                 sendChunk(chunk, audioBytesWritten)
                 audioBytesWritten += toWrite
             }
         }
 
         // Setting playing to false when the show ends
-        if (audioBytesWritten >= show.audio.size - 1) {
+        if (audioBytesWritten >= showData.audio.size - 1) {
             setPlaying(false)
             hasFinished = true
             shouldUpdate = true
@@ -121,14 +120,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
-        audioOut.data.mono = chunk
-        audioOut.send()
+        audio.data.mono = chunk
+        audio.send()
     }
 
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
-        showOut.send(PackedShowData(playing, signal, show.mapping))
+        show.send(PackedShowData(playing, signal, showData.mapping))
         level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
 
         // TODO: Find only near players
@@ -142,7 +141,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPaused(paused: Boolean) {
         this.playing = !paused
         this.paused = paused
-        showOut.send(PackedShowData(playing, signal, show.mapping))
+        show.send(PackedShowData(playing, signal, showData.mapping))
         level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
 
         // TODO: Find only near players
@@ -153,7 +152,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
     }
 
-    fun getFormat() = show.format ?: show.targetFormat
+    fun getFormat() = showData.format ?: showData.targetFormat
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
@@ -165,7 +164,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.putDouble("seek", seek)
         tag.putIntArray("signal_frame", signal.save())
         connectionManager.save(tag)
-        show.saveNBT(tag)
+        showData.saveNBT(tag)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -178,7 +177,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         seek = tag.getDoubleOrNull("seek") ?: 0.0
         signal.load(tag.getIntArrayOrNull("signal_frame"))
         connectionManager.load(tag)
-        show.loadNBT(tag)
+        showData.loadNBT(tag)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {
@@ -193,7 +192,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun resetPlayback() {
         seek = 0.0
         audioBytesWritten = 0
-        audioOut.data.chunkId = 0
+        audio.data.chunkId = 0
         if (playing) setPlaying(false)
         hasFinished = false
         signal.reset()
@@ -204,15 +203,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     // region | Container
     override fun getContainerSize() = 1
-    override fun isEmpty() = show.isEmpty()
+    override fun isEmpty() = showData.isEmpty()
     override fun getItem(slot: Int): ItemStack {
-        return show.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
+        return showData.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
     }
     override fun removeItem(slot: Int, amount: Int): ItemStack {
-        val item = show.name?.let { ReelItem.makeItem(it) }
+        val item = showData.name?.let { ReelItem.makeItem(it) }
         if (!isEmpty) {
             setPlaying(false)
-            show.free()
+            showData.free()
         }
         return item ?: ItemStack.EMPTY
     }
@@ -226,8 +225,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (stack.item is ReelItem) {
             val filename = ReelItem.getFilename(stack) ?: return
             resetPlayback()
-            show.isLoaded = true
-            show.load(filename) { data ->
+            showData.isLoaded = true
+            showData.load(filename) { data ->
                 markDirtyNotifyAll()
                 val level = level as? ServerLevel ?: return@load
                 val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
@@ -250,7 +249,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         Container.stillValidBlockEntity(this, player)
     override fun clearContent() {
         applyChange(true) {
-            show.free()
+            showData.free()
             resetPlayback()
         }
     }

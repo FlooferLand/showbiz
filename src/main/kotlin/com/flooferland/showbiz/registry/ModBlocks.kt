@@ -25,22 +25,18 @@ import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.BitViewBlock
+import com.flooferland.showbiz.blocks.ProgrammerBlock
 import com.flooferland.showbiz.blocks.SpotlightBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
+import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import software.bernie.geckolib.animatable.GeoAnimatable
-import software.bernie.geckolib.animatable.client.GeoRenderProvider
-import software.bernie.geckolib.model.DefaultedItemGeoModel
-import software.bernie.geckolib.renderer.GeoItemRenderer
-import kotlin.reflect.KCallable
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
@@ -164,6 +160,16 @@ enum class ModBlocks {
         modelPreset = BlockModelId.Custom,
         entity = ::BitViewBlockEntity,
         recipe = ModRecipes.BitViewBlock
+    ),
+    Programmer(
+        "programmer", ::ProgrammerBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = ::ProgrammerBlockEntity,
+        recipe = ModRecipes.ProgrammerBlock
     )
     ;
 

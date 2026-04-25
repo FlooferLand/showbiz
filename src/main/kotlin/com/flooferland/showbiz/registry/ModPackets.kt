@@ -20,6 +20,8 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ShowListSelect : ModPackets<BotListSelectPacket>(ClientToServer, BotListSelectPacket.type, BotListSelectPacket.codec)
     data object CurtainControllerEdit: ModPackets<CurtainControllerEditPacket>(ClientToServer, CurtainControllerEditPacket.type, CurtainControllerEditPacket.codec)
     data object UpdateConnections: ModPackets<UpdateConnectionsPacket>(ServerToClient, UpdateConnectionsPacket.type, UpdateConnectionsPacket.codec)
+    data object ProgrammerKeyPress: ModPackets<ProgrammerKeyPressPacket>(ClientToServer, ProgrammerKeyPressPacket.type, ProgrammerKeyPressPacket.codec)
+    data object ProgrammerPlayerUpdate: ModPackets<ProgrammerPlayerUpdatePacket>(ClientToServer, ProgrammerPlayerUpdatePacket.type, ProgrammerPlayerUpdatePacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

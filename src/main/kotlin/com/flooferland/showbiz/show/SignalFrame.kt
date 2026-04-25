@@ -15,6 +15,9 @@ class SignalFrame {
     fun set(array: BitIdArray?) {
         array?.let { raw = array }
     }
+    operator fun plusAssign(other: SignalFrame) {
+        raw = mutableListOf<BitId>().also { it.addAll(raw); it.addAll(other.raw) }.toBitIdArray()
+    }
     fun save(): IntArray = raw.map { it.toInt() }.toIntArray()
     fun load(array: IntArray?) {
         array?.let {
