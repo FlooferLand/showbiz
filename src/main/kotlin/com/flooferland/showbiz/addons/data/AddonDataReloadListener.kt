@@ -63,7 +63,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>
                         ?: run { err("Failed to find bots.toml"); continue }
                     runCatching { Toml.decodeFromString<HashMap<String, AddonBotEntry>>(e) }
                         .getOrElse { err ->
-                            err("Failed to parse $MANIFEST_NAME for addon '$namespace'", err)
+                            err("Failed to parse bots.toml for addon '$namespace'", err)
                             continue
                         }
                         .mapKeys { (key, _) -> ResourceId(namespace, key) }
