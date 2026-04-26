@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import kotlin.math.roundToInt
 
-/** Lists shw files mainly for [com.flooferland.showbiz.screens.ReelUploadScreen] (or anything that requires a show file listing) */
+/** Lists shw files mainly for [com.flooferland.showbiz.screens.ReelManagerScreen] (or anything that requires a show file listing) */
 class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSelectionList<ShowFileListWidget.FileEntry>(Minecraft.getInstance(), width, height, y, 15) {
     init {
         setPosition(x, y)

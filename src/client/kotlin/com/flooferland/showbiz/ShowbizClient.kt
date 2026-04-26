@@ -33,7 +33,7 @@ import com.flooferland.showbiz.resources.ModelPartReloadListener
 import com.flooferland.showbiz.screens.BitViewScreen
 import com.flooferland.showbiz.screens.BotSelectScreen
 import com.flooferland.showbiz.screens.CurtainControllerEditScreen
-import com.flooferland.showbiz.screens.ReelUploadScreen
+import com.flooferland.showbiz.screens.ReelManagerScreen
 import com.flooferland.showbiz.screens.ShowParserEditScreen
 import com.flooferland.showbiz.screens.SpotlightEditScreen
 import com.flooferland.showbiz.types.AbstractBotPart
@@ -56,9 +56,7 @@ import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
-import software.bernie.geckolib.model.DefaultedItemGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
-import kotlin.math.min
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -225,7 +223,7 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // DARN YOU SPLIT SOURCESETS
-        ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelUploadScreen(stack)) }
+        ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
         AbstractBotPart.clientSpawn = { level, id, owner ->
             val entity = BotPartEntity(level, id, owner)
             (level as? ClientLevel)?.addEntity(entity)

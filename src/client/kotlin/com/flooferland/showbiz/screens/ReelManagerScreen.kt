@@ -15,7 +15,7 @@ import com.flooferland.showbiz.utils.PlatformUtils
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
-class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Upload")) {
+class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Manager")) {
     var files = mutableListOf<String>()
     var loading = true
 
@@ -96,7 +96,7 @@ class ReelUploadScreen(val reelStack: ItemStack) : Screen(Component.literal("Ree
     companion object {
         init {
             ClientPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { packet, _ ->
-                val screen = (Minecraft.getInstance().screen as? ReelUploadScreen) ?: return@registerGlobalReceiver
+                val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@registerGlobalReceiver
                 screen.updateFiles(packet.files)
             }
         }

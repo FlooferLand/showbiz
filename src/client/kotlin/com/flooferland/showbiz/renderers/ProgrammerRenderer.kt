@@ -12,7 +12,7 @@ object ProgrammerRenderer {
     val slotTextureOn = rl("textures/gui/sprites/hud/programbar_slot_on.png")
     val slotTextureOff = rl("textures/gui/sprites/hud/programbar_slot_off.png")
     val slotTextureSelect = rl("textures/gui/sprites/hud/programbar_slot_select.png")
-    val slotTextureSize = Vec2ic(16, 26)
+    val slotTextureSize = Vec2ic(15, 26)
 
     fun renderBitView(guiGraphics: GuiGraphics, data: PlayerProgrammingData) {
         val minecraft = Minecraft.getInstance() ?: return
@@ -20,7 +20,7 @@ object ProgrammerRenderer {
         val font = minecraft.font
         val keys = data.heldKeys
 
-        val pad = 3
+        val pad = 2
         val tileWidth = slotTextureSize.x
         val tileHeight = slotTextureSize.y
         val heightOffset = tileHeight + 1
