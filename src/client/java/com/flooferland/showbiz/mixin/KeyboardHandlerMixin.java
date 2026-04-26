@@ -21,9 +21,9 @@ public class KeyboardHandlerMixin {
 
 		// Consuming hotbar inputs
 		var data = PlayerProgrammingData.Companion.getFromPlayer(minecraft.player);
-		if (data.getActive()) {
+		if (data.getActive() && minecraft.screen == null) {
 			// 0 key
-			if (key == GLFW.GLFW_KEY_0 && action == 1 && !(minecraft.screen instanceof ProgrammerScreen)) {
+			if (key == GLFW.GLFW_KEY_0 && action == 1) {
 				minecraft.setScreen(new ProgrammerScreen());
 				return;
 			}
