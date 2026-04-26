@@ -1,12 +1,12 @@
 package com.flooferland.showbiz
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
-import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
@@ -17,11 +17,7 @@ import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
-import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
-import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
@@ -30,19 +26,10 @@ import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
-import com.flooferland.showbiz.screens.BitViewScreen
-import com.flooferland.showbiz.screens.BotSelectScreen
-import com.flooferland.showbiz.screens.CurtainControllerEditScreen
-import com.flooferland.showbiz.screens.ReelManagerScreen
-import com.flooferland.showbiz.screens.ShowParserEditScreen
-import com.flooferland.showbiz.screens.SpotlightEditScreen
-import com.flooferland.showbiz.types.AbstractBotPart
-import com.flooferland.showbiz.types.BotSoundHandler
-import com.flooferland.showbiz.types.ClientConnections
-import com.flooferland.showbiz.types.ClientModelPartInstance
-import com.flooferland.showbiz.types.ModelPartManager
-import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.screens.*
+import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import java.nio.file.Files
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
@@ -57,6 +44,7 @@ import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
+import kotlin.jvm.optionals.getOrNull
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = listOf()
@@ -93,6 +81,15 @@ object ShowbizClient : ClientModInitializer {
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
         ModelPartManager.clientModelPartInstancer = { owner, block -> ClientModelPartInstance(owner, block.id) }
+        for (block in ModBlocks.entries) {
+            val path = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull()
+                ?.findPath("assets/${MOD_ID}/geo/block/${block.id.path}.geo.json")?.getOrNull()
+            val isGeckoLib = path?.let { Files.exists(it) } ?: false
+            if (block.isGeckoLib != isGeckoLib && Showbiz.log.isDebugEnabled) {
+                if (isGeckoLib) error("Block '${block.id}' is marked to not be using GeckoLib, but it actually is?")
+                else error("Block '${block.id}' is marked to be using GeckoLib, but it actually isn't?")
+            }
+        }
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
@@ -144,7 +141,7 @@ object ShowbizClient : ClientModInitializer {
             }
         }
         for (block in ModBlocks.entries) {
-            if (!block.geckoLib) continue
+            if (!block.isGeckoLib) continue
             val item = block.item as? GeoBlockItem ?: continue
             item.renderProviderHolder.value = object : GeoRenderProvider {
                 inner class Renderer : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id))

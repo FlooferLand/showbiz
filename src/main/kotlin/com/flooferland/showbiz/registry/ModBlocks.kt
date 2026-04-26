@@ -36,7 +36,6 @@ import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.base.GeoBlockItem
-import software.bernie.geckolib.animatable.GeoAnimatable
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
@@ -47,7 +46,7 @@ enum class ModBlocks {
             .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
-        entity = ::StagedBotBlockEntity,
+        entity = Entity(::StagedBotBlockEntity, isGeckolib = false),
         recipe = ModRecipes.StagedBot
     ),
     ReelToReel(
@@ -57,7 +56,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
-        entity = ::ReelToReelBlockEntity,
+        entity = Entity(::ReelToReelBlockEntity, isGeckolib = false),
         recipe = ModRecipes.ReelToReel
     ),
     Greybox(
@@ -67,7 +66,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
-        entity = ::GreyboxBlockEntity,
+        entity = Entity(::GreyboxBlockEntity, isGeckolib = false),
         recipe = ModRecipes.Greybox
     ),
     Speaker(
@@ -77,7 +76,7 @@ enum class ModBlocks {
             .sound(SoundType.WOOD)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::SpeakerBlockEntity,
+        entity = Entity(::SpeakerBlockEntity, isGeckolib = false),
         recipe = ModRecipes.Speaker
     ),
     ShowParser(
@@ -87,7 +86,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::ShowParserBlockEntity,
+        entity = Entity(::ShowParserBlockEntity, isGeckolib = false),
         recipe = ModRecipes.ShowParser
     ),
     ShowSelector(
@@ -97,7 +96,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::ShowSelectorBlockEntity,
+        entity = Entity(::ShowSelectorBlockEntity, isGeckolib = true),
         recipe = ModRecipes.ShowSelector
     ),
     CurtainBlock(
@@ -107,7 +106,7 @@ enum class ModBlocks {
             .sound(SoundType.WOOL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::CurtainBlockEntity,
+        entity = Entity(::CurtainBlockEntity, isGeckolib = false),
         recipe = ModRecipes.CurtainBlock
     ),
     CurtainBlockShadow(
@@ -128,7 +127,7 @@ enum class ModBlocks {
             .sound(SoundType.STONE)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::CurtainControllerBlockEntity,
+        entity = Entity(::CurtainControllerBlockEntity, isGeckolib = false),
         recipe = ModRecipes.CurtainControllerBlock
     ),
     WojackBlock(
@@ -148,7 +147,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::SpotlightBlockEntity,
+        entity = Entity(::SpotlightBlockEntity, isGeckolib = true),
         recipe = ModRecipes.SpotlightBlock
     ),
     BitView(
@@ -158,7 +157,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::BitViewBlockEntity,
+        entity = Entity(::BitViewBlockEntity, isGeckolib = false),
         recipe = ModRecipes.BitViewBlock
     ),
     Programmer(
@@ -168,7 +167,7 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
-        entity = ::ProgrammerBlockEntity,
+        entity = Entity(::ProgrammerBlockEntity, isGeckolib = false),
         recipe = ModRecipes.ProgrammerBlock
     )
     ;
@@ -179,12 +178,13 @@ enum class ModBlocks {
     var model: BlockModelId? = null
     var entityType: BlockEntityType<*>? = null
     var recipe: ModRecipes? = null
-    var geckoLib: Boolean = false
+    var isGeckoLib: Boolean = false
     var hideFromPlayer: Boolean = false
-    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity)? = null, recipe: ModRecipes?, hideFromPlayer: Boolean = false) {
+    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: Entity? = null, recipe: ModRecipes?, hideFromPlayer: Boolean = false) {
         this.id = rl(name)
         this.model = modelPreset;
         this.hideFromPlayer = hideFromPlayer
+        this.isGeckoLib = entity?.isGeckolib == true
         this.recipe = recipe
 
         this.block = Blocks.register(
@@ -198,23 +198,17 @@ enum class ModBlocks {
 
         // Item
         var blockItem = when {
-            geckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())
+            isGeckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())
             else -> FancyBlockItem(this.id, this.block, Item.Properties())
         }
         this.item = Items.registerBlock(blockItem) as BlockItem
 
         // Entity
         if (entity != null && !DataGenerator.engaged) {
-            this.entityType = BlockEntityType.Builder.of(entity, this.block).build()
+            this.entityType = BlockEntityType.Builder.of(entity.entity, this.block).build()
             Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entityType!!)
         }
-
-        // Hell
-        this.geckoLib = runCatching {
-            entity?.let { factory ->
-                val returnType = factory.javaClass.methods.firstOrNull { it.name == "invoke" && !it.isBridge }?.returnType
-                returnType != null && GeoAnimatable::class.java.isAssignableFrom(returnType)
-            } == true
-        }.getOrNull() ?: false
     }
+
+    data class Entity(val entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity), val isGeckolib: Boolean)
 }
