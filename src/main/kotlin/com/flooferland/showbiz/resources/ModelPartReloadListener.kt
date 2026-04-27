@@ -14,6 +14,8 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import org.joml.Vector3d
 import software.bernie.geckolib.cache.`object`.GeoBone
 
+// TODO: Fix modelparts not working well with parent bone rotations (see how many workarounds there have to be in the show selector model...)
+
 object ModelPartReloadListener : SimplePreparableReloadListener<ModelPartMap>(), IdentifiableResourceReloadListener {
     override fun getFabricId() = rl("modelpart")
 

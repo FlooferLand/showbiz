@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types
 
 import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
@@ -20,5 +21,6 @@ object ModelPartManager {
     interface IInstance {
         fun kill() {}
         fun tick(level: Level, pos: BlockPos, state: BlockState) {}
+        fun changeResourcePath(path: ResourceLocation) {}
     }
 }

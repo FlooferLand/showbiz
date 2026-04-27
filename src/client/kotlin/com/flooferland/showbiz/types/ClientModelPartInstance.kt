@@ -17,13 +17,16 @@ import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import software.bernie.geckolib.animatable.GeoAnimatable
+import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.model.GeoModel
+import software.bernie.geckolib.renderer.GeoBlockRenderer
 import kotlin.collections.iterator
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ClientModelPartInstance(val owner: IModelPartInteractable, modelResourcePath: ResourceLocation) : ModelPartManager.IInstance {
+class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourcePath: ResourceLocation) : ModelPartManager.IInstance {
     val interactableParts = mutableMapOf<String, ModelPart>()
     val interactionMapping = owner.getInteractionMapping()
     var nameMapping = owner.getNameMapping()
@@ -31,10 +34,12 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, modelResourcePa
 
     val ownerEntity get() = owner as BlockEntity
 
-    private val modelResourcePath = when (owner) {
-        is GeoModel<*> -> modelResourcePath.withPrefix("geckolib/models/block/").withSuffix(".geo.json")
-        else -> modelResourcePath
-    }
+    private val renderer get() = Minecraft.getInstance().blockEntityRenderDispatcher.getRenderer(ownerEntity) as? GeoBlockRenderer
+    private val model get() = renderer?.geoModel
+
+    private val modelResourcePath get() = model?.getModelResource(ownerEntity)?.let {
+        it.withPath(it.path.replace("geo/block/", "").replace(".geo.json", ""))
+    } ?: baseResourcePath
 
     /** Spawns all the interactable entities */
     private fun spawn() {
