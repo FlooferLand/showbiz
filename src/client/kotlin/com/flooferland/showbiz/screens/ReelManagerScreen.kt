@@ -29,8 +29,8 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     fun refresh() {
         clearWidgets()
-        val maxWidth = (width * 0.6).toInt()
-        val maxHeight = (height * 0.6).toInt()
+        val maxWidth = (width * 0.7).toInt()
+        val maxHeight = (height * 0.7).toInt()
         val openDirButton =
             Button.builder(Component.literal("Open file manager")) {
                 PlatformUtils.openFileManager(FileStorage.SHOWS_DIR)
