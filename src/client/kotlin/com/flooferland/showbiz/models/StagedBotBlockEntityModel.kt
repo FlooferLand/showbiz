@@ -260,7 +260,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     }
 
     fun soundKeyframeHandler(animatable: StagedBotBlockEntity, state: SoundKeyframeEvent<GeoAnimatable>) {
-        if (!ShowbizClient.config.audio.playBotEffects) return
+        if (!Showbiz.config.audio.playBotEffects) return
         if (animatable.isRemoved) return
         val sound = ResourceLocation.parse(state.keyframeData.sound)
         if (!BuiltInRegistries.SOUND_EVENT.containsKey(sound)) {

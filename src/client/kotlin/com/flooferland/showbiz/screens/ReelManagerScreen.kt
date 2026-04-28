@@ -18,6 +18,7 @@ import kotlin.io.path.pathString
 class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Manager")) {
     var files = mutableListOf<String>()
     var loading = true
+    var authorized = false
 
     override fun isPauseScreen() = false
 
@@ -97,6 +98,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         init {
             ClientPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { packet, _ ->
                 val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@registerGlobalReceiver
+                screen.authorized = packet.playerAuthorized
                 screen.updateFiles(packet.files)
             }
         }

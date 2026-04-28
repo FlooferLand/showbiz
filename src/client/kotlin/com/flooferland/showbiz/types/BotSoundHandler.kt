@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.util.Mth.clamp
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModSounds
@@ -17,7 +18,7 @@ class BotSoundHandler : IBotSoundHandler {
 
     override fun tick(entity: StagedBotBlockEntity, level: Level, pos: BlockPos, state: BlockState) {
         val level = level as? ClientLevel ?: return
-        if (!ShowbizClient.config.audio.playPneumaticSounds) return
+        if (!Showbiz.config.audio.playPneumaticSounds) return
 
         val bot = ShowbizClient.bots[entity.botId] ?: return
         val show = entity.show.data

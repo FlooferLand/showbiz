@@ -51,22 +51,8 @@ object ShowbizClient : ClientModInitializer {
     var bots: Map<ResourceId, AddonBot> = mapOf()
     var botModels: Map<ResourceLocation, BotModelData> = mapOf()
     var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
-    var config = ShowbizClientConfig()
 
     override fun onInitializeClient() {
-        // Loading config
-        val configResult = runCatching {
-            val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
-            if (configFile.exists()) {
-                config = Toml.decodeFromString<ShowbizClientConfig>(configFile.readText())
-            } else {
-                configFile.writeText(Toml.encodeToString<ShowbizClientConfig>(config))
-            }
-        }
-        configResult.onFailure { throwable ->
-            Showbiz.log.error("Error loading config", throwable)
-        }
-
         // Loading the mod
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)

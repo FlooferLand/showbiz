@@ -61,6 +61,7 @@ object FileServer {
     /** Responds to a client's request to send the file */
     fun sendShowsToClient(player: ServerPlayer) {
         val files = fetchShows().map { it.name }.toTypedArray()
-        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = files))
+        val authorized = Permissions.canWriteReels(player)
+        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = files, playerAuthorized = authorized))
     }
 }

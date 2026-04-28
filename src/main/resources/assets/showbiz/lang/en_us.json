@@ -1,7 +1,8 @@
 {
     "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand and Monsterwaill!",
-    "config.prop.playPneumaticSounds": "Play pneumatic sounds",
-    "config.prop.playBotEffects": "Play custom bot effects",
+    "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
+    "config.prop.audio.playBotEffects": "Play custom bot effects",
+    "config.prop.permissions.restrict": "Restrict permissions (server-only)",
 
     "itemGroup.showbiz.main": "Showbiz",
 

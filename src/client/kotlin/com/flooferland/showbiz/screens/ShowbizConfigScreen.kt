@@ -1,56 +1,83 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.components.AbstractWidget
-import net.minecraft.client.gui.components.Checkbox
-import net.minecraft.client.gui.components.StringWidget
-import net.minecraft.client.gui.screens.Screen
-import net.minecraft.network.chat.Component
+import net.minecraft.client.*
+import net.minecraft.client.gui.components.*
+import net.minecraft.client.gui.screens.*
+import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.ShowbizClient
-import com.flooferland.showbiz.ShowbizClientConfig
-import kotlin.reflect.KMutableProperty0
+import com.flooferland.showbiz.registry.ModConfig
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.staticProperties
 
 typealias Category = String
 
 class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal("Showbiz Config")) {
-    val config = ShowbizClient.config.clone()
+    val config = Showbiz.config.clone()
 
-    data class ConfigWidget(val name: String, val widget: AbstractWidget)
+    data class ConfigWidget(val name: String, val widget: AbstractWidget, var nameWidget: StringWidget? = null)
     val configEntries = mutableMapOf<Category, MutableList<ConfigWidget>>()
 
+    val categoryButtons = mutableListOf<Button>()
+    var selectedCategory: String? = null
+
     override fun init() {
+        categoryButtons.clear()
+        configEntries.clear()
+        clearWidgets()
+
         runCatching {
-            for (categoryClass in ShowbizClientConfig::class.nestedClasses) {
+            for (categoryClass in ModConfig::class.nestedClasses) {
                 when (categoryClass) {
-                    ShowbizClientConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
+                    ModConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
+                    ModConfig.Permissions::class -> categoryAddWidgets("Permissions", config.permissions)
                 }
             }
         }.onFailure { Showbiz.log.error("Failure adding config categories", it) }
 
         // Placing the UI
         if (configEntries.isEmpty()) Minecraft.getInstance().screen = parent
-        for ((categoryName, widgets) in configEntries) {
+        var categoryWidthsAcc = 0
+        for ((categoryIndex, categoryName) in configEntries.keys.withIndex()) {
+            val widgets = configEntries[categoryName] ?: continue
             widgets.firstOrNull()?.widget?.isFocused = true
 
-            val categoryNameWidget = StringWidget(20, 0, width, 20, Component.literal(categoryName), font).alignLeft()
-            addRenderableWidget(categoryNameWidget)
-            for ((i, entry) in widgets.withIndex()) {
-                val location = i + 1
+            if (selectedCategory == null) selectedCategory = categoryName
+
+            val categoryWidth = font.width("  $categoryName  ")
+            categoryWidthsAcc += categoryWidth
+            val categoryButton = Button.builder(Component.literal(categoryName))
+                { b ->
+                    selectedCategory = categoryName
+                    categoryButtons.forEach { button -> button.active = (button != b) }
+                    configEntries.forEach { (category, widgets) ->
+                        widgets.forEach {
+                            it.nameWidget?.visible = category == selectedCategory
+                            it.widget.visible = category == selectedCategory
+                        }
+                    }
+                }
+                .pos(20 + categoryWidthsAcc, 0)
+                .size(categoryWidth, 20)
+                .build()
+            addRenderableWidget(categoryButton)
+            categoryButtons.add(categoryButton)
+
+            for ((widgetIndex, entry) in widgets.withIndex()) {
+                val location = widgetIndex + 1
                 val (name, widget) = entry
                 val spacing = 40
                 val x = 20
-                val y = (location * spacing)
+                val y = (location * spacing) + (categoryIndex * spacing)
 
                 val nameHeight = (font.lineHeight * 1.65f).toInt()
-                val nameWidget = StringWidget(x, y, width - x, 20, Component.translatable("config.prop.$name"), font).alignLeft()
+                val nameWidget = StringWidget(x, y, width - x, 20, Component.translatable("config.prop.${categoryName.lowercase()}.$name"), font).alignLeft()
+                nameWidget.visible = (selectedCategory == categoryName)
                 addRenderableWidget(nameWidget)
+                entry.nameWidget = nameWidget
 
                 widget.x = x
                 widget.y = y + nameHeight
+                widget.visible = (selectedCategory == categoryName)
                 addRenderableWidget(widget)
             }
         }
@@ -67,9 +94,11 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
             val widget = when (propValue) {
                 is Boolean -> Checkbox.builder(propName, font)
                     .selected(propValue)
-                    .onValueChange { _, bool -> (prop as KMutableProperty1<T, Boolean>).set(category, bool) }
+                    .onValueChange { _, bool ->
+                        (prop as? KMutableProperty1<T, Boolean>)?.set(category, bool) ?: Showbiz.log.error("Failed to set '${propName.string}'")
+                    }
                     .build()
-                else -> error("Prop of this type does not exist")
+                else -> { Showbiz.log.error("Prop of this type does not exist for ${propName.string}"); return@forEach }
             }
 
             val widgets = configEntries.getOrPut(categoryName) { mutableListOf() }
@@ -78,7 +107,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
     }
 
     override fun onClose() {
-        ShowbizClient.config = config
+        Showbiz.config = config
         super.onClose()
     }
 }

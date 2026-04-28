@@ -1,6 +1,7 @@
 package com.flooferland.showbiz
 
 import net.minecraft.server.packs.*
+import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
@@ -11,11 +12,14 @@ import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
+import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -25,8 +29,22 @@ object Showbiz : ModInitializer {
 
     var addons = listOf<AddonData>()
     var bots = mapOf<ResourceId, AddonBotEntry>()
+    var config = ModConfig()
 
     override fun onInitialize() {
+        // Loading config
+        val configResult = runCatching {
+            val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
+            if (configFile.exists()) {
+                config = Toml.decodeFromString<ModConfig>(configFile.readText())
+            } else {
+                configFile.writeText(Toml.encodeToString<ModConfig>(config))
+            }
+        }
+        configResult.onFailure { throwable ->
+            Showbiz.log.error("Error loading config", throwable)
+        }
+
         // Making sure the JVM compiles these
         @Suppress("UnusedExpression")
         run {
