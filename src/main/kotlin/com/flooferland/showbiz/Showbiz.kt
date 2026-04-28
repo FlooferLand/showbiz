@@ -12,6 +12,7 @@ import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
@@ -72,7 +73,9 @@ object Showbiz : ModInitializer {
             data.recording = packet.recording
             data.saveToPlayer(player)
         }
-        
+        ServerPlayerEvents.JOIN.register { player -> PlayerProgrammingData.resetPlayerState(player) }
+        ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->  }
+
         // Finished
         log.info("Enjoy the show!")
         log.debug("Debugging log level enabled! More information will be printed (bogos binted 👽)")

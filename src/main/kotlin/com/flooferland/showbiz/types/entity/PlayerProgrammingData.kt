@@ -3,6 +3,7 @@ package com.flooferland.showbiz.types.entity
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
+import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.registry.ModPlayerSynchedData
 import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.toBitId
@@ -13,7 +14,7 @@ import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongOrNull
 
 /** Defines stuff for the programming block */
-data class `PlayerProgrammingData`(
+data class PlayerProgrammingData(
     var active: Boolean = false,
     var recording: Boolean = false,
     var blockPos: BlockPos? = null,
@@ -40,10 +41,30 @@ data class `PlayerProgrammingData`(
         player.entityData.set(ModPlayerSynchedData.Programming.type, CompoundTag().also { this.save(it) })
     }
 
+    /** Resets things other than settings back to default */
+    fun cleanBasic() {
+        active = false
+        recording = false
+        blockPos = null
+        heldKeys.forEachIndexed { i, _ -> heldKeys[i] = false }
+    }
+
     fun mapKeyToBit(keyId: Int) = keysToBits.getOrNull(keyId)?.toShort() ?: 0
 
     companion object {
         fun getFromPlayer(player: Player) =
             PlayerProgrammingData().also { it.load(player.entityData.get(ModPlayerSynchedData.Programming.type)) }
+
+        /** Resets things other than settings back to default */
+        fun resetPlayerState(player: Player) {
+            val data = getFromPlayer(player)
+            data.blockPos?.let { pos ->
+                val level = player.level() ?: return@let
+                val entity = level.getBlockEntity(pos) as? ProgrammerBlockEntity ?: return@let
+                entity.operators.removeIf { it.id == player.id }
+            }
+            data.cleanBasic()
+            data.saveToPlayer(player)
+        }
     }
 }

@@ -40,6 +40,14 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         return canSupportCenter(level, pos.below(), Direction.UP)
     }
 
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        val entity = level.getBlockEntity(pos) as? ProgrammerBlockEntity
+        entity?.let { entity ->
+            entity.operators.forEach { PlayerProgrammingData.resetPlayerState(it) }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston)
+    }
+
     override fun updateShape(state: BlockState, direction: Direction, neighborState: BlockState, level: LevelAccessor, pos: BlockPos, neighborPos: BlockPos): BlockState {
         if (direction == Direction.DOWN && !canSurvive(state, level, pos)) {
             level.destroyBlock(pos, true)

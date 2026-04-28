@@ -10,8 +10,6 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.show.SignalFrame
-import com.flooferland.showbiz.show.toBitIdArray
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -34,8 +32,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val shouldRemove = it.isRemoved || distSqr > playerMaxDistSqr
             if (shouldRemove) {
                 val data = PlayerProgrammingData.getFromPlayer(it)
-                data.active = false
-                data.blockPos = null
+                data.cleanBasic()
                 data.saveToPlayer(it)
                 it.displayClientMessage(Component.literal("Exited programming mode"), true)
             } else if (distSqr > (playerMaxDistSqr / 2)) {
