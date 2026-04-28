@@ -30,7 +30,6 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
-        println(it.signal.raw.contentToString())
         level.updateNeighborsAt(blockPos, blockState.block)
     }
 

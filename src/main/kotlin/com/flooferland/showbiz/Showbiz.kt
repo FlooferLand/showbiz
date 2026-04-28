@@ -69,6 +69,7 @@ object Showbiz : ModInitializer {
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
             data.keysToBits = packet.keysToBits
+            data.recording = packet.recording
             data.saveToPlayer(player)
         }
         

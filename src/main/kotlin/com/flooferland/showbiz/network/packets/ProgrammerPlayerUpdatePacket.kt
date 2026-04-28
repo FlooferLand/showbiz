@@ -6,7 +6,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.utils.rl
 
-class ProgrammerPlayerUpdatePacket(val keysToBits: BitIdArray) : CustomPacketPayload {
+class ProgrammerPlayerUpdatePacket(val keysToBits: BitIdArray, val recording: Boolean) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -15,10 +15,12 @@ class ProgrammerPlayerUpdatePacket(val keysToBits: BitIdArray) : CustomPacketPay
             { buf, state ->
                 buf.writeVarInt(state.keysToBits.size)
                 state.keysToBits.forEach { buf.writeShort(it.toInt()) }
+                buf.writeBoolean(state.recording)
             },
             { buf ->
                 ProgrammerPlayerUpdatePacket(
-                    keysToBits = BitIdArray(buf.readVarInt()).also { it.forEachIndexed { i, _ -> it[i] = buf.readShort().toUShort() } }
+                    keysToBits = BitIdArray(buf.readVarInt()).also { it.forEachIndexed { i, _ -> it[i] = buf.readShort().toUShort() } },
+                    recording = buf.readBoolean()
                 )
             }
         )!!
