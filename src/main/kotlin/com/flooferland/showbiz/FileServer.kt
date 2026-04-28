@@ -13,6 +13,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchService
+import java.security.Permission
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.io.path.name
 
@@ -54,7 +55,9 @@ object FileServer {
 
         if (changed) {
             val files = fetchShows(recache = true).map { it.name }.toTypedArray()
-            server.playerList.players.forEach { ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = files)) }
+            server.playerList.players.forEach {
+                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = files, playerAuthorized = Permissions.canWriteReels(it)))
+            }
         }
     }
 

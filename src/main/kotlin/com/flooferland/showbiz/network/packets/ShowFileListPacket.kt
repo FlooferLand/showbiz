@@ -5,7 +5,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.utils.rl
 
-class ShowFileListPacket(val toClient: Boolean = false, val files: Array<String> = arrayOf(), val playerAuthorized: Boolean = false) : CustomPacketPayload {
+class ShowFileListPacket(val toClient: Boolean = false, val playerAuthorized: Boolean = false, val files: Array<String> = arrayOf()) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -13,21 +13,21 @@ class ShowFileListPacket(val toClient: Boolean = false, val files: Array<String>
         val codec = StreamCodec.of<FriendlyByteBuf, ShowFileListPacket>(
             { buf, packet ->
                 buf.writeBoolean(packet.toClient)
+                buf.writeBoolean(packet.playerAuthorized)
                 if (packet.toClient) {
                     buf.writeShort(packet.files.size)
                     for (entry in packet.files) {
                         buf.writeUtf(entry)
                     }
                 }
-                buf.writeBoolean(packet.playerAuthorized)
             },
             { buf ->
                 val isResponse = buf.readBoolean()  // toClient
+                val playerAuthorized = buf.readBoolean()
                 if (isResponse) {
                     val size = buf.readShort().toInt()
                     val files = MutableList(size) { buf.readUtf() }
-                    val playerAuthorized = buf.readBoolean()
-                    ShowFileListPacket(true, files.toTypedArray(), playerAuthorized)
+                    ShowFileListPacket(true, playerAuthorized, files.toTypedArray())
                 } else {
                     ShowFileListPacket(false)
                 }
