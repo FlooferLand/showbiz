@@ -74,7 +74,11 @@ object Showbiz : ModInitializer {
             data.saveToPlayer(player)
         }
         ServerPlayerEvents.JOIN.register { player -> PlayerProgrammingData.resetPlayerState(player) }
-        ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->  }
+        ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->
+            val data = PlayerProgrammingData.getFromPlayer(oldPlayer)
+            data.cleanBasic()
+            data.saveToPlayer(newPlayer)
+        }
 
         // Finished
         log.info("Enjoy the show!")
