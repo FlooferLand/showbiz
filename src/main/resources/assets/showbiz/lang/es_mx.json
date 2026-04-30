@@ -1,0 +1,38 @@
+{
+    "text.mod.description": "Simulador no oficial de Rock-afire Explosion para Minecraft, mod hecho por FlooferLand y Monsterwaill!",
+    "config.prop.audio.playPneumaticSounds": "Reproducir sonidos neumáticos",
+    "config.prop.audio.playBotEffects": "Reproducir efectos de bots personalizados",
+    "config.prop.permissions.restrict": "Restringir permisos (solo servidor)",
+
+    "itemGroup.showbiz.main": "Showbiz",
+
+    "block.showbiz.staged_bot": "Robot En Escenario",
+    "block.showbiz.reel_to_reel": "Magnetófono",
+    "block.showbiz.greybox": "Controladora Greybox", 
+    "block.showbiz.speaker": "Bocina",
+    "block.showbiz.show_parser": "Parser del Show",
+    "block.showbiz.show_selector": "Selector de Show ",
+    "block.showbiz.curtain_block": "Riel de Cortinas",
+    "block.showbiz.curtain_controller": "Controlador De Cortinas",
+    "block.showbiz.spotlight": "Foco (W.I.P)",
+    "block.showbiz.bit_view": "Vista De Bit",
+    "block.showbiz.programmer": "Programador",
+
+    "item.showbiz.wand": "Varita",
+    "item.showbiz.reel": "Carrete",
+
+    "tooltip.showbiz.block.staged_bot": "También se conocen como animatronicos/figuras\n- Presione Click Derecho para cambiar modelo\n- Coloque un bloque encima para esconderlo",
+    "tooltip.showbiz.block.reel_to_reel": "Reproduce carretes\nInserta un carrete en la parte superior\nInicia/pausa la reproducción haciendo clic derecho en los lados\nPuede extraer carretes de un cofre a su lado",
+    "tooltip.showbiz.block.greybox": "Lee información de un Magnetófono\ny muestra información del show",
+    "tooltip.showbiz.block.speaker": "Mueve el aire violentamente para producir sonido\n(Solo soporta sonido mono)",
+    "tooltip.showbiz.block.show_parser": "Convierte datos de bits del show en redstone\ncuando se conecta a una Controladora Greybox",
+    "tooltip.showbiz.block.show_selector": "Permite a las personas seleccionar un carrete para reproducir\ncuando se conecta a un Magnetófono",
+    "tooltip.showbiz.block.curtain_block": "Coloca en la parte superior de un escenario para crear las cortinas.\nConecta una de ellas a un Controlador De Cortinas\nUsa un tinte para cambiar el color",
+    "tooltip.showbiz.block.curtain_controller": "Convertir bits a señales de control de cortinas",
+    "tooltip.showbiz.block.spotlight": "Trabajo en progreso",
+    "tooltip.showbiz.block.bit_view": "Muestra bits y sus nombres en vivo cuando se conecta a un show",
+    "tooltip.showbiz.block.programmer": "Permite grabar bits",
+
+    "message.showbiz.show_load_fail": "El show no pudo cargar. Revisa los registros del servidor.",
+    "message.showbiz.empty_reel_warning": "¡Este carrete no tiene ningún show en él!"
+}
