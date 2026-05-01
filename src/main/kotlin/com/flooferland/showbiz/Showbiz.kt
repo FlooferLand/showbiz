@@ -5,10 +5,15 @@ import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
+import com.flooferland.showbiz.network.packets.AudioUploadChunkPacket
+import com.flooferland.showbiz.network.packets.AudioUploadHeaderPacket
+import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket
+import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket.ServerMessage
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
 import com.flooferland.showbiz.registry.*
+import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
@@ -29,7 +34,10 @@ object Showbiz : ModInitializer {
 
     var addons = listOf<AddonData>()
     var bots = mapOf<ResourceId, AddonBotEntry>()
+    val charts = BitChartStore()
     var config = ModConfig()
+
+    var tempPlayerUploadedFile = 0L
 
     override fun onInitialize() {
         // Loading config
@@ -90,6 +98,15 @@ object Showbiz : ModInitializer {
             data.keysToBits = packet.keysToBits
             data.recording = packet.recording
             data.saveToPlayer(player)
+        }
+        ServerPlayNetworking.registerGlobalReceiver(AudioUploadHeaderPacket.type) { packet, ctx ->
+            val player = ctx.player()
+            ServerPlayNetworking.send(player, AudioUploadResponsePacket(ServerMessage.Continue, bytesSoFar = tempPlayerUploadedFile))
+        }
+        ServerPlayNetworking.registerGlobalReceiver(AudioUploadChunkPacket.type) { packet, ctx ->
+            val player = ctx.player()
+            tempPlayerUploadedFile += packet.chunk.size
+            ServerPlayNetworking.send(player, AudioUploadResponsePacket(ServerMessage.Continue, bytesSoFar = tempPlayerUploadedFile))
         }
         ServerPlayerEvents.JOIN.register { player -> PlayerProgrammingData.resetPlayerState(player) }
         ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->

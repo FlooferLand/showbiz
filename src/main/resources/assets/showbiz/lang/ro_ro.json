@@ -1,0 +1,28 @@
+{
+    "text.mod.description": "Simulator neoficial Rock-afire Explosion pentru Minecraft, un mod facut de FlooferLand și Monsterwaill!",
+    "config.prop.audio.playPneumaticSounds": "Sunete pneumatice",
+    "config.prop.audio.playBotEffects": "Efecte vizuale/sonore custom",
+    "config.prop.permissions.restrict": "Restrictionează permisiuni (doar pe server)",
+
+    "itemGroup.showbiz.main": "Showbiz",
+
+    "block.showbiz.staged_bot": "Bot Scenat",
+    "block.showbiz.reel_to_reel": "Magnetofon",
+    "block.showbiz.greybox": "Greybox",
+    "block.showbiz.speaker": "Difuzor",
+    "block.showbiz.show_parser": "Parser Show",
+    "block.showbiz.show_selector": "Selector Show",
+    "block.showbiz.curtain_block": "Cortină",
+    "block.showbiz.curtain_controller": "Controlor Cortină",
+    "block.showbiz.spotlight": "Reflector (W.I.P)",
+    "block.showbiz.bit_view": "Bit View",
+    "block.showbiz.programmer": "Programator",
+
+    "item.showbiz.wand": "Baghetă",
+    "item.showbiz.reel": "Bandă",
+
+    "tooltip.showbiz.block.staged_bot": "Cunoscuti și ca \"animatronici\"\n- Click dreapta pentru a schimba modele\n- Pune un bloc pe el pentru a îi ascunde blocul",
+    "tooltip.showbiz.block.greybox": "Citeste banda dintr-un reel-to-reel\nși îți dă biții",
+    "tooltip.showbiz.block.speaker": "Scutură aerul violent sa producă sunet",
+    "tooltip.showbiz.block.show_parser": "Transformă bit-uri in redstone\ncand e atașat la un Greybox"
+}

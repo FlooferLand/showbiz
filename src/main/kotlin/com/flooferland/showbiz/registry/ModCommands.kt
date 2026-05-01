@@ -82,7 +82,7 @@ object ModCommands {
             .executes { ctx ->
                 val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
                 if (shows.isNullOrEmpty()) {
-                    ctx.source.sendFailure(Component.literal("No shows found.\nUpload an ${FileStorage.SUPPORTED_FORMATS.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"))
+                    ctx.source.sendFailure(Component.literal("No shows found.\nUpload an ${Showbiz.charts.extensions.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"))
                     return@executes 0
                 }
 
@@ -120,8 +120,8 @@ object ModCommands {
 
                         // Validating the file
                         val filename = StringArgumentType.getString(ctx, "file") ?: return@executes err("Failed to find parameter")
-                        if (!FileStorage.SUPPORTED_FORMATS.contains(Path(filename).extension)) {
-                            return@executes err("File name must end with the supported file extensions: [${FileStorage.SUPPORTED_FORMATS.joinToString(", ") }]")
+                        if (!Showbiz.charts.extensions.contains(Path(filename).extension)) {
+                            return@executes err("File name must end with the supported file extensions: [${Showbiz.charts.extensions.joinToString(", ") }]")
                         }
 
                         val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()

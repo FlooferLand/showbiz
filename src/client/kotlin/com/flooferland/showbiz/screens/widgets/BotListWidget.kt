@@ -4,7 +4,9 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.addons.data.AddonBotEntry
+import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.ResourceId
 import kotlin.math.roundToInt
 
@@ -60,10 +62,9 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             runCatching {
                 val font = Minecraft.getInstance().font
 
-                // TODO: Move the format colours to be inside the rshw/fshw/etc format container class
                 val supported = Component.empty()
-                if (bot.accepts.rockafire) supported.append(Component.literal("r").withColor(0x60AF4F2B))
-                if (bot.accepts.fnaf1) supported.append(Component.literal("f").withColor(0x608D6320))
+                if (bot.accepts.rockafire) supported.append(Component.literal("r").withColor(Showbiz.charts.getColor(id = BitChartStore.RAE_ID)))
+                if (bot.accepts.fnaf1) supported.append(Component.literal("f").withColor(Showbiz.charts.getColor(id = BitChartStore.FAZ_ID)))
 
                 val (w, h) = Pair(font.width(supported), font.lineHeight / 2)
                 val (x, y) = Pair(button.x - 15, button.y + (button.height * 0.25).roundToInt())

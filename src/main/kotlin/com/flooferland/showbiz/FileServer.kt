@@ -1,21 +1,29 @@
 package com.flooferland.showbiz
 
 import net.minecraft.core.component.DataComponentPatch
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
+import com.flooferland.bizlib.RawShowData
+import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage.fetchShows
 import com.flooferland.showbiz.items.ReelItem
+import com.flooferland.showbiz.network.packets.ShowFileEditPacket
 import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.utils.Extensions.getHeldItem
 import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchService
 import java.security.Permission
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import kotlin.io.path.Path
+import kotlin.io.path.createFile
 import kotlin.io.path.name
+import kotlin.io.path.writeBytes
 
 object FileServer {
     var showWatchService: WatchService =
@@ -40,6 +48,24 @@ object FileServer {
                     .build()
             )
         }
+        ServerPlayNetworking.registerGlobalReceiver(ShowFileEditPacket.type) { packet, ctx ->
+            if (!Permissions.canWriteReels(ctx.player())) {
+                ctx.player().sendSystemMessage(Component.literal("You don't have the permission to write files"))
+                return@registerGlobalReceiver
+            }
+            val path = FileStorage.SHOWS_DIR.resolve(packet.file)
+            when (packet.action) {
+                FileAction.Create -> runCatching {
+                    val stream = Files.newOutputStream(path)
+                    RshowFormat().write(stream, RawShowData())
+                }
+                FileAction.Delete -> runCatching {
+                    Files.deleteIfExists(path)
+                }
+                else -> Showbiz.log.error("File action '${packet.action}' is unsupported")
+            }
+            sendShowsToClient(ctx.player())
+        }
     }
 
     fun update(server: MinecraftServer) {
@@ -48,6 +74,7 @@ object FileServer {
         var changed = false
         for (event in key.pollEvents()) {
             val path = event.context() as? Path ?: continue
+            Showbiz.log.debug("Show file changed: {}", path)
             changed = true
             break
         }
@@ -66,5 +93,9 @@ object FileServer {
         val files = fetchShows().map { it.name }.toTypedArray()
         val authorized = Permissions.canWriteReels(player)
         ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = files, playerAuthorized = authorized))
+    }
+
+    enum class FileAction {
+        Create, Delete
     }
 }

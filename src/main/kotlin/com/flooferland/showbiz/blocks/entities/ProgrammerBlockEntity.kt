@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -43,7 +44,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Show recording
         if (operators.isEmpty()) return
-        if (show.data.mapping.isNullOrEmpty()) show.data.mapping = "rae"
+        if (show.data.mapping.isNullOrEmpty()) show.data.mapping = BitChartStore.DEFAULT
         show.data.playing = true
         show.data.signal.reset()
         for (player in operators) {

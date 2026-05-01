@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.ChatFormatting
 import net.minecraft.core.component.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.ClickEvent
@@ -8,8 +7,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.*
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.FastColor
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.LivingEntity
@@ -113,6 +110,8 @@ object Extensions {
     }!!
     fun MutableComponent.asLink() = asLink(string)
     //endregion
+
+    fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
     fun Int.secsToTicks(): Int = this * 20

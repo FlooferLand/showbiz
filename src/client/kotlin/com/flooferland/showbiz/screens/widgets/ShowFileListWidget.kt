@@ -4,6 +4,9 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
+import net.minecraft.util.FastColor
+import com.flooferland.showbiz.Showbiz
+import com.mojang.blaze3d.systems.RenderSystem
 import kotlin.math.roundToInt
 
 /** Lists shw files mainly for [com.flooferland.showbiz.screens.ReelManagerScreen] (or anything that requires a show file listing) */
@@ -54,18 +57,15 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
 
             runCatching {
                 val font = Minecraft.getInstance().font
-                // TODO: Move the format colours to be inside the rshw/fshw/etc format container class
-                val color = when (ext) {
-                    "rshw" -> 0x60AF4F2B
-                    "fshw" -> 0x608D6320
-                    else -> 0x60FFFFFF
-                }
+                val color = Showbiz.charts.getColor(ext = ext)
                 val (x, y) = Pair(button.x - 10, button.y + (button.height * 0.25).roundToInt())
                 val (w, h) = Pair(font.width(ext) / 2, font.lineHeight / 2)
                 if ((mouseX > x-w && mouseX < x+w) && (mouseY > y-w && mouseY < y+h)) {
                     guiGraphics.renderTooltip(font, Component.literal(ext), mouseX, mouseY)
                 }
+                RenderSystem.setShaderColor(1f, 1f, 1f, 0.8f)
                 guiGraphics.drawCenteredString(font, ext.first().toString(), x, y, color)
+                RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
             }
         }
 

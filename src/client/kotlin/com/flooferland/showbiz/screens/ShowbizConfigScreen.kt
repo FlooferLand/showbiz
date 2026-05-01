@@ -35,7 +35,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
         }.onFailure { Showbiz.log.error("Failure adding config categories", it) }
 
         // Placing the UI
-        if (configEntries.isEmpty()) Minecraft.getInstance().screen = parent
+        if (configEntries.isEmpty()) Minecraft.getInstance().setScreen(parent)
         var categoryWidthsAcc = 0
         for ((categoryIndex, categoryName) in configEntries.keys.withIndex()) {
             val widgets = configEntries[categoryName] ?: continue

@@ -16,6 +16,7 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.show.toBitId
+import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.IModelPartInteractable
 import com.flooferland.showbiz.types.ModelPartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
@@ -103,7 +104,7 @@ class ShowSelectorBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mo
         run {  // Bit data
             show.data.playing = true
             show.data.signal.set(bitIdArrayOf(key.toBitId()))
-            show.data.mapping = "rae"
+            show.data.mapping = BitChartStore.DEFAULT
             show.send()
         }
         pressWaitTicks = 5

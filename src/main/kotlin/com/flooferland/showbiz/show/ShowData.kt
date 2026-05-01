@@ -50,18 +50,14 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         loading = true
         name = filename
         id = UUID.randomUUID()
-        mapping = run {  // TODO: Clean up the code for mappings
-            val format = name?.split('.', limit = 2)?.last() ?: run {
+        mapping = run {
+            val ext = name?.split('.', limit = 2)?.last() ?: run {
                 Showbiz.log.error("Error loading show '${filename}'. Format is missing a file extension")
                 return
             }
-            when (format) {  // TODO: Move mapping file names to file types to its own thingy
-                "fshw" -> "faz"
-                "rshw" -> "rae"
-                else -> {
-                    Showbiz.log.error("Error loading show '${filename}'. Format '${format}' is not supported")
-                    return
-                }
+            Showbiz.charts.extensionToId[ext] ?: run {
+                Showbiz.log.error("Error loading show '${filename}'. Format '${ext}' is not supported")
+                return
             }
         }
 
