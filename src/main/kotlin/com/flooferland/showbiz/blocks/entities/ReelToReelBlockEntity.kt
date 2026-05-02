@@ -9,6 +9,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
@@ -16,9 +17,12 @@ import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
+import com.flooferland.showbiz.types.IModelPartInteractable
+import com.flooferland.showbiz.types.ModelPartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -34,10 +38,10 @@ import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
-class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer {
+class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { received ->
-        signal += received.signal
+        recordQueue.add(received.signal.clone())
     }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
     val showSelect = connectionManager.port("select", PackedControlData(), PortDirection.In) { data ->
@@ -61,6 +65,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     val aBufferSize: Int
         get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
 
+    public var recording: Boolean = false
     public var showData: ShowData = ShowData(this)
     public var seek = 0.0
     public val signal = SignalFrame()
@@ -73,21 +78,43 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         public get private set
     private val tickDelta = (50 * 0.001) // ms
     private val fps = 60  // Tied to rshw
+    private var seekInt = 0
+    private val recordQueue = mutableListOf<SignalFrame>()
+
+    override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
+        addPart("record", Vec3(-0.3, 0.3, -0.2), Vec3(0.2, 0.2, 0.2))
+    }
 
     private var audioBytesWritten = 0
 
     fun tick() {
+        modelPartInstance.tick(level ?: return, blockPos, blockState)
         if (!playing || showData.isEmpty()) return
         var shouldUpdate = false
 
         seek += tickDelta
-        val seekInt = (seek * fps).roundToInt()
+        seekInt = (seek * fps).roundToInt()
         if (level?.isClientSide ?: true) return
 
         // Signal
         run {
-            val entry = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
-            signal.set(entry)
+            val frame = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
+            if (recording && recordQueue.isNotEmpty()) {
+                val newFrame = BitIdArray(frame.size + recordQueue.sumOf { it.raw.size })
+                var i = 0
+                frame.forEach { newFrame[i++] = it }
+                for (frame in recordQueue) {
+                    frame.raw.forEach { newFrame[i++] = it }
+                }
+                if (seekInt + 10 > showData.signal.size) {
+                    for (i in showData.signal.size..seekInt + 10) {
+                        showData.signal.add(bitIdArrayOf())
+                    }
+                }
+                showData.signal[seekInt] = newFrame
+                recordQueue.clear()
+            }
+            signal.set(frame)
             shouldUpdate = signal.raw.isNotEmpty()
             show.send(PackedShowData(playing, signal, showData.mapping))
         }
@@ -117,6 +144,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Updating the block entity (sends network packet)
         if (shouldUpdate) markDirtyNotifyAll()
+    }
+
+    override fun setRemoved() {
+        super.setRemoved()
+        modelPartInstance.kill()
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
@@ -154,12 +186,32 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun getFormat() = showData.format ?: showData.targetFormat
 
+    fun resetPlayback() {
+        seek = 0.0
+        audioBytesWritten = 0
+        audio.data.chunkId = 0
+        if (playing) setPlaying(false)
+        hasFinished = false
+        signal.reset()
+    }
+
+    override fun getInteractionMapping() = mapOf("record" to 0)
+
+    override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
+
+    override fun onInteract(key: Int, level: Level, player: Player) {
+        if (key == 0) applyChange(true) {
+            recording = !recording
+        }
+    }
+
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
 
         // Save other
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
+        tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
         tag.putDouble("seek", seek)
         tag.putIntArray("signal_frame", signal.save())
@@ -173,6 +225,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // Load other
         playing = tag.getBooleanOrNull("playing") ?: false
         paused = tag.getBooleanOrNull("paused") ?: false
+        recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
         seek = tag.getDoubleOrNull("seek") ?: 0.0
         signal.load(tag.getIntArrayOrNull("signal_frame"))
@@ -189,15 +242,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
 
-    fun resetPlayback() {
-        seek = 0.0
-        audioBytesWritten = 0
-        audio.data.chunkId = 0
-        if (playing) setPlaying(false)
-        hasFinished = false
-        signal.reset()
-    }
-
     fun getNearbyContainer() =
         arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south()).firstNotNullOfOrNull { level?.getBlockEntity(it) as? Container }
 
@@ -211,7 +255,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val item = showData.name?.let { ReelItem.makeItem(it) }
         if (!isEmpty) {
             setPlaying(false)
-            showData.free()
+            showData.unload()
         }
         return item ?: ItemStack.EMPTY
     }
@@ -249,7 +293,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         Container.stillValidBlockEntity(this, player)
     override fun clearContent() {
         applyChange(true) {
-            showData.free()
+            showData.unload()
             resetPlayback()
         }
     }

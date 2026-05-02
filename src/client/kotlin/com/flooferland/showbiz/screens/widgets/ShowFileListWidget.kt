@@ -27,16 +27,24 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
         return x + width - 5
     }
 
+    public fun setSelected(filename: String) {
+        for (child in children()) {
+            child.button.active = (child.filename != filename)
+        }
+    }
+
     public fun setFiles(files: List<String>, click: (String) -> Unit) {
         clearEntries()
         files.forEach { addEntry(FileEntry(it) { click(it) }) }
     }
 
-    inner class FileEntry(nameString: String, val click: () -> Unit) : Entry<FileEntry>() {
-        val name = nameString.substringBefore('.')
-        val ext = nameString.substringAfter('.')
-        val button = Button.builder(Component.literal(name)) { click() }.size(width - 70, itemHeight)
-            .tooltip(Tooltip.create(Component.literal(nameString)))
+    inner class FileEntry(val filename: String, val click: () -> Unit) : Entry<FileEntry>() {
+        val name = filename.substringBefore('.')
+        val ext = filename.substringAfter('.')
+        val button = Button.builder(Component.literal(name))
+            { setSelected(filename); click() }
+            .size(width - 70, itemHeight)
+            .tooltip(Tooltip.create(Component.literal(filename)))
             .build()!!
 
         override fun render(

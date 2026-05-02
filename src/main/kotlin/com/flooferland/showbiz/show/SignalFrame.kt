@@ -1,5 +1,7 @@
 package com.flooferland.showbiz.show
 
+// TODO: Test the performance of switching this to a data class, an inline value class, and using BitSet instead of BitIdArray
+
 /** One frame of signal data, split per drawer */
 class SignalFrame {
     var raw: BitIdArray = bitIdArrayOf()
@@ -9,6 +11,7 @@ class SignalFrame {
     fun frameHas(id: Int): Boolean =
         raw.contains(id.toBitId())
 
+    fun clone() = SignalFrame().also { it.raw = raw }
     fun reset() {
         raw = bitIdArrayOf()
     }
@@ -16,7 +19,10 @@ class SignalFrame {
         array?.let { raw = array }
     }
     operator fun plusAssign(other: SignalFrame) {
-        raw = mutableListOf<BitId>().also { it.addAll(raw); it.addAll(other.raw) }.toBitIdArray()
+        raw = MutableList<BitId>(raw.size + other.raw.size) { 0u }.also { list ->
+            list.addAll(raw)
+            list.addAll(other.raw.filter { !raw.contains(it) })
+        }.toBitIdArray()
     }
     fun save(): IntArray = raw.map { it.toInt() }.toIntArray()
     fun load(array: IntArray?) {

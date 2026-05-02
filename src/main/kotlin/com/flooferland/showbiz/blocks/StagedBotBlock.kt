@@ -24,6 +24,7 @@ import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     val codec: MapCodec<StagedBotBlock> = simpleCodec(::StagedBotBlock)
+    val occlusionShape = Shapes.create(AABB.ofSize(Vec3(0.5, 0.0, 0.5), 2.0, 4.0, 2.0))!!
 
     init {
         registerDefaultState(stateDefinition.any().setValue(facing, GigaDirectionProperty.Enum.North))
@@ -31,8 +32,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
     override fun codec(): MapCodec<out BaseEntityBlock> = codec
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
-    override fun getOcclusionShape(state: BlockState, level: BlockGetter, pos: BlockPos) =
-        Shapes.box(-0.5, 0.0, -0.5, 1.5, 4.0, 1.5)!!
+    override fun getOcclusionShape(state: BlockState, level: BlockGetter, pos: BlockPos) = occlusionShape
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS

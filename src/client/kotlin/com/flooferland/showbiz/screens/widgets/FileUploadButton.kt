@@ -4,11 +4,14 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.network.chat.*
-import com.flooferland.showbiz.network.packets.AudioUploadChunkPacket
-import com.flooferland.showbiz.network.packets.AudioUploadHeaderPacket
-import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket
-import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket.ServerMessage
+import net.minecraft.sounds.SoundEvents
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.network.packets.FileUploadChunkPacket
+import com.flooferland.showbiz.network.packets.FileUploadHeaderPacket
+import com.flooferland.showbiz.network.packets.FileUploadResponsePacket
+import com.flooferland.showbiz.network.packets.FileUploadResponsePacket.ServerMessage
 import com.mojang.blaze3d.systems.RenderSystem
 import java.io.InputStream
 import java.nio.file.Files
@@ -22,8 +25,7 @@ import kotlin.io.path.extension
 import kotlin.io.path.fileSize
 import kotlin.io.path.name
 import kotlin.math.max
-
-// TODO: Don't allow new uploads during processing, or right-click cancellations(?)
+import kotlin.math.roundToInt
 
 class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = null) : AbstractButton(x, y, max(width, 100), 40, Component.literal("Choose a file")) {
     public var title = "Select a file"
@@ -34,26 +36,38 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
 
     var tooltipText = Component.empty()!!
 
+    public var isUploadFinished = false
     val innerHeight get() = (Minecraft.getInstance()?.font?.lineHeight ?: 100) + 10
     val hasFile get() = loadedPath != null
-    val isUploadFinished get() = !processing && progressBytes >= fileSizeBytes
 
-    public var processing = false
+    var processing = false
     var fileSizeBytes = 0L
     var progressBytes = 0L
     var fileStream: InputStream? = null
 
     init {
         update()
-        ClientPlayNetworking.registerReceiver(AudioUploadResponsePacket.type) { packet, context ->
+        ClientPlayNetworking.registerReceiver(FileUploadResponsePacket.type) { packet, context -> context.client().execute {
             val fileStream = fileStream
             if (packet.status == ServerMessage.FuckOff || fileStream == null) {
                 reset()
-                return@registerReceiver
+                context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, 0.3f))
+                return@execute
+            }
+            if (packet.status == ServerMessage.Done) {
+                fileStream.close()
+                processing = false
+                isUploadFinished = true
+                progressBytes = 0L
+                update()
+                context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BELL, 1.0f))
+                return@execute
             }
             progressBytes = packet.bytesSoFar
-            ClientPlayNetworking.send(AudioUploadChunkPacket(fileStream.readNBytes(1000)))
-        }
+            val chunkSize = 128 * 1024
+            val packet = FileUploadChunkPacket(runCatching { fileStream.readNBytes(chunkSize) }.getOrNull() ?: byteArrayOf())
+            ClientPlayNetworking.send(packet)
+        } }
     }
 
     fun update() {
@@ -69,21 +83,26 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
                 message = Component.literal("$newString.. .${loadedPath.extension}")
             }
         }
-        onSubmit.invoke(loadedPath)
+        onSubmit(loadedPath)
+        if (isUploadFinished) onUploadFinish()
     }
 
     fun submit(path: Path) {
         fileSizeBytes = runCatching { path.fileSize() }.getOrNull() ?: 0L
-        fileStream = Files.newInputStream(path)
-        ClientPlayNetworking.send(AudioUploadHeaderPacket(path.name, fileSizeBytes))
-        processing = true
+        if (fileSizeBytes > 0L) {
+            fileStream = Files.newInputStream(path)
+            ClientPlayNetworking.send(FileUploadHeaderPacket(path.name, fileSizeBytes))
+            processing = true
+        } else Showbiz.log.error("Failed to send audio to the server. File size is 0")
     }
 
     fun reset() {
         fileStream?.close()
+        fileStream = null
         fileSizeBytes = 0
         progressBytes = 0
         processing = false
+        isUploadFinished = false
         loadedPath = null
         update()
     }
@@ -103,13 +122,17 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         MemoryUtil.memFree(filters)
         path?.let { first ->
             loadedPath = runCatching { Path.of(first) }.getOrNull()
+            if (filter != null && loadedPath?.extension != filter.ext) {
+                Minecraft.getInstance()?.soundManager?.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, 0.3f))
+                reset()
+            }
             loadedPath?.let { submit(it); onSubmit(it) } ?: onSubmit(null)
         }
         update()
     }
 
     override fun clicked(mouseX: Double, mouseY: Double) =
-        super.clicked(mouseX, mouseY) && (mouseY < y+innerHeight)
+        super.clicked(mouseX, mouseY) && (mouseY < y+innerHeight) && !processing
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && clicked(mouseX, mouseY)) {
@@ -139,16 +162,21 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         guiGraphics.fill(x, y, x + width, y + innerHeight, color)
 
         // Progress bar
+        var progressText: String? = null
         if (processing) {
             var pad = 4
+            val maxBarWidth = width - (pad * 2)
+            val progress = (progressBytes.toFloat() / fileSizeBytes.coerceAtLeast(1L).toFloat())
+            val barRight = (x + pad + (maxBarWidth * progress).roundToInt()).coerceAtMost(x + width)
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, 0.7f)
-            val progress = (progressBytes / max(1, fileSizeBytes)).toInt()
-            println(progress)
-            val width = (x + width) * progress
-            guiGraphics.fill(x + pad, (y + innerHeight) + pad, max(pad + 5, width - pad), (y + height) - pad, 0xFF000000.toInt())
+            guiGraphics.fill(x + pad, (y + innerHeight) + pad, barRight, (y + height) - pad, 0xFF000000.toInt())
             pad += 1
-            guiGraphics.fill(x + pad, (y + innerHeight) + pad, max(pad + 5, width - pad), (y + height) - pad, 0xFF44FF44.toInt())
+            guiGraphics.fill(x + pad, (y + innerHeight) + pad, barRight, (y + height) - pad, 0xFF44FF44.toInt())
+            progressText = "${(progress * 100f).roundToInt()}%"
+        } else if (isUploadFinished) {
+            progressText = "Upload finished!"
         }
+        progressText?.let { guiGraphics.drawString(minecraft.font, it, x + 5, (y + innerHeight) + 5, 0xFFFFFFFF.toInt()) }
 
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f)
         guiGraphics.drawString(minecraft.font, message, x + 5, y + ((innerHeight - 6) / 2), if (loadedPath != null) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt())
@@ -168,10 +196,10 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         init {
             ScreenEvents.AFTER_INIT.register { minecraft, screen, i, i1 ->
                 ScreenEvents.remove(screen).register { closedScreen ->
-                    ClientPlayNetworking.unregisterReceiver(AudioUploadResponsePacket.type.id)
                     for (widget in closedScreen.children()) {
                         if (widget is FileUploadButton) widget.fileStream?.close()
                     }
+                    if (minecraft.currentServer != null) runCatching { ClientPlayNetworking.unregisterReceiver(FileUploadResponsePacket.type.id) }
                 }
             }
         }

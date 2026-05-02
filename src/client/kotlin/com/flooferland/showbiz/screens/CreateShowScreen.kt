@@ -10,7 +10,6 @@ import net.minecraft.network.chat.*
 import net.minecraft.sounds.SoundEvents
 import com.flooferland.showbiz.FileServer
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket
 import com.flooferland.showbiz.network.packets.ShowFileEditPacket
 import com.flooferland.showbiz.screens.widgets.FileUploadButton
 import com.flooferland.showbiz.types.BitChartStore
@@ -79,7 +78,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
         // Upload audio button
         uploadAudioButton = FileUploadButton(showName.x, showName.bottom + 50, filter = FileUploadButton.Filter.AudioWav)
         uploadAudioButton.onSubmit = { path ->
-
+            updateSubmitActive()
         }
         uploadAudioButton.onUploadFinish = {
             updateSubmitActive()
@@ -91,7 +90,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
                 val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extension ?: return@Builder
                 val file = showName.value.alwaysEndsWith(".$ext")
                 ClientPlayNetworking.send(ShowFileEditPacket(file, FileServer.FileAction.Create))
-                minecraft?.setScreen(parent)
+                minecraft?.setScreen(null)
             }
             .size(70, 20)
             .tooltip(Tooltip.create(Component.literal("Create a new file")))
@@ -113,7 +112,11 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == GLFW.GLFW_KEY_ENTER) {
             if (focused == showName) {
-                submitButton.onPress()
+                if (submitButton.active) {
+                    submitButton.onPress()
+                } else {
+                    Minecraft.getInstance().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.8f))
+                }
                 return true
             }
         }

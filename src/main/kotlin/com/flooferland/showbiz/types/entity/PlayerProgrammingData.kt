@@ -16,14 +16,12 @@ import com.flooferland.showbiz.utils.Extensions.getLongOrNull
 /** Defines stuff for the programming block */
 data class PlayerProgrammingData(
     var active: Boolean = false,
-    var recording: Boolean = false,
     var blockPos: BlockPos? = null,
     var heldKeys: BooleanArray = BooleanArray(9) { false },
     var keysToBits: BitIdArray = BitIdArray(9)
 ) : ICompoundable {
     override fun save(tag: CompoundTag) {
         tag.putBoolean("active", active)
-        tag.putBoolean("recording", recording)
         blockPos?.let { tag.putLong("block", it.asLong()) }
         tag.putByteArray("held_keys", heldKeys.map { if (it) 1 else 0 })
         tag.putIntArray("keys_to_bits", keysToBits.map { it.toInt() })
@@ -31,7 +29,6 @@ data class PlayerProgrammingData(
 
     override fun load(tag: CompoundTag) {
         tag.getBooleanOrNull("active")?.let { active = it }
-        tag.getBooleanOrNull("recording")?.let { recording = it }
         tag.getLongOrNull("block")?.let { blockPos = BlockPos.of(it) }
         tag.getByteArrayOrNull("held_keys")?.let { it.forEachIndexed { i, b -> heldKeys[i] = (b.toInt() == 1) } }
         tag.getIntArrayOrNull("keys_to_bits")?.let { ints -> ints.forEachIndexed { i, int -> keysToBits[i] = int.toBitId() } }
@@ -44,7 +41,6 @@ data class PlayerProgrammingData(
     /** Resets things other than settings back to default */
     fun cleanBasic() {
         active = false
-        recording = false
         blockPos = null
         heldKeys.forEachIndexed { i, _ -> heldKeys[i] = false }
     }

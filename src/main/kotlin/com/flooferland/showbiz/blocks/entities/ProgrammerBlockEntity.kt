@@ -20,6 +20,10 @@ import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
+// !!!!
+// TODO: Figure out some way to merge connection port data on transfer, so the programmer wont replace the reel-to-reel's show when its active
+// !!!!
+
 class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Programmer.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.Both)
@@ -46,7 +50,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (operators.isEmpty()) return
         if (show.data.mapping.isNullOrEmpty()) show.data.mapping = BitChartStore.DEFAULT
         show.data.playing = true
-        show.data.signal.reset()
+        // if (show.readListeners().none { pos -> (level.getBlockEntity(pos) as? ReelToReelBlockEntity)?.let { it.recording && it.playing } ?: false }) show.data.signal.reset()
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)
             val heldBits = data.heldKeys

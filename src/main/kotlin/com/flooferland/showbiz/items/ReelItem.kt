@@ -35,10 +35,6 @@ class ReelItem(properties: Properties) : Item(properties) {
             tooltip.add(
                 Component.literal("Right-click the air to upload to this reel").withStyle(ChatFormatting.GRAY)
             )
-            tooltip.add(
-                Component.literal("Or use ")
-                    .append(Component.literal("/${Showbiz.MOD_ID} reelupload").withStyle(ChatFormatting.GREEN))
-            )
             return
         }
 
@@ -57,6 +53,10 @@ class ReelItem(properties: Properties) : Item(properties) {
         fun getFilename(stack: ItemStack): String? {
             if (stack.item !is ReelItem) return null
             return stack.components.get(ModComponents.FileName.type)
+        }
+
+        fun setFilename(stack: ItemStack, filename: String) {
+            stack.applyComponent(ModComponents.FileName.type, filename)
         }
 
         fun makeItem(filename: String): ItemStack {

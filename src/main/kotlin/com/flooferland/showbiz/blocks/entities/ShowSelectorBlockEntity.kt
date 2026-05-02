@@ -83,6 +83,7 @@ class ShowSelectorBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mo
     }
 
     override fun setRemoved() {
+        super.setRemoved()
         modelPartInstance.kill()
     }
 

@@ -7,7 +7,6 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
-import com.flooferland.showbiz.screens.widgets.RecordButton
 import com.flooferland.showbiz.show.toBitIdOrNull
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.rl
@@ -25,15 +24,10 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
     val textureY get() = (height / 2) - (size / 2)
 
     val inputs = mutableListOf<EditBox>()
-    var record: RecordButton? = null
 
     override fun init() {
         val player = Minecraft.getInstance().player ?: return
         val data = PlayerProgrammingData.getFromPlayer(player)
-
-        record = RecordButton((textureX + size) - 143, 50)
-        record?.recording = data.recording
-        addRenderableWidget(record!!)
 
         inputs.clear()
         for ((i, key) in data.keysToBits.withIndex()) {
@@ -64,7 +58,7 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
             data.keysToBits[i] = bitId
         }
         data.saveToPlayer(player)
-        ClientPlayNetworking.send(ProgrammerPlayerUpdatePacket(keysToBits = data.keysToBits, record?.recording ?: false))
+        ClientPlayNetworking.send(ProgrammerPlayerUpdatePacket(keysToBits = data.keysToBits))
         println(data.keysToBits.joinToString(", "))
         super.onClose()
     }

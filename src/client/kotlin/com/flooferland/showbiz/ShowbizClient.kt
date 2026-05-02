@@ -66,7 +66,7 @@ object ShowbizClient : ClientModInitializer {
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
-        ModelPartManager.clientModelPartInstancer = { owner, block -> ClientModelPartInstance(owner, block.id) }
+        ModelPartManager.clientModelPartInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         for (block in ModBlocks.entries) {
             val path = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull()
                 ?.findPath("assets/${MOD_ID}/geo/block/${block.id.path}.geo.json")?.getOrNull()

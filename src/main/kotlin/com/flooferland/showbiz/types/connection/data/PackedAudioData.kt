@@ -15,7 +15,7 @@ data class PackedAudioData(
     var left: ByteArray = byteArrayOf(),
     var right: ByteArray = byteArrayOf(),
     val format: FriendlyAudioFormat = FriendlyAudioFormat()
-) : ConnectionData("audio") {
+) : ConnectionData<PackedAudioData>("audio") {
     public var chunkId: Int = 0
     public var mono: ByteArray
         get() = left
@@ -31,6 +31,11 @@ data class PackedAudioData(
         left = tag.getByteArrayOrNull("left") ?: byteArrayOf()
         right = tag.getByteArrayOrNull("right") ?: byteArrayOf()
         tag.getCompound("format").let { format.loadOrThrow(it) }
+    }
+
+    override fun tempReset() {
+        left = byteArrayOf()
+        right = byteArrayOf()
     }
 
     fun broadcastToAll(level: ServerLevel, origin: BlockPos) {

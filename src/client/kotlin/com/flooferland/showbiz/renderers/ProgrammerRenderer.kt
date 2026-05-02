@@ -2,6 +2,8 @@ package com.flooferland.showbiz.renderers
 
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
+import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.screens.ProgrammerScreen
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.types.math.Vec2ic
@@ -20,6 +22,8 @@ object ProgrammerRenderer {
 
     fun renderBitView(guiGraphics: GuiGraphics, data: PlayerProgrammingData) {
         val minecraft = Minecraft.getInstance() ?: return
+        val level = minecraft.level ?: return
+        val programmer = data.blockPos?.let { level.getBlockEntity(it) as? ProgrammerBlockEntity }
         val player = minecraft.player ?: return
         val font = minecraft.font
         val keys = data.heldKeys
@@ -45,7 +49,7 @@ object ProgrammerRenderer {
                 else (if (pressed) slotTextureOn else slotTextureOff)
 
             // Drawing textures
-            if (isConfigKey && data.recording) {
+            if (isConfigKey && programmer?.show?.readListeners()?.any { (level.getBlockEntity(it) as? ReelToReelBlockEntity)?.recording ?: false } ?: false) {
                 guiGraphics.fill(x - 1, y - 1, x + size.x + 1, y + size.y + 1, 0xFFFF0000.toInt())
                 RenderSystem.setShaderColor(1f, 0.8f, 0.8f, 1f)
             }

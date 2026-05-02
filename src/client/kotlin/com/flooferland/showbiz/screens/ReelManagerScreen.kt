@@ -9,6 +9,7 @@ import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
@@ -35,6 +36,8 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         val maxWidth = (width * 0.7).toInt()
         val maxHeight = (height * 0.7).toInt()
 
+        val filename = ReelItem.getFilename(reelStack)
+
         // File listing
         val fileListWidget = ShowFileListWidget(
             (width - maxWidth) / 2, (height - maxHeight) / 2, maxWidth, maxHeight
@@ -43,6 +46,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
             ClientPlayNetworking.send(ShowFileSelectPacket(file))
             Minecraft.getInstance().setScreen(null)
         }
+        filename?.let { fileListWidget.setSelected(it) }
         addRenderableWidget(fileListWidget)
 
         // Additional

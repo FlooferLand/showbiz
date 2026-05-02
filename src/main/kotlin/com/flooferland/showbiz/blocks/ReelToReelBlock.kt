@@ -21,6 +21,9 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.handItem
@@ -30,6 +33,20 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
     init {
         registerDefaultState(stateDefinition.any().setValue(PLAYING, false))
+    }
+
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
+        val facing = state.getValue(FacingEntityBlock.FACING) ?: return Shapes.block()
+        val width = 0.9
+        val height = 0.8
+        val thickness = 0.4
+        return when (facing) {
+            Direction.NORTH, Direction.SOUTH ->
+                Shapes.create(AABB.ofSize(Vec3(0.5, 0.5, 0.5), width, height, thickness))
+            Direction.EAST, Direction.WEST ->
+                Shapes.create(AABB.ofSize(Vec3(0.5, 0.5, 0.5), thickness, height, width))
+            else -> Shapes.block()
+        }
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
@@ -98,7 +115,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
                     entity.applyChange(true) {
                         entity.setPlaying(false)
-                        entity.showData.free()
+                        entity.showData.unload()
                         player.inventoryMenu.broadcastChanges()
                     }
                 }

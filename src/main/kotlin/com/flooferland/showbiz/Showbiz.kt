@@ -5,10 +5,6 @@ import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
-import com.flooferland.showbiz.network.packets.AudioUploadChunkPacket
-import com.flooferland.showbiz.network.packets.AudioUploadHeaderPacket
-import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket
-import com.flooferland.showbiz.network.packets.AudioUploadResponsePacket.ServerMessage
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
@@ -36,8 +32,6 @@ object Showbiz : ModInitializer {
     var bots = mapOf<ResourceId, AddonBotEntry>()
     val charts = BitChartStore()
     var config = ModConfig()
-
-    var tempPlayerUploadedFile = 0L
 
     override fun onInitialize() {
         // Loading config
@@ -96,23 +90,21 @@ object Showbiz : ModInitializer {
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
             data.keysToBits = packet.keysToBits
-            data.recording = packet.recording
             data.saveToPlayer(player)
         }
-        ServerPlayNetworking.registerGlobalReceiver(AudioUploadHeaderPacket.type) { packet, ctx ->
-            val player = ctx.player()
-            ServerPlayNetworking.send(player, AudioUploadResponsePacket(ServerMessage.Continue, bytesSoFar = tempPlayerUploadedFile))
+        ServerPlayerEvents.JOIN.register { player ->
+            PlayerProgrammingData.resetPlayerState(player)
+            FileServer.serverPlayerUploads.remove(player.id)
         }
-        ServerPlayNetworking.registerGlobalReceiver(AudioUploadChunkPacket.type) { packet, ctx ->
-            val player = ctx.player()
-            tempPlayerUploadedFile += packet.chunk.size
-            ServerPlayNetworking.send(player, AudioUploadResponsePacket(ServerMessage.Continue, bytesSoFar = tempPlayerUploadedFile))
+        ServerPlayerEvents.LEAVE.register { player ->
+            PlayerProgrammingData.resetPlayerState(player)
+            FileServer.serverPlayerUploads.remove(player.id)
         }
-        ServerPlayerEvents.JOIN.register { player -> PlayerProgrammingData.resetPlayerState(player) }
         ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->
             val data = PlayerProgrammingData.getFromPlayer(oldPlayer)
             data.cleanBasic()
             data.saveToPlayer(newPlayer)
+            FileServer.serverPlayerUploads.remove(oldPlayer.id)
         }
 
         // Finished

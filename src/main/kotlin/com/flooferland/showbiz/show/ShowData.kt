@@ -11,13 +11,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.nbt.*
+import com.flooferland.bizlib.RawShowData
 import com.flooferland.bizlib.formats.LegacyRshowFormat
+import com.flooferland.showbiz.utils.Extensions.applyChange
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.util.UUID
+import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import kotlin.io.path.Path
+
+// TODO: Ensure the file is saved correctly,
+//       even when the user spams the record button and does whatever weird things users do
+
+// TODO: Optimize this! Right now when loading/unloading shows, signal data is stored twice!
 
 /**
  * Abstraction class to work with rshw.
@@ -43,10 +53,11 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var loading = false
     var isLoaded = false
 
+    fun getFilePath(filename: String) = Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isEmpty() = !isLoaded
 
     fun load(filename: String, onLoad: ((ShowData?) -> Unit)? = null) {
-        free()
+        unload()
         loading = true
         name = filename
         id = UUID.randomUUID()
@@ -65,12 +76,12 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
             val loaded = run {
-                val path = Path("${FileStorage.SHOWS_DIR}/$filename")
-                val out = runCatching { RshowFormat().read(Files.newInputStream(path)) }
+                val path = getFilePath(filename)
+                val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
                 out.onFailure { throwable ->
                     Showbiz.log.error("BizlibNative failed to load '${path}'", throwable)
                 }
-                out.getOrNull() ?: LegacyRshowFormat().read(Files.newInputStream(path))
+                out.getOrNull() ?: LegacyRshowFormat().readFile(path)
             }
 
             // Audio and conversion
@@ -101,19 +112,14 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         }
         coro.invokeOnCompletion { err ->
             loading = false
-            isLoaded = (audio.isNotEmpty() && signal.isNotEmpty())
-            if (!isLoaded) {
-                Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size})")
-                onLoad?.invoke(null)
-                return@invokeOnCompletion
-            }
-            if (err == null) {
+            isLoaded = audio.isNotEmpty() || err == null
+            if (isLoaded) {
                 Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
                 onLoad?.invoke(this)
-            } else {
-                Showbiz.log.error(err.toString())
-                onLoad?.invoke(null)
+                return@invokeOnCompletion
             }
+            Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size})", err)
+            onLoad?.invoke(null)
         }
     }
 
@@ -143,8 +149,45 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         tag.putBoolean("is_loaded", isLoaded)
     }
 
-    /** Deletes and resets everything regarding the show data */
-    fun free() {
+    /** Frees / deletes and resets everything regarding the show data */
+    fun unload() {
+        if (owner.recording && !(owner.level?.isClientSide ?: true)) run {
+            val filename = name ?: return@run
+            val showFormat = RshowFormat()
+
+            // Signal
+            val signalInt = IntArray(this.signal.sumOf { it.size + 1 })
+            var i = 0
+            for (array in this.signal) {
+                for (bitId in array) signalInt[i++] = bitId.toInt()
+                signalInt[i++] = 0
+            }
+
+            // Audio
+            val audio = run {
+                val format = this.format ?: return@run this.audio
+                if (this.audio.isEmpty()) return@run this.audio
+                val buf = ByteArrayOutputStream()
+                AudioSystem.write(
+                    AudioSystem.getAudioInputStream(
+                        format,
+                        AudioInputStream(ByteArrayInputStream(this.audio), format, this.audio.size.toLong() / format.frameSize)
+                    ),
+                    AudioFileFormat.Type.WAVE,
+                    buf
+                )
+                buf.toByteArray()
+            }
+
+            // Finally saving
+            val path = getFilePath(filename)
+            runCatching {
+                Files.newOutputStream(path).use {
+                    showFormat.write(it, RawShowData(audio = audio, signal = signalInt))
+                }
+            }.onFailure { Showbiz.log.error("Exception writing show file '${path}'", it) }
+            Showbiz.log.info("Saved show! (signal=${signalInt.size}, audio=${audio.size})")
+        }
         signal.clear()
         audio = ByteArray(0)
         isLoaded = false
@@ -152,5 +195,6 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         id = null
         name = null
         mapping = null
+        System.gc()
     }
 }

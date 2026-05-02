@@ -7,13 +7,17 @@ import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 
 data class PackedControlData(
     var instruction: CompoundTag = CompoundTag(),
-) : ConnectionData("control") {
+) : ConnectionData<PackedControlData>("control") {
     override fun saveOrThrow(tag: CompoundTag) {
         tag.put("instruction", instruction)
     }
 
     override fun loadOrThrow(tag: CompoundTag) {
         instruction = tag.getCompound("instruction")
+    }
+
+    override fun tempReset() {
+        instruction = CompoundTag()
     }
 
     fun writeCurtain(open: Boolean) = instruction.putBoolean("curtain_open", open)

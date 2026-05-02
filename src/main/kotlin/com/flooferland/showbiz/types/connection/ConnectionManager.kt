@@ -18,18 +18,18 @@ class ConnectionManager(val entity: BlockEntity) {
     var saveCalled = false;
     var loadCalled = false;
 
-    fun <T: ConnectionData> addInput(port: ConnectionPort<T>) {
+    fun <T: ConnectionData<T>> addInput(port: ConnectionPort<T>) {
         if (port.direction == PortDirection.Out)
             Showbiz.log.warn("Port '${port.name}' was added via 'addInput'. However, it is an output.")
         inputs[port.id] = port
     }
-    fun <T: ConnectionData> addOutput(port: ConnectionPort<T>) {
+    fun <T: ConnectionData<T>> addOutput(port: ConnectionPort<T>) {
         if (port.direction == PortDirection.In)
             Showbiz.log.warn("Port '${port.name}' was added via 'addOutput'. However, it is an input.")
         outputs[port.id] = port
     }
 
-    fun <T: ConnectionData> port(id: String, data: T, direction: PortDirection, react: ConnectionPort<T>.(T) -> Unit = {}) =
+    fun <T: ConnectionData<T>> port(id: String, data: T, direction: PortDirection, react: ConnectionPort<T>.(T) -> Unit = {}) =
         ConnectionPort(this.entity as IConnectable, id, data, direction, react)
 
     /** Saves connections to a tag */

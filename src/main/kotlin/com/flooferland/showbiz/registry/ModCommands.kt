@@ -11,8 +11,10 @@ import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.utils.Extensions.asLink
+import com.flooferland.showbiz.utils.Extensions.hover
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.mojang.brigadier.tree.CommandNode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import kotlin.io.path.*
@@ -29,6 +31,7 @@ object ModCommands {
             }
             .then(
                 Commands.argument("map", StringArgumentType.word())
+                    .suggests { _, builder -> SharedSuggestionProvider.suggest(Showbiz.charts.ids, builder) }
                     .executes { ctx ->
                         val mapName = StringArgumentType.getString(ctx, "map") ?: return@executes 1
                         val mapping = BitUtils.readBitmap(mapName)
@@ -42,12 +45,20 @@ object ModCommands {
                             ctx.source.sendSuccess({ built }, true)
                             0
                         } else {
-                            ctx.source.sendFailure(Component.literal("Mapping '$mapName' does not exist. Try 'rae' or 'faz'."))
+                            ctx.source.sendFailure(Component.literal("Mapping '$mapName' does not exist."))
                             1
                         }
                     }
                     .then (
                         Commands.argument("fixture", StringArgumentType.word())
+                            .suggests { ctx, builder ->
+                                val strings = run {
+                                    val mapName = StringArgumentType.getString(ctx, "map") ?: return@run emptyArray<String>()
+                                    val mapping = BitUtils.readBitmap(mapName) ?: return@run emptyArray<String>()
+                                    mapping.keys.toTypedArray()
+                                }
+                                SharedSuggestionProvider.suggest(strings, builder)
+                            }
                             .executes { ctx ->
                                 val mapName = StringArgumentType.getString(ctx, "map") ?: return@executes 1
                                 val fixtureName = StringArgumentType.getString(ctx, "fixture") ?: return@executes 1
@@ -56,15 +67,14 @@ object ModCommands {
                                 val movements = mapping[fixtureName]
                                 if (movements != null) {
                                     val built = Component.literal("Bits for '$mapName/$fixtureName':\n")
-                                    for ((moveName, moveBit) in movements) {
+                                    for ((moveName, moveBit) in movements.entries.sortedWith(compareBy { it.value.toInt() })) {
                                         val moveComp = Component.literal("- ").withStyle(ChatFormatting.RESET)
-                                        moveComp.append(Component.literal(moveName).withStyle(ChatFormatting.DARK_GREEN))
+                                        moveComp.append(Component.literal(moveName).withStyle(ChatFormatting.GREEN))
                                         moveComp.append(Component.literal(": ").withStyle(ChatFormatting.RESET))
-                                        moveComp.append(Component.literal("$moveBit ").withStyle(ChatFormatting.BLUE))
-                                        moveComp.append(Component.literal("(").withStyle(ChatFormatting.DARK_GRAY))
-                                        moveComp.append(Drawer.formatBitAsComp(moveBit).withStyle(ChatFormatting.DARK_GRAY))
-                                        moveComp.append(Component.literal(")\n").withStyle(ChatFormatting.DARK_GRAY))
-                                        built.append(moveComp)
+                                        moveComp.append(Component.literal("$moveBit").withStyle(ChatFormatting.AQUA))
+                                        moveComp.append(Component.literal("\n").withStyle(ChatFormatting.DARK_GRAY))
+                                        built.append(moveComp.hover(Drawer.formatBitAsComp(moveBit).append(Component.literal(" (${Drawer.fromBit(moveBit).toStringEnglish()} drawer)").withStyle(
+                                            ChatFormatting.GRAY))))
                                     }
                                     ctx.source.sendSuccess({ built }, true)
                                     0
@@ -77,73 +87,6 @@ object ModCommands {
             )
             .build()
 
-        // TODO: Remove the reelupload command
-        val reelAdd = Commands.literal("reelupload")
-            .executes { ctx ->
-                val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-                if (shows.isNullOrEmpty()) {
-                    ctx.source.sendFailure(Component.literal("No shows found.\nUpload an ${Showbiz.charts.extensions.joinToString("/")} show file to your ${FileStorage.SHOWS_DIR.pathString}"))
-                    return@executes 0
-                }
-
-                val showsComp = Component.empty().also { showsComp ->
-                    shows.map { path ->
-                        val hover = Component.literal("Click to upload to a reel you're holding\n")
-                            .append(Component.literal(path.name).withStyle(ChatFormatting.GRAY))
-                        Component.literal("${path.nameWithoutExtension}\n")
-                            .withStyle { it
-                                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hover))
-                                .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$MOD_ID reelupload ${path.name}"))
-                                .withBold(true)
-                            }
-                    }.forEach { showsComp.append(Component.literal("- ").append(it)) }
-                }
-                ctx.source.sendSuccess(
-                    { Component.literal("Click or run the command with one of the following file names:\n").append(showsComp) },
-                    false
-                )
-                0
-            }
-            .then(
-                Commands.argument("file", StringArgumentType.greedyString())
-                    .executes { ctx ->
-                        fun err(text: String): Int {
-                            ctx.source.sendFailure(Component.literal(text))
-                            return 0
-                        }
-
-                        val player = ctx.source.player ?: return@executes err("Player entity not found")
-                        val heldItem = player.mainHandItem
-                        if (heldItem?.isEmpty ?: true || heldItem.item !is ReelItem) {
-                            return@executes err("You need to be holding a reel item to upload something to it")
-                        }
-
-                        // Validating the file
-                        val filename = StringArgumentType.getString(ctx, "file") ?: return@executes err("Failed to find parameter")
-                        if (!Showbiz.charts.extensions.contains(Path(filename).extension)) {
-                            return@executes err("File name must end with the supported file extensions: [${Showbiz.charts.extensions.joinToString(", ") }]")
-                        }
-
-                        val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-                        if (shows?.find { it.name == filename } == null) {
-                            ctx.source.sendFailure(
-                                Component.literal("File does not exist: '${filename}'\n")
-                                    .append(Component.literal("  Hint: Run the command with no file to list all files\n"))
-                            )
-                            return@executes 0
-                        }
-
-                        // Setting it to the item
-                        heldItem.applyComponentsAndValidate(
-                            DataComponentPatch.builder()
-                                .set(ModComponents.FileName.type, filename)
-                                .build()
-                        )
-                        1
-                    }
-            )
-            .build()
-
         val clientWiki = Commands.literal("wiki")
             .executes { ctx ->
                 ctx.source.sendSuccess({ Component.literal("https://github.com/FlooferLand/showbiz/wiki").asLink() }, true)
@@ -151,7 +94,7 @@ object ModCommands {
             }
             .build()
 
-        return arrayOf(reelAdd, bitmap, clientWiki)
+        return arrayOf(bitmap, clientWiki)
     }
 
     init {

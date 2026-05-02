@@ -1,32 +1,30 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.BlockPos
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.util.Mth
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.state.properties.BlockStateProperties
-import net.minecraft.world.phys.Vec3
+import net.minecraft.client.*
+import net.minecraft.client.multiplayer.*
+import net.minecraft.core.*
+import net.minecraft.resources.*
+import net.minecraft.util.*
+import net.minecraft.world.entity.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.level.block.state.properties.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
+import com.flooferland.showbiz.utils.Extensions.divide
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import software.bernie.geckolib.animatable.GeoAnimatable
-import software.bernie.geckolib.animatable.GeoBlockEntity
-import software.bernie.geckolib.model.GeoModel
+import org.joml.Vector3d
 import software.bernie.geckolib.renderer.GeoBlockRenderer
-import kotlin.collections.iterator
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourcePath: ResourceLocation) : ModelPartManager.IInstance {
+class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourcePath: ResourceLocation, val customParts: Map<String, ModelPart>) : ModelPartManager.IInstance {
     val interactableParts = mutableMapOf<String, ModelPart>()
     val interactionMapping = owner.getInteractionMapping()
     var nameMapping = owner.getNameMapping()
@@ -50,8 +48,12 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
             return
         }
         val modelParts = modelPartData[modelResourcePath] ?: run {
+            if (customParts.isNotEmpty()) return@run hashMapOf()
             Showbiz.log.error("No model part data found for '${modelResourcePath}'")
             return
+        }
+        for ((key, part) in customParts) {
+            modelParts[key] = part
         }
 
         for ((name, data) in modelParts) {
