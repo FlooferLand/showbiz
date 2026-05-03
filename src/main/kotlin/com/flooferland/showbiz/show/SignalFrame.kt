@@ -19,10 +19,9 @@ class SignalFrame {
         array?.let { raw = array }
     }
     operator fun plusAssign(other: SignalFrame) {
-        raw = MutableList<BitId>(raw.size + other.raw.size) { 0u }.also { list ->
-            list.addAll(raw)
-            list.addAll(other.raw.filter { !raw.contains(it) })
-        }.toBitIdArray()
+        val combined = raw.toMutableSet()
+        other.raw.forEach { combined.add(it) }
+        raw = combined.toBitIdArray()
     }
     fun save(): IntArray = raw.map { it.toInt() }.toIntArray()
     fun load(array: IntArray?) {
@@ -30,4 +29,5 @@ class SignalFrame {
             raw = array.map { it.toBitId() }.toBitIdArray()
         }
     }
+    override fun toString() = raw.contentToString()
 }
