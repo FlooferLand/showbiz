@@ -7,7 +7,6 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.IUnsafeCompoundable
 import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import org.jetbrains.annotations.NotNull
 
 enum class PortDirection {
@@ -17,8 +16,6 @@ enum class PortDirection {
 data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id: String, val initData: T, val direction: PortDirection, val react: ConnectionPort<T>.(T) -> Unit = {}) : IUnsafeCompoundable {
     val name: String get() = "${owner::class.java.name}:$id(${direction.name.firstOrNull()})"
     @NotNull var data: T = initData
-
-    var lastTick = -1L
 
     private var listeners = hashSetOf<BlockPos>()
     fun hasListeners(): Boolean = listeners.isNotEmpty()
@@ -65,19 +62,12 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     /** Sends the current data through this port and notifies the listeners */
     fun send() {
         (owner as? BlockEntity)?.level?.let { level ->
-            val tick = level.gameTime
             @Suppress("UNCHECKED_CAST")
             listeners.forEach { pos ->
                 val entity = level.getBlockEntity(pos) as? IConnectable ?: return@forEach
                 val listener = entity.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
 
-                if (lastTick + 1 < tick) {
-                    listener.data.tempReset()
-                    lastTick = tick
-                }
-
-                if (!listener.data.merge(data))
-                    listener.data = data
+                listener.data = data
 
                 runCatching {
                     val be = (listener.owner as? BlockEntity)
@@ -104,13 +94,5 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
             return
         }
         listeners.add(listening.blockPos)
-    }
-
-    companion object {
-        init {
-            ServerTickEvents.END_SERVER_TICK.register { server ->
-
-            }
-        }
     }
 }

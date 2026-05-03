@@ -38,6 +38,13 @@ data class PackedAudioData(
         right = byteArrayOf()
     }
 
+    override fun merge(other: PackedAudioData): Boolean {
+        left = other.left.copyOf()
+        right = other.right.copyOf()
+        chunkId = other.chunkId
+        return true
+    }
+
     fun broadcastToAll(level: ServerLevel, origin: BlockPos) {
         chunkId++
         for (player in level.players()) {
