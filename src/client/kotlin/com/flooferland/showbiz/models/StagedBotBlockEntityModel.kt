@@ -93,9 +93,6 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             return
         }
 
-        // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
-        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId())
-
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
@@ -132,6 +129,9 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             localStorage.remove(instanceId)
             return
         }
+
+        // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
+        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId())
 
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks

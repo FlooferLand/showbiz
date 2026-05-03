@@ -23,7 +23,7 @@ object ServerConnections {
     val entries = mutableMapOf<BlockPos, MutableList<Point>>()
 
     const val CLIENT_UPDATE_INTERVAL = 10L // ticks
-    final val MAX_VIEW_DISTANCE_SQR = pow(24, 2)
+    final val MAX_VIEW_DISTANCE_SQR = pow(32, 2)
 
     init {
         ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { blockEntity, level ->

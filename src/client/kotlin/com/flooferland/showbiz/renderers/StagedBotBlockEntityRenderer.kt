@@ -1,15 +1,11 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.core.particles.ParticleOptions
-import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.network.chat.*
+import net.minecraft.core.particles.*
 import net.minecraft.world.level.*
-import net.minecraft.world.phys.Vec3
-import com.flooferland.showbiz.Showbiz
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -18,14 +14,11 @@ import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
 import com.flooferland.showbiz.types.BotPartId
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
-import com.flooferland.showbiz.utils.Extensions.divide
-import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
 import java.lang.Math.clamp
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
-import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer

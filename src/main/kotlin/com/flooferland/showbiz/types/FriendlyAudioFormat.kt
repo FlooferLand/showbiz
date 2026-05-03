@@ -26,6 +26,11 @@ data class FriendlyAudioFormat(var sampleRate: Int = 44_100, var sampleBits: Int
         tag.getBoolean("stereo").also { stereo = it }
         tag.getBoolean("signed").also { signed = it }
         tag.getBoolean("big_endian").also { bigEndian = it }
+        if (sampleRate == 0) reset()
+    }
+
+    fun reset() {
+        load(CompoundTag().also { FriendlyAudioFormat().save(it) })
     }
 
     companion object {

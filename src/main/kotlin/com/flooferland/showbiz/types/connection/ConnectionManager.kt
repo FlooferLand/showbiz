@@ -4,9 +4,6 @@ import net.minecraft.nbt.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
-import com.flooferland.showbiz.utils.Extensions.secsToTicks
-import com.flooferland.showbiz.utils.ShowbizUtils
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 
 class ConnectionManager(val entity: BlockEntity) {
     /** Ports that take in information */

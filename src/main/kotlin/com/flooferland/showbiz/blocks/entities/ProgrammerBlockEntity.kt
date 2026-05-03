@@ -52,7 +52,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val heldBits = data.heldKeys
                 .mapIndexed { i, held -> if (held) data.mapKeyToBit(i).toUShort() else null }
                 .filterNotNull()
-            show.data.signal.raw += heldBits
+            show.data.signal += heldBits
         }
         show.send()
     }

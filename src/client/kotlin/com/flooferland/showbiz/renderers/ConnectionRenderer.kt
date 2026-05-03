@@ -60,8 +60,8 @@ object ConnectionRenderer {
         run {
             pose.pushPose()
             pose.translate(pos.x, pos.y, pos.z)
-            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.032), color, alpha = 1.0f)
-            DrawUtils.drawBox(pose, consumer, bound, darkColor, alpha = 0.6f)
+            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.01), color, alpha = 1.0f)
+            if (point.connections.isEmpty()) DrawUtils.drawBox(pose, consumer, bound, darkColor, alpha = 0.6f)
             pose.popPose()
         }
 
@@ -88,8 +88,8 @@ object ConnectionRenderer {
         pose.translate(startPos.x, startPos.y, startPos.z)
         pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
         pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
-        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125), color, alpha = 0.6f)
-        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.03125, -0.03125, length, 0.03125, 0.03125).inflate(0.032), darkColor, alpha = 0.2f)
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.01125, -0.01125, length, 0.01125, 0.01125), color, alpha = 0.6f)
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.01125, -0.01125, length, 0.01125, 0.01125).inflate(0.01), darkColor, alpha = 0.2f)
         pose.popPose()
     }
 
@@ -170,7 +170,7 @@ object ConnectionRenderer {
     }
 
     fun getPointBoundingBox(): AABB {
-        val size = 0.105
+        val size = 0.05
         return AABB.ofSize(Vec3.ZERO, size, size, size)
     }
 

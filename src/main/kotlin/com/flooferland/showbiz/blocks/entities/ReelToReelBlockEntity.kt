@@ -100,11 +100,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         run {
             val frame = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             if (recording && recordQueue.isNotEmpty()) {
-                val newFrame = BitIdArray(frame.size + recordQueue.sumOf { it.raw.size })
+                val newFrame = BitIdArray(frame.size + recordQueue.sumOf { it.size })
                 var i = 0
                 frame.forEach { newFrame[i++] = it }
                 for (frame in recordQueue) {
-                    frame.raw.forEach { newFrame[i++] = it }
+                    frame.forEach { newFrame[i++] = it }
                 }
                 if (seekInt + 10 > showData.signal.size) {
                     for (i in showData.signal.size..seekInt + 10) {
@@ -115,7 +115,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 recordQueue.clear()
             }
             signal.set(frame)
-            shouldUpdate = signal.raw.isNotEmpty()
+            shouldUpdate = signal.isNotEmpty()
             show.send(PackedShowData(playing, signal, showData.mapping))
         }
 
@@ -214,7 +214,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
         tag.putDouble("seek", seek)
-        tag.putIntArray("signal_frame", signal.save())
+        signal.saveTo("signal_frame", tag)
         connectionManager.save(tag)
         showData.saveNBT(tag)
     }
@@ -228,7 +228,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
         seek = tag.getDoubleOrNull("seek") ?: 0.0
-        signal.load(tag.getIntArrayOrNull("signal_frame"))
+        signal.loadFrom("signal_frame", tag)
         connectionManager.load(tag)
         showData.loadNBT(tag)
     }

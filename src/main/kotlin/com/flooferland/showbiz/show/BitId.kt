@@ -17,6 +17,8 @@ inline fun String.toBitIdOrNull(): BitId? =
 
 inline fun Int.toBitId(): BitId =
     toUShort()
+inline fun Byte.toBitId(): BitId =
+    toUShort()
 
 inline fun Collection<BitId>.toBitIdArray() =
     toUShortArray()

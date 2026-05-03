@@ -10,14 +10,14 @@ data class PackedShowData(
     var mapping: String? = null
 ) : ConnectionData<PackedShowData>("show") {
     override fun saveOrThrow(tag: CompoundTag) {
+        signal.saveTo("signal", tag)
         tag.putBoolean("playing", playing)
-        tag.putIntArray("signal", signal.save())
         mapping?.let { tag.putString("mapping", it) }
     }
 
     override fun loadOrThrow(tag: CompoundTag) {
+        signal.loadFrom("signal", tag)
         playing = tag.getBoolean("playing")
-        signal.load(tag.getIntArray("signal"))
         mapping = tag.getString("mapping")
     }
 
