@@ -15,7 +15,9 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 
 class GreyboxBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.Greybox.entityType!!, pos, state), IConnectable {
     override val connectionManager = ConnectionManager(this)
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { send(it) }
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both, autoUseReceived = false) {
+        send(it)
+    }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Both) {
         send(it)
         if (!this.hasListeners()) {

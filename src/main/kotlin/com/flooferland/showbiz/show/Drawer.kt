@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.show
 
-import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.MutableComponent

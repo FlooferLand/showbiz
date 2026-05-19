@@ -26,8 +26,8 @@ class ConnectionManager(val entity: BlockEntity) {
         outputs[port.id] = port
     }
 
-    fun <T: ConnectionData<T>> port(id: String, data: T, direction: PortDirection, react: ConnectionPort<T>.(T) -> Unit = {}) =
-        ConnectionPort(this.entity as IConnectable, id, data, direction, react)
+    fun <T: ConnectionData<T>> port(id: String, data: T, direction: PortDirection, autoUseReceived: Boolean = true, react: ConnectionPort<T>.(T) -> Unit = {}) =
+        ConnectionPort(this.entity as IConnectable, id, data, direction, autoUseReceived, react)
 
     /** Saves connections to a tag */
     fun save(tag: CompoundTag) {

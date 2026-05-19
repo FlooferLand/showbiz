@@ -13,9 +13,13 @@ enum class PortDirection {
     In, Out, Both;
 }
 
-data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id: String, val initData: T, val direction: PortDirection, val react: ConnectionPort<T>.(T) -> Unit = {}) : IUnsafeCompoundable {
+// NOTE: In order not to replace 'data', could have a separate 'receivedData' field that external ports set,
+//       and the port's 'react' can manually/automatically handle merging it into 'data'. Best of both worlds.
+
+data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id: String, val initData: T, val direction: PortDirection, val autoUseReceived: Boolean = true, val react: ConnectionPort<T>.(T) -> Unit = {}) : IUnsafeCompoundable {
     val name: String get() = "${owner::class.java.name}:$id(${direction.name.firstOrNull()})"
     @NotNull var data: T = initData
+    @NotNull var dataReceived: T = initData
 
     private var listeners = hashSetOf<BlockPos>()
     fun hasListeners(): Boolean = listeners.isNotEmpty()
@@ -39,6 +43,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     @Throws
     override fun saveOrThrow(tag: CompoundTag) {
         tag.put("data", CompoundTag().also { data.saveOrThrow(it) })
+        tag.put("data_recv", CompoundTag().also { dataReceived.saveOrThrow(it) })
 
         // Saving listeners
         if (direction != PortDirection.In) {
@@ -49,6 +54,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     @Throws
     override fun loadOrThrow(tag: CompoundTag) {
         data.loadOrThrow(tag.getCompound("data"))
+        dataReceived.loadOrThrow(tag.getCompound("data_recv"))
 
         // Loading listeners
         if (direction != PortDirection.In) {
@@ -67,12 +73,15 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 val entity = level.getBlockEntity(pos) as? IConnectable ?: return@forEach
                 val listener = entity.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
 
-                listener.data = data
+                listener.dataReceived = data
+                if (listener.autoUseReceived) {
+                    listener.data = listener.dataReceived;
+                }
 
                 runCatching {
                     val be = (listener.owner as? BlockEntity)
                     if (be?.level == null || be.isRemoved) return@runCatching
-                    listener.react(listener, data)
+                    listener.react(listener, listener.dataReceived)
                 }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
                 if (!level.isClientSide && entity is BlockEntity) {
                     entity.markDirtyNotifyAll()

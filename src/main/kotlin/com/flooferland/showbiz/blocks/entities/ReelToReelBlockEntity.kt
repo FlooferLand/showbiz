@@ -32,7 +32,6 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -40,7 +39,7 @@ import kotlin.math.roundToInt
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
     override val connectionManager = ConnectionManager(this)
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both) { received ->
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both, autoUseReceived = false) { received ->
         recordQueue.add(received.signal.clone())
     }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
@@ -100,22 +99,30 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         run {
             val frame = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
             if (recording && recordQueue.isNotEmpty()) {
-                val newFrame = BitIdArray(frame.size + recordQueue.sumOf { it.size })
-                var i = 0
-                frame.forEach { newFrame[i++] = it }
-                for (frame in recordQueue) {
-                    frame.forEach { newFrame[i++] = it }
+                val mergedBits = mutableSetOf<UShort>()
+                frame.forEach { mergedBits.add(it) }
+                recordQueue.forEach { frame ->
+                    frame.forEach { mergedBits.add(it) }
                 }
-                if (seekInt + 10 > showData.signal.size) {
-                    for (i in showData.signal.size..seekInt + 10) {
+
+                val newFrame = BitIdArray(mergedBits.size)
+                mergedBits.forEachIndexed { i, bit -> newFrame[i] = bit }
+
+                if (seekInt >= showData.signal.size) {
+                    for (i in showData.signal.size..seekInt) {
                         showData.signal.add(bitIdArrayOf())
                     }
                 }
+
                 showData.signal[seekInt] = newFrame
                 recordQueue.clear()
+
+                signal.set(newFrame)
+            } else {
+                signal.set(frame)
             }
-            signal.set(frame)
-            shouldUpdate = signal.isNotEmpty()
+
+            shouldUpdate = true
             show.send(PackedShowData(playing, signal, showData.mapping))
         }
 

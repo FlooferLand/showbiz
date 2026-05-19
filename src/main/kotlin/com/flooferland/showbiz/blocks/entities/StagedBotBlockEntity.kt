@@ -33,7 +33,9 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, ExtendedScreenHandlerFactory<BotListSelectPacket> {
     override val connectionManager = ConnectionManager(this)
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.In)
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
+        pendingShow.merge(received)
+    }
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     var botId: ResourceId? = null
@@ -42,9 +44,14 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
 
+    private val pendingShow = PackedShowData();
     private var prevBotId: ResourceId? = null
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
+        show.data.tempReset()
+        show.data.merge(pendingShow)
+        pendingShow.tempReset()
+
         soundHandler?.tick(this, level, pos, state)
         if (botId != prevBotId) {
             refreshBotParts()
@@ -79,6 +86,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
         connectionManager.save(tag)
+        pendingShow.save(tag)
 
         if (level?.isClientSide == false) {
             botId?.let { tag.putString("bot_id", it.toString()) }
@@ -88,6 +96,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
         connectionManager.load(tag)
+        pendingShow.load(tag)
 
         tag.getStringOrNull("bot_id")?.let { botId ->
             var id = ResourceId.of(botId)
