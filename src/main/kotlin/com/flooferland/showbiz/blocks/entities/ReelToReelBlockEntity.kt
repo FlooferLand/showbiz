@@ -88,7 +88,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun tick() {
         modelPartInstance.tick(level ?: return, blockPos, blockState)
-        if (!playing || showData.isEmpty()) return
+        if ((!playing && !recording) || showData.isEmpty()) return
         var shouldUpdate = false
 
         seek += tickDelta
@@ -143,7 +143,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
 
         // Setting playing to false when the show ends
-        if (audioBytesWritten >= showData.audio.size - 1) {
+        if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
             setPlaying(false)
             hasFinished = true
             shouldUpdate = true
