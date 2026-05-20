@@ -2,7 +2,9 @@
 
 package com.flooferland.showbiz.show
 
-// Should probably use UByte, but its experimental since JVM doesn't really support unsignedness
+import net.minecraft.network.FriendlyByteBuf
+
+// Should probably use UByte, but its experimental since the JVM doesn't really support unsignedness
 
 typealias BitId = UShort
 typealias BitIdArray = UShortArray
@@ -17,8 +19,14 @@ inline fun String.toBitIdOrNull(): BitId? =
 
 inline fun Int.toBitId(): BitId =
     toUShort()
+inline fun Short.toBitId(): BitId =
+    toUShort()
 inline fun Byte.toBitId(): BitId =
     toUShort()
 
 inline fun Collection<BitId>.toBitIdArray() =
     toUShortArray()
+inline fun FriendlyByteBuf.writeBitId(bitId: BitId) =
+    writeShort(bitId.toInt())
+inline fun FriendlyByteBuf.readBitId(): BitId =
+    readShort().toBitId()

@@ -1,13 +1,12 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
-import com.flooferland.showbiz.show.toBitIdOrNull
+import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
@@ -23,21 +22,20 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
     val textureX get() = (width / 2) - (size / 2)
     val textureY get() = (height / 2) - (size / 2)
 
-    val inputs = mutableListOf<EditBox>()
+    val inputs = mutableListOf<BitSelectButton>()
 
     override fun init() {
         val player = Minecraft.getInstance().player ?: return
         val data = PlayerProgrammingData.getFromPlayer(player)
 
         inputs.clear()
-        for ((i, key) in data.keysToBits.withIndex()) {
+        for ((i, mappedBits) in data.keysToBits.withIndex()) {
             val spacing = 20
             val height = 15
             val name = "Key ${i+1}"
             val leftSpace = font.width(name)
-            val input = EditBox(font, 40, height, Component.literal(key.toString()))
-            input.setHint(Component.literal("Bit ID").withStyle(ChatFormatting.DARK_GRAY))
-            input.value = key.toString()
+            val input = BitSelectButton(0, 0, 80, height)
+            input.values = mappedBits
             val x = textureX + (input.width / 2) + leftSpace + (spacing * 2)
             val y = textureY + 10 + (size * 0.2f).toInt() + (i * spacing)
             run {
@@ -53,9 +51,8 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
     override fun onClose() {
         val player = Minecraft.getInstance().player ?: return
         val data = PlayerProgrammingData.getFromPlayer(player)
-        for ((i, input) in inputs.withIndex()) {
-            val bitId = input.value.filter { it.isDigit() }.toBitIdOrNull() ?: continue
-            data.keysToBits[i] = bitId
+        inputs.forEachIndexed { i, input ->
+            data.keysToBits[i] = input.values
         }
         data.saveToPlayer(player)
         ClientPlayNetworking.send(ProgrammerPlayerUpdatePacket(keysToBits = data.keysToBits))

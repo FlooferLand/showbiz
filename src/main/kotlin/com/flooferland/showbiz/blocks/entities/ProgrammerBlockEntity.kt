@@ -46,11 +46,11 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (operators.isEmpty()) return
         if (show.data.mapping.isNullOrEmpty()) show.data.mapping = BitChartStore.DEFAULT
         show.data.signal.reset()
-        // if (show.readListeners().none { pos -> (level.getBlockEntity(pos) as? ReelToReelBlockEntity)?.let { it.recording && it.playing } ?: false }) show.data.signal.reset()
+        val mapping = show.data.mapping ?: BitChartStore.DEFAULT
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)
             val heldBits = data.heldKeys
-                .mapIndexed { i, held -> if (held) data.mapKeyToBit(i).toUShort() else null }
+                .mapIndexed { i, held -> if (held) data.mapKeyToBit(i)?.get(mapping) else null }
                 .filterNotNull()
             show.data.signal += heldBits
         }

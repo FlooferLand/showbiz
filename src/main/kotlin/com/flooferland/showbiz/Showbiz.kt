@@ -89,7 +89,10 @@ object Showbiz : ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(ProgrammerPlayerUpdatePacket.type) { packet, ctx ->
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
-            data.keysToBits = packet.keysToBits
+            packet.keysToBits.forEachIndexed { i, receivedBits ->
+                data.keysToBits[i].clear()
+                data.keysToBits[i].putAll(receivedBits)
+            }
             data.saveToPlayer(player)
         }
         ServerPlayerEvents.JOIN.register { player ->

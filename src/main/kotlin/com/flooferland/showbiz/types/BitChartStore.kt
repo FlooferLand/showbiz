@@ -6,6 +6,7 @@ class BitChartStore {
     val idsToInfo = mutableMapOf<String, BitChartInfo>()
     val extensionToInfo = mutableMapOf<String, BitChartInfo>()
     val extensionToId = mutableMapOf<String, String>()
+    val size get() = ids.size
 
     init {
         add(id = RAE_ID,
