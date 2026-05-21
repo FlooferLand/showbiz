@@ -55,7 +55,7 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             "showbiz:rolfe_dewolfe" -> {
                 model.getBone("cymbal").getOrNull()?.let { bone ->
                     bonePosFromCapture(bone)?.let { pos ->
-                        Minecraft.getInstance().level?.addParticle(ParticleTypes.ASH, pos.x, pos.y + 1, pos.z, 0.0, 0.0, 0.0)
+                        Minecraft.getInstance().level?.addParticle(ParticleTypes.ASH, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
                     }
                 }
 
