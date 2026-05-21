@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.*
-import net.minecraft.world.phys.Vec3
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.bizlib.bits.BitMappingData
 import com.flooferland.bizlib.bits.BitUtils
@@ -223,7 +222,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
                 // Applying wiggle
                 var boneSizeMul = getBoneSize(bone) / 2f
-                boneSizeMul = boneSizeMul.coerceIn(0f..1.5f)
+                boneSizeMul = boneSizeMul.coerceIn(0f..2f)
                 val affect = (springVel * boneSizeMul * getSpringScale(data))
                     .coerceIn(-2f, 2f)
                     .let { if (it.isNaN()) 0f else it }

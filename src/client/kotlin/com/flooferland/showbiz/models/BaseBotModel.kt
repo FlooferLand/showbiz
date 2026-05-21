@@ -21,6 +21,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     enum class Error {
         MissingModel,
         MissingTexture,
+        MissingAnimation,
         RenderException;
         var context: String? = null
         var botId: String? = null
@@ -101,11 +102,11 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     override fun getAnimation(animatable: StagedBotBlockEntity, name: String): Animation? {
         val res = getAnimationResource(animatable) ?: run {
-            Showbiz.log.error("Couldn't find animation file for animation '$name' (bot=${animatable.botId})")
+            errorsTriggered.add(Error.MissingAnimation.withContext("Couldn't find animation file for animation '$name'"))
             null
         }
         return ShowbizClient.animations[res]?.getAnimation(name) ?: run {
-            Showbiz.log.error("Couldn't find animation '$name' in '$res' (bot=${animatable.botId})")
+            errorsTriggered.add(Error.MissingAnimation.withContext("Couldn't find animation '$name' in '$res'"))
             null
         }
     }

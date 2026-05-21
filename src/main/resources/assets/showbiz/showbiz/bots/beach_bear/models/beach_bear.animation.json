@@ -1,209 +1,165 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.beach_bear.eyelids.on": {
+		"animation.beach_bear.left_leg.on": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
+			"animation_length": 1.1667,
 			"bones": {
-				"Left Eyelid": {
-					"position": {
-						"0.0": {
-							"vector": [0, 0, 0]
+				"Left Leg": {
+					"rotation": {
+						"0.0833": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutQuart"
 						},
-						"0.25": {
-							"vector": [0, 0.5, 0]
+						"0.5": {
+							"vector": [-12.5, 0, 0],
+							"easing": "easeInOutQuart"
 						}
 					}
 				},
-				"Right Eyelid": {
-					"position": {
+				"Left Lower Leg": {
+					"rotation": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
 						"0.25": {
-							"vector": [0, 0.5, 0]
+							"vector": [10, 0, 0]
+						},
+						"0.3333": {
+							"vector": [0, 0, 0],
+							"easing": "linear"
+						},
+						"0.5417": {
+							"vector": [-62.5, 0, 0]
+						},
+						"0.6667": {
+							"vector": [-42.5, 0, 0]
+						},
+						"0.7917": {
+							"vector": [-55, 0, 0],
+							"easing": "linear"
+						},
+						"0.9167": {
+							"vector": [-47.5, 0, 0]
+						},
+						"1.0833": {
+							"vector": [-50, 0, 0]
 						}
 					}
 				}
 			}
 		},
-		"animation.beach_bear.eyelids.off": {
+		"animation.beach_bear.left_leg.off": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
+			"animation_length": 0.7083,
 			"bones": {
-				"Left Eyelid": {
-					"position": {
+				"Left Leg": {
+					"rotation": {
 						"0.0": {
-							"vector": [0, 0.5, 0]
+							"vector": [-12.5, 0, 0],
+							"easing": "easeInOutQuart"
 						},
-						"0.25": {
-							"vector": [0, 0, 0]
+						"0.5": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutBack"
 						}
 					}
 				},
-				"Right Eyelid": {
-					"position": {
+				"Left Lower Leg": {
+					"rotation": {
 						"0.0": {
-							"vector": [0, 0.5, 0]
+							"vector": [-15, 0, 0],
+							"easing": "easeOutQuart"
 						},
-						"0.25": {
-							"vector": [0, 0, 0]
+						"0.2083": {
+							"vector": [12.5, 0, 0],
+							"easing": "easeInSine"
+						},
+						"0.5833": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutQuart"
 						}
 					}
 				}
 			}
 		},
-		"animation.beach_bear.righteyelid.on": {
+		"animation.beach_bear.right_leg.on": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
+			"animation_length": 1.1667,
 			"bones": {
-				"Right Eyelid": {
-					"position": {
+				"Right Leg": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutQuart"
+						},
+						"0.4167": {
+							"vector": [-12.5, 0, 0],
+							"easing": "easeInOutQuart"
+						}
+					}
+				},
+				"Right Lower Leg": {
+					"rotation": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
 						"0.25": {
-							"vector": [0, 0.5, 0]
+							"vector": [10, 0, 0]
+						},
+						"0.3333": {
+							"vector": [0, 0, 0],
+							"easing": "linear"
+						},
+						"0.5417": {
+							"vector": [-62.5, 0, 0]
+						},
+						"0.6667": {
+							"vector": [-42.5, 0, 0]
+						},
+						"0.7917": {
+							"vector": [-55, 0, 0],
+							"easing": "linear"
+						},
+						"0.9167": {
+							"vector": [-47.5, 0, 0]
+						},
+						"1.0833": {
+							"vector": [-50, 0, 0]
 						}
 					}
 				}
 			}
 		},
-		"animation.beach_bear.righteyelid.off": {
+		"animation.beach_bear.right_leg.off": {
 			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
+			"animation_length": 0.7083,
 			"bones": {
-				"Right Eyelid": {
-					"position": {
-						"0.0": {
-							"vector": [0, 0.5, 0]
-						},
-						"0.25": {
-							"vector": [0, 0, 0]
-						}
-					}
-				}
-			}
-		},
-		"animation.beach_bear.lefteyelid.on": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
-			"bones": {
-				"Left Eyelid": {
-					"position": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [0, 0.5, 0]
-						}
-					}
-				}
-			}
-		},
-		"animation.beach_bear.lefteyelid.off": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
-			"bones": {
-				"Left Eyelid": {
-					"position": {
-						"0.0": {
-							"vector": [0, 0.5, 0]
-						},
-						"0.25": {
-							"vector": [0, 0, 0]
-						}
-					}
-				}
-			}
-		},
-		"animation.beach_bear.guitar_raise.off": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
-			"bones": {
-				"Left Arm": {
+				"Right Leg": {
 					"rotation": {
 						"0.0": {
-							"vector": [0, 0, 0]
+							"vector": [-12.5, 0, 0],
+							"easing": "easeInOutQuart"
 						},
-						"0.25": {
-							"vector": [-7.5, 0, 0]
+						"0.5": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutBack"
 						}
 					}
 				},
-				"Left Hand": {
+				"Right Lower Leg": {
 					"rotation": {
 						"0.0": {
-							"vector": [0, 0, 0]
+							"vector": [-15, 0, 0],
+							"easing": "easeOutQuart"
 						},
-						"0.25": {
-							"vector": [25, 0, 0]
-						}
-					}
-				},
-				"Left Lower Arm": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
+						"0.2083": {
+							"vector": [12.5, 0, 0],
+							"easing": "easeInSine"
 						},
-						"0.25": {
-							"vector": [-25, 0, 0]
-						}
-					}
-				},
-				"Guitar": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [0, 0, -17.5]
-						}
-					}
-				}
-			}
-		},
-		"animation.beach_bear.guitar_raise.on": {
-			"loop": "hold_on_last_frame",
-			"animation_length": 0.25,
-			"bones": {
-				"Left Arm": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [-7.5, 0, 0]
-						}
-					}
-				},
-				"Left Hand": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [25, 0, 0]
-						}
-					}
-				},
-				"Left Lower Arm": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [-25, 0, 0]
-						}
-					}
-				},
-				"Guitar": {
-					"rotation": {
-						"0.0": {
-							"vector": [0, 0, 0]
-						},
-						"0.25": {
-							"vector": [0, 0, -17.5]
+						"0.5833": {
+							"vector": [0, 0, 0],
+							"easing": "easeOutQuart"
 						}
 					}
 				}
