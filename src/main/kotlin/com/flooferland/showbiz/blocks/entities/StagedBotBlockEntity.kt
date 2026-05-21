@@ -60,7 +60,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     }
 
     fun refreshBotParts() {
-        /*val level = level ?: return
+        val level = level ?: return
         if (!level.isClientSide) return
         clientBotParts.values.removeIf { it.remove(Entity.RemovalReason.DISCARDED); true }
         val ids = when (botId.toString()) {
@@ -72,7 +72,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
             val entity = spawn(level, id, this)
             entity.setPos(blockPos.center)
             clientBotParts[id] = entity
-        }*/
+        }
     }
 
     override fun getDisplayName() = Component.literal("Staged Bot")!!
