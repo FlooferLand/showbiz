@@ -2,18 +2,23 @@ package com.flooferland.showbiz.utils
 
 import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.utils.Extensions.divide
+import org.joml.Matrix4f
 import org.joml.Vector4f
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
-    fun GeoBone.calculateBounds(): Vec3 {
+    fun GeoBone.calculateBounds(): Vec3 =
+        calculateBounds { it.worldSpaceMatrix }
+
+    // overload for the geckolib #841 workaround: caller supplies snapshotted matrices
+    fun GeoBone.calculateBounds(matrixFor: (GeoBone) -> Matrix4f?): Vec3 {
         val min = Vector4f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 1f)
         val max = Vector4f(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE, 1f)
         val stack = mutableListOf(this)
         var hasCubes = false
         while (stack.isNotEmpty()) {
             val bone = stack.removeAt(stack.size - 1)
-            val mat = bone.worldSpaceMatrix
+            val mat = matrixFor(bone) ?: bone.worldSpaceMatrix
             for (cube in bone.cubes) {
                 hasCubes = true
                 val size = cube.size
