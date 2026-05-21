@@ -25,16 +25,19 @@ import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.BitViewBlock
+import com.flooferland.showbiz.blocks.PlushBlock
 import com.flooferland.showbiz.blocks.ProgrammerBlock
 import com.flooferland.showbiz.blocks.SpotlightBlock
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.items.PlushBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
@@ -47,7 +50,6 @@ enum class ModBlocks {
             .sound(SoundType.METAL)
             .noOcclusion(),
         entity = Entity(::StagedBotBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.StagedBot
     ),
     ReelToReel(
         "reel_to_reel", ::ReelToReelBlock,
@@ -57,7 +59,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
         entity = Entity(::ReelToReelBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.ReelToReel
     ),
     Greybox(
         "greybox", ::GreyboxBlock,
@@ -67,7 +68,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom.transparent(),
         entity = Entity(::GreyboxBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.Greybox
     ),
     Speaker(
         "speaker", ::SpeakerBlock,
@@ -77,7 +77,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::SpeakerBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.Speaker
     ),
     ShowParser(
         "show_parser", ::ShowParserBlock,
@@ -87,7 +86,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::ShowParserBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.ShowParser
     ),
     ShowSelector(
         "show_selector", ::ShowSelectorBlock,
@@ -97,7 +95,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::ShowSelectorBlockEntity, isGeckolib = true),
-        recipe = ModRecipes.ShowSelector
     ),
     CurtainBlock(
         "curtain_block", ::CurtainBlock,
@@ -107,7 +104,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::CurtainBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.CurtainBlock
     ),
     CurtainBlockShadow(
         "curtain_block_shadow", ::CurtainShadowBlock,
@@ -118,7 +114,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         hideFromPlayer = true,
-        recipe = null
     ),
     CurtainController(
         "curtain_controller", ::CurtainControllerBlock,
@@ -128,7 +123,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::CurtainControllerBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.CurtainControllerBlock
     ),
     WojackBlock(
         "wojack_block", ::Block,
@@ -137,8 +131,7 @@ enum class ModBlocks {
         .sound(SoundType.AMETHYST)
         .noOcclusion(),
         modelPreset = BlockModelId.CubeAll,
-        hideFromPlayer = true,
-        recipe = null
+        hideFromPlayer = true
     ),
     Spotlight(
         "spotlight", ::SpotlightBlock,
@@ -148,7 +141,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::SpotlightBlockEntity, isGeckolib = true),
-        recipe = ModRecipes.SpotlightBlock
     ),
     BitView(
         "bit_view", ::BitViewBlock,
@@ -158,7 +150,6 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::BitViewBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.BitViewBlock
     ),
     Programmer(
         "programmer", ::ProgrammerBlock,
@@ -168,7 +159,17 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::ProgrammerBlockEntity, isGeckolib = false),
-        recipe = ModRecipes.ProgrammerBlock
+    ),
+    Plush(
+        "plush", ::PlushBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.WOOL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        item = ::PlushBlockItem,
+        entity = Entity(::PlushBlockEntity, isGeckolib = true),
+        hideFromPlayer = true
     )
     ;
 
@@ -177,15 +178,13 @@ enum class ModBlocks {
     val item: BlockItem
     var model: BlockModelId? = null
     var entityType: BlockEntityType<*>? = null
-    var recipe: ModRecipes? = null
     var isGeckoLib: Boolean = false
     var hideFromPlayer: Boolean = false
-    constructor(name: String, constructor: (Properties) -> Block, props: Properties, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: Entity? = null, recipe: ModRecipes?, hideFromPlayer: Boolean = false) {
+    constructor(name: String, constructor: (Properties) -> Block, props: Properties, item: BlockItemConstructor? = null, modelPreset: BlockModelId = BlockModelId.CubeAll, entity: Entity? = null, hideFromPlayer: Boolean = false) {
         this.id = rl(name)
         this.model = modelPreset;
         this.hideFromPlayer = hideFromPlayer
         this.isGeckoLib = entity?.isGeckolib == true
-        this.recipe = recipe
 
         this.block = Blocks.register(
             ResourceKey.create(BuiltInRegistries.BLOCK.key(), this.id),
@@ -197,7 +196,7 @@ enum class ModBlocks {
         )
 
         // Item
-        var blockItem = when {
+        var blockItem = item?.invoke(this.id, this.block, Item.Properties()) ?: when {
             isGeckoLib -> GeoBlockItem(this.id, this.block, Item.Properties())
             else -> FancyBlockItem(this.id, this.block, Item.Properties())
         }
@@ -210,5 +209,6 @@ enum class ModBlocks {
         }
     }
 
+    typealias BlockItemConstructor = (ResourceLocation, Block, Item.Properties) -> BlockItem
     data class Entity(val entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity), val isGeckolib: Boolean)
 }

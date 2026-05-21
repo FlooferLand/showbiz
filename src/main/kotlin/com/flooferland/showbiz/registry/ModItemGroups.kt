@@ -14,6 +14,7 @@ enum class ModItemGroups {
         for (item in ModItems.entries) {
             if (!item.hideFromPlayer) out.accept(item.item)
         }
+        out.accept(ModRecipes.MitziPlush.outputProvider())
     });
 
     constructor(name: String, generator: CreativeModeTab.DisplayItemsGenerator) {

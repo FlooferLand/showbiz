@@ -11,7 +11,7 @@ import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class GeoBlockItem(id: ResourceLocation, block: Block, properties: Properties) : FancyBlockItem(id, block, properties), GeoItem {
+open class GeoBlockItem(id: ResourceLocation, block: Block, properties: Properties) : FancyBlockItem(id, block, properties), GeoItem {
     val renderProviderHolder = MutableObject<GeoRenderProvider>()
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache

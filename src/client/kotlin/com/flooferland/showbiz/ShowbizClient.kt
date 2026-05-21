@@ -10,7 +10,6 @@ import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
-import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.assets.AddonAssets
 import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
@@ -19,6 +18,7 @@ import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.entities.BotPartEntity
+import com.flooferland.showbiz.items.PlushBlockItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -30,8 +30,6 @@ import com.flooferland.showbiz.screens.*
 import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import java.nio.file.Files
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -68,12 +66,16 @@ object ShowbizClient : ClientModInitializer {
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
         ModelPartManager.clientModelPartInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         for (block in ModBlocks.entries) {
-            val path = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull()
-                ?.findPath("assets/${MOD_ID}/geo/block/${block.id.path}.geo.json")?.getOrNull()
-            val isGeckoLib = path?.let { Files.exists(it) } ?: false
-            if (block.isGeckoLib != isGeckoLib && Showbiz.log.isDebugEnabled) {
-                if (isGeckoLib) error("Block '${block.id}' is marked to not be using GeckoLib, but it actually is?")
-                else error("Block '${block.id}' is marked to be using GeckoLib, but it actually isn't?")
+            val container = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull() ?: break
+            val paths = listOf(
+                "assets/${MOD_ID}/geo/block/${block.id.path}.geo.json",
+                "assets/${MOD_ID}/geo/${block.id.path}.geo.json",
+            )
+            val path = paths.firstOrNull { container.findPath(it)?.getOrNull()?.let { Files.exists(it) } == true }
+            val geckoModelFound = (path != null)
+            if (block.isGeckoLib != geckoModelFound && Showbiz.log.isDebugEnabled) {
+                if (geckoModelFound) error("Block '${block.id}' is marked to not use GeckoLib, but a model was found? (${path})")
+                else error("Block '${block.id}' is marked to use GeckoLib, but no model was found in:\n- ${paths.joinToString("\n - ")}")
             }
         }
 
@@ -87,34 +89,19 @@ object ShowbizClient : ClientModInitializer {
         // Entity renderers (should find a nicer way to register these)
         @Suppress("UNCHECKED_CAST")
         run {
-            BlockEntityRenderers.register(
-                ModBlocks.StagedBot.entityType!! as BlockEntityType<StagedBotBlockEntity>,
-                ::StagedBotBlockEntityRenderer
-            )
-            BlockEntityRenderers.register(
-                ModBlocks.ReelToReel.entityType!! as BlockEntityType<ReelToReelBlockEntity>,
-                ::ReelToReelBlockEntityRenderer
-            )
-            BlockEntityRenderers.register(
-                ModBlocks.ShowSelector.entityType!! as BlockEntityType<ShowSelectorBlockEntity>,
-                ::ShowSelectorBlockEntityRenderer
-            )
-            BlockEntityRenderers.register(
-                ModBlocks.CurtainBlock.entityType!! as BlockEntityType<CurtainBlockEntity>,
-                ::CurtainBlockEntityRenderer
-            )
-            BlockEntityRenderers.register(
-                ModBlocks.Spotlight.entityType!! as BlockEntityType<SpotlightBlockEntity>,
-                ::SpotlightBlockEntityRenderer
-            )
-            EntityRendererRegistry.register(
-                ModClientEntities.ModelPart.type,
-                ::ModelPartEntityRenderer
-            )
-            EntityRendererRegistry.register(
-                ModClientEntities.BotPart.type,
-                ::BotPartEntityRenderer
-            )
+            fun <T> add(modBlock: ModBlocks, renderer: BlockEntityRendererProvider<T>) where T: BlockEntity =
+                BlockEntityRenderers.register(
+                    modBlock.entityType as BlockEntityType<T>,
+                    renderer
+                )
+            add(ModBlocks.StagedBot, ::StagedBotBlockEntityRenderer)
+            add(ModBlocks.ReelToReel, ::ReelToReelBlockEntityRenderer)
+            add(ModBlocks.ShowSelector, ::ShowSelectorBlockEntityRenderer)
+            add(ModBlocks.CurtainBlock, ::CurtainBlockEntityRenderer)
+            add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
+            add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
+            EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
+            EntityRendererRegistry.register(ModClientEntities.BotPart.type, ::BotPartEntityRenderer)
         }
 
         // GeckoLib renderers
@@ -130,10 +117,12 @@ object ShowbizClient : ClientModInitializer {
             if (!block.isGeckoLib) continue
             val item = block.item as? GeoBlockItem ?: continue
             item.renderProviderHolder.value = object : GeoRenderProvider {
-                inner class Renderer : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id))
-                var renderer: Renderer? = null
-                override fun getGeoItemRenderer(): Renderer {
-                    if (renderer == null) renderer = Renderer()
+                var renderer: GeoItemRenderer<*>? = null
+                override fun getGeoItemRenderer(): GeoItemRenderer<*> {
+                    if (renderer == null) renderer = when (block) {
+                        ModBlocks.Plush -> PlushItemRenderer()
+                        else -> object : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id)) {}
+                    }
                     return renderer!!
                 }
             }

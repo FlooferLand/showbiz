@@ -21,6 +21,7 @@ import net.minecraft.core.registries.*
 import net.minecraft.server.*
 import com.flooferland.showbiz.datagen.providers.LootTableProvider
 import com.flooferland.showbiz.datagen.providers.RecipeProvider
+import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModPackets
 import com.flooferland.showbiz.registry.ModRecipes
 import java.nio.file.Files
@@ -59,7 +60,8 @@ object DataGenerator {
         run {
             // Loading things
             run {
-                ModPackets
+                ModComponents.register()
+                ModPackets.register()
             }
 
             // Calling the generator
@@ -94,41 +96,8 @@ object DataGenerator {
             )
         }
 
-        // Recipe validation
-        for (recipe in ModRecipes.entries) {
-            // IDs
-            for (ingredient in recipe.fetchIngredients()) {
-                ingredient.item?.let { item ->
-                    if (!BuiltInRegistries.ITEM.containsKey(item)) error("Recipe ingredient item '${ingredient.item}' does not exist in the Minecraft registry for recipe '${recipe.name}'")
-                }
-                // TODO: Add tag checking for ingredients in datagen
-                /*ingredient.tag?.let { tag ->
-                    val key = TagKey.create(Registries.ITEM, tag)
-                    if (!BuiltInRegistries.ITEM.tags.anyMatch { it.first == key }) error("Recipe tag '${ingredient.tag}' does not exist in the Minecraft registry for recipe '${recipe.name}'")
-                }*/
-            }
-            // Shaped
-            if (recipe.data is ModRecipes.ShapedRecipeData) {
-                for (char in recipe.data.let { it.line1 + it.line2 + it.line3 }) {
-                    if (!recipe.data.mapping.keys.contains(char.toString()) && char != ' ') {
-                        error("No idea what to map '$char' to for recipe '${recipe.name}'")
-                    }
-                }
-            }
-        }
-
         // Generation
         for (modBlock in ModBlocks.entries) {
-            // Recipe
-            if (modBlock.recipe == null && !modBlock.hideFromPlayer)
-                warn("No recipe provided for '${modBlock.id}'")
-            else
-                modBlock.recipe?.let { recipe ->
-                    val recipe = RecipeProvider.buildRecipe(recipe, modBlock.id)
-                    val recipePath = dataRoot / "recipe" / "${modBlock.id.path}.json"
-                    writeAsset(recipePath, recipe)
-                }
-
             // States and models
             val builder = CustomBlockModel.BlockStateBuilder(modBlock)
             val block = (modBlock.block as? CustomBlockModel)
@@ -184,16 +153,6 @@ object DataGenerator {
             writeAsset(lootTablePath, blockDrop)
         }
         for (modItem in ModItems.entries) {
-            // Recipe
-            if (modItem.recipe == null && !modItem.hideFromPlayer)
-                warn("No recipe provided for '${modItem.id}'")
-            else
-                modItem.recipe?.let { recipe ->
-                    val recipe = RecipeProvider.buildRecipe(recipe, modItem.id)
-                    val recipePath = dataRoot / "recipe" / "${modItem.id.path}.json"
-                    writeAsset(recipePath, recipe)
-                }
-
             // Model
             val modelJson = ItemProvider.generateModel(modItem)
             if (modelJson != null) {
@@ -207,6 +166,39 @@ object DataGenerator {
                 val itemPath = assetsRoot / "items" / "${modItem.id.path}.json"
                 writeAsset(itemPath, itemJson)
             } else warn("Model JSON is null for item ${modItem.id}")
+        }
+
+        // Recipes
+        for (modRecipe in ModRecipes.entries) {
+            // Validation
+            run {
+                // IDs
+                for (ingredient in modRecipe.fetchIngredients()) {
+                    ingredient.item?.let { item ->
+                        if (!BuiltInRegistries.ITEM.containsKey(item)) error("Recipe ingredient item '${ingredient.item}' does not exist in the Minecraft registry for recipe '${modRecipe.name}'")
+                    }
+                    // TODO: Add tag checking for ingredients in datagen
+                    /*ingredient.tag?.let { tag ->
+                    val key = TagKey.create(Registries.ITEM, tag)
+                    if (!BuiltInRegistries.ITEM.tags.anyMatch { it.first == key }) error("Recipe tag '${ingredient.tag}' does not exist in the Minecraft registry for recipe '${recipe.name}'")
+                }*/
+                }
+                // Shaped
+                if (modRecipe.data is ModRecipes.ShapedRecipeData) {
+                    for (char in modRecipe.data.let { it.line1 + it.line2 + it.line3 }) {
+                        if (!modRecipe.data.mapping.keys.contains(char.toString()) && char != ' ') {
+                            error("No idea what to map '$char' to for recipe '${modRecipe.name}'")
+                        }
+                    }
+                }
+            }
+
+            // Recipe creation
+            val stack = modRecipe.outputProvider()
+            val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
+            val recipe = RecipeProvider.buildRecipe(modRecipe, stack)
+            val recipePath = dataRoot / "recipe" / "${modRecipe.customId ?: itemId.path}.json"
+            writeAsset(recipePath, recipe)
         }
 
         // Sounds

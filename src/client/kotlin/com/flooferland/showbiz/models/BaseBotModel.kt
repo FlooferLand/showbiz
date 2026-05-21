@@ -112,7 +112,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     companion object {
         val errorsTriggered = mutableSetOf<Error>()
-        val emptyModel = rl("geo/entity/empty.geo.json")
+        val emptyModel = rl("geo/empty.geo.json")
         val emptyTexture = rl("textures/empty.png")
     }
 }

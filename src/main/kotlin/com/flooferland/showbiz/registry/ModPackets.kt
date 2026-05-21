@@ -41,6 +41,8 @@ sealed class ModPackets<T: CustomPacketPayload> {
     enum class PacketRegistryWay { /** S2C */ ServerToClient, /** C2S */ ClientToServer, Bidirectional }
 
     companion object {
-        init { ModPackets::class.sealedSubclasses.forEach { it.objectInstance } }
+        fun register() {
+            ModPackets::class.sealedSubclasses.forEach { it.objectInstance }
+        }
     }
 }

@@ -50,8 +50,8 @@ object Showbiz : ModInitializer {
         // Making sure the JVM compiles these
         @Suppress("UnusedExpression")
         run {
-            ModComponents
-            ModPackets
+            ModComponents.register()
+            ModPackets.register()
             ModBlocks.entries
             ModItems.entries
             ModItemGroups.entries

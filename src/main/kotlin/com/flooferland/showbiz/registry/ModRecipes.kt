@@ -1,6 +1,9 @@
 package com.flooferland.showbiz.registry
 
 import net.minecraft.resources.*
+import net.minecraft.world.item.ItemStack
+import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlString
 
 enum class ModRecipes {
@@ -13,7 +16,8 @@ enum class ModRecipes {
             "I" to Ingredient("iron_ingot"),
             "-" to Ingredient("iron_bars"),
             "R" to Ingredient("redstone"),
-        )
+        ),
+        outputItem = { ModBlocks.StagedBot.item.defaultInstance }
     ),
     ReelToReel(
         "I I",
@@ -25,7 +29,8 @@ enum class ModRecipes {
             "R" to Ingredient("redstone"),
             "F" to Ingredient(tag="fences"),
             "X" to Ingredient(tag="planks"),
-        )
+        ),
+        outputItem = { ModBlocks.ReelToReel.item.defaultInstance }
     ),
     Greybox(
         "GGG",
@@ -34,7 +39,8 @@ enum class ModRecipes {
         mapOf(
             "G" to Ingredient("gray_concrete"),
             "R" to Ingredient("redstone"),
-        )
+        ),
+        outputItem = { ModBlocks.Greybox.item.defaultInstance }
     ),
     Speaker(
         "WIW",
@@ -45,21 +51,24 @@ enum class ModRecipes {
             "R" to Ingredient("redstone"),
             "_" to Ingredient("dried_kelp"),
             "I" to Ingredient("iron_ingot"),
-        )
+        ),
+        outputItem = { ModBlocks.Speaker.item.defaultInstance }
     ),
     ShowParser(
         arrayOf(
             Ingredient("repeater"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
-        )
+        ),
+        outputItem = { ModBlocks.ShowParser.item.defaultInstance }
     ),
     ShowSelector(
         arrayOf(
             Ingredient(tag="buttons"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
-        )
+        ),
+        outputItem = { ModBlocks.ShowSelector.item.defaultInstance }
     ),
     CurtainBlock(
         "W-W",
@@ -68,7 +77,8 @@ enum class ModRecipes {
         mapOf(
             "-" to Ingredient("chain"),
             "W" to Ingredient(tag="wool")
-        )
+        ),
+        outputItem = { ModBlocks.CurtainBlock.item.defaultInstance }
     ),
     CurtainControllerBlock(
         "I-I",
@@ -78,14 +88,16 @@ enum class ModRecipes {
             "-" to Ingredient("chain"),
             "O" to Ingredient("iron_ingot"),
             "I" to Ingredient("stick")
-        )
+        ),
+        outputItem = { ModBlocks.CurtainController.item.defaultInstance }
     ),
     SpotlightBlock(
         arrayOf(
             Ingredient("redstone_lamp"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
-        )
+        ),
+        outputItem = { ModBlocks.Spotlight.item.defaultInstance }
     ),
     BitViewBlock(
         "O-O",
@@ -96,7 +108,8 @@ enum class ModRecipes {
             "-" to Ingredient("stick"),
             "R" to Ingredient("redstone"),
             "S" to Ingredient("amethyst_shard"),
-        )
+        ),
+        outputItem = { ModBlocks.BitView.item.defaultInstance }
     ),
     ProgrammerBlock(
         "IAI",
@@ -109,7 +122,8 @@ enum class ModRecipes {
             "R" to Ingredient("redstone"),
             "F" to Ingredient(tag="fences"),
             "X" to Ingredient(tag="planks"),
-        )
+        ),
+        outputItem = { ModBlocks.Programmer.item.defaultInstance }
     ),
     Wand(
         " I ",
@@ -120,7 +134,8 @@ enum class ModRecipes {
             "R" to Ingredient("redstone"),
             "i" to Ingredient("lightning_rod"),
             "C" to Ingredient("copper_ingot")
-        )
+        ),
+        outputItem = { ModItems.Wand.item.defaultInstance }
     ),
     Reel(
         "KKK",
@@ -129,20 +144,42 @@ enum class ModRecipes {
         mapOf(
             "K" to Ingredient("dried_kelp"),
             "O" to Ingredient("iron_nugget"),
-        )
+        ),
+        outputItem = { ModItems.Reel.item.defaultInstance }
     ),
+    MitziPlush(
+        "WWW",
+        "WSW",
+        "WWW",
+        mapOf(
+            "W" to Ingredient(tag="wool"),
+            "S" to Ingredient("green_dye"),
+        ),
+        id = "plush_mitzi",
+        outputItem = {
+            ModBlocks.Plush.item.defaultInstance.apply {
+                set(ModComponents.Plush.type, PlushComponent(rl("mitzi")))
+            }
+        }
+    )
     ;
 
     val data: IRecipeData
+    val outputProvider: () -> ItemStack
+    val customId: String?
 
     /** Shaped recipe */
-    constructor(line1: String, line2: String, line3: String, mapping: Map<String, Ingredient>) {
+    constructor(line1: String, line2: String, line3: String, mapping: Map<String, Ingredient>, id: String? = null, outputItem: () -> ItemStack) {
         data = ShapedRecipeData(line1, line2, line3, mapping)
+        outputProvider = outputItem
+        customId = id
     }
 
     /** Shapeless recipe */
-    constructor(ingredients: Array<Ingredient>) {
+    constructor(ingredients: Array<Ingredient>, id: String? = null, outputItem: () -> ItemStack) {
         data = ShapelessRecipeData(ingredients)
+        outputProvider = outputItem
+        customId = id
     }
 
     fun fetchIngredients() = when (data) {

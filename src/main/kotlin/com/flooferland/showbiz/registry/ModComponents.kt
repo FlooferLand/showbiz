@@ -7,7 +7,9 @@ import com.mojang.serialization.Codec
 import net.minecraft.core.*
 import net.minecraft.core.component.*
 import net.minecraft.core.registries.*
+import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.resources.*
+import com.flooferland.showbiz.components.PlushComponent
 
 sealed class ModComponents<T> {
     data object BlockOwner : ModComponents<OptionBlockPos>(
@@ -16,22 +18,26 @@ sealed class ModComponents<T> {
     )
     data object FileName : ModComponents<String>(
         "filename",
-        { b -> b.persistent(Codec.STRING) }
+        { b -> b.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8) }
+    )
+    data object Plush : ModComponents<PlushComponent>(
+        "plush",
+        { b -> b.persistent(PlushComponent.CODEC).networkSynchronized(PlushComponent.STREAM_CODEC) }
     )
     ;
 
     constructor(name: String, builder: (DataComponentType.Builder<T>) -> DataComponentType.Builder<T>) {
         this.id = rl(name)
         this.type = builder(DataComponentType.builder<T>()).build()
-        if (!DataGenerator.engaged) {
-            Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, this.id, this.type)
-        }
+        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, this.id, this.type)
     }
 
     val id: ResourceLocation
     val type: DataComponentType<T>
 
     companion object {
-        init { ModComponents::class.sealedSubclasses.forEach { it.objectInstance } }
+        fun register() {
+            ModComponents::class.sealedSubclasses.forEach { it.objectInstance }
+        }
     }
 }

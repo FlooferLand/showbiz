@@ -1,12 +1,13 @@
 package com.flooferland.showbiz.datagen.providers
 
-import net.minecraft.resources.*
+import net.minecraft.world.item.ItemStack
 import com.flooferland.showbiz.registry.ModRecipes
 import com.flooferland.showbiz.utils.rlVanilla
+import com.mojang.serialization.JsonOps
 import kotlinx.serialization.json.*
 
 object RecipeProvider {
-    public fun buildRecipe(recipe: ModRecipes, outId: ResourceLocation) = buildJsonObject {
+    public fun buildRecipe(recipe: ModRecipes, stack: ItemStack) = buildJsonObject {
         put("type", rlVanilla(recipe.data.type).toString())
         when (recipe.data) {
             is ModRecipes.ShapedRecipeData -> {
@@ -33,8 +34,9 @@ object RecipeProvider {
                 }
             }
         }
-        putJsonObject("result") {
-            put("id", outId.toString())
-        }
+        put("result",
+            ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, stack).orThrow
+                .let { Json.parseToJsonElement(it.toString()) }
+        )
     }
 }
