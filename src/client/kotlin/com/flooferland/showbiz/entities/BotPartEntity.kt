@@ -4,6 +4,7 @@ import net.minecraft.nbt.*
 import net.minecraft.network.syncher.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
@@ -27,7 +28,7 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
     override fun isPickable() = true
     override fun isAttackable() = true
     override fun canBeCollidedWith() = false
-    override fun canCollideWith(entity: Entity) = (entity is BotPartEntity)
+    override fun canCollideWith(entity: Entity) = (entity is BotPartEntity) || (entity is Player)
     override fun canBeHitByProjectile() = true
     override fun getDimensions(pose: Pose): EntityDimensions =
         targetSize.let { EntityDimensions.fixed(it.x.toFloat(), it.y.toFloat()) }
@@ -42,12 +43,22 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
     }
 
     override fun playerTouch(player: Player) {
-        colliding.add(player)
+        if (boundingBox.intersects(player.boundingBox)) {
+            colliding += player
+        }
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
-        colliding.add(player)
+        colliding += player
         return InteractionResult.PASS
+    }
+
+    override fun hurt(source: DamageSource, amount: Float): Boolean {
+        val attacker = source.entity ?: return false
+        if (attacker is Player) {
+            colliding += attacker
+        }
+        return false
     }
 
     override fun tick() {
@@ -56,8 +67,8 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
         refreshDimensions()
         setPos(targetPos)
 
-        val collisions = level.getEntitiesOfClass(BotPartEntity::class.java, boundingBox).filter { it != this }
-        colliding.apply { clear(); addAll(collisions) }
+        val boxCollisions = level.getEntitiesOfClass(BotPartEntity::class.java, boundingBox).filter { it != this }
+        colliding += boxCollisions
         used.removeIf { it !in colliding }
 
         val newCollisions = colliding.filter { it !in used }
@@ -67,8 +78,9 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
             }
             if (id == BotPartId.RolfeCymbal) {
                 level.playLocalSound(x, y, z, ModSounds.HihatClosed.event, SoundSource.BLOCKS, 1.5f, 1f, false)
-                used.addAll(newCollisions)
+                used += newCollisions
             }
         }
+        colliding.clear()
     }
 }
