@@ -5,7 +5,6 @@ import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
-import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.level.*
@@ -15,10 +14,11 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.types.AbstractBotPart
-import com.flooferland.showbiz.types.InteractPartId
 import com.flooferland.showbiz.types.IBotSoundHandler
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -30,7 +30,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, ExtendedScreenHandlerFactory<BotListSelectPacket> {
+class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, ExtendedScreenHandlerFactory<BotListSelectPacket>, ICollidePartInteractable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
         pendingShow.merge(received)
@@ -38,7 +38,14 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     var botId: ResourceId? = null
-    var clientBotParts = hashMapOf<InteractPartId, AbstractBotPart>()
+
+    override val collidePartInstance = CollidePartManager.create(this) {
+        val botId = botId ?: return@create
+        if (botId.matches("showbiz:rolfe_dewolfe")) {
+            map("cymbal", CollidePartId.RolfeCymbal)
+            map("stick", CollidePartId.RolfeStick)
+        }
+    }
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
@@ -52,25 +59,10 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         pendingShow.tempReset()
 
         soundHandler?.tick(this, level, pos, state)
+        collidePartInstance.tick(level, pos, state)
         if (botId != prevBotId) {
-            refreshBotParts()
+            collidePartInstance.refresh(level, pos)
             prevBotId = botId
-        }
-    }
-
-    fun refreshBotParts() {
-        val level = level ?: return
-        if (!level.isClientSide) return
-        clientBotParts.values.removeIf { it.remove(Entity.RemovalReason.DISCARDED); true }
-        val ids = when (botId.toString()) {
-            "showbiz:rolfe_dewolfe" -> arrayOf(InteractPartId.RolfeStick, InteractPartId.RolfeCymbal)
-            else -> emptyArray()
-        }
-        for (id in ids) {
-            val spawn = AbstractBotPart.clientSpawn ?: continue
-            val entity = spawn(level, id, this)
-            entity.setPos(blockPos.center)
-            clientBotParts[id] = entity
         }
     }
 

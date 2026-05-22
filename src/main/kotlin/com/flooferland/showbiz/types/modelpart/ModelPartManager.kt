@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.types
+package com.flooferland.showbiz.types.modelpart
 
 import net.minecraft.core.*
 import net.minecraft.resources.*
@@ -12,7 +12,7 @@ import org.joml.Vector3d
 /** Responsible for initializing parts */
 object ModelPartManager {
     var modelPartData: ModelPartMap? = null
-    var clientModelPartInstancer: (IModelPartInteractable, block: ModBlocks, customParts: Map<String, ModelPart>) -> IInstance? = { _, _, _ -> null }
+    var clientInstancer: (IModelPartInteractable, block: ModBlocks, customParts: Map<String, ModelPart>) -> IInstance? = { _, _, _ -> null }
 
     @DslMarker
     annotation class ModelPartDsl
@@ -35,7 +35,7 @@ object ModelPartManager {
         ModelPartInstance(
             owner,
             block,
-            clientModelPartInstancer(owner, block, ModelPartBuilder().also { builder(it) }.parts)
+            clientInstancer(owner, block, ModelPartBuilder().also { builder(it) }.parts)
         )
 
     fun getMaxReach(player: Player) = if (player.isCreative) 4f else 2.7f

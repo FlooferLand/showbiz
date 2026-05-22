@@ -5,8 +5,7 @@ package com.flooferland.showbiz.types
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.phys.Vec3
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.entities.BotPartEntity
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -21,12 +20,8 @@ import kotlin.jvm.optionals.getOrNull
  * Workaround for GeckoLib #841: worldSpaceMatrix is broken inside GeoBlockRenderer
  * Credit to https://duzo.is-a.dev
  */
-class InteractionRenderHook(val bonePrepareBlock: BonePrepare.() -> Unit) {
+class InteractionRenderHook() {
     private val capturedBoneMatrices = mutableMapOf<String, Matrix4f>()
-    private val bonesToIds = mutableMapOf<String, InteractPartId>()
-    inner class BonePrepare() {
-        public fun map(bone: String, id: InteractPartId) = bonesToIds.put(bone, id)
-    }
 
     fun beforeRenderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
         val pose = Matrix4f(poseStack.last().pose())
@@ -39,13 +34,12 @@ class InteractionRenderHook(val bonePrepareBlock: BonePrepare.() -> Unit) {
         capturedBoneMatrices.clear()
     }
 
-    fun postRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        val bonePrepare = BonePrepare()
-        bonesToIds.clear()
-        bonePrepareBlock.invoke(bonePrepare)
-        for ((bone, id) in bonesToIds) {
+    fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+        val instance = (animatable as? ICollidePartInteractable)?.collidePartInstance ?: return
+        val clientInstance = instance.clientInstance as? ClientCollidePartInstance ?: return
+        for ((bone, id) in instance.bonesToIds) {
             model.getBone(bone).getOrNull()?.let { bone ->
-                val entity = animatable.clientBotParts[id] as? BotPartEntity ?: return@let
+                val entity = clientInstance.spawned[id] ?: return@let
                 entity.targetPos = bonePosFromCapture(bone) ?: return@let
                 entity.targetSize = bone.calculateBounds { capturedBoneMatrices[it.name] }
             }

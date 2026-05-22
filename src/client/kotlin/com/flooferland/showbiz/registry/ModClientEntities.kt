@@ -9,13 +9,13 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
 import net.minecraft.world.level.Level
-import com.flooferland.showbiz.entities.BotPartEntity
+import com.flooferland.showbiz.entities.CollidePartEntity
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.utils.rl
 
 sealed class ModClientEntities<T: Entity> {
     object ModelPart : ModClientEntities<ModelPartEntity>("model_part", ::ModelPartEntity)
-    object BotPart : ModClientEntities<BotPartEntity>("bot_part", ::BotPartEntity)
+    object CollidePart : ModClientEntities<CollidePartEntity>("collide_part", ::CollidePartEntity)
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>

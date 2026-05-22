@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.types
+package com.flooferland.showbiz.types.modelpart
 
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level

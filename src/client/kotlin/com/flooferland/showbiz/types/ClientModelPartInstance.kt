@@ -15,10 +15,11 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
-import com.flooferland.showbiz.utils.Extensions.divide
+import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
+import com.flooferland.showbiz.types.modelpart.ModelPart
+import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import org.joml.Vector3d
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos

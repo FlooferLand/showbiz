@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.types
+package com.flooferland.showbiz.types.modelpart
 
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel

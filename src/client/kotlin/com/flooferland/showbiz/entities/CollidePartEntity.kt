@@ -10,13 +10,12 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.types.AbstractBotPart
-import com.flooferland.showbiz.types.InteractPartId
+import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 
-class BotPartEntity(level: Level, id: InteractPartId = InteractPartId.None, owner: StagedBotBlockEntity? = null) : AbstractBotPart(ModClientEntities.BotPart.type, level, id, owner) {
+class CollidePartEntity(level: Level, val id: CollidePartId = CollidePartId.None, owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -28,7 +27,7 @@ class BotPartEntity(level: Level, id: InteractPartId = InteractPartId.None, owne
     override fun isPickable() = true
     override fun isAttackable() = true
     override fun canBeCollidedWith() = false
-    override fun canCollideWith(entity: Entity) = (entity is BotPartEntity) || (entity is Player)
+    override fun canCollideWith(entity: Entity) = (entity is CollidePartEntity) || (entity is Player)
     override fun canBeHitByProjectile() = true
     override fun getDimensions(pose: Pose): EntityDimensions =
         targetSize.let { EntityDimensions.fixed(it.x.toFloat(), it.y.toFloat()) }
@@ -39,7 +38,7 @@ class BotPartEntity(level: Level, id: InteractPartId = InteractPartId.None, owne
     var targetSize = Vec3(0.1, 0.1, 0.1)
 
     init {
-        if (id == InteractPartId.None) remove(RemovalReason.DISCARDED)
+        if (id == CollidePartId.None) remove(RemovalReason.DISCARDED)
     }
 
     override fun playerTouch(player: Player) {
@@ -67,16 +66,13 @@ class BotPartEntity(level: Level, id: InteractPartId = InteractPartId.None, owne
         refreshDimensions()
         setPos(targetPos)
 
-        val boxCollisions = level.getEntitiesOfClass(BotPartEntity::class.java, boundingBox).filter { it != this }
+        val boxCollisions = level.getEntitiesOfClass(CollidePartEntity::class.java, boundingBox).filter { it != this }
         colliding += boxCollisions.filter { it.position() != position() }  // Filter prevents a weird bug triggering all of them at once upon join
         used.removeIf { it !in colliding }
 
         val newCollisions = colliding.filter { it !in used }
         if (newCollisions.isNotEmpty()) {
-            if (Showbiz.log.isDebugEnabled) {
-                Showbiz.log.debug("{} Hit {}", id, colliding.joinToString(transform = { it.id.toString() }))
-            }
-            if (id == InteractPartId.RolfeCymbal) {
+            if (id == CollidePartId.RolfeCymbal) {
                 level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, 1.5f, 1f, false)
                 used += newCollisions
             }

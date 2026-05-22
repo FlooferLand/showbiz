@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.registry.ModClientEntities
-import com.flooferland.showbiz.types.IModelPartInteractable
+import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.utils.Extensions.divide
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 

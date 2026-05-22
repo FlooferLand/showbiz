@@ -21,8 +21,8 @@ import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
-import com.flooferland.showbiz.types.IModelPartInteractable
-import com.flooferland.showbiz.types.ModelPartManager
+import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
+import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection

@@ -8,7 +8,6 @@ import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
-import com.flooferland.showbiz.types.InteractPartId
 import com.flooferland.showbiz.types.InteractionRenderHook
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -21,13 +20,7 @@ import software.bernie.geckolib.renderer.GeoBlockRenderer
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
-    val hook = InteractionRenderHook() {
-        val botId = animatable.botId ?: return@InteractionRenderHook
-        if (botId.matches("showbiz:rolfe_dewolfe")) {
-            map("cymbal", InteractPartId.RolfeCymbal)
-            map("stick", InteractPartId.RolfeStick)
-        }
-    }
+    val hook = InteractionRenderHook()
 
     init {
         addRenderLayer(AutoGlowingGeoLayer(this))

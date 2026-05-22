@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.types
+package com.flooferland.showbiz.types.modelpart
 
 import net.minecraft.resources.*
 import net.minecraft.world.phys.Vec3

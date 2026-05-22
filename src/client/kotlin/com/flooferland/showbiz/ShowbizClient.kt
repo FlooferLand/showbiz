@@ -3,7 +3,6 @@ package com.flooferland.showbiz
 import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
-import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.*
@@ -17,8 +16,6 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.*
-import com.flooferland.showbiz.entities.BotPartEntity
-import com.flooferland.showbiz.items.PlushBlockItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -28,6 +25,8 @@ import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
 import com.flooferland.showbiz.screens.*
 import com.flooferland.showbiz.types.*
+import com.flooferland.showbiz.types.collidepart.CollidePartManager
+import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
@@ -64,7 +63,6 @@ object ShowbizClient : ClientModInitializer {
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
-        ModelPartManager.clientModelPartInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         for (block in ModBlocks.entries) {
             val container = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull() ?: break
             val paths = listOf(
@@ -101,7 +99,7 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
             add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
-            EntityRendererRegistry.register(ModClientEntities.BotPart.type, ::BotPartEntityRenderer)
+            EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
         }
 
         // GeckoLib renderers
@@ -196,11 +194,8 @@ object ShowbizClient : ClientModInitializer {
 
         // DARN YOU SPLIT SOURCESETS
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
-        AbstractBotPart.clientSpawn = { level, id, owner ->
-            val entity = BotPartEntity(level, id, owner)
-            (level as? ClientLevel)?.addEntity(entity)
-            entity
-        }
+        ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
+        CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
     }
 
     fun resetAssetErrors() {
