@@ -5806,10 +5806,10 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": false,
+			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "EarR",
@@ -6144,7 +6144,7 @@
 			"override": false,
 			"length": 0.16667,
 			"snapping": 24,
-			"selected": true,
+			"selected": false,
 			"saved": true,
 			"path": "../Documents/showbiz/src/main/resources/assets/showbiz/showbiz/bots/dook_larue/models/dook_larue.animation.json",
 			"scope": 0,

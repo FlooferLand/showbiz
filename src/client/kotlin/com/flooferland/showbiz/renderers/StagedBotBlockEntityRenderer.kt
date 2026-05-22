@@ -3,7 +3,6 @@ package com.flooferland.showbiz.renderers
 import net.minecraft.client.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.core.particles.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
@@ -54,22 +53,14 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         when (animatable.botId.toString()) {
             "showbiz:rolfe_dewolfe" -> {
                 model.getBone("cymbal").getOrNull()?.let { bone ->
-                    bonePosFromCapture(bone)?.let { pos ->
-                        Minecraft.getInstance().level?.addParticle(ParticleTypes.ASH, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
-                    }
+                    val cymbalEntity = animatable.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return@let
+                    cymbalEntity.targetPos = bonePosFromCapture(bone) ?: return@let
+                    cymbalEntity.targetSize = bone.calculateBounds { capturedBoneMatrices[it.name] }
                 }
-
-                run {
-                    val stickBone = model.getBone("stick").getOrNull() ?: return@run
-                    val stickEntity = animatable.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return@run
-                    stickEntity.targetPos = bonePosFromCapture(stickBone) ?: return@run
-                    stickEntity.targetSize = stickBone.calculateBounds { capturedBoneMatrices[it.name] }
-                }
-                run {
-                    val cymbalBone = model.getBone("cymbal").getOrNull() ?: return@run
-                    val cymbalEntity = animatable.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return@run
-                    cymbalEntity.targetPos = bonePosFromCapture(cymbalBone) ?: return@run
-                    cymbalEntity.targetSize = cymbalBone.calculateBounds { capturedBoneMatrices[it.name] }
+                model.getBone("stick").getOrNull()?.let { bone ->
+                    val stickEntity = animatable.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return@let
+                    stickEntity.targetPos = bonePosFromCapture(bone) ?: return@let
+                    stickEntity.targetSize = bone.calculateBounds { capturedBoneMatrices[it.name] }
                 }
             }
         }

@@ -57,7 +57,18 @@ rae right_elbow_twist {
 
 rae left_arm_raise {
     flow 0.3
-    rotate "arm_l_up_pivot" z:-65
+    rotate "arm_l_up_pivot" z:-70
+    wigglemul 1.5
+}
+
+rae left_arm_twist {
+    flow 0.5
+    rotate "ArmL" y:60
+    wigglemul 1.5
+}
+rae left_elbow {
+    flow 0.5
+    rotate "ArmL2" x:-50
     wigglemul 1.5
 }
 
