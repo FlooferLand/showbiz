@@ -2,7 +2,6 @@ package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
 import net.minecraft.resources.*
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -19,6 +18,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     protected var currentModel: BotModelData? = null
 
     enum class Error {
+        MissingBot,
         MissingModel,
         MissingTexture,
         MissingAnimation,
@@ -37,31 +37,24 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
 
     override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
         val botId = animatable.botId ?: return emptyModel
-        val model = ShowbizClient.bots[botId]?.getDefaultModel() ?: run {
-            if (!errorsTriggered.contains(Error.MissingModel)) {
-                errorsTriggered.add(
-                    Error.MissingModel.withBot(animatable).withContext(
-                        "Failed to get model. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
-                    )
-                )
-            }
-            emptyModel
+        val bot = ShowbizClient.bots[botId] ?: run {
+            errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
+                "Failed to get model. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
+            )
+            return emptyModel
         }
-        return model
+        return bot.getDefaultModel()
     }
 
     override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation {
         val botId = animatable.botId ?: return emptyTexture
-        return ShowbizClient.bots[botId]?.getDefaultTexture() ?: run {
-            if (!errorsTriggered.contains(Error.MissingTexture)) {
-                errorsTriggered.add(
-                    Error.MissingTexture.withBot(animatable).withContext(
-                        "Failed to get texture. Bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]"
-                    )
-                )
-            }
-            emptyModel
+        val bot = ShowbizClient.bots[botId] ?: run {
+            errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
+                "Failed to get texture. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]"
+            )
+            return emptyTexture
         }
+        return bot.getDefaultTexture()
     }
 
     // TODO: QUICK: Make this cache the animation based on the bot ID, loading the cached version if cached

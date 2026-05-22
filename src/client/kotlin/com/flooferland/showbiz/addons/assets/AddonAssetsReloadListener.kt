@@ -46,7 +46,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
             if (pack.packId().startsWith("fabric-")) continue
-            for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
+            namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
                 fun err(msg: String, throwable: Throwable? = null) =
                     Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
                 fun getResAsString(location: ResourceLocation) =
@@ -80,7 +80,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
                     // Animations
                     if (location.path.endsWith(".animation.json")) {
-                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
                         assets.animations = location
                         val anim = string?.let { ShowbizUtils.loadBakedAnimation(location, it) }
                         if (anim != null) out.animations[location] = anim
@@ -88,15 +88,20 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
                     // assets.toml
                     if (location.path.endsWith("/$ASSETS_TOML_NAME")) {
-                        val assets = botAssets.getOrPut(botId, { BotLoadAssets() })
+                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
                         assets.rootPath = location.toPath().parent
                     }
                 }
                 pack.listResources(PackType.CLIENT_RESOURCES, namespace, Showbiz.MOD_ID, onList)
+                for ((botId, botAsset) in botAssets) {
+                    if (botAsset.model == null) err("Bot '${botId}' was found, but it's model wasn't")
+                    if (botAsset.rootPath == null) err("Bot '${botId}' was found, but it's root path wasn't (missing assets.toml?)")
+                }
 
                 // Finding toml def files
-                val bots = mutableMapOf<String, AddonBot>()
+                val bots = mutableMapOf<String, AddonBot?>()
                 for ((id, bot) in botAssets) {
+                    bots[id] = null
                     if (bot.rootPath == null || bot.model == null) {
                         err("INTERNAL: Failed to load root path or model for '${id}'")
                         continue
@@ -118,15 +123,21 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                         return bits.getOrNull()
                     }
 
-                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
-                    val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
+                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: run { err("Failed to get $ASSETS_TOML_NAME"); continue }
+                    val bitmap = getBits(BITMAP_BITS_NAME) ?: run { err("Failed to get $BITMAP_BITS_NAME"); continue }
                     bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations)
                 }
 
                 if (bots.isNotEmpty()) {
+                    for ((botId, bot) in bots) {
+                        if (bot == null) {
+                            err("Bot '${botId}' has no associated data. Missing files")
+                            continue@namespace
+                        }
+                    }
                     val assets = AddonAssets(
                         id = namespace,
-                        bots = bots.mapKeys { (key, _) -> ResourceId(namespace, key) }
+                        bots = bots.mapKeys { (key, _) -> ResourceId(namespace, key) }.mapValues { (_, v) -> v!! }
                     )
                     addons.add(assets)
                 }

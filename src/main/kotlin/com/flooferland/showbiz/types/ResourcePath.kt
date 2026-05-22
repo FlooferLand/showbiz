@@ -33,4 +33,21 @@ class ResourcePath(val namespace: String, path: String) {
 
     fun toLocation(): ResourceLocation =
         ResourceLocation.fromNamespaceAndPath(namespace, path)
+
+    override fun equals(other: Any?) = when {
+        other === this -> true
+        other is ResourcePath -> other.namespace == namespace && other.path == path
+        other is ResourceId -> other.namespace == namespace && other.path == path
+        else -> false
+    }
+
+    override fun hashCode(): Int {
+        var result = namespace.hashCode()
+        result = 31 * result + pathArray.hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + parent.hashCode()
+        result = 31 * result + last.hashCode()
+        result = 31 * result + name.hashCode()
+        return result
+    }
 }

@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types
 
-enum class BotPartId {
+/** ID of whatever entity can interact with another */
+enum class InteractPartId {
     None,
     Player,
     RolfeStick,

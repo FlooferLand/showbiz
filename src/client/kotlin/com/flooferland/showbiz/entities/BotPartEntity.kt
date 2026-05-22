@@ -14,9 +14,9 @@ import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.AbstractBotPart
-import com.flooferland.showbiz.types.BotPartId
+import com.flooferland.showbiz.types.InteractPartId
 
-class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedBotBlockEntity? = null) : AbstractBotPart(ModClientEntities.BotPart.type, level, id, owner) {
+class BotPartEntity(level: Level, id: InteractPartId = InteractPartId.None, owner: StagedBotBlockEntity? = null) : AbstractBotPart(ModClientEntities.BotPart.type, level, id, owner) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -39,7 +39,7 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
     var targetSize = Vec3(0.1, 0.1, 0.1)
 
     init {
-        if (id == BotPartId.None) remove(RemovalReason.DISCARDED)
+        if (id == InteractPartId.None) remove(RemovalReason.DISCARDED)
     }
 
     override fun playerTouch(player: Player) {
@@ -68,7 +68,7 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
         setPos(targetPos)
 
         val boxCollisions = level.getEntitiesOfClass(BotPartEntity::class.java, boundingBox).filter { it != this }
-        colliding += boxCollisions
+        colliding += boxCollisions.filter { it.position() != position() }  // Filter prevents a weird bug triggering all of them at once upon join
         used.removeIf { it !in colliding }
 
         val newCollisions = colliding.filter { it !in used }
@@ -76,8 +76,8 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
             if (Showbiz.log.isDebugEnabled) {
                 Showbiz.log.debug("{} Hit {}", id, colliding.joinToString(transform = { it.id.toString() }))
             }
-            if (id == BotPartId.RolfeCymbal) {
-                level.playLocalSound(x, y, z, ModSounds.HihatClosed.event, SoundSource.BLOCKS, 1.5f, 1f, false)
+            if (id == InteractPartId.RolfeCymbal) {
+                level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, 1.5f, 1f, false)
                 used += newCollisions
             }
         }

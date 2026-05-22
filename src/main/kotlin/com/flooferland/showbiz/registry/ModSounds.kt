@@ -7,6 +7,7 @@ import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.sounds.*
 
+/// NOTE: Data generator should be called after adding new sounds here
 enum class ModSounds {
     Select("select", folder = "interface"),
     Deselect("deselect", folder = "interface"),
@@ -16,7 +17,8 @@ enum class ModSounds {
     ReelEnter("reel_enter"),
     ReelExit("reel_exit"),
     ReelPlay("reel_play"),
-    HihatClosed("hihat_closed")
+    HihatClosed("hihat_closed"),
+    Cymbal("cymbal")
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {

@@ -11,13 +11,12 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.AbstractBotPart
-import com.flooferland.showbiz.types.BotPartId
+import com.flooferland.showbiz.types.InteractPartId
 import com.flooferland.showbiz.types.IBotSoundHandler
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ConnectionManager
@@ -39,7 +38,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     var botId: ResourceId? = null
-    var clientBotParts = hashMapOf<BotPartId, AbstractBotPart>()
+    var clientBotParts = hashMapOf<InteractPartId, AbstractBotPart>()
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
@@ -64,7 +63,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         if (!level.isClientSide) return
         clientBotParts.values.removeIf { it.remove(Entity.RemovalReason.DISCARDED); true }
         val ids = when (botId.toString()) {
-            "showbiz:rolfe_dewolfe" -> arrayOf(BotPartId.RolfeStick, BotPartId.RolfeCymbal)
+            "showbiz:rolfe_dewolfe" -> arrayOf(InteractPartId.RolfeStick, InteractPartId.RolfeCymbal)
             else -> emptyArray()
         }
         for (id in ids) {

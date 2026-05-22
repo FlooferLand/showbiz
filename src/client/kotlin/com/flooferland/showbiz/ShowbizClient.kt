@@ -45,10 +45,10 @@ import software.bernie.geckolib.renderer.GeoItemRenderer
 import kotlin.jvm.optionals.getOrNull
 
 object ShowbizClient : ClientModInitializer {
-    var addons: List<AddonAssets> = listOf()
-    var bots: Map<ResourceId, AddonBot> = mapOf()
-    var botModels: Map<ResourceLocation, BotModelData> = mapOf()
-    var animations: Map<ResourceLocation, BakedAnimations> = mapOf()
+    var addons: List<AddonAssets> = emptyList()
+    var bots: Map<ResourceId, AddonBot> = emptyMap()
+    var botModels: Map<ResourceLocation, BotModelData> = emptyMap()
+    var animations: Map<ResourceLocation, BakedAnimations> = emptyMap()
 
     override fun onInitializeClient() {
         // Loading the mod
