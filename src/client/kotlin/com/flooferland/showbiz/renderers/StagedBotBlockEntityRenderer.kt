@@ -3,6 +3,7 @@ package com.flooferland.showbiz.renderers
 import net.minecraft.client.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.core.particles.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
@@ -12,6 +13,7 @@ import com.flooferland.showbiz.entities.BotPartEntity
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
 import com.flooferland.showbiz.types.BotPartId
+import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
@@ -23,29 +25,54 @@ import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
-
-// Thanks to Duzo for the bone position workaround!
-// https://github.com/bernie-g/geckolib/issues/841
+import kotlin.jvm.optionals.getOrNull
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
-    val capturedBoneMatrices = hashMapOf<String, Matrix4f>()
     init {
         addRenderLayer(AutoGlowingGeoLayer(this))
     }
 
-    override fun renderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer, packedLight: Int, packedOverlay: Int, colour: Int) {
-        if (bone.isHidden) return;
+    // workaround for geckolib #841: worldSpaceMatrix is broken inside GeoBlockRenderer
+    private val capturedBoneMatrices = mutableMapOf<String, Matrix4f>()
+
+    override fun renderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
         val pose = Matrix4f(poseStack.last().pose())
-        pose.translate(bone.pivotX / 16f, (bone.pivotY / 16f) - 1f, bone.pivotZ / 16f)
+        // undo prepMatrixForBone's translateAwayFromPivotPoint so the matrix matches worldSpaceMatrix
+        pose.translate(bone.pivotX / 16f, bone.pivotY / 16f, bone.pivotZ / 16f)
         capturedBoneMatrices[bone.name] = pose
         super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour)
     }
 
-    fun bonePosFromCapture(boneName: String?): Vec3? {
-        val mat = capturedBoneMatrices[boneName] ?: return null
+    private fun bonePosFromCapture(bone: GeoBone): Vec3? {
+        val mat = capturedBoneMatrices[bone.name] ?: return null
         val v = Vector4f(0f, 0f, 0f, 1f).mul(mat)
-        val cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()
-        return Vec3(v.x + cam.x, v.y + cam.y, v.z + cam.z)
+        val cam = Minecraft.getInstance().gameRenderer.mainCamera.position
+        return Vec3(v.x.toDouble() + cam.x, v.y.toDouble() + cam.y, v.z.toDouble() + cam.z)
+    }
+
+    fun setupBones(model: BakedGeoModel) {
+        when (animatable.botId.toString()) {
+            "showbiz:rolfe_dewolfe" -> {
+                model.getBone("cymbal").getOrNull()?.let { bone ->
+                    bonePosFromCapture(bone)?.let { pos ->
+                        Minecraft.getInstance().level?.addParticle(ParticleTypes.ASH, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
+                    }
+                }
+
+                run {
+                    val stickBone = model.getBone("stick").getOrNull() ?: return@run
+                    val stickEntity = animatable.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return@run
+                    stickEntity.targetPos = bonePosFromCapture(stickBone) ?: return@run
+                    stickEntity.targetSize = stickBone.calculateBounds { capturedBoneMatrices[it.name] }
+                }
+                run {
+                    val cymbalBone = model.getBone("cymbal").getOrNull() ?: return@run
+                    val cymbalEntity = animatable.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return@run
+                    cymbalEntity.targetPos = bonePosFromCapture(cymbalBone) ?: return@run
+                    cymbalEntity.targetSize = cymbalBone.calculateBounds { capturedBoneMatrices[it.name] }
+                }
+            }
+        }
     }
 
     override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
@@ -135,16 +162,6 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         poseStack.popPose()
     }
 
-    override fun postRender(poseStack: PoseStack?, animatable: StagedBotBlockEntity?, model: BakedGeoModel?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        val stickPos = bonePosFromCapture("stick") ?: return
-        val stickEntity = animatable?.clientBotParts[BotPartId.RolfeStick] as? BotPartEntity ?: return
-        stickEntity.targetPos = stickPos
-
-        val cymbalPos = bonePosFromCapture("cymbal") ?: return
-        val cymbalEntity = animatable?.clientBotParts[BotPartId.RolfeCymbal] as? BotPartEntity ?: return
-        cymbalEntity.targetPos = cymbalPos
-    }
-
     override fun actuallyRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel?, renderType: RenderType?, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         // GigaDirection rotation
         if (!isReRender) run {
@@ -153,6 +170,10 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             poseStack.mulPose(Axis.YP.rotationDegrees(angle))
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
+    }
+
+    override fun postRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+        setupBones(model)
     }
 
     companion object {

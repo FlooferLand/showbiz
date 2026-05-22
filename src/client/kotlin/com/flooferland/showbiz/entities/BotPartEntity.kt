@@ -43,9 +43,7 @@ class BotPartEntity(level: Level, id: BotPartId = BotPartId.None, owner: StagedB
         val level = level() ?: return
 
         refreshDimensions()
-        val blockPos = owner?.blockPos!!.let { Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()) }
-        val newPos = targetPos.add(0.0, 1.0, 0.0)
-        setPos(newPos)
+        setPos(targetPos)
 
         val area = boundingBox
         val collisions = level.getEntitiesOfClass(BotPartEntity::class.java, area).filter { it != this }
