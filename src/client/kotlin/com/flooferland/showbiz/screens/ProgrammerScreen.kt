@@ -40,6 +40,7 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
             val y = textureY + 10 + (size * 0.2f).toInt() + (i * spacing)
             run {
                 val nameWidget = StringWidget(x, y, leftSpace, height, Component.literal(name), font).alignLeft()
+                nameWidget.tooltip = Tooltip.create(Component.literal("$name in your number row"))
                 addRenderableWidget(nameWidget)
             }
             input.setPosition(x + leftSpace + 5, y)
@@ -56,7 +57,6 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
         }
         data.saveToPlayer(player)
         ClientPlayNetworking.send(ProgrammerPlayerUpdatePacket(keysToBits = data.keysToBits))
-        println(data.keysToBits.joinToString(", "))
         super.onClose()
     }
 

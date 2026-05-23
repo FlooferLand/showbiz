@@ -1,11 +1,9 @@
 package com.flooferland.showbiz.network.packets
 
-import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import com.flooferland.showbiz.Showbiz
+import net.minecraft.network.*
+import net.minecraft.network.codec.*
+import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.show.readBitId
-import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.rl
@@ -19,15 +17,16 @@ class ProgrammerPlayerUpdatePacket(val keysToBits: Array<MappedBits>) : CustomPa
             { buf, state ->
                 state.keysToBits.forEachIndexed { i, mappedBits ->
                     buf.writeInt(i)
-                    buf.writeInt(mappedBits.size)
-                    mappedBits.forEach { (map, bitId) ->
+                    val entries = mappedBits.entries.toTypedArray()
+                    buf.writeInt(entries.size)
+                    entries.forEach { (map, bitId) ->
                         buf.writeUtf(map)
                         buf.writeShort(bitId.toInt())
                     }
                 }
             },
             { buf ->
-                val keysToBits = MutableList(PlayerProgrammingData.SIZE) { MappedBits() }
+                val keysToBits = Array(PlayerProgrammingData.SIZE) { MappedBits() }
                 repeat(PlayerProgrammingData.SIZE) {
                     val i = buf.readInt()
                     val mappedBitsSize = buf.readInt()
@@ -36,7 +35,7 @@ class ProgrammerPlayerUpdatePacket(val keysToBits: Array<MappedBits>) : CustomPa
                         keysToBits[i][mapping] = buf.readBitId()
                     }
                 }
-                ProgrammerPlayerUpdatePacket(keysToBits.toTypedArray())
+                ProgrammerPlayerUpdatePacket(keysToBits)
             }
         )!!
     }
