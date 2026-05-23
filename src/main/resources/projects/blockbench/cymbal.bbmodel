@@ -292,11 +292,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-4, 25.225, -4.5],
-			"to": [4, 26, 3.5],
+			"from": [-4, 25.475, -4.5],
+			"to": [4, 26.25, 3.5],
 			"autouv": 0,
 			"color": 5,
-			"origin": [0, 24.7375, -0.5],
+			"origin": [0, 25.4375, -0.5],
 			"uv_offset": [100, 26],
 			"faces": {
 				"north": {
@@ -386,7 +386,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 24.5125, -0.5],
+			"origin": [0, 25.5125, -0.5],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -396,7 +396,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		}
 	],
 	"outliner": [

@@ -1,11 +1,12 @@
 package com.flooferland.showbiz.audio
 
-import com.flooferland.showbiz.Showbiz
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
+import org.lwjgl.openal.ALC10.alcGetCurrentContext
 
 // TODO: Should probably avoid sending stereo audio to this cuz an extra channel means extra network bandwidth
 //       OpenAL can only do mono (without exploding)
@@ -22,20 +23,23 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             else -> error("Unsupported format: $friendlyFormat")
         }
     }
-    val maxDistance = 18f
-    var source = 0
+    val maxDistance = 32f
+    val paused get() = getState() == AL_PAUSED
     var lastReceivedChunkId = -1
+    var source = 0
+    var sourceContext = 0L
 
     private fun getState(): Int {
         if (!isValidSource()) return -1
         return handleAL { alGetSourcei(source, AL_SOURCE_STATE) }
     }
-    private fun isValidSource() = source != 0 && alIsSource(source)
+    private fun isValidSource() = source != 0 && handleALBasic { alIsSource(source) } && alcGetCurrentContext() == sourceContext
 
     fun isOpen() = isValidSource()
     fun open() {
         if (isValidSource()) close()
         source = handleAL { alGenSources() }
+        sourceContext = handleAL { alcGetCurrentContext() }
         handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
         handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
@@ -43,23 +47,26 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         lastReceivedChunkId = -1
     }
     fun close() {
-        if (!handleAL { alIsSource(source) }) return
-        handleAL { alSourceStop(source) }
+        if (isValidSource()) {
+            handleALBasic { alSourceStop(source) }
 
-        val queued = handleAL { alGetSourcei(source, AL_BUFFERS_QUEUED) }
-        if (queued > 0) {
-            val buffers = BufferUtils.createIntBuffer(queued)
-            handleAL { alSourceUnqueueBuffers(source, buffers) }
-            handleAL { alDeleteBuffers(buffers) }
+            val queued = handleALBasic { alGetSourcei(source, AL_BUFFERS_QUEUED) }
+            if (queued > 0) {
+                val buffers = BufferUtils.createIntBuffer(queued)
+                handleALBasic { alSourceUnqueueBuffers(source, buffers) }
+                handleALBasic { alDeleteBuffers(buffers) }
+            }
+
+            handleALBasic { alSourcei(source, AL_BUFFER, 0) }
+            handleALBasic { alDeleteSources(source) }
+            alGetError()
         }
-
-        handleAL { alSourcei(source, AL_BUFFER, 0) }
-        handleAL { alDeleteSources(source) }
         lastReceivedChunkId = -1
         source = 0
     }
     fun write(packet: PlaybackChunkPacket) {
         if (!isValidSource()) return
+        if (paused) return
         updatePosition()
 
         // Checking chunk order
@@ -72,31 +79,42 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         handleAL { alSourceStop(source) }
 
         // Cleaning buffers
-        val queued = handleAL { alGetSourcei(source, AL_BUFFERS_QUEUED) }
-        if (queued > 0) {
-            val oldBuffers = BufferUtils.createIntBuffer(queued)
+        val processedCount = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
+        if (processedCount > 0) {
+            val oldBuffers = BufferUtils.createIntBuffer(processedCount)
             handleAL { alSourceUnqueueBuffers(source, oldBuffers) }
-            alDeleteBuffers(oldBuffers)
+            handleAL { alDeleteBuffers(oldBuffers) }
         }
-        handleAL { alSourcei(source, AL_BUFFER, 0) }
 
         // Creating a new buffer
         val newBufId = handleAL { alGenBuffers() }
         val data = BufferUtils.createByteBuffer(packet.audioChunk.size)
             .put(packet.audioChunk)
             .flip()
-        alBufferData(newBufId, format, data, packet.format.sampleRate)
+        handleAL { alBufferData(newBufId, format, data, packet.format.sampleRate) }
 
         // Sets the buffer
         // !! Will fail if the window is resized, for whatever reason, so manual error handling re-creates the source and everything.
         if (alGetError() != AL_NO_ERROR) {
-            close()
+            source = 0
             open()
             return
         }
 
         handleAL { alSourceQueueBuffers(source, newBufId) }
-        if (getState() != AL_PLAYING) {
+        if (getState() != AL_PLAYING && !paused) {
+            handleAL { alSourcePlay(source) }
+        }
+    }
+    fun pause() {
+        if (!isValidSource()) return
+        if (getState() == AL_PLAYING) {
+            handleAL { alSourcePause(source) }
+        }
+    }
+    fun resume() {
+        if (!isValidSource()) return
+        if (getState() == AL_PAUSED) {
             handleAL { alSourcePlay(source) }
         }
     }
@@ -112,20 +130,24 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
     }
 
-    private fun <T> handleAL(block: () -> T): T {
+    private fun <T> handleALBasic(block: () -> T): T = handleAL(logOnly = true, block)
+    private fun <T> handleAL(logOnly: Boolean = false, block: () -> T): T {
         val res = block()
-        checkAlError()
+        val error = checkAlError()
+        if (error != null && !logOnly) {
+            close()
+            open()
+        }
         return res
     }
 
-    private fun checkAlError(): Boolean {
+    private fun checkAlError(): String? {
         val error = alGetError()
-        if (error == AL_NO_ERROR) {
-            return false
-        }
+        if (error == AL_NO_ERROR) return null
         val stack = Thread.currentThread().stackTrace.slice(3..7).joinToString("\n")
-        Showbiz.log.error("OpenAL error \"${formatAlError(error)}\": $stack")
-        return true
+        val formatted = formatAlError(error)
+        Showbiz.log.error("OpenAL error \"$formatted\": $stack")
+        return formatted
     }
 
     private fun formatAlError(error: Int) = when (error) {
@@ -135,6 +157,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         AL_INVALID_ENUM -> "Invalid enum"
         AL_INVALID_NAME -> "Invalid name"
         AL_INVALID_VALUE -> "Invalid value"
-        else -> "Error ID '$error'"
+        else -> "OpenAL error ID '$error'"
     }
 }
