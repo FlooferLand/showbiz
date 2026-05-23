@@ -5,28 +5,32 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
+import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.util.*
 import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.MappedBits
 import com.mojang.blaze3d.systems.RenderSystem
 
 // Welcome to hell
-class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(x, y, width, height, Component.literal("Bit select")) {
+class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWidget(x, y, width, height, Component.literal("Bit select")) {
     val popupY get() = y + height
     val popupHeight get() = (Minecraft.getInstance().screen!!.height - popupY) - 5
     val popupWidth get() = 180
     val popupEntryHeight get() = 13
 
     var pickingChart: String? = null
+    var usedBits = mutableSetOf<BitId>()
     var expanded = false
     var values = MappedBits()
-    var usedBits = mutableSetOf<BitId>()
+        set(value) {
+            field = value
+            updateChartButtons()
+        }
 
     var scrollOffset = 0.0
     var bitWidgets = mutableListOf<AbstractWidget>()
@@ -55,73 +59,9 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
             searchBar?.setPosition(x, popupY)
             searchBar?.tooltip = Tooltip.create(Component.literal("Click to search"))
             searchBar?.isFocused = true
-            searchBar?.setResponder { text ->
-                val query = text.lowercase().trim()
-                if (query.isEmpty()) {
-                    bitWidgets.forEach { it.visible = true }
-                } else {
-                    var currentHeader: StringWidget? = null
-                    var matchesHeader = false
-                    bitWidgets.forEach { widget ->
-                        if (widget is StringWidget) {
-                            currentHeader = widget
-                            val target = widget.message.string.lowercase()
-                                .replace('_', ' ')
-                                .replace("duke", "dook")
-                            matchesHeader = query in target
-                            widget.visible = matchesHeader
-                        } else if (widget is BitEntryButton) {
-                            val buttonMatched = query in widget.searchKey
-                            widget.visible = matchesHeader || buttonMatched
-                            if (buttonMatched && currentHeader != null) {
-                                currentHeader.visible = true
-                            }
-                        }
-                    }
-                }
-                updateScroll(0.0)
-            }
+            searchBar?.setResponder { filterList(it) }
 
-            val widgets = mutableListOf<AbstractWidget>()
-            val chart = chartId?.let { BitUtils.readBitmap(it) } ?: return
-
-            // Named bits
-            chart.forEach { (fixtureName, movements) ->
-                widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal(fixtureName), font))
-                val movements = movements.entries.sortedBy { it.value }
-                movements.forEach { (movementName, bitId) ->
-                    usedBits.add(bitId)
-                    val button = BitEntryButton(
-                        x + 5, 0, popupWidth - 10, popupEntryHeight,
-                        fixtureName = fixtureName,
-                        movementName = movementName,
-                        bitId = bitId
-                    ) {
-                        values[chartId] = bitId
-                        popupSetOpen(false)
-                    }
-                    widgets.add(button)
-                }
-            }
-
-            // Unused
-            widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal("Unused"), font))
-            val unusedBits = (1..(BitUtils.NEXT_DRAWER * 2u).toInt()).filter { it.toBitId() !in usedBits }
-            unusedBits.forEach { id ->
-                val bitId = id.toBitId()
-                val button = BitEntryButton(
-                    x + 5, 0, popupWidth - 10, popupEntryHeight,
-                    fixtureName = "unused",
-                    movementName = "Bit $bitId",
-                    bitId = bitId
-                ) {
-                    values[chartId] = bitId
-                    popupSetOpen(false)
-                }
-                widgets.add(button)
-            }
-            bitWidgets = widgets
-            updateScroll(0.0)
+            chartId?.let { rebuildList(it) }
         } else if (activeButton == this) {
             activeButton = null;
             searchBar = null
@@ -132,6 +72,110 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
         expanded = open
         pickingChart = chartId
         buttons.forEach { (id, b) -> b.active = !open || id != chartId }
+        updateChartButtons()
+        updateScroll(0.0)
+    }
+
+    private fun rebuildList(chartId: String) {
+        val font = Minecraft.getInstance().font
+        val widgets = mutableListOf<AbstractWidget>()
+        val chart = chartId.let { BitUtils.readBitmap(it) } ?: return
+        fun addBitButton(fixtureName: String, movementName: String, bitId: BitId, selectionButton: Boolean, pressed: () -> Unit): BitEntryButton {
+            val button = BitEntryButton(
+                x + 5, 0, popupWidth - 10, popupEntryHeight,
+                fixtureName, movementName, bitId,
+                selectionButton, pressed
+            )
+            widgets.add(button)
+            return button
+        }
+
+        // Selected bits
+        val selection = values.getOrPutDefault(chartId)
+        if (selection.isNotEmpty()) {
+            widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal("selected"), font))
+            selection.forEach { bitId ->
+                val fixtureName = chart.entries.find { (_, movements) -> movements.containsValue(bitId) }?.key ?: "Unknown fixture"
+                val info = chart.values.flatMap { it.entries }.find { it.value == bitId }
+                val movementName = info?.key ?: "Bit $bitId"
+                addBitButton(fixtureName, movementName, bitId, true) {
+                    values.removeBit(chartId, bitId)
+                    rebuildList(chartId)
+                }
+            }
+        }
+
+        // Main named bits
+        val bitButtonClick = fun(bitId: BitId) {
+            if (Screen.hasShiftDown()) {
+                if (bitId in selection) values.removeBit(chartId, bitId)
+                else values.addBit(chartId, bitId)
+                rebuildList(chartId)
+            } else {
+                values.clearBits(chartId)
+                values.addBit(chartId, bitId)
+                popupSetOpen(false)
+            }
+        }
+        chart.forEach { (fixtureName, movements) ->
+            val movements = movements.entries
+                .filter { it.value !in selection }
+                .sortedBy { it.value }
+            widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal(fixtureName), font))
+            movements.forEach { (movementName, bitId) ->
+                usedBits.add(bitId)
+                addBitButton(fixtureName, movementName, bitId, false, { bitButtonClick(bitId) },)
+            }
+        }
+
+        // Unused bits
+        widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal("Unused"), font))
+        val unusedBits = (1..(BitUtils.NEXT_DRAWER * 2u).toInt()).filter { it.toBitId() !in usedBits }
+        unusedBits.forEach { id ->
+            val bitId = id.toBitId()
+            addBitButton(fixtureName = "unused", movementName = "Bit $bitId", bitId = bitId, false, { bitButtonClick(bitId) },)
+        }
+        bitWidgets = widgets
+        searchBar?.let { filterList(it.value) }
+        updateChartButtons()
+    }
+
+    private fun filterList(text: String) {
+        val query = text.lowercase().trim()
+        if (query.isEmpty()) {
+            bitWidgets.forEach { it.visible = true }
+        } else {
+            var currentHeader: StringWidget? = null
+            var matchesHeader = false
+            bitWidgets.forEach { widget ->
+                if (widget is StringWidget) {
+                    currentHeader = widget
+                    val target = widget.message.string.lowercase()
+                        .replace('_', ' ')
+                        .replace("duke", "dook")
+                    matchesHeader = query in target
+                    widget.visible = matchesHeader
+                } else if (widget is BitEntryButton) {
+                    val buttonMatched = query in widget.searchKey
+                    widget.visible = matchesHeader || buttonMatched
+                    if (buttonMatched && currentHeader != null) {
+                        currentHeader.visible = true
+                    }
+                }
+            }
+        }
+        updateScroll()
+    }
+
+    private fun updateChartButtons() {
+        buttons.forEach { (chartId, button) ->
+            val bits = values.getOrPutDefault(chartId)
+            val text = if (bits.isNotEmpty())
+                Component.literal(bits.joinToString(",")).withStyle(ChatFormatting.GREEN)
+            else
+                Component.literal("..").withStyle(ChatFormatting.GRAY)
+            button.message = text
+        }
     }
 
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -152,28 +196,20 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
             val color = Showbiz.charts.idsToInfo[chartId]?.color ?: 0xFFFFFFFF.toInt()
             guiGraphics.drawString(font, chartId.first().toString(), button.x, button.y - 3, color)
 
-            // Bit ID
-            val text = values[chartId]?.let { Drawer.formatBitAsComp(it).withStyle(ChatFormatting.GREEN) } ?: Component.literal("..").withStyle(ChatFormatting.GRAY)
-            guiGraphics.drawCenteredString(font, text, button.x + (button.width / 2), button.y + (button.height / 2) - (font.lineHeight / 2), 0xFFFFFFFF.toInt())
-
             // Tooltip
             if ((!expanded && activeButton?.expanded != true) && button.isHovered) {
-                val info: String = run {
+                val info = run {
                     val bitChart = BitUtils.readBitmap(chartId)
-                    val bit = values[chartId] ?: return@run null
-                    val bitName = bitChart?.let {
-                        for ((fixture, movements) in bitChart.entries) {
-                            for ((name, moveBit) in movements)
-                                if (moveBit == bit) return@let "$fixture.$name"
-                        }
-                        return@let null
-                    } ?: "Unused"
-                    return@run bitName
-                } ?: "Unset"
-                val comps = listOf<MutableComponent>(
-                    Component.literal("$chartId bit"),
-                    Component.literal(info).withStyle(ChatFormatting.GRAY)
-                )
+                    val bits = values.getOrPutDefault(chartId)
+                    val list = mutableListOf<String>()
+                    for ((fixture, movements) in bitChart?.entries ?: emptyList()) {
+                        for ((name, moveBit) in movements)
+                            if (moveBit in bits) list += "$fixture.$name"
+                    }
+                    list
+                }
+                val comps = mutableListOf<MutableComponent>(Component.literal("$chartId bit"))
+                info.forEach { comps += Component.literal(it).withStyle(ChatFormatting.GRAY) }
                 guiGraphics.renderTooltip(font, comps.map { it.visualOrderText }, mouseX, mouseY)
             }
         }
@@ -186,7 +222,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
 
             // Search
             searchBar?.let { searchBar ->
-                val bit = pickingChart?.let { values[it] }
+                val bit = pickingChart?.let { values.getOrPutDefault(it) }
                 val text = if (bit == null) "Pick a bit" else "Replacing bit $bit"
                 searchBar.setHint(Component.literal("$text ($pickingChart)").withStyle(ChatFormatting.DARK_GRAY))
                 searchBar.render(guiGraphics, mouseX, mouseY, partialTick)
@@ -194,7 +230,15 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
 
             // Content
             guiGraphics.enableScissor(x, listStartY, x + popupWidth, listStartY + listHeight)
-            bitWidgets.forEach { it.render(guiGraphics, mouseX, mouseY, partialTick) }
+            val firstVisible = maxOf(0, (scrollOffset / popupEntryHeight).toInt())
+            val maxVisible = (listHeight / popupEntryHeight) + 2
+            val lastVisible = minOf(bitWidgets.lastIndex, firstVisible + maxVisible)
+            if (firstVisible <= lastVisible) {
+                for (i in firstVisible..lastVisible) {
+                    val widget = bitWidgets[i]
+                    if (widget.visible) widget.render(guiGraphics, mouseX, mouseY, partialTick)
+                }
+            }
             guiGraphics.disableScissor()
             guiGraphics.renderOutline(x - 1, popupY - 1, popupWidth + 1, popupHeight + 1, 0xFFFFFFFF.toInt())
             guiGraphics.pose().popPose()
@@ -253,8 +297,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
         expanded && mouseX > x && mouseX < (x + popupWidth)
                 && mouseY > popupY && mouseY < (popupY + popupHeight)
 
-    fun updateScroll(scroll: Double) {
-        // Dynamically calculate maxScroll inline based on currently visible items
+    fun updateScroll(scroll: Double = scrollOffset) {
         val currentMaxScroll = maxOf(0.0, (bitWidgets.count { it.visible } * popupEntryHeight).toDouble() - listHeight)
         scrollOffset = scroll.coerceIn(0.0, currentMaxScroll)
 
@@ -288,7 +331,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
         narration.add(NarratedElementType.HINT, "Bit selection button")
     }
 
-    inner class BitEntryButton(x: Int, y: Int, width: Int, height: Int, fixtureName: String, movementName: String, bitId: BitId, val action: () -> Unit) : AbstractButton(x, y, width, height, message) {
+    inner class BitEntryButton(x: Int, y: Int, width: Int, height: Int, fixtureName: String, movementName: String, bitId: BitId, val selectionButton: Boolean = false, val pressed: () -> Unit) : AbstractButton(x, y, width, height, message) {
         val searchKey: String = "$bitId $movementName $fixtureName"
             .lowercase()
             .replace('_', ' ')
@@ -298,11 +341,20 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
             message = Component.literal(bitId.toString()).withStyle(ChatFormatting.GREEN)
                 .append(Component.literal(" "))
                 .append(Component.literal(movementName).withStyle(ChatFormatting.WHITE))
-            tooltip = Component.empty()
+
+            val tooltipComp = Component.empty()
                 .append(Component.literal(fixtureName).withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.literal("\n"))
                 .append(Component.literal(movementName).withStyle(ChatFormatting.WHITE))
-                .let { Tooltip.create(it) }
+                .append(Component.literal("\n"))
+
+            tooltip = (
+                if (!selectionButton) {
+                    Component.literal("Hold shift to multi-select").withStyle(ChatFormatting.GRAY)
+                } else {
+                    Component.literal("Click to deselect").withStyle(ChatFormatting.GRAY)
+                }
+            ).let { Tooltip.create(tooltipComp.append(it)) }
         }
 
         val sprites: WidgetSprites = WidgetSprites(
@@ -312,7 +364,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
         )
 
         override fun onPress() {
-            action()
+            pressed()
         }
 
         override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -326,6 +378,9 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int) : AbstractWidget(
             )
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f)
             guiGraphics.drawString(font, message, x + 4, y + 1 + (height - font.lineHeight) / 2, 0xffffffff.toInt())
+            if (selectionButton) {
+                guiGraphics.drawString(font, "x", x + (width - font.width("x")) - 5, y + (height - font.lineHeight) / 2, 0xffff2222.toInt())
+            }
         }
 
         override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) {

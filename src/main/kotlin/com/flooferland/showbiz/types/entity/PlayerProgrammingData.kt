@@ -1,8 +1,8 @@
 package com.flooferland.showbiz.types.entity
 
-import net.minecraft.core.BlockPos
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.entity.player.Player
+import net.minecraft.core.*
+import net.minecraft.nbt.*
+import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.registry.ModPlayerSynchedData
 import com.flooferland.showbiz.show.toBitId
@@ -11,10 +11,8 @@ import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getByteArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongOrNull
-import com.flooferland.showbiz.utils.Extensions.getShortOrNull
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
 
 /** Defines stuff for the programming block */
 data class PlayerProgrammingData(
@@ -31,7 +29,9 @@ data class PlayerProgrammingData(
             keysToBits.forEachIndexed { i, bits ->
                 if (bits.isEmpty()) return@forEachIndexed
                 tag.put(i.toString(), CompoundTag().apply {
-                    bits.forEach { (mapping, bit) -> putShort(mapping, bit.toShort()) }
+                    bits.forEach { (mapping, bits) ->
+                        putIntArray(mapping, bits.map { it.toInt() })
+                    }
                 })
             }
         })
@@ -43,9 +43,12 @@ data class PlayerProgrammingData(
         tag.getByteArrayOrNull("held_keys")?.let { it.forEachIndexed { i, b -> heldKeys[i] = (b.toInt() == 1) } }
         tag.getCompoundOrNull("keys_to_bits")?.let { tag ->
             keysToBits.indices.forEach { i ->
-                keysToBits[i].clear()
+                keysToBits[i].clearCharts()
                 tag.getCompoundOrNull(i.toString())?.also { tag ->
-                    tag.allKeys.forEach { mapping -> keysToBits[i][mapping] = tag.getShortOrNull(mapping)?.toBitId() ?: 0.toBitId() }
+                    tag.allKeys.forEach { mapping ->
+                        val bits = tag.getIntArrayOrNull(mapping)?.map { it.toBitId() }?.toMutableSet() ?: return@forEach
+                        keysToBits[i].setBits(mapping, bits)
+                    }
                 }
             }
         }

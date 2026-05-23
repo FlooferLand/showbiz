@@ -90,8 +90,7 @@ object Showbiz : ModInitializer {
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
             packet.keysToBits.forEachIndexed { i, receivedBits ->
-                data.keysToBits[i].clear()
-                data.keysToBits[i].putAll(receivedBits)
+                data.keysToBits[i].set(receivedBits)
             }
             data.saveToPlayer(player)
         }

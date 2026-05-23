@@ -1,14 +1,13 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.core.*
+import net.minecraft.nbt.*
+import net.minecraft.network.chat.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.connection.ConnectionManager
@@ -49,10 +48,11 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val mapping = show.data.mapping ?: BitChartStore.DEFAULT
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)
-            val heldBits = data.heldKeys
-                .mapIndexed { i, held -> if (held) data.mapKeyToBit(i)?.get(mapping) else null }
-                .filterNotNull()
-            show.data.signal += heldBits
+            for (i in 0 until data.heldKeys.size) {
+                if (!data.heldKeys[i]) continue
+                val mappedBits = data.mapKeyToBit(i)?.get(mapping) ?: continue
+                show.data.signal += mappedBits
+            }
         }
         show.send()
     }

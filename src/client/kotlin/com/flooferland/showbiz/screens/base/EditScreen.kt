@@ -2,16 +2,16 @@ package com.flooferland.showbiz.screens.base
 
 import net.minecraft.*
 import net.minecraft.client.*
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.client.gui.screens.inventory.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.world.entity.player.*
-import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.registry.ModCommands
 import com.flooferland.showbiz.show.toBitIdOrNull
+import com.flooferland.showbiz.types.EditScreenMenu
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.math.roundToInt
