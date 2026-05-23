@@ -8,31 +8,21 @@ import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.StagedBotBlockEntityModel
-import com.flooferland.showbiz.types.InteractionRenderHook
+import com.flooferland.showbiz.renderers.base.GeoFixedBlockEntityRenderer
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
 import java.lang.Math.clamp
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
-import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.math.MolangQueries
-import software.bernie.geckolib.renderer.GeoBlockRenderer
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 
-class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoBlockRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
-    val hook = InteractionRenderHook()
-
+class StagedBotBlockBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoFixedBlockEntityRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
     init {
         addRenderLayer(AutoGlowingGeoLayer(this))
     }
 
-    override fun renderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
-        hook.beforeRenderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour)
-        super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour)
-    }
-
     override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        hook.beforePreRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
         if (!isReRender) {
             poseStack.translate(0.0, 1.0, 0.0)
 
@@ -126,10 +116,6 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             poseStack.mulPose(Axis.YP.rotationDegrees(angle))
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
-    }
-
-    override fun postRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        hook.postRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
 
     companion object {

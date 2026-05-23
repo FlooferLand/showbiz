@@ -92,12 +92,13 @@ object ShowbizClient : ClientModInitializer {
                     modBlock.entityType as BlockEntityType<T>,
                     renderer
                 )
-            add(ModBlocks.StagedBot, ::StagedBotBlockEntityRenderer)
+            add(ModBlocks.StagedBot, ::StagedBotBlockBlockEntityRenderer)
             add(ModBlocks.ReelToReel, ::ReelToReelBlockEntityRenderer)
             add(ModBlocks.ShowSelector, ::ShowSelectorBlockEntityRenderer)
             add(ModBlocks.CurtainBlock, ::CurtainBlockEntityRenderer)
             add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
             add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
+            add(ModBlocks.Cymbal, ::CymbalBlockBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
         }
@@ -148,7 +149,7 @@ object ShowbizClient : ClientModInitializer {
             pose.popPose()
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
-            if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
+            if (StagedBotBlockBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
                 for (err in BaseBotModel.errorsTriggered) {
                     val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
                     Showbiz.log.error(message)
@@ -157,9 +158,9 @@ object ShowbizClient : ClientModInitializer {
                         false
                     )
                 }
-                StagedBotBlockEntityRenderer.renderExceptionCountdown = 5f.secsToTicks().toFloat()
+                StagedBotBlockBlockEntityRenderer.renderExceptionCountdown = 5f.secsToTicks().toFloat()
             } else {
-                StagedBotBlockEntityRenderer.renderExceptionCountdown -= 1
+                StagedBotBlockBlockEntityRenderer.renderExceptionCountdown -= 1
             }
             BaseBotModel.errorsTriggered.clear()
         }
@@ -200,6 +201,6 @@ object ShowbizClient : ClientModInitializer {
 
     fun resetAssetErrors() {
         BaseBotModel.errorsTriggered.clear()
-        StagedBotBlockEntityRenderer.renderExceptionCountdown = 0f
+        StagedBotBlockBlockEntityRenderer.renderExceptionCountdown = 0f
     }
 }

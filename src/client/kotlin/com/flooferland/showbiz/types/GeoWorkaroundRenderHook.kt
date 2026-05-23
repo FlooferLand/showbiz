@@ -20,7 +20,7 @@ import kotlin.jvm.optionals.getOrNull
  * Workaround for GeckoLib #841: worldSpaceMatrix is broken inside GeoBlockRenderer
  * Credit to https://duzo.is-a.dev
  */
-class InteractionRenderHook() {
+class GeoWorkaroundRenderHook() {
     private val capturedBoneMatrices = mutableMapOf<String, Matrix4f>()
 
     fun beforeRenderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {

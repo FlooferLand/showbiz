@@ -5,5 +5,5 @@ enum class CollidePartId {
     None,
     Player,
     RolfeStick,
-    RolfeCymbal
+    Cymbal
 }

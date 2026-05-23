@@ -42,7 +42,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override val collidePartInstance = CollidePartManager.create(this) {
         val botId = botId ?: return@create
         if (botId.matches("showbiz:rolfe_dewolfe")) {
-            map("cymbal", CollidePartId.RolfeCymbal)
+            map("cymbal", CollidePartId.Cymbal)
             map("stick", CollidePartId.RolfeStick)
         }
     }

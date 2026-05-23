@@ -25,6 +25,7 @@ import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.blocks.ShowSelectorBlock
 import com.flooferland.showbiz.blocks.BitViewBlock
+import com.flooferland.showbiz.blocks.CymbalBlock
 import com.flooferland.showbiz.blocks.PlushBlock
 import com.flooferland.showbiz.blocks.ProgrammerBlock
 import com.flooferland.showbiz.blocks.SpotlightBlock
@@ -32,6 +33,7 @@ import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
+import com.flooferland.showbiz.blocks.entities.CymbalBlockEntity
 import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
@@ -170,6 +172,15 @@ enum class ModBlocks {
         item = ::PlushBlockItem,
         entity = Entity(::PlushBlockEntity, isGeckolib = true),
         hideFromPlayer = true
+    ),
+    Cymbal(
+        "cymbal", ::CymbalBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = Entity(::CymbalBlockEntity, isGeckolib = true),
     )
     ;
 
