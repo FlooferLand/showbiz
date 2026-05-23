@@ -59,7 +59,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
              true -> {
                  val newState = state
                      .setValue(PLAYING_POWERED, true)
-                     .setValue(SIGNAL_POWERED, show.data.signal.any { bitId -> menuData.bitFilter.contains(bitId) })
+                     .setValue(SIGNAL_POWERED, menuData.bitFilter.chartHasBit(show.data.mapping) { show.data.signal.frameHas(it) })
                  level.setBlockAndUpdate(blockPos, newState)
              }
             false if (state.getValue(PLAYING_POWERED) || state.getValue(SIGNAL_POWERED)) -> {

@@ -12,6 +12,8 @@ import com.flooferland.showbiz.show.BitId
  */
 data class MappedBits(val inner: HashMap<String, MutableSet<BitId>> = HashMap<String, MutableSet<BitId>>(Showbiz.charts.size)) : AbstractMap<String, MutableSet<BitId>>() {
     override val entries get() = inner.entries
+    val charts get() = inner.keys
+    val bits get() = inner.values.flatten()
 
     fun getOrPutDefault(key: String) = inner.getOrPut(key) { mutableSetOf() }
     fun addBit(chartId: String, bit: BitId) {
@@ -29,13 +31,16 @@ data class MappedBits(val inner: HashMap<String, MutableSet<BitId>> = HashMap<St
         bits.clear()
         inner[chartId] = bits
     }
+    fun chartHasBit(chartId: String?, predicate: (BitId) -> Boolean): Boolean {
+        if (chartId == null) return false
+        return inner[chartId]?.any(predicate) ?: false
+    }
     fun clearCharts() {
         inner.clear()
     }
     fun setBits(chartId: String, bits: MutableSet<BitId>) {
         inner[chartId] = bits
     }
-
     fun set(received: MappedBits) {
         inner.clear()
         inner.putAll(received)

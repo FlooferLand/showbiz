@@ -10,8 +10,9 @@ import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.registry.ModCommands
-import com.flooferland.showbiz.show.toBitIdOrNull
+import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.EditScreenMenu
+import com.flooferland.showbiz.types.MappedBits
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.math.roundToInt
@@ -37,7 +38,7 @@ where M: EditScreenMenu<P> {
     override fun getMenu() = editMenu
     override fun isPauseScreen() = false
 
-    var bitFilterBox: EditBox? = null
+    var bitSelector: BitSelectButton? = null
 
     override fun init() {
         super.init()
@@ -67,34 +68,19 @@ where M: EditScreenMenu<P> {
 
     override fun resize(minecraft: Minecraft, width: Int, height: Int) {
         super.resize(minecraft, width, height)
-        bitFilterBox = null
+        bitSelector = null
         clearWidgets()
         init()
     }
 
     open fun addWidgets(widgets: MutableList<WidgetInfo>) {
-        // Filter box
+        // Filter
         run {
-            bitFilterBox = EditBox(font, 200, 20, Component.literal("Filter"))
-            bitFilterBox!!.tooltip =
-                Tooltip.create(Component.literal("Enter one or more bit numbers (comma-separated)"))
-            bitFilterBox!!.value = menu.data.base.bitFilter.joinToString(",")
-            bitFilterBox!!.setFormatter { text, _ ->
-                val result = Component.empty()
-                if (text.contains(',')) {
-                    for (char in text) {
-                        if (char == ',') {
-                            result.append(Component.literal("$char ").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
-                        } else {
-                            result.append(char.toString())
-                        }
-                    }
-                } else {
-                    result.append(text)
-                }
-                result.visualOrderText
-            }
-            widgets.add(WidgetInfo("Bit filter", bitFilterBox!!))
+            bitSelector = BitSelectButton(0, 0, 200, 20)
+            val copy = MappedBits()
+            menu.data.base.bitFilter.forEach { (chartId, bits) -> copy.setBits(chartId, bits) }
+            bitSelector!!.values = copy
+            widgets.add(WidgetInfo("Bit filter", bitSelector!!))
         }
     }
 
@@ -129,14 +115,11 @@ where M: EditScreenMenu<P> {
     override fun onClose() {
         super.onClose()
 
-        menu.data.base.bitFilter.clear()
-        bitFilterBox?.let { filterBox ->
-            filterBox.value.split(',').forEach { entry ->
-                entry.toBitIdOrNull()?.let {
-                    menu.data.base.bitFilter.add(it)
-                }
-            }
+        menu.data.base.bitFilter.clearCharts()
+        bitSelector?.values?.forEach { (chartId, bits) ->
+            menu.data.base.bitFilter.setBits(chartId, bits)
         }
+
         saveCustom(menu.data)
         ClientPlayNetworking.send(menu.data)
     }

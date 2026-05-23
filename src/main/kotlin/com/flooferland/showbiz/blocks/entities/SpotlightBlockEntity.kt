@@ -9,10 +9,10 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
@@ -31,7 +31,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override val connectionManager = ConnectionManager(this)
 
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
-        isOn = menuData.bitFilter.any { show.signal.frameHas(it) }
+        isOn = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
 
     var isOn: Boolean = false

@@ -230,13 +230,12 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
 
             // Content
             guiGraphics.enableScissor(x, listStartY, x + popupWidth, listStartY + listHeight)
-            val firstVisible = maxOf(0, (scrollOffset / popupEntryHeight).toInt())
-            val maxVisible = (listHeight / popupEntryHeight) + 2
-            val lastVisible = minOf(bitWidgets.lastIndex, firstVisible + maxVisible)
-            if (firstVisible <= lastVisible) {
-                for (i in firstVisible..lastVisible) {
-                    val widget = bitWidgets[i]
-                    if (widget.visible) widget.render(guiGraphics, mouseX, mouseY, partialTick)
+            val minRenderY = listStartY - popupEntryHeight
+            val maxRenderY = listStartY + listHeight
+            bitWidgets.forEach { widget ->
+                if (!widget.visible) return@forEach
+                if (widget.y in minRenderY..maxRenderY) {
+                    widget.render(guiGraphics, mouseX, mouseY, partialTick)
                 }
             }
             guiGraphics.disableScissor()
@@ -322,8 +321,13 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
         }
     }
 
-    override fun setPosition(x: Int, y: Int) {
-        super.setPosition(x, y)
+    override fun setX(x: Int) {
+        super.setX(x)
+        updatePositions()
+    }
+
+    override fun setY(y: Int) {
+        super.setY(y)
         updatePositions()
     }
 

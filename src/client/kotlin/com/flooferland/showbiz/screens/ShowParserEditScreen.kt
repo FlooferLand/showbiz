@@ -16,7 +16,7 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
     val ports = rl("textures/gui/show_parser_ports.png")
 
     override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
-        val bitFilter = widgets.first { it.widget == bitFilterBox }
+        val bitFilter = widgets.first { it.widget == bitSelector }
         bitFilter.side = WidgetSide.Bottom
     }
 
