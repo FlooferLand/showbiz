@@ -1,20 +1,16 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.BlockPos
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.item.ItemStack
+import net.minecraft.core.*
+import net.minecraft.world.entity.*
+import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
-import net.minecraft.world.level.BlockGetter
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.LevelReader
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.level.storage.loot.LootParams
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams
-import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.shapes.VoxelShape
+import net.minecraft.world.level.storage.loot.*
+import net.minecraft.world.level.storage.loot.parameters.*
+import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -24,8 +20,10 @@ class PlushBlock(properties: Properties) : BaseEntityBlock(properties) {
         registerDefaultState(stateDefinition.any().setValue(ROTATION, 0))
     }
 
+    val shape = Shapes.box(0.125, 0.0, 0.1875, 0.875, 0.8, 0.8125)!!
     val codec = simpleCodec(::PlushBlock)!!
     override fun codec() = codec
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext) = shape
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.INVISIBLE
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.Plush.entityType!!.create(pos, state)!!
