@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.registry
 
 import net.minecraft.resources.*
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.*
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlString
@@ -146,6 +146,13 @@ enum class ModRecipes {
             "O" to Ingredient("iron_nugget"),
         ),
         outputItem = { ModItems.Reel.item.defaultInstance }
+    ),
+    EnderEarl(
+        arrayOf(
+            Ingredient("yellow_dye"),
+            Ingredient("ender_pearl")
+        ),
+        outputItem = { ModItems.EnderEarl.item.defaultInstance }
     ),
     MitziPlush(
         "WWW",

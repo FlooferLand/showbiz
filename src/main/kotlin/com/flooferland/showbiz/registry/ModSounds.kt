@@ -18,7 +18,8 @@ enum class ModSounds {
     ReelExit("reel_exit"),
     ReelPlay("reel_play"),
     HihatClosed("hihat_closed"),
-    Cymbal("cymbal")
+    Cymbal("cymbal"),
+    EnderEarl("ender_earl")
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {

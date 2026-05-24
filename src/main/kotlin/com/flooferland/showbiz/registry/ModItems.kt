@@ -5,8 +5,8 @@ import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.Item.*
 import com.flooferland.showbiz.components.OptionBlockPos
-import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
+import com.flooferland.showbiz.items.EnderEarl
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.utils.rl
@@ -21,6 +21,12 @@ enum class ModItems {
         "reel", ::ReelItem,
         { stacksTo(1).component(ModComponents.FileName.type, "") },
         model = ItemModelId.Custom
+    ),
+    EnderEarl(
+        "ender_earl", ::EnderEarl,
+        { stacksTo(24) },
+        model = ItemModelId.Generated,
+        hideFromPlayer = true
     )
     ;
 
