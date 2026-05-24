@@ -16,10 +16,12 @@
     "block.showbiz.curtain_controller": "Controlor Cortină",
     "block.showbiz.spotlight": "Reflector (W.I.P)",
     "block.showbiz.bit_view": "Bit View",
-    "block.showbiz.programmer": "Programator",
+    "block.showbiz.programmer": "Programator (W.I.P)",
+    "block.showbiz.cymbal": "Cinel",
 
     "item.showbiz.wand": "Baghetă",
-    "item.showbiz.reel": "Bandă",
+    "item.showbiz.reel": "Bobină cu bandă",
+    "item.showbiz.plush.mitzi": "Pluș Mitzi",
 
     "tooltip.showbiz.block.staged_bot": "Cunoscuti și ca \"animatronici\"\n- Click dreapta pentru a schimba modele\n- Pune un bloc pe el pentru a îi ascunde blocul",
     "tooltip.showbiz.block.greybox": "Citeste banda dintr-un reel-to-reel\nși îți dă biții",
