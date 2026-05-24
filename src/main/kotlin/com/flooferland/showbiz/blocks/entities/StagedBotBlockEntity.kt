@@ -15,10 +15,10 @@ import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.IBotSoundHandler
-import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -54,9 +54,11 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     private var prevBotId: ResourceId? = null
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        show.data.tempReset()
-        show.data.merge(pendingShow)
-        pendingShow.tempReset()
+        if (!level.isClientSide) {
+            show.data.tempReset()
+            show.data.merge(pendingShow)
+            pendingShow.tempReset()
+        }
 
         soundHandler?.tick(this, level, pos, state)
         collidePartInstance.tick(level, pos, state)
