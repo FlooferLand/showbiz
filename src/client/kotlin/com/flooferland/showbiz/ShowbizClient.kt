@@ -99,7 +99,8 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.CurtainBlock, ::CurtainBlockEntityRenderer)
             add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
             add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
-            add(ModBlocks.Cymbal, ::CymbalBlockBlockEntityRenderer)
+            add(ModBlocks.Cymbal, ::CymbalBlockEntityRenderer)
+            add(ModBlocks.ReelHolder, ::ReelHolderBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
         }

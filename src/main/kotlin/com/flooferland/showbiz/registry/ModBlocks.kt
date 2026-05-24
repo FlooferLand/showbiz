@@ -1,16 +1,5 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.blocks.GreyboxBlock
-import com.flooferland.showbiz.blocks.ReelToReelBlock
-import com.flooferland.showbiz.blocks.SpeakerBlock
-import com.flooferland.showbiz.blocks.StagedBotBlock
-import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.datagen.DataGenerator
-import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
-import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
@@ -19,28 +8,14 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
-import com.flooferland.showbiz.blocks.CurtainBlock
-import com.flooferland.showbiz.blocks.CurtainControllerBlock
-import com.flooferland.showbiz.blocks.CurtainShadowBlock
-import com.flooferland.showbiz.blocks.ShowParserBlock
-import com.flooferland.showbiz.blocks.ShowSelectorBlock
-import com.flooferland.showbiz.blocks.BitViewBlock
-import com.flooferland.showbiz.blocks.CymbalBlock
-import com.flooferland.showbiz.blocks.PlushBlock
-import com.flooferland.showbiz.blocks.ProgrammerBlock
-import com.flooferland.showbiz.blocks.SpotlightBlock
+import com.flooferland.showbiz.blocks.*
 import com.flooferland.showbiz.blocks.base.FancyBlockItem
-import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
-import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
-import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
-import com.flooferland.showbiz.blocks.entities.CymbalBlockEntity
-import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
-import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
-import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.blocks.entities.*
+import com.flooferland.showbiz.datagen.DataGenerator
+import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.items.PlushBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
+import com.flooferland.showbiz.utils.rl
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
@@ -181,6 +156,16 @@ enum class ModBlocks {
             .noOcclusion(),
         modelPreset = BlockModelId.Custom,
         entity = Entity(::CymbalBlockEntity, isGeckolib = true),
+    ),
+    ReelHolder(
+        "reel_holder", ::ReelHolderBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = Entity(::ReelHolderBlockEntity, isGeckolib = true),
+        hideFromPlayer = true
     )
     ;
 

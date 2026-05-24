@@ -9,7 +9,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
-import net.minecraft.world.level.Level
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
@@ -21,14 +21,14 @@ import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
-import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
-import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
 import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
+import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
@@ -254,6 +254,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     // region | Container
     override fun getContainerSize() = 1
+    override fun getMaxStackSize() = 1
+    override fun canPlaceItem(slot: Int, stack: ItemStack) = (slot < containerSize) && stack.item is ReelItem
     override fun isEmpty() = showData.isEmpty()
     override fun getItem(slot: Int): ItemStack {
         return showData.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
@@ -264,6 +266,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             setPlaying(false)
             showData.unload()
         }
+        setChanged()
         return item ?: ItemStack.EMPTY
     }
     override fun removeItemNoUpdate(slot: Int) = removeItem(slot, 1)
@@ -295,6 +298,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 }
             }
         }
+        setChanged()
     }
     override fun stillValid(player: Player): Boolean =
         Container.stillValidBlockEntity(this, player)
