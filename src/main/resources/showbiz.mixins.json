@@ -2,8 +2,15 @@
     "required": true,
     "package": "com.flooferland.showbiz.mixin",
     "compatibilityLevel": "JAVA_21",
-    "client": ["SplashManagerMixin", "GuiMixin", "KeyboardHandlerMixin"],
-    "mixins": ["PlayerMixin"],
+    "client": [
+        "GuiMixin",
+        "KeyboardHandlerMixin",
+        "SplashManagerMixin"
+    ],
+    "mixins": [
+        "JukeboxBlockEntityMixin",
+        "PlayerMixin"
+    ],
     "injectors": {
         "defaultRequire": 1
     }

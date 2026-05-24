@@ -15,7 +15,7 @@ import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
-import com.flooferland.showbiz.blocks.entities.*
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -92,6 +92,7 @@ object ShowbizClient : ClientModInitializer {
                     modBlock.entityType as BlockEntityType<T>,
                     renderer
                 )
+            JukeboxLyricRenderer.register()
             add(ModBlocks.StagedBot, ::StagedBotBlockBlockEntityRenderer)
             add(ModBlocks.ReelToReel, ::ReelToReelBlockEntityRenderer)
             add(ModBlocks.ShowSelector, ::ShowSelectorBlockEntityRenderer)
@@ -138,12 +139,14 @@ object ShowbizClient : ClientModInitializer {
             if (context == null) return@register
             val mc = Minecraft.getInstance() ?: return@register
             val player = mc.player ?: return@register
+            val level = player.clientLevel ?: return@register
             val partialTick = context.tickCounter().getGameTimeDeltaPartialTick(true)
             val view = context.camera()?.position ?: return@register
 
             val pose = context.matrixStack() ?: return@register
             pose.pushPose()
             pose.translate(-view.x, -view.y, -view.z)
+            JukeboxLyricRenderer.render(level, player, mc.renderBuffers().bufferSource(), pose)
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()

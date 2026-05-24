@@ -1,24 +1,24 @@
 package com.flooferland.showbiz.datagen.providers
 
-import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.utils.rl
+import net.minecraft.resources.*
 import kotlinx.serialization.json.*
 
 object SoundProvider {
-    fun generateSound(sound: ModSounds): JsonObject? {
+    fun generateSound(sounds: Array<ResourceLocation>, folder: String? = null, procedural: Boolean = false, stream: Boolean = false): JsonObject? {
         return buildJsonObject {
             putJsonArray("sounds") {
-                if (sound.procedural) {
+                if (procedural) {
                     addJsonObject {
                         put("name", "fabric-sound-api-v1:empty")
                         put("stream", true)
                     }
                 } else {
-                    for (name in sound.sounds) {
-                        val id = rl(name).let {
-                            if (sound.folder != null) { it.withPrefix("${sound.folder}/") } else it.withPath(name)
+                    for (id in sounds) {
+                        val id = if (folder != null) { id.withPrefix("${folder}/") } else id
+                        addJsonObject {
+                            put("name", id.toString())
+                            put("stream", stream)
                         }
-                        add(id.toString())
                     }
                 }
             }

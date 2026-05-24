@@ -1,33 +1,24 @@
 package com.flooferland.showbiz.datagen
 
+import net.minecraft.*
+import net.minecraft.core.registries.*
+import net.minecraft.server.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel.Model
-import com.flooferland.showbiz.datagen.providers.BlockProvider
-import com.flooferland.showbiz.datagen.providers.ItemProvider
-import com.flooferland.showbiz.datagen.providers.SoundProvider
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.datagen.providers.*
+import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.Extensions.itemPath
-import kotlinx.io.bytestring.encodeToByteString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import net.minecraft.*
-import net.minecraft.core.registries.*
-import net.minecraft.server.*
-import com.flooferland.showbiz.datagen.providers.LootTableProvider
-import com.flooferland.showbiz.datagen.providers.RecipeProvider
-import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModPackets
-import com.flooferland.showbiz.registry.ModRecipes
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
+import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.div
 import kotlin.io.path.exists
@@ -81,13 +72,15 @@ object DataGenerator {
         val fileList = mutableListOf<Path>()
         fun log(message: String, tag: String? = null) = println((tag?.let { "[ ${it} ] " } ?: "") + message)
         fun warn(message: String) = log(message, tag = "/!\\")
-        fun writeAsset(path: Path, data: JsonObject) {
+        fun writeAsset(path: Path, data: JsonObject?) {
             path.createParentDirectories()
             val override = (rootPath / path.relativeTo(generatedPath)).normalize()
             if (override.exists()) {
                 log("Skipping '${path.relativeTo(generatedPath)}' (already exists in src/main)", tag = "-->")
                 return
             }
+            if (data == null) warn("JSON is null for path '$path'")
+
             log("Writing '${path.relativeTo(generatedPath)}'", tag = "...")
             fileList.add(path)
             Files.write(
@@ -119,10 +112,8 @@ object DataGenerator {
             } else {
                 // Default / empty state
                 val stateJson = BlockProvider.generateStates(modBlock, listOf())
-                if (stateJson != null) {
-                    val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
-                    writeAsset(statePath, stateJson)
-                } else warn("States JSON is null for block ${modBlock.id}")
+                val statePath = assetsRoot / "blockstates" / "${modBlock.id.path}.json"
+                writeAsset(statePath, stateJson)
 
                 // Default / empty model
                 val modelJson = BlockProvider.generateBlockModel(modBlock, Model(builder).texture(modBlock.id))
@@ -135,17 +126,13 @@ object DataGenerator {
             // Item model
             val defaultState = builder.defaultStateId
             val itemModelJson = BlockProvider.generateBlockItemModel(modBlock, defaultState.blockPath())
-            if (itemModelJson != null) {
-                val itemModelPath = assetsRoot / "models" / "item" / "${modBlock.id.path}.json"
-                writeAsset(itemModelPath, itemModelJson)
-            } else warn("Item model JSON is null for block ${modBlock.id}")
+            val itemModelPath = assetsRoot / "models" / "item" / "${modBlock.id.path}.json"
+            writeAsset(itemModelPath, itemModelJson)
 
             // Item ('items/' entry)
             val itemJson = ItemProvider.generateItem(defaultState.itemPath())
-            if (itemJson != null) {
-                val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
-                writeAsset(itemPath, itemJson)
-            } else warn("Item JSON is null for block ${modBlock.id}")
+            val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
+            writeAsset(itemPath, itemJson)
 
             // Loot table (block drops)
             val blockDrop = LootTableProvider.generateBlockDrops(modBlock)
@@ -154,18 +141,30 @@ object DataGenerator {
         }
         for (modItem in ModItems.entries) {
             // Model
-            val modelJson = ItemProvider.generateModel(modItem)
-            if (modelJson != null) {
-                val modelPath = assetsRoot / "models" / "item" / "${modItem.id.path}.json"
-                writeAsset(modelPath, modelJson)
-            } else warn("Model JSON is null for item ${modItem.id}")
+            val modelJson = ItemProvider.generateModel(modItem.model!!, modItem.id)
+            val modelPath = assetsRoot / "models" / "item" / "${modItem.id.path}.json"
+            writeAsset(modelPath, modelJson)
 
             // Item
             val itemJson = ItemProvider.generateItem(modItem.id.itemPath())
-            if (itemJson != null) {
-                val itemPath = assetsRoot / "items" / "${modItem.id.path}.json"
-                writeAsset(itemPath, itemJson)
-            } else warn("Model JSON is null for item ${modItem.id}")
+            val itemPath = assetsRoot / "items" / "${modItem.id.path}.json"
+            writeAsset(itemPath, itemJson)
+        }
+        for (musicDisc in ModMusicDiscs.entries) {
+            // Model
+            val modelJson = ItemProvider.generateModel(ItemProvider.ItemModelId.MusicDisc, musicDisc.id)
+            val modelPath = assetsRoot / "models" / "item" / "${musicDisc.id.path}.json"
+            writeAsset(modelPath, modelJson)
+
+            // Item
+            val itemJson = ItemProvider.generateItem(musicDisc.id.itemPath())
+            val itemPath = assetsRoot / "items" / "${musicDisc.id.path}.json"
+            writeAsset(itemPath, itemJson)
+
+            // Song
+            val songJson = JukeboxSongsProvider.generateSong(musicDisc)
+            val songsPath = dataRoot / "jukebox_song" / "${musicDisc.id.path}.json"
+            writeAsset(songsPath, songJson)
         }
 
         // Recipes
@@ -205,8 +204,12 @@ object DataGenerator {
         run {
             val soundsJson = buildJsonObject {
                 for (sound in ModSounds.entries) {
-                    val generated = SoundProvider.generateSound(sound) ?: continue
+                    val generated = SoundProvider.generateSound(sound.sounds, sound.folder, procedural = sound.procedural) ?: continue
                     put(sound.id.path, generated)
+                }
+                for (disc in ModMusicDiscs.entries) {
+                    val generated = SoundProvider.generateSound(arrayOf(disc.keyId), "music", stream = true) ?: continue
+                    put(disc.id.path, generated)
                 }
             }
             val soundsPath = assetsRoot / "sounds.json"

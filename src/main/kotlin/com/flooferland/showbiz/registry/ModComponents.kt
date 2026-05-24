@@ -1,15 +1,14 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.components.OptionBlockPos
-import com.flooferland.showbiz.datagen.DataGenerator
-import com.flooferland.showbiz.utils.rl
-import com.mojang.serialization.Codec
 import net.minecraft.core.*
 import net.minecraft.core.component.*
 import net.minecraft.core.registries.*
-import net.minecraft.network.codec.ByteBufCodecs
+import net.minecraft.network.codec.*
 import net.minecraft.resources.*
+import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.utils.rl
+import com.mojang.serialization.Codec
 
 sealed class ModComponents<T> {
     data object BlockOwner : ModComponents<OptionBlockPos>(

@@ -1,10 +1,10 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
+import com.flooferland.showbiz.utils.rl
 
 enum class ModItemGroups {
     Main("main", { params, out ->
@@ -13,6 +13,9 @@ enum class ModItemGroups {
         }
         for (item in ModItems.entries) {
             if (!item.hideFromPlayer) out.accept(item.item)
+        }
+        for (disc in ModMusicDiscs.entries) {
+            out.accept(disc.item)
         }
         out.accept(ModRecipes.MitziPlush.outputProvider())
     });

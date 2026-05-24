@@ -2,20 +2,17 @@ package com.flooferland.showbiz.utils
 
 import net.minecraft.core.component.*
 import net.minecraft.nbt.*
-import net.minecraft.network.chat.ClickEvent
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.HoverEvent
-import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.*
 import net.minecraft.resources.*
-import net.minecraft.util.FastColor
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.player.Player
+import net.minecraft.util.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.*
+import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
-import net.minecraft.world.level.Level
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.phys.AABB
-import net.minecraft.world.phys.Vec3
+import net.minecraft.world.phys.*
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.roundToInt
@@ -35,7 +32,7 @@ object Extensions {
     /** Calls setChanged and sendBlockUpdated */
     fun BlockEntity.markDirtyNotifyAll() {
         setChanged()
-        level?.sendBlockUpdated(this.blockPos, blockState, blockState, 0)
+        level?.sendBlockUpdated(this.blockPos, blockState, blockState, Block.UPDATE_ALL)
     }
 
     @DslMarker annotation class BlockEntityApplyDsl;

@@ -1,17 +1,17 @@
 package com.flooferland.showbiz.datagen.providers
 
-import com.flooferland.showbiz.registry.ModItems
+import net.minecraft.resources.*
 import com.flooferland.showbiz.utils.Extensions.itemPath
 import com.flooferland.showbiz.utils.rlVanilla
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
-import net.minecraft.resources.ResourceLocation
 
 object ItemProvider {
     enum class ItemModelId {
         Generated,
+        MusicDisc,
         Custom;
 
         var data: JsonObject? = null
@@ -21,12 +21,18 @@ object ItemProvider {
         }
     }
 
-    fun generateModel(item: ModItems): JsonObject? {
-        return when (item.model!!) {
+    fun generateModel(model: ItemModelId, id: ResourceLocation): JsonObject? {
+        return when (model) {
             ItemModelId.Generated -> buildJsonObject {
                 put("parent", rlVanilla("generated").itemPath().toString())
                 putJsonObject("textures") {
-                    put("layer0", item.id.itemPath().toString())
+                    put("layer0", id.itemPath().toString())
+                }
+            }
+            ItemModelId.MusicDisc -> buildJsonObject {
+                put("parent", rlVanilla("template_music_disc").itemPath().toString())
+                putJsonObject("textures") {
+                    put("layer0", id.itemPath().toString())
                 }
             }
             ItemModelId.Custom -> null

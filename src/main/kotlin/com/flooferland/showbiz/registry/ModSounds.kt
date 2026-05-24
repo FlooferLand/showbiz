@@ -1,11 +1,11 @@
 package com.flooferland.showbiz.registry
 
-import com.flooferland.showbiz.datagen.DataGenerator
-import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.sounds.*
+import com.flooferland.showbiz.datagen.DataGenerator
+import com.flooferland.showbiz.utils.rl
 
 /// NOTE: Data generator should be called after adding new sounds here
 enum class ModSounds {
@@ -24,7 +24,7 @@ enum class ModSounds {
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {
         this.id = rl(if (folder == null) name else "$folder.$name")
         this.event = SoundEvent.createVariableRangeEvent(this.id)
-        this.sounds = sounds
+        this.sounds = sounds.map { rl(it) }.toTypedArray()
         this.folder = folder
         this.procedural = procedural
         if (!DataGenerator.engaged) {
@@ -34,7 +34,7 @@ enum class ModSounds {
 
     val id: ResourceLocation
     val event: SoundEvent
-    val sounds: Array<String>
+    val sounds: Array<ResourceLocation>
     val folder: String?
     val procedural: Boolean
 }
