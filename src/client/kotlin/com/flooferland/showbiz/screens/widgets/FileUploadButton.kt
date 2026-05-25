@@ -19,6 +19,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
+import org.lwjgl.PointerBuffer
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.tinyfd.TinyFileDialogs
@@ -95,22 +96,25 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
     }
 
     override fun onPress() {
-        val filters = filter?.let {
-            val pointer = MemoryUtil.memAllocPointer(1)
-            pointer.put(MemoryUtil.memUTF8("*.${it.ext}")).flip()
+        val filters = filter?.let { filter ->
+            val pointer = PointerBuffer.allocateDirect(1)
+            pointer.put(0, MemoryUtil.memUTF8(filter.blob))
             pointer
         }
         val path = TinyFileDialogs.tinyfd_openFileDialog(
             title,
             "",
-            filters, filter?.title,
+            filters, filter?.description,
             false
         )
-        MemoryUtil.memFree(filters)
+        if (filters != null) {
+            MemoryUtil.nmemFree(filters.get(0))
+        }
         path?.let { first ->
             loadedPath = runCatching { Path.of(first) }.getOrNull()
-            if (filter != null && loadedPath?.extension != filter.ext) {
+            if (filter != null && loadedPath?.extension !in filter.extensions) {
                 Minecraft.getInstance()?.soundManager?.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, 0.3f))
+                setError("Unknown file format '${loadedPath?.extension}' (expected: ${filter.extensions.joinToString(",")})")
                 reset()
             }
             loadedPath?.let { submit(it); onSubmit(it) } ?: onSubmit(null)
@@ -175,8 +179,12 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         narration.add(NarratedElementType.HINT, "File upload button")
     }
 
-    enum class Filter(val ext: String, val title: String) {
-        AudioWav("wav", "WAV File")
+    enum class Filter(val extensions: Array<String>, title: String) {
+        AudioWav(arrayOf("wav"), "WAV File"),
+        Audio(arrayOf("wav", "mp3", "flac", "ogg", "opus", "aac", "m4a"), "Audio")
+        ;
+        val blob = extensions.joinToString(";") { "*.$it" }
+        val description = "$title (${blob})"
     }
 
     companion object {

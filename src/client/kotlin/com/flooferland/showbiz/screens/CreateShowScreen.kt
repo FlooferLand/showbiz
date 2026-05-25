@@ -13,6 +13,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ShowFileEditPacket
 import com.flooferland.showbiz.screens.widgets.FileUploadButton
 import com.flooferland.showbiz.types.BitChartStore
+import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.alwaysEndsWith
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import org.lwjgl.glfw.GLFW
@@ -21,6 +22,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
     lateinit var showName: EditBox
     lateinit var submitButton: Button
     lateinit var uploadAudioButton: FileUploadButton
+    lateinit var notice: StringWidget
 
     val editHint = Component.literal("File name").withStyle(ChatFormatting.DARK_GRAY)!!
     val chartButtons = mutableListOf<Button>()
@@ -80,7 +82,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
         }
 
         // Upload audio button
-        uploadAudioButton = FileUploadButton(showName.x, showName.bottom + 50, filter = FileUploadButton.Filter.AudioWav)
+        uploadAudioButton = FileUploadButton(showName.x, showName.bottom + 50, filter = if (FFmpeg.serverAvailable) FileUploadButton.Filter.Audio else FileUploadButton.Filter.AudioWav)
         uploadAudioButton.onSubmit = { path ->
             updateSubmitActive()
         }
@@ -88,6 +90,14 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
             updateSubmitActive()
         }
         addRenderableWidget(uploadAudioButton)
+
+        // Notice
+        notice = StringWidget(
+            uploadAudioButton.x, uploadAudioButton.bottom + 5,
+            (width * 0.6).toInt(), font.lineHeight,
+            Component.empty(), font
+        ).alignLeft()
+        addRenderableWidget(notice)
 
         // Submit button
         submitButton = Button.Builder(Component.literal("Create")) {
@@ -113,6 +123,9 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
     fun updateWidgets() {
         val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extension
         showName.setHint(ext?.let { editHint.copy().append(".$it") } ?: editHint)
+
+        val noticeText = if (!FFmpeg.serverAvailable) "Consider installing FFmpeg to support more audio formats!" else ""
+        notice.message = Component.literal(noticeText).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
     }
 
     override fun onClose() {

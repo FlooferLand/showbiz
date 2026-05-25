@@ -27,6 +27,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ProgrammerKeyPress: ModPackets<ProgrammerKeyPressPacket>(ClientToServer, ProgrammerKeyPressPacket.type, ProgrammerKeyPressPacket.codec)
     data object ProgrammerPlayerUpdate: ModPackets<ProgrammerPlayerUpdatePacket>(ClientToServer, ProgrammerPlayerUpdatePacket.type, ProgrammerPlayerUpdatePacket.codec)
     data object JukeboxLyric: ModPackets<JukeboxLyricPacket>(ServerToClient, JukeboxLyricPacket.type, JukeboxLyricPacket.codec)
+    data object ServerInfo: ModPackets<ServerCapabilitiesPacket>(ServerToClient, ServerCapabilitiesPacket.type, ServerCapabilitiesPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

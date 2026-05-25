@@ -8,8 +8,10 @@ import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
+import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.BitChartStore
+import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
@@ -47,6 +49,9 @@ object Showbiz : ModInitializer {
             Showbiz.log.error("Error loading config", throwable)
         }
 
+        // Loading FFMPEG
+        FFmpeg.init()
+
         // Making sure the JVM compiles these
         @Suppress("UnusedExpression")
         run {
@@ -69,7 +74,11 @@ object Showbiz : ModInitializer {
         // Services
         UpdateChecker.check()
         ServerTickEvents.START_SERVER_TICK.register { server ->
+            FFmpeg.serverAvailable = FFmpeg.localAvailable
             FileServer.update(server)
+        }
+        ServerPlayerEvents.JOIN.register { player ->
+            ServerPlayNetworking.send(player, ServerCapabilitiesPacket(hasFFmpeg = FFmpeg.localAvailable))
         }
 
         // Server addons

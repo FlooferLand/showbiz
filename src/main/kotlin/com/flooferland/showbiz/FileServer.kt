@@ -1,5 +1,6 @@
 package com.flooferland.showbiz
 
+import net.minecraft.*
 import net.minecraft.core.component.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.*
@@ -11,9 +12,16 @@ import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.network.packets.FileUploadResponsePacket.ServerMessage
 import com.flooferland.showbiz.registry.ModComponents
+import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.FFmpeg.AudioSettings
+import com.flooferland.showbiz.types.FFmpeg.Settings
 import com.flooferland.showbiz.types.ServerPlayerFileUpload
+import com.flooferland.showbiz.types.WavHeader
 import com.flooferland.showbiz.utils.Extensions.getHeldItem
 import java.nio.file.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.io.path.name
 
@@ -48,24 +56,40 @@ object FileServer {
                 return@registerGlobalReceiver
             }
             val path = FileStorage.SHOWS_DIR.resolve(packet.file)
-            when (packet.action) {
-                FileAction.Create -> runCatching {
-                    val stream = Files.newOutputStream(path)
-                    val audio = serverPlayerUploads[ctx.player().id]?.bytes.orEmpty()
-                    RshowFormat().write(stream, RawShowData(audio = audio.toByteArray()))
-                    serverPlayerUploads.remove(ctx.player().id)
+            val player = ctx.player()
+            val server = ctx.server()
 
-                    val heldItem = ctx.player().getHeldItem { it.item is ReelItem }
-                    if (heldItem != null) {
-                        ReelItem.setFilename(heldItem, packet.file)
+            when (packet.action) {
+                FileAction.Create -> CoroutineScope(Dispatchers.IO).launch {
+                    val audioBytes = serverPlayerUploads.remove(player.id)?.bytes.orEmpty().toByteArray()
+                    val result = runCatching {
+                        val settings = Settings(outputFormat = "wav", audio = AudioSettings(codec = "pcm_s16le", channels = 2, sampleRate = 44100))
+                        val audioWav = when {
+                            WavHeader.isWav(audioBytes) -> audioBytes
+                            FFmpeg.localAvailable -> FFmpeg.encode(audioBytes, settings) ?: error("Failed to encode audio bytes to wav: ${FFmpeg.getLastError()}")
+                            else -> error("Failed to create a show file. Audio is not using the WAV format. Please install FFMPEG if you want to use other audio formats")
+                        }
+                        Files.newOutputStream(path).use {
+                            RshowFormat().write(it, RawShowData(audio = audioWav))
+                        }
+                    }
+                    server.execute {
+                        if (!player.connection.isAcceptingMessages) return@execute
+                        result.onSuccess {
+                            player.getHeldItem { it.item is ReelItem }?.let { ReelItem.setFilename(it, packet.file) }
+                            sendShowsToClient(player)
+                        }.onFailure { throwable ->
+                            serverError(throwable, player)
+                            sendShowsToClient(player)
+                        }
                     }
                 }
+
                 FileAction.Delete -> runCatching {
                     Files.deleteIfExists(path)
-                }
-                else -> Showbiz.log.error("File action '${packet.action}' is unsupported")
+                    sendShowsToClient(player)
+                }.onFailure { serverError(it, player) }
             }
-            sendShowsToClient(ctx.player())
         }
 
         // File uploads
@@ -83,6 +107,11 @@ object FileServer {
             val message = if (upload == null) ServerMessage.BuzzOff else if (done) ServerMessage.Done else ServerMessage.Continue
             ServerPlayNetworking.send(player, FileUploadResponsePacket(message, bytesSoFar = upload?.getSizeBytes() ?: 0L))
         }
+    }
+
+    fun serverError(throwable: Throwable, player: ServerPlayer? = null) {
+        Showbiz.log.error("SERVER ERROR:", throwable)
+        player?.sendSystemMessage(Component.literal("Server error: $throwable").withStyle(ChatFormatting.RED))
     }
 
     fun update(server: MinecraftServer) {

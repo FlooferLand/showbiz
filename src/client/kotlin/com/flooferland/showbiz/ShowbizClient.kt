@@ -20,6 +20,7 @@ import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.models.BaseBotModel
+import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
@@ -33,6 +34,7 @@ import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
@@ -195,6 +197,12 @@ object ShowbizClient : ClientModInitializer {
             // Version check
             if (UpdateChecker.newerVersion != null)
                 minecraft.player?.displayClientMessage(UpdateChecker.getMessage(), false)
+        }
+
+        // Server capabilities
+        ClientPlayNetworking.registerGlobalReceiver(ServerCapabilitiesPacket.type) { packet, ctx ->
+            FFmpeg.serverAvailable = packet.hasFFmpeg
+            Showbiz.log.debug("Server capabilities: {}", packet.toString())
         }
 
         // DARN YOU SPLIT SOURCESETS
