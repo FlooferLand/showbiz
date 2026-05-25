@@ -1,9 +1,8 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.client.Minecraft
+import net.minecraft.client.*
 import net.minecraft.core.*
-import net.minecraft.network.chat.Component
-import net.minecraft.util.Mth
+import net.minecraft.util.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import foundry.veil.api.client.registry.LightTypeRegistry
@@ -13,7 +12,6 @@ import foundry.veil.api.client.render.light.renderer.LightRenderHandle
 import foundry.veil.platform.VeilEventPlatform
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import org.joml.Quaternionf
-import org.joml.Vector3f
 
 /** Veil integration for stuff like spotlights */
 object ModClientVeil {
@@ -29,6 +27,12 @@ object ModClientVeil {
 
                 val light = lightRef.lightData
                 light.angle = blockEntity.angle * Mth.DEG_TO_RAD
+                blockEntity.color.let {
+                    light.color.setInt(
+                        FastColor.ARGB32.red(it),
+                        FastColor.ARGB32.green(it),
+                        FastColor.ARGB32.blue(it))
+                }
 
                 val pos = blockEntity.blockPos
                 val forward = facing.step()

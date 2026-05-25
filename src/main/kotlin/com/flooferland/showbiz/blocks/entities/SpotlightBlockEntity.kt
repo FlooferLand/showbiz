@@ -35,11 +35,11 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     }
 
     var isOn: Boolean = false
-    var color: Int = 0xffffff
 
     override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
     var turn = Vec2f.ZERO
     var angle = 45f
+    var color: Int = 0xffffff
 
     val geckoCache = GeckoLibUtil.createInstanceCache(this)!!
 
@@ -52,26 +52,26 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, color)
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
         menuData.loadAdditional(tag)
         tag.getBooleanOrNull("is_on")?.let { isOn = it }
-        tag.getIntOrNull("color")?.let { color = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
         tag.getFloatOrNull("turn_y")?.let { turn.y = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
+        tag.getIntOrNull("color")?.let { color = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
         menuData.saveAdditional(tag)
         tag.putBoolean("is_on", isOn)
-        tag.putInt("color", color)
         tag.putFloat("turn_x", turn.x)
         tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)
+        tag.putInt("color", color)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {

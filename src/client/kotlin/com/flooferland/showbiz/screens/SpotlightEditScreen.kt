@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
+import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
 
 class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
@@ -14,6 +15,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
     var turnX: EditBox? = null
     var turnY: EditBox? = null
     var angle: EditBox? = null
+    var color: ColorPicker? = null
 
     override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
         // Turn X
@@ -40,11 +42,20 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
             angle!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() }
             widgets.add(WidgetInfo("Angle", angle!!))
         }
+
+        // Color
+        /*run {
+            color = ColorPicker(0, 0, 80, 40, editMenu.data.color)
+            widgets.add(WidgetInfo("Color", color!!))
+        }*/
     }
 
     override fun saveCustom(data: SpotlightEditPacket) {
         turnX?.value?.toFloatOrNull()?.let { data.turn.x = it }
         turnY?.value?.toFloatOrNull()?.let { data.turn.y = it }
         angle?.value?.toFloatOrNull()?.let { data.angle = it }
+        color?.value?.let {
+            data.color = it
+        }
     }
 }
