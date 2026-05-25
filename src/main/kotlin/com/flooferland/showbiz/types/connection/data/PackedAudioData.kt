@@ -44,7 +44,8 @@ data class PackedAudioData(
         return true
     }
 
-    fun broadcastToAll(level: ServerLevel, origin: BlockPos) {
+    /** Broadcasts the audio to all players in range */
+    fun broadcastAudio(level: ServerLevel, origin: BlockPos) {
         chunkId++
         for (player in level.players()) {
             if (player.distanceToSqr(origin.center) > AUDIO_DIST_SQUARE) continue

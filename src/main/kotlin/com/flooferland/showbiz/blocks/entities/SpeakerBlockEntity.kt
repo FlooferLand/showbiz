@@ -16,7 +16,7 @@ class SpeakerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     override val connectionManager = ConnectionManager(this)
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
-        it.broadcastToAll(level, blockPos)
+        it.broadcastAudio(level, blockPos)
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {

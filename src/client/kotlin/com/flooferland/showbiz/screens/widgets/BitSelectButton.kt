@@ -15,12 +15,13 @@ import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.MappedBits
 import com.mojang.blaze3d.systems.RenderSystem
+import kotlin.math.max
 
 // Welcome to hell
 class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWidget(x, y, width, height, Component.literal("Bit select")) {
     val popupY get() = y + height
     val popupHeight get() = (Minecraft.getInstance().screen!!.height - popupY) - 5
-    val popupWidth get() = 180
+    val popupWidth get() = max(180, width+1)
     val popupEntryHeight get() = 13
 
     var pickingChart: String? = null
@@ -51,6 +52,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
     fun popupSetOpen(open: Boolean, chartId: String? = null) {
         if (activeButton != this) activeButton?.popupSetOpen(false)
         usedBits.clear()
+        bitWidgets.clear()
         if (open) {
             val font = Minecraft.getInstance().font
             activeButton = this
@@ -79,7 +81,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
     private fun rebuildList(chartId: String) {
         val font = Minecraft.getInstance().font
         val widgets = mutableListOf<AbstractWidget>()
-        val chart = chartId.let { BitUtils.readBitmap(it) } ?: return
+        val chart = chartId.let { BitUtils.readBitmap(it) }
         fun addBitButton(fixtureName: String, movementName: String, bitId: BitId, selectionButton: Boolean, pressed: () -> Unit): BitEntryButton {
             val button = BitEntryButton(
                 x + 5, 0, popupWidth - 10, popupEntryHeight,
@@ -95,8 +97,8 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
         if (selection.isNotEmpty()) {
             widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal("selected"), font))
             selection.forEach { bitId ->
-                val fixtureName = chart.entries.find { (_, movements) -> movements.containsValue(bitId) }?.key ?: "Unknown fixture"
-                val info = chart.values.flatMap { it.entries }.find { it.value == bitId }
+                val fixtureName = chart?.entries?.find { (_, movements) -> movements.containsValue(bitId) }?.key ?: "Unknown fixture"
+                val info = chart?.values?.flatMap { it.entries }?.find { it.value == bitId }
                 val movementName = info?.key ?: "Bit $bitId"
                 addBitButton(fixtureName, movementName, bitId, true) {
                     values.removeBit(chartId, bitId)
@@ -117,14 +119,14 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
                 popupSetOpen(false)
             }
         }
-        chart.forEach { (fixtureName, movements) ->
+        chart?.forEach { (fixtureName, movements) ->
             val movements = movements.entries
                 .filter { it.value !in selection }
                 .sortedBy { it.value }
             widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal(fixtureName), font))
             movements.forEach { (movementName, bitId) ->
                 usedBits.add(bitId)
-                addBitButton(fixtureName, movementName, bitId, false, { bitButtonClick(bitId) },)
+                addBitButton(fixtureName, movementName, bitId, false) { bitButtonClick(bitId) }
             }
         }
 
@@ -238,6 +240,9 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
                     widget.render(guiGraphics, mouseX, mouseY, partialTick)
                 }
             }
+            if (bitWidgets.isEmpty()) {
+                guiGraphics.drawString(font, "No chart yet. Type bit IDs in", x + 2, popupY + (searchBar?.height ?: 0) + 2, 0xFFFFFFFF.toInt())
+            }
             guiGraphics.disableScissor()
             guiGraphics.renderOutline(x - 1, popupY - 1, popupWidth + 1, popupHeight + 1, 0xFFFFFFFF.toInt())
             guiGraphics.pose().popPose()
@@ -245,8 +250,19 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        val searchBar = searchBar
+        val chartId = pickingChart
         if (expanded && searchBar?.isFocused == true) {
-            return searchBar!!.keyPressed(keyCode, scanCode, modifiers)
+            /*if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_COMMA) {
+                val value = searchBar.value.trim().toBitIdOrNull()
+                if (value != null && chartId != null) {
+                    values.addBit(chartId, value)
+                    rebuildList(chartId)
+                    searchBar.value = ""
+                    return true
+                }
+            }*/
+            return searchBar.keyPressed(keyCode, scanCode, modifiers)
         }
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
@@ -270,7 +286,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
         if (!active || !visible) return false
         if (isMouseOverPopup(mouseX, mouseY)) {
             if (mouseY >= listStartY) {
-                bitWidgets.forEach { if (it.visible) it.mouseClicked(mouseX, mouseY, button) }
+                bitWidgets.toList().forEach { if (it.visible) it.mouseClicked(mouseX, mouseY, button) }
             } else if (mouseY > y) {
                 searchBar?.isFocused = true
                 searchBar?.mouseClicked(mouseX, mouseY, button)

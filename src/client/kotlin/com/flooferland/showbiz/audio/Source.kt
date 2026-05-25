@@ -48,6 +48,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     fun close() {
         if (isValidSource()) {
+            if (getState() == AL_PLAYING) handleALBasic { alSourcePause(source) }
             handleALBasic { alSourceStop(source) }
 
             val queued = handleALBasic { alGetSourcei(source, AL_BUFFERS_QUEUED) }

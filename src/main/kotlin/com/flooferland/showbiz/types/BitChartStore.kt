@@ -15,6 +15,12 @@ class BitChartStore {
         add(id = FAZ_ID,
             BitChartInfo(extension = "fshw", color = 0xFF8D6320.toInt())
         )
+        add(id = CEC_ID,
+            BitChartInfo(extension = "cshw", color = 0xFF8D6320.toInt())
+        )
+        add(id = FAZTOYS_ID,
+            BitChartInfo(extension = "tshw", color = 0xFF204A8D.toInt())
+        )
     }
 
     fun add(id: String, info: BitChartInfo) {
@@ -33,6 +39,9 @@ class BitChartStore {
     companion object {
         const val RAE_ID = "rae"
         const val FAZ_ID = "faz"
+        const val CEC_ID = "cec"
+        const val FAZTOYS_ID = "toy"
+        const val FAZMANGLE_ID = "mgl"
 
         // TODO: Figure out a replacement for having to include a default show mapping in most systems.
         //       Most of the things using this shouldn't have any mapping assigned
