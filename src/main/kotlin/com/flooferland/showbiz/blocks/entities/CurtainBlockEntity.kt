@@ -8,7 +8,6 @@ import net.minecraft.sounds.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.AABB
 import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.registry.ModBlocks
@@ -20,7 +19,7 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
-import com.flooferland.showbiz.utils.lerp
+import com.flooferland.showbiz.utils.Sounds
 
 class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainBlock.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
@@ -71,8 +70,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         val center = findCenter(rails) ?: blockPos
 
         // Sounds
-        if (level is ServerLevel)
-            level.playSound(null, center, SoundEvents.WOOL_HIT, SoundSource.BLOCKS, 1f, 1f)
+        Sounds.play(level, center, SoundEvents.WOOL_HIT, SoundSource.BLOCKS)
     }
 
     fun findConnectedCurtains(): Set<BlockPos> {

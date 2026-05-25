@@ -4,7 +4,6 @@ import net.minecraft.*
 import net.minecraft.core.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.level.*
-import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
@@ -25,6 +24,7 @@ import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handItem
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.Sounds
 
 class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
     override val codec = simpleCodec(::ReelToReelBlock)!!
@@ -80,7 +80,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     val stackCopy = heldStack.copy()
                     player.setItemInHand(hand, Items.AIR.defaultInstance)
                     player.displayClientMessage(Component.literal("Loading.."), true)
-                    player.playNotifySound(ModSounds.ReelEnter.event, SoundSource.MASTER, 1f, 1f)
+                    Sounds.play(player, ModSounds.ReelEnter)
 
                     // Playback
                     if (player is ServerPlayer) {
@@ -96,7 +96,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                                 player.inventoryMenu.broadcastChanges()
                                 return@load
                             }
-                            level.playSound(player, pos, ModSounds.ReelEnter.event, SoundSource.MASTER, 0.4f, 1.5f)
+                            Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
                             player.displayClientMessage(Component.empty(), true)
                             player.inventoryMenu.broadcastChanges()
                         }
@@ -110,7 +110,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 if (player is ServerPlayer) {
                     val showName = entity.showData.name
                     showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-                    player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
+                    Sounds.play(player, ModSounds.ReelExit)
                     entity.applyChange(true) {
                         entity.setPlaying(false)
                         entity.showData.unload(player)
@@ -135,12 +135,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 }
 
                 if (!paused)
-                    player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 1f, 1f)
+                    Sounds.play(player, ModSounds.ReelPlay)
                 else
-                    player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 0.5f, 0.8f)
+                    Sounds.play(player, ModSounds.ReelPlay, volume = 0.5f, pitch = 0.8f)
                 return ItemInteractionResult.SUCCESS
             } else {
-                player.playNotifySound(ModSounds.ReelPlay.event, SoundSource.MASTER, 0.4f, 0.4f)
+                Sounds.play(player, ModSounds.ReelPlay, volume = 0.4f, pitch = 0.4f)
             }
         }
         return ItemInteractionResult.SUCCESS

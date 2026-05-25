@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
-import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
@@ -13,6 +12,7 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import com.flooferland.showbiz.utils.Sounds
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -62,7 +62,7 @@ class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModB
             setItem(slot, ItemStack.EMPTY)
         }
 
-        level.playSound(null, blockPos, ModSounds.ReelPlay.event, SoundSource.BLOCKS, 1.0f, 1.5f)
+        Sounds.play(player, ModSounds.ReelPlay)
     }
 
     // region | Container

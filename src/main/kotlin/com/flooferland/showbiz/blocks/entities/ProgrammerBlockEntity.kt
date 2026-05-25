@@ -45,6 +45,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (operators.isEmpty()) return
         if (show.data.mapping.isNullOrEmpty()) show.data.mapping = BitChartStore.DEFAULT
         show.data.signal.reset()
+        show.data.playing = true
         val mapping = show.data.mapping ?: BitChartStore.DEFAULT
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)

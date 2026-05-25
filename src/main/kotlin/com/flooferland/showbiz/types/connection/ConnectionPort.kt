@@ -55,11 +55,11 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     override fun loadOrThrow(tag: CompoundTag) {
         data.loadOrThrow(tag.getCompound("data"))
         dataReceived.loadOrThrow(tag.getCompound("data_recv"))
+        listeners.clear()
 
         // Loading listeners
         if (direction != PortDirection.In) {
             tag.getLongArrayOrNull("listeners")?.let { array ->
-                listeners.clear()
                 listeners.addAll(array.map { BlockPos.of(it) })
             }
         }

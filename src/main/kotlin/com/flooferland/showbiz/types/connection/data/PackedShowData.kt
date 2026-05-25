@@ -23,6 +23,7 @@ data class PackedShowData(
 
     override fun tempReset() {
         signal.reset()
+        playing = false
     }
 
     override fun merge(other: PackedShowData): Boolean {

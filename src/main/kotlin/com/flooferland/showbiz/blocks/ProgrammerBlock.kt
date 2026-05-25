@@ -1,34 +1,21 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.Direction
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.chat.Component
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.LevelAccessor
-import net.minecraft.world.level.LevelReader
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.RenderShape
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityTicker
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.core.*
+import net.minecraft.network.chat.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
-import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.registry.ModPlayerSynchedData
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
-import com.flooferland.showbiz.utils.Extensions.applyComponent
+import com.flooferland.showbiz.utils.Sounds
 
 class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
     override val codec = simpleCodec(::ProgrammerBlock)!!
@@ -70,10 +57,12 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             data.blockPos = pos
             blockEntity.operators.add(player)
             player.displayClientMessage(Component.literal("Entering programming mode"), true)
+            Sounds.enter(player)
         } else {
             data.blockPos = null
             blockEntity.operators.remove(player)
             player.displayClientMessage(Component.literal("Exiting programming mode"), true)
+            Sounds.exit(player)
         }
         data.saveToPlayer(player)
 

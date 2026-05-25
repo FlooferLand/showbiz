@@ -34,6 +34,7 @@ import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
@@ -88,17 +89,21 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun tick() {
         modelPartInstance.tick(level ?: return, blockPos, blockState)
-        if ((!playing && !recording) || showData.isEmpty()) return
-        var shouldUpdate = false
-
-        seek += tickDelta
-        seekInt = (seek * fps).roundToInt()
         if (level?.isClientSide ?: true) return
+
+        val runningShow = (playing || recording) && !showData.isEmpty()
+        val passthrough = recordQueue.isNotEmpty()
+        if (!runningShow && !passthrough) return
+
+        if (runningShow) {
+            seek += tickDelta
+            seekInt = (seek * fps).roundToInt()
+        }
 
         // Signal
         run {
-            val frame = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
-            if (recordQueue.isNotEmpty()) {
+            val frame = if (runningShow) showData.signal.getOrNull(seekInt) ?: bitIdArrayOf() else bitIdArrayOf()
+            if (passthrough) {
                 val mergedBits = mutableSetOf<UShort>()
                 frame.forEach { mergedBits.add(it) }
                 recordQueue.forEach { frame ->
@@ -124,35 +129,37 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 signal.set(frame)
             }
 
-            shouldUpdate = true
-            show.send(PackedShowData(playing, signal, showData.mapping))
+            val outMapping = if (runningShow && !showData.mapping.isNullOrEmpty()) showData.mapping else show.dataReceived.mapping
+            val outPlaying = playing || show.dataReceived.playing
+            show.send(PackedShowData(outPlaying, signal, outMapping))
         }
 
-        // Audio
-        val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
-        if (audioBytesWritten < targetBytes && audioBytesWritten < showData.audio.size) {
-            var toWrite = aBufferSize
-            toWrite -= toWrite % getFormat().frameSize
+        if (runningShow) {
+            // Audio
+            val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
+            if (audioBytesWritten < targetBytes && audioBytesWritten < showData.audio.size) {
+                var toWrite = aBufferSize
+                toWrite -= toWrite % getFormat().frameSize
 
-            val remain = showData.audio.size - audioBytesWritten
-            if (toWrite > remain) toWrite = remain
+                val remain = showData.audio.size - audioBytesWritten
+                if (toWrite > remain) toWrite = remain
 
-            if (toWrite > 0) {
-                val chunk = showData.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
-                sendChunk(chunk, audioBytesWritten)
-                audioBytesWritten += toWrite
+                if (toWrite > 0) {
+                    val chunk = showData.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
+                    sendChunk(chunk, audioBytesWritten)
+                    audioBytesWritten += toWrite
+                }
+            }
+
+            // Setting playing to false when the show ends
+            if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
+                setPlaying(false)
+                hasFinished = true
             }
         }
 
-        // Setting playing to false when the show ends
-        if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
-            setPlaying(false)
-            hasFinished = true
-            shouldUpdate = true
-        }
-
         // Updating the block entity (sends network packet)
-        if (shouldUpdate) markDirtyNotifyAll()
+        markDirtyNotifyAll()
     }
 
     override fun setRemoved() {
@@ -213,10 +220,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             if (recording) {
                 recording = false
                 showData.saveToDisk(player)
+                Sounds.exit(player)
             } else if (playing) {
                 recording = true
+                Sounds.enter(player)
             } else {
                 player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+                Sounds.bad(player)
             }
         }
     }
