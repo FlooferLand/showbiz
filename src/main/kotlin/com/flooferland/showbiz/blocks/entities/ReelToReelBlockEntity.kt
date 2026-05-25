@@ -212,6 +212,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (key == 0) applyChange(true) {
             if (recording) {
                 recording = false
+                showData.saveToDisk(player)
             } else if (playing) {
                 recording = true
             } else {

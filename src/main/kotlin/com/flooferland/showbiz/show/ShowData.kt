@@ -1,5 +1,11 @@
 package com.flooferland.showbiz.show
 
+import net.minecraft.*
+import net.minecraft.nbt.*
+import net.minecraft.network.chat.*
+import net.minecraft.world.entity.player.*
+import com.flooferland.bizlib.RawShowData
+import com.flooferland.bizlib.formats.LegacyRshowFormat
 import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
@@ -7,13 +13,6 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import net.minecraft.nbt.*
-import com.flooferland.bizlib.RawShowData
-import com.flooferland.bizlib.formats.LegacyRshowFormat
-import com.flooferland.showbiz.utils.Extensions.applyChange
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
@@ -22,6 +21,9 @@ import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.io.path.Path
 
 // TODO: Ensure the file is saved correctly,
@@ -149,45 +151,51 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         tag.putBoolean("is_loaded", isLoaded)
     }
 
-    /** Frees / deletes and resets everything regarding the show data */
-    fun unload() {
-        if (owner.recording && !(owner.level?.isClientSide ?: true)) run {
-            val filename = name ?: return@run
-            val showFormat = RshowFormat()
+    /** Saves the show to the disk */
+    fun saveToDisk(toNotify: Player? = null) {
+        val filename = name ?: return
+        val showFormat = RshowFormat()
 
-            // Signal
-            val signalInt = IntArray(this.signal.sumOf { it.size + 1 })
-            var i = 0
-            for (array in this.signal) {
-                for (bitId in array) signalInt[i++] = bitId.toInt()
-                signalInt[i++] = 0
-            }
-
-            // Audio
-            val audio = run {
-                val format = this.format ?: return@run this.audio
-                if (this.audio.isEmpty()) return@run this.audio
-                val buf = ByteArrayOutputStream()
-                AudioSystem.write(
-                    AudioSystem.getAudioInputStream(
-                        format,
-                        AudioInputStream(ByteArrayInputStream(this.audio), format, this.audio.size.toLong() / format.frameSize)
-                    ),
-                    AudioFileFormat.Type.WAVE,
-                    buf
-                )
-                buf.toByteArray()
-            }
-
-            // Finally saving
-            val path = getFilePath(filename)
-            runCatching {
-                Files.newOutputStream(path).use {
-                    showFormat.write(it, RawShowData(audio = audio, signal = signalInt))
-                }
-            }.onFailure { Showbiz.log.error("Exception writing show file '${path}'", it) }
-            Showbiz.log.info("Saved show! (signal=${signalInt.size}, audio=${audio.size})")
+        // Signal
+        val signalInt = IntArray(this.signal.sumOf { it.size + 1 })
+        var i = 0
+        for (array in this.signal) {
+            for (bitId in array) signalInt[i++] = bitId.toInt()
+            signalInt[i++] = 0
         }
+
+        // Audio
+        val audio = run {
+            val format = this.format ?: return@run this.audio
+            if (this.audio.isEmpty()) return@run this.audio
+            val buf = ByteArrayOutputStream()
+            AudioSystem.write(
+                AudioSystem.getAudioInputStream(
+                    format,
+                    AudioInputStream(ByteArrayInputStream(this.audio), format, this.audio.size.toLong() / format.frameSize)
+                ),
+                AudioFileFormat.Type.WAVE,
+                buf
+            )
+            buf.toByteArray()
+        }
+
+        // Finally saving
+        val path = getFilePath(filename)
+        runCatching {
+            Files.newOutputStream(path).use {
+                showFormat.write(it, RawShowData(audio = audio, signal = signalInt))
+            }
+        }.onFailure { Showbiz.log.error("Exception writing show file '${path}'", it) }
+        val info = "signal=${signalInt.size}, audio=${audio.size}"
+        toNotify?.displayClientMessage(Component.literal("Saved ($info)").withStyle(ChatFormatting.GRAY), true)
+        Showbiz.log.info("Saved show! ($info)")
+    }
+
+    /** Frees / deletes and resets everything regarding the show data */
+    fun unload(toNotify: Player? = null) {
+        if (owner.recording && !(owner.level?.isClientSide ?: true)) saveToDisk(toNotify)
+        owner.recording = false
         signal.clear()
         audio = ByteArray(0)
         isLoaded = false

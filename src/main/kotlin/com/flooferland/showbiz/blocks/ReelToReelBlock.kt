@@ -1,17 +1,10 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.ChatFormatting
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
-import com.flooferland.showbiz.items.ReelItem
-import com.flooferland.showbiz.items.WandItem
-import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.utils.Extensions.applyChange
-import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import net.minecraft.*
 import net.minecraft.core.*
-import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.SoundSource
+import net.minecraft.network.chat.*
+import net.minecraft.server.level.*
+import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
@@ -21,12 +14,17 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.CollisionContext
-import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.shapes.VoxelShape
+import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
+import com.flooferland.showbiz.items.ReelItem
+import com.flooferland.showbiz.items.WandItem
+import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handItem
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 
 class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
     override val codec = simpleCodec(::ReelToReelBlock)!!
@@ -115,7 +113,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     player.playNotifySound(ModSounds.ReelExit.event, SoundSource.MASTER, 1f, 1f)
                     entity.applyChange(true) {
                         entity.setPlaying(false)
-                        entity.showData.unload()
+                        entity.showData.unload(player)
                         player.inventoryMenu.broadcastChanges()
                     }
                 }
