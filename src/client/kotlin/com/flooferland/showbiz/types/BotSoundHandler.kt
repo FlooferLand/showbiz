@@ -1,11 +1,12 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.BlockPos
-import net.minecraft.sounds.SoundSource
-import net.minecraft.util.Mth.clamp
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.client.multiplayer.*
+import net.minecraft.core.*
+import net.minecraft.sounds.*
+import net.minecraft.util.Mth.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.state.*
+import com.flooferland.bizlib.bits.MoveType
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -32,6 +33,7 @@ class BotSoundHandler : IBotSoundHandler {
         for ((bit, data) in bitmapBits) {
             val bitOn = show.signal.frameHas(bit)
             val prevState = states[bit]
+            if (data.type == MoveType.Effect) continue
 
             if (prevState != null && prevState != bitOn) {
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease

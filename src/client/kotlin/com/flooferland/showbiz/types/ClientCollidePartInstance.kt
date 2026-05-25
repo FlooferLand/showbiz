@@ -1,12 +1,12 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.BlockPos
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.client.*
+import net.minecraft.client.multiplayer.*
+import net.minecraft.core.*
+import net.minecraft.world.entity.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.entities.CollidePartEntity
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
@@ -22,6 +22,11 @@ class ClientCollidePartInstance(val owner: ICollidePartInteractable) : CollidePa
 
     override fun tick(level: Level, pos: BlockPos, state: BlockState) {
         val level = level as? ClientLevel ?: return
+
+        spawned.entries.removeIf { (partId, entity) ->
+            entity.isRemoved || entity.id == CollidePartId.None
+        }
+
         if (spawned.isEmpty()) refresh(level, pos)
     }
 
@@ -29,8 +34,7 @@ class ClientCollidePartInstance(val owner: ICollidePartInteractable) : CollidePa
         val level = level as? ClientLevel ?: return
         spawned.values.removeIf { it.remove(Entity.RemovalReason.DISCARDED); true }
         for (id in owner.collidePartInstance.bonesToIds.values) {
-            val entity = CollidePartEntity(level, id, owner)
-            entity.setPos(pos.center)
+            val entity = CollidePartEntity(level, pos.center, id, owner)
             level.addEntity(entity)
             spawned[id] = entity
         }

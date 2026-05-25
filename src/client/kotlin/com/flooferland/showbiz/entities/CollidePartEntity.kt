@@ -17,7 +17,7 @@ import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class CollidePartEntity(level: Level, val id: CollidePartId = CollidePartId.None, val owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
+class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollidePartId = CollidePartId.None, val owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -44,6 +44,10 @@ class CollidePartEntity(level: Level, val id: CollidePartId = CollidePartId.None
 
     init {
         if (id == CollidePartId.None) remove(RemovalReason.DISCARDED)
+        initialPos?.let {
+            setPos(it)
+            targetPos = it
+        }
     }
 
     override fun playerTouch(player: Player) {

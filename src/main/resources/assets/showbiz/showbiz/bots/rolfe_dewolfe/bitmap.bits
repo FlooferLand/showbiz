@@ -80,7 +80,7 @@ rae jaw {
 }
 rae earl_jaw {
     flow 2.0
-    rotate "earl_jaw" x:25
+    rotate "earl_jaw" x:50
 }
 rae eyes_left {
     flow 0.5
