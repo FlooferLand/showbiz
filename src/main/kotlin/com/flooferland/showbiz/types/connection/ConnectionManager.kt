@@ -52,7 +52,8 @@ class ConnectionManager(val entity: BlockEntity) {
     fun load(tag: CompoundTag) {
         loadCalled = true
         val tag = tag.getCompoundOrNull("connections") ?: return
-        inputs.values.forEach { it.removeListeners { true } }
+        inputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
+        outputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
 
         inputs.forEach { (id, port) ->
             val loaded = runCatching { tag.getCompoundOrNull(id)?.let { port.loadOrThrow(it) } }

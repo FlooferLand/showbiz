@@ -1,9 +1,12 @@
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+fun vers(name: String): String = property("vers.${name}") as String
+fun dep(name: String): String = property("deps.${name}") as String
+
+val kotlin = dep("kotlin")
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
     JavaVersion.VERSION_21 else JavaVersion.VERSION_17
-val kotlinVersion = "2.3.0"
 val loader = "fabric"
 
 val minecraft = stonecutter.current.version
@@ -23,11 +26,11 @@ stonecutter {
 }
 
 plugins {
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
     id("com.google.devtools.ksp") version "2.3.4"
     id("dev.kikugie.stonecutter")
-    id("fabric-loom") version "1.15-SNAPSHOT"
+    id("fabric-loom")
     id("com.gradleup.shadow") version "9.2.2"
     id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 }
@@ -50,13 +53,11 @@ repositories {
     }
 }
 
-fun vers(name: String): String = property("vers.${name}") as String
-fun dep(name: String): String = property("deps.${name}") as String
 val fabricLanguageKotlin = dep("fabric_language_kotlin")
 dependencies {
-    minecraft("com.mojang:minecraft:${minecraft}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.3.10-RC")
+    minecraft("com.mojang:minecraft:$minecraft")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${dep("kotlin_json")}")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin")
 
     // Loader-specific
     if (loader == "fabric") {
@@ -66,7 +67,7 @@ dependencies {
             parchment("org.parchmentmc.data:parchment-${minecraft}:${dep("parchment")}@zip")
         })
 
-        if (dep("fabric_language_kotlin").split("+")[1] != "kotlin.$kotlinVersion") {
+        if (dep("fabric_language_kotlin").split("+")[1] != "kotlin.$kotlin") {
             error("Fabric Language Kotlin and Kotlin version do not match up")
         }
         modImplementation("net.fabricmc:fabric-loader:${dep("fabric_loader")}")
@@ -172,7 +173,7 @@ tasks.withType<ProcessResources>().configureEach {
         "version" to modVersion,
         "versionFull" to version as String,
         "java" to java.toString(),
-        "kotlin" to kotlinVersion,
+        "kotlin" to kotlin,
         "fabric_loader" to dep("fabric_loader"),
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),

@@ -20,8 +20,12 @@ pluginManagement {
     }
 }
 
-
 plugins {
+    fun dep(name: String) = providers.gradleProperty("deps.$name").get()
+
+    kotlin("jvm") version dep("kotlin") apply false
+    kotlin("plugin.serialization") version dep("kotlin") apply false
+    id("fabric-loom") version dep("fabric_loom") apply false
     id("dev.kikugie.stonecutter") version "0.7.10"
 }
 
