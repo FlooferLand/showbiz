@@ -98,7 +98,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // Signal
         run {
             val frame = showData.signal.getOrNull(seekInt) ?: bitIdArrayOf()
-            if (recording && recordQueue.isNotEmpty()) {
+            if (recordQueue.isNotEmpty()) {
                 val mergedBits = mutableSetOf<UShort>()
                 frame.forEach { mergedBits.add(it) }
                 recordQueue.forEach { frame ->
@@ -108,13 +108,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 val newFrame = BitIdArray(mergedBits.size)
                 mergedBits.forEachIndexed { i, bit -> newFrame[i] = bit }
 
+                // Extending the show file if the player keeps recording
                 if (seekInt >= showData.signal.size) {
                     for (i in showData.signal.size..seekInt) {
                         showData.signal.add(bitIdArrayOf())
                     }
                 }
 
-                showData.signal[seekInt] = newFrame
+                // Writing to the show
+                if (recording) showData.signal[seekInt] = newFrame
                 recordQueue.clear()
 
                 signal.set(newFrame)
@@ -207,8 +209,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
 
     override fun onInteract(key: Int, level: Level, player: Player) {
-        if (key == 0 && playing) applyChange(true) {
-            recording = !recording
+        if (key == 0) applyChange(true) {
+            if (recording) {
+                recording = false
+            } else if (playing) {
+                recording = true
+            } else {
+                player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+            }
         }
     }
 

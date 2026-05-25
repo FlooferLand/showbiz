@@ -78,9 +78,9 @@ object FileServer {
         ServerPlayNetworking.registerGlobalReceiver(FileUploadChunkPacket.type) { packet, ctx ->
             val player = ctx.player()
             val upload = serverPlayerUploads[player.id]
+            if (upload != null && packet.chunk.isNotEmpty()) upload.bytes.addAll(packet.chunk.toTypedArray())
             val done = (upload?.let { it.getSizeBytes() >= it.maxSizeBytes } ?: true) || packet.chunk.isEmpty()
-            if (!done) upload.bytes.addAll(packet.chunk.toTypedArray())
-            val message = if (upload == null) ServerMessage.FuckOff else if (done) ServerMessage.Done else ServerMessage.Continue
+            val message = if (upload == null) ServerMessage.BuzzOff else if (done) ServerMessage.Done else ServerMessage.Continue
             ServerPlayNetworking.send(player, FileUploadResponsePacket(message, bytesSoFar = upload?.getSizeBytes() ?: 0L))
         }
     }

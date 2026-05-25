@@ -1,13 +1,13 @@
 package com.flooferland.showbiz.screens
 
 import net.minecraft.*
-import net.minecraft.client.Minecraft
+import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
-import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.resources.sounds.*
 import net.minecraft.network.chat.*
-import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.*
 import com.flooferland.showbiz.FileServer
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ShowFileEditPacket
@@ -22,8 +22,9 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
     lateinit var submitButton: Button
     lateinit var uploadAudioButton: FileUploadButton
 
-    var selectedFormat = BitChartStore.DEFAULT
+    val editHint = Component.literal("File name").withStyle(ChatFormatting.DARK_GRAY)!!
     val chartButtons = mutableListOf<Button>()
+    var selectedFormat = BitChartStore.DEFAULT
 
     override fun isPauseScreen() = false
     override fun shouldCloseOnEsc() = !uploadAudioButton.processing
@@ -35,7 +36,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
         // File name
         showName = EditBox(font, (width * 0.6).toInt(), 20, Component.literal("Show name"))
         showName.setPosition(width / 2 - showName.width / 2, 50)
-        showName.setHint(Component.literal("File name").withStyle(ChatFormatting.DARK_GRAY))
+        showName.setHint(editHint)
         showName.setFormatter { string, _ ->
             if (string.contains('.') || showName.cursorPosition != showName.value.length) return@setFormatter Component.literal(string).visualOrderText
             Component.literal(string).append(Component.literal(".${Showbiz.charts.idsToInfo[selectedFormat]?.extension}").withStyle(ChatFormatting.DARK_GRAY)).visualOrderText
@@ -62,6 +63,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
                 { b ->
                     selectedFormat = chartId
                     chartButtons.forEach { it.active = (it.message.string != selectedFormat) }
+                    updateWidgets()
                 }
                 .size(font.width(" $chartId "), 20)
                 .tooltip(Tooltip.create(Component.literal("The ${Showbiz.charts.idsToInfo[chartId]?.extension} file format")))
@@ -69,10 +71,12 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
             chartButtons += button
             addRenderableWidget(button)
         }
+        var xOffset = 0
         val buttonWidthTotal = chartButtons.sumOf { it.width }
-        for ((i, button) in chartButtons.withIndex()) {
+        for (button in chartButtons) {
             button.active = (button.message.string != selectedFormat)
-            button.setPosition(((width / 2) + (i * button.width)) - (buttonWidthTotal / 2), showName.bottom + 5)
+            button.setPosition(((width / 2) + xOffset) - (buttonWidthTotal / 2), showName.bottom + 5)
+            xOffset += button.width
         }
 
         // Upload audio button
@@ -98,10 +102,17 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
             .build()
         submitButton.active = false
         addRenderableWidget(submitButton)
+
+        updateWidgets()
     }
 
     fun updateSubmitActive() {
         submitButton.active = showName.value.isNotBlank() && uploadAudioButton.isUploadFinished
+    }
+
+    fun updateWidgets() {
+        val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extension
+        showName.setHint(ext?.let { editHint.copy().append(".$it") } ?: editHint)
     }
 
     override fun onClose() {

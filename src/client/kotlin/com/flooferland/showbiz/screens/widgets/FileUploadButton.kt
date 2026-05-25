@@ -1,12 +1,13 @@
 package com.flooferland.showbiz.screens.widgets
 
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
-import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.resources.sounds.*
 import net.minecraft.network.chat.*
-import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.FileUploadChunkPacket
 import com.flooferland.showbiz.network.packets.FileUploadHeaderPacket
@@ -47,27 +48,6 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
 
     init {
         update()
-        ClientPlayNetworking.registerReceiver(FileUploadResponsePacket.type) { packet, context -> context.client().execute {
-            val fileStream = fileStream
-            if (packet.status == ServerMessage.FuckOff || fileStream == null) {
-                reset()
-                context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, 0.3f))
-                return@execute
-            }
-            if (packet.status == ServerMessage.Done) {
-                fileStream.close()
-                processing = false
-                isUploadFinished = true
-                progressBytes = 0L
-                update()
-                context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BELL, 1.0f))
-                return@execute
-            }
-            progressBytes = packet.bytesSoFar
-            val chunkSize = 128 * 1024
-            val packet = FileUploadChunkPacket(runCatching { fileStream.readNBytes(chunkSize) }.getOrNull() ?: byteArrayOf())
-            ClientPlayNetworking.send(packet)
-        } }
     }
 
     fun update() {
@@ -91,9 +71,10 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         fileSizeBytes = runCatching { path.fileSize() }.getOrNull() ?: 0L
         if (fileSizeBytes > 0L) {
             fileStream = Files.newInputStream(path)
+            activeUploadButton = this
             ClientPlayNetworking.send(FileUploadHeaderPacket(path.name, fileSizeBytes))
             processing = true
-        } else Showbiz.log.error("Failed to send audio to the server. File size is 0")
+        } else setError("Failed to send audio to the server. File size is 0")
     }
 
     fun reset() {
@@ -104,7 +85,13 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
         processing = false
         isUploadFinished = false
         loadedPath = null
+        activeUploadButton = null
         update()
+    }
+
+    fun setError(error: String) {
+        message = Component.literal(error).withStyle(ChatFormatting.RED)
+        Showbiz.log.error(error)
     }
 
     override fun onPress() {
@@ -132,7 +119,7 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
     }
 
     override fun clicked(mouseX: Double, mouseY: Double) =
-        super.clicked(mouseX, mouseY) && (mouseY < y+innerHeight) && !processing
+        super.clicked(mouseX, mouseY) && (mouseY < y+innerHeight)
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && clicked(mouseX, mouseY)) {
@@ -193,13 +180,47 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
     }
 
     companion object {
+        var activeUploadButton: FileUploadButton? = null
         init {
+            ClientPlayNetworking.registerGlobalReceiver(FileUploadResponsePacket.type) { packet, context -> context.client().execute {
+                val button = activeUploadButton ?: return@execute
+                with(button) {
+                    val fileStream = fileStream
+                    if (packet.status == ServerMessage.BuzzOff || fileStream == null) {
+                        reset()
+                        setError("Packet status ${packet.status} (fileStream = $fileStream)")
+                        context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS, 0.3f))
+                        return@with
+                    }
+                    if (packet.status == ServerMessage.Done) {
+                        fileStream.close()
+                        processing = false
+                        isUploadFinished = true
+                        progressBytes = 0L
+                        update()
+                        context.client().soundManager.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BELL, 1.0f))
+                        return@with
+                    }
+                    progressBytes = packet.bytesSoFar
+                    val chunkSize = 128 * 1024
+                    val bytes = runCatching { fileStream.readNBytes(chunkSize) }
+                        .onFailure { setError("Failed to read chunk at $progressBytes bytes") }
+                        .getOrNull() ?: byteArrayOf()
+                    val packet = FileUploadChunkPacket(bytes)
+                    ClientPlayNetworking.send(packet)
+                }
+            } }
+
             ScreenEvents.AFTER_INIT.register { minecraft, screen, i, i1 ->
                 ScreenEvents.remove(screen).register { closedScreen ->
                     for (widget in closedScreen.children()) {
-                        if (widget is FileUploadButton) widget.fileStream?.close()
+                        if (widget is FileUploadButton) {
+                            widget.fileStream?.close()
+                            if (activeUploadButton == widget) {
+                                activeUploadButton = null
+                            }
+                        }
                     }
-                    if (minecraft.currentServer != null) runCatching { ClientPlayNetworking.unregisterReceiver(FileUploadResponsePacket.type.id) }
                 }
             }
         }

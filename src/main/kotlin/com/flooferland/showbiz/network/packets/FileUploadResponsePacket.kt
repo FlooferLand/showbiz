@@ -11,7 +11,7 @@ class FileUploadResponsePacket(val status: ServerMessage, val bytesSoFar: Long) 
     enum class ServerMessage {
         Continue,
         Done,
-        FuckOff
+        BuzzOff
     }
 
     companion object {
