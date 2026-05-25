@@ -207,7 +207,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
 
     override fun onInteract(key: Int, level: Level, player: Player) {
-        if (key == 0) applyChange(true) {
+        if (key == 0 && playing) applyChange(true) {
             recording = !recording
         }
     }
