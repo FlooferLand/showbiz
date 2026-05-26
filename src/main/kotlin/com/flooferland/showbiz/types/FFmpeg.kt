@@ -24,7 +24,7 @@ object FFmpeg {
     fun init() {
         if (file != null) return
         val ffmpeg = findFile() ?: run { setError("Failed to find executable"); return }
-        Showbiz.log.debug("FFmpeg found at '${ffmpeg.absolutePath}'")
+        Showbiz.log.info("FFmpeg found at '${ffmpeg.absolutePath}'")
     }
 
     fun getLastError() = error

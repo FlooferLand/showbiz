@@ -1,12 +1,11 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.core.*
+import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.world.item.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.getOrNull
 import software.bernie.geckolib.animatable.GeoBlockEntity
@@ -23,7 +22,8 @@ class PlushBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModB
     var stack: ItemStack? = null
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        stack?.save(registries)?.let { tag.put("item", it) }
+        if (stack != ItemStack.EMPTY)
+            stack?.save(registries)?.let { tag.put("item", it) }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
