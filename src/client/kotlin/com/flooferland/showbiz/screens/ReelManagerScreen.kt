@@ -1,12 +1,13 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.items.ReelItem
@@ -122,8 +123,8 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     companion object {
         init {
-            ClientPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { packet, _ ->
-                val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@registerGlobalReceiver
+            ClientPackets.listen(ShowFileListPacket.type) { packet, _ ->
+                val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@listen
                 screen.authorized = packet.playerAuthorized
                 screen.updateFiles(packet.files)
             }

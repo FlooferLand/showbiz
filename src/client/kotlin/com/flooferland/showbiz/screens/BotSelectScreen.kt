@@ -1,13 +1,14 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
-import net.minecraft.client.gui.screens.inventory.MenuAccess
+import net.minecraft.client.gui.screens.inventory.*
 import net.minecraft.network.chat.*
-import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListPacket
@@ -16,7 +17,6 @@ import com.flooferland.showbiz.screens.widgets.BotListWidget
 import com.flooferland.showbiz.types.ResourceId
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import org.lwjgl.glfw.GLFW
-import kotlin.collections.filter
 
 class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title: Component) : Screen(title), MenuAccess<BotSelectMenu> {
     var bots = mutableMapOf<ResourceId, AddonBotEntry>()
@@ -96,8 +96,8 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
     companion object {
         init {
             // BotListPacket response
-            ClientPlayNetworking.registerGlobalReceiver(BotListPacket.type) { packet, _ ->
-                val screen = (Minecraft.getInstance().screen as? BotSelectScreen) ?: return@registerGlobalReceiver
+            ClientPackets.listen(BotListPacket.type) { packet, _ ->
+                val screen = (Minecraft.getInstance().screen as? BotSelectScreen) ?: return@listen
                 screen.updateBots(packet.bots)
             }
         }

@@ -63,7 +63,8 @@ object Extensions {
     }
     //endregion
 
-    //region Compound get functions, since these change for 1.21.5+
+    //region Compound functions, since these change for 1.21.5+
+    fun CompoundTag.removeIfPresent(key: String)    = if (contains(key)) remove(key) else Unit
     fun CompoundTag.getOrNull(key: String)          = if (contains(key)) get(key) else null
     fun CompoundTag.getCompoundOrNull(key: String)  = if (contains(key)) getCompound(key) else null
     fun CompoundTag.getBooleanOrNull(key: String)   = if (contains(key)) getBoolean(key) else null

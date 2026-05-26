@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.show
 
-import net.minecraft.nbt.*
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
+import net.minecraft.network.*
 
 // TODO: Test the performance of using an inline value class and using BitSet instead of BitIdArray
 
@@ -27,9 +26,12 @@ class SignalFrame(private var raw: BitIdArray = bitIdArrayOf()) : Cloneable, Col
         other.forEach { combined.add(it) }
         raw = combined.toBitIdArray()
     }
-    public fun saveTo(id: String, tag: CompoundTag) = tag.putIntArray(id, raw.map { it.toInt() })
-    public fun loadFrom(id: String, tag: CompoundTag) {
-        val array = tag.getIntArrayOrNull(id) ?: return
+
+    public fun saveTo(buf: FriendlyByteBuf) {
+        buf.writeVarIntArray(raw.map { it.toInt() }.toIntArray())
+    }
+    public fun loadFrom(buf: FriendlyByteBuf) {
+        val array = buf.readVarIntArray() ?: return
         raw = array.map { it.toBitId() }.toBitIdArray()
     }
 

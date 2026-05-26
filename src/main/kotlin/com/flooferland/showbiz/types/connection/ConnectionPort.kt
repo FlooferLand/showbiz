@@ -2,11 +2,15 @@ package com.flooferland.showbiz.types.connection
 
 import net.minecraft.core.*
 import net.minecraft.nbt.*
+import net.minecraft.network.*
+import net.minecraft.server.level.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.network.packets.ConnectionDataPacket
+import com.flooferland.showbiz.types.IPacketable
 import com.flooferland.showbiz.types.IUnsafeCompoundable
 import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
-import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import org.jetbrains.annotations.NotNull
 
 enum class PortDirection {
@@ -16,7 +20,7 @@ enum class PortDirection {
 // NOTE: In order not to replace 'data', could have a separate 'receivedData' field that external ports set,
 //       and the port's 'react' can manually/automatically handle merging it into 'data'. Best of both worlds.
 
-data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id: String, val initData: T, val direction: PortDirection, val autoUseReceived: Boolean = true, val react: ConnectionPort<T>.(T) -> Unit = {}) : IUnsafeCompoundable {
+data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id: String, val initData: T, val direction: PortDirection, val autoUseReceived: Boolean = true, val react: ConnectionPort<T>.(T) -> Unit = {}) : IUnsafeCompoundable, IPacketable {
     val name: String get() = "${owner::class.java.name}:$id(${direction.name.firstOrNull()})"
     @NotNull var data: T = initData
     @NotNull var dataReceived: T = initData
@@ -42,9 +46,6 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
     @Throws
     override fun saveOrThrow(tag: CompoundTag) {
-        tag.put("data", CompoundTag().also { data.saveOrThrow(it) })
-        tag.put("data_recv", CompoundTag().also { dataReceived.saveOrThrow(it) })
-
         // Saving listeners
         if (direction != PortDirection.In) {
             tag.putLongArray("listeners", listeners.map { it.asLong() })
@@ -53,8 +54,6 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
     @Throws
     override fun loadOrThrow(tag: CompoundTag) {
-        data.loadOrThrow(tag.getCompound("data"))
-        dataReceived.loadOrThrow(tag.getCompound("data_recv"))
         listeners.clear()
 
         // Loading listeners
@@ -63,6 +62,16 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 listeners.addAll(array.map { BlockPos.of(it) })
             }
         }
+    }
+
+    override fun encode(buf: FriendlyByteBuf) {
+        data.encode(buf)
+        dataReceived.encode(buf)
+    }
+
+    override fun decode(buf: FriendlyByteBuf) {
+        data.decode(buf)
+        dataReceived.decode(buf)
     }
 
     /** Sends the current data through this port and notifies the listeners */
@@ -75,7 +84,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
                 listener.dataReceived = data
                 if (listener.autoUseReceived) {
-                    listener.data = listener.dataReceived;
+                    listener.data = listener.dataReceived
                 }
 
                 runCatching {
@@ -83,8 +92,14 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                     if (be?.level == null || be.isRemoved) return@runCatching
                     listener.react(listener, listener.dataReceived)
                 }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
-                if (!level.isClientSide && entity is BlockEntity) {
-                    entity.markDirtyNotifyAll()
+
+                if (!level.isClientSide) {
+                    val byteBuf = FriendlyByteBuf(io.netty.buffer.Unpooled.buffer())
+                    data.encode(byteBuf)
+                    val packet = ConnectionDataPacket(pos, id, byteBuf)
+                    for (player in (level as ServerLevel).players()) {
+                        ServerPlayNetworking.send(player, packet)
+                    }
                 }
             }
         }

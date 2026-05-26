@@ -1,23 +1,16 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.Direction
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.BlockGetter
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.RenderShape
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityTicker
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockBehaviour
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.state.StateDefinition
-import net.minecraft.world.level.block.state.properties.BooleanProperty
-import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.shapes.CollisionContext
-import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.core.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.level.block.state.properties.*
+import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
@@ -25,7 +18,6 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock(properties) {
     override val codec = simpleCodec(::ShowParserBlock)!!
@@ -101,9 +93,9 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         val PLAYING_POWERED = BooleanProperty.create("powered_playing")!!
 
         init {
-            ServerPlayNetworking.registerGlobalReceiver(ShowParserEditPacket.type) { packet, context ->
-                val player = context.player() ?: return@registerGlobalReceiver
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? ShowParserBlockEntity ?: return@registerGlobalReceiver
+            ServerPackets.listen(ShowParserEditPacket.type) { packet, context ->
+                val player = context.player() ?: return@listen
+                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? ShowParserBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                 }

@@ -11,15 +11,13 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.entities.ModelPartEntity
-import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPart
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos
@@ -111,28 +109,11 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
 
     companion object {
         init {
-            ServerPlayNetworking.registerGlobalReceiver(ModelPartInteractPacket.type) { packet, context ->
-                val player = context.player()
-                context.server().execute {
-                    if (player.uuid != packet.player) return@execute
-                    val level = player.serverLevel() ?: return@execute
-
-                    // TODO: Do a more secure distance check for model part interaction (raycast)
-                    if (player.position().distanceTo(packet.parent.center) > ModelPartManager.getMaxReach(player) + 1f) {
-                        Showbiz.log.info("Player ${player.name} shouldn't have been able to reach a modelpart block. Reach hacks?")
-                        return@execute
-                    }
-
-                    val blockEntity = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@execute
-                    val key = blockEntity.getInteractionMapping()[packet.name] ?: return@execute
-                    blockEntity.onInteract(key, level, player)
-                }
-            }
-            ClientPlayNetworking.registerGlobalReceiver(ModelPartNamesPacket.type) { packet, context ->
+            ClientPackets.listen(ModelPartNamesPacket.type) { packet, context ->
                 val player = context.player()
                 val level = player.level() as ClientLevel
-                val owner = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@registerGlobalReceiver
-                val self = owner.modelPartInstance.clientInstance as? ClientModelPartInstance ?: return@registerGlobalReceiver
+                val owner = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@listen
+                val self = owner.modelPartInstance.clientInstance as? ClientModelPartInstance ?: return@listen
                 self.nameMapping = packet.names
             }
         }

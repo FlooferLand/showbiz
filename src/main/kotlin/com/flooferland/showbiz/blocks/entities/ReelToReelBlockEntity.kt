@@ -31,9 +31,9 @@ import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
-import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
@@ -89,16 +89,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun tick() {
         modelPartInstance.tick(level ?: return, blockPos, blockState)
+        if (playing && !paused) {
+            seek += tickDelta
+            seekInt = (seek * fps).roundToInt()
+        }
         if (level?.isClientSide ?: true) return
 
         val runningShow = (playing || recording) && !showData.isEmpty()
         val passthrough = recordQueue.isNotEmpty()
         if (!runningShow && !passthrough) return
-
-        if (runningShow) {
-            seek += tickDelta
-            seekInt = (seek * fps).roundToInt()
-        }
 
         // Signal
         run {
@@ -157,9 +156,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 hasFinished = true
             }
         }
-
-        // Updating the block entity (sends network packet)
-        markDirtyNotifyAll()
     }
 
     override fun setRemoved() {
@@ -177,11 +173,12 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
         level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
+        setChanged()
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
         for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = this.paused)
+            val state = PlaybackStatePacket(blockPos, playing = playing, paused = this.paused, seek = seek)
             ServerPlayNetworking.send(player, state)
         }
     }
@@ -191,11 +188,12 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
         level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
+        setChanged()
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
         for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused)
+            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
             ServerPlayNetworking.send(player, state)
         }
     }
@@ -209,6 +207,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (playing) setPlaying(false)
         hasFinished = false
         signal.reset()
+        setChanged()
+    }
+
+    /** Client-side only !! */
+    fun clientApplyPlaybackState(packet: PlaybackStatePacket) {
+        this.playing = packet.playing
+        this.paused = packet.paused
+        this.seek = packet.seek
     }
 
     override fun getInteractionMapping() = mapOf("record" to 0)
@@ -234,15 +240,17 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
 
+        // Removing legacy tags
+        tag.removeIfPresent("signal_frame")
+        tag.removeIfPresent("seek")
+
         // Save other
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
-        tag.putDouble("seek", seek)
-        signal.saveTo("signal_frame", tag)
         connectionManager.save(tag)
-        showData.saveNBT(tag)
+        showData.saveNBT(tag)  // TODO: Should probably remove this?
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -253,8 +261,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         paused = tag.getBooleanOrNull("paused") ?: false
         recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
-        seek = tag.getDoubleOrNull("seek") ?: 0.0
-        signal.loadFrom("signal_frame", tag)
         connectionManager.load(tag)
         showData.loadNBT(tag)
     }

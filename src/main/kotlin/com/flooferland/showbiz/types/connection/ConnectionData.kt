@@ -1,8 +1,8 @@
 package com.flooferland.showbiz.types.connection
 
-import com.flooferland.showbiz.types.IUnsafeCompoundable
+import com.flooferland.showbiz.types.IPacketable
 
-abstract class ConnectionData<T: ConnectionData<T>>(val typeId: String) : IUnsafeCompoundable {
+abstract class ConnectionData<T: ConnectionData<T>>(val typeId: String) : IPacketable {
     abstract fun tempReset()
 
     /**

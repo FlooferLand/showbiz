@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types.connection.data
 
 import net.minecraft.nbt.*
+import net.minecraft.network.*
 import com.flooferland.showbiz.types.connection.ConnectionData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
@@ -8,12 +9,12 @@ import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 data class PackedControlData(
     var instruction: CompoundTag = CompoundTag(),
 ) : ConnectionData<PackedControlData>("control") {
-    override fun saveOrThrow(tag: CompoundTag) {
-        tag.put("instruction", instruction)
+    override fun encode(buf: FriendlyByteBuf) {
+        buf.writeNbt(instruction)
     }
 
-    override fun loadOrThrow(tag: CompoundTag) {
-        instruction = tag.getCompound("instruction")
+    override fun decode(buf: FriendlyByteBuf) {
+        instruction = buf.readNbt() ?: CompoundTag()
     }
 
     override fun tempReset() {

@@ -38,22 +38,22 @@ object FileServer {
 
     init {
         // Show files
-        ServerPlayNetworking.registerGlobalReceiver(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
-        ServerPlayNetworking.registerGlobalReceiver(ShowFileSelectPacket.type) { packet, ctx ->
-            val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@registerGlobalReceiver
+        ServerPackets.listen(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
+        ServerPackets.listen(ShowFileSelectPacket.type) { packet, ctx ->
+            val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@listen
             val filename = packet.selected
             val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-            if (shows?.find { it.name == filename } == null) return@registerGlobalReceiver
+            if (shows?.find { it.name == filename } == null) return@listen
             reel.applyComponentsAndValidate(
                 DataComponentPatch.builder()
                     .set(ModComponents.FileName.type, filename)
                     .build()
             )
         }
-        ServerPlayNetworking.registerGlobalReceiver(ShowFileEditPacket.type) { packet, ctx ->
+        ServerPackets.listen(ShowFileEditPacket.type) { packet, ctx ->
             if (!Permissions.canWriteReels(ctx.player())) {
                 ctx.player().sendSystemMessage(Component.literal("You don't have the permission to write files"))
-                return@registerGlobalReceiver
+                return@listen
             }
             val path = FileStorage.SHOWS_DIR.resolve(packet.file)
             val player = ctx.player()
@@ -93,13 +93,13 @@ object FileServer {
         }
 
         // File uploads
-        ServerPlayNetworking.registerGlobalReceiver(FileUploadHeaderPacket.type) { headerPacket, ctx ->
+        ServerPackets.listen(FileUploadHeaderPacket.type) { headerPacket, ctx ->
             val player = ctx.player()
             val upload = ServerPlayerFileUpload(headerPacket.file, headerPacket.fileSizeBytes)
             serverPlayerUploads[player.id] = upload
             ServerPlayNetworking.send(player, FileUploadResponsePacket(ServerMessage.Continue, bytesSoFar = upload.getSizeBytes()))
         }
-        ServerPlayNetworking.registerGlobalReceiver(FileUploadChunkPacket.type) { packet, ctx ->
+        ServerPackets.listen(FileUploadChunkPacket.type) { packet, ctx ->
             val player = ctx.player()
             val upload = serverPlayerUploads[player.id]
             if (upload != null && packet.chunk.isNotEmpty()) upload.bytes.addAll(packet.chunk.toTypedArray())

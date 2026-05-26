@@ -7,13 +7,13 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::SpotlightBlock)!!
@@ -30,9 +30,9 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
 
     companion object {
         init {
-            ServerPlayNetworking.registerGlobalReceiver(SpotlightEditPacket.type) { packet, context ->
-                val player = context.player() ?: return@registerGlobalReceiver
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? SpotlightBlockEntity ?: return@registerGlobalReceiver
+            ServerPackets.listen(SpotlightEditPacket.type) { packet, context ->
+                val player = context.player() ?: return@listen
+                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? SpotlightBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                     blockEntity.turn = packet.turn

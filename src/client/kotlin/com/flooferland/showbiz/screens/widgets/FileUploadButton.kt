@@ -8,6 +8,7 @@ import net.minecraft.client.gui.narration.*
 import net.minecraft.client.resources.sounds.*
 import net.minecraft.network.chat.*
 import net.minecraft.sounds.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.FileUploadChunkPacket
 import com.flooferland.showbiz.network.packets.FileUploadHeaderPacket
@@ -190,8 +191,8 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
     companion object {
         var activeUploadButton: FileUploadButton? = null
         init {
-            ClientPlayNetworking.registerGlobalReceiver(FileUploadResponsePacket.type) { packet, context -> context.client().execute {
-                val button = activeUploadButton ?: return@execute
+            ClientPackets.listen(FileUploadResponsePacket.type) { packet, context ->
+                val button = activeUploadButton ?: return@listen
                 with(button) {
                     val fileStream = fileStream
                     if (packet.status == ServerMessage.BuzzOff || fileStream == null) {
@@ -217,7 +218,7 @@ class FileUploadButton(x: Int, y: Int, width: Int = 200, val filter: Filter? = n
                     val packet = FileUploadChunkPacket(bytes)
                     ClientPlayNetworking.send(packet)
                 }
-            } }
+            }
 
             ScreenEvents.AFTER_INIT.register { minecraft, screen, i, i1 ->
                 ScreenEvents.remove(screen).register { closedScreen ->

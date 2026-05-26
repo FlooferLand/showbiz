@@ -12,12 +12,12 @@ import net.minecraft.util.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.JukeboxLyricPacket
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 
 object JukeboxLyricRenderer {
     data class JukeboxData(val entity: JukeboxBlockEntity, var lyric: String)
@@ -89,10 +89,10 @@ object JukeboxLyricRenderer {
                 newEntity !is JukeboxBlockEntity || data.entity.isRemoved
             }
         }
-        ClientPlayNetworking.registerGlobalReceiver(JukeboxLyricPacket.type) { packet, ctx ->
-            val level = ctx.player()?.clientLevel ?: return@registerGlobalReceiver
+        ClientPackets.listen(JukeboxLyricPacket.type) { packet, ctx ->
+            val level = ctx.player()?.clientLevel ?: return@listen
             val data = jukeboxes.getOrPut(packet.blockPos) {
-                val entity = level.getBlockEntity(packet.blockPos) as? JukeboxBlockEntity ?: return@registerGlobalReceiver
+                val entity = level.getBlockEntity(packet.blockPos) as? JukeboxBlockEntity ?: return@listen
                 JukeboxData(entity, packet.lyric)
             }
             data.lyric = packet.lyric

@@ -1,13 +1,12 @@
 package com.flooferland.showbiz.types.connection.data
 
 import net.minecraft.core.*
-import net.minecraft.nbt.*
+import net.minecraft.network.*
 import net.minecraft.server.level.*
 import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity.Companion.AUDIO_DIST_SQUARE
 import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import com.flooferland.showbiz.types.connection.ConnectionData
-import com.flooferland.showbiz.utils.Extensions.getByteArrayOrNull
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 data class PackedAudioData(
@@ -20,16 +19,16 @@ data class PackedAudioData(
         get() = left
         set(value) { left = value }
 
-    override fun saveOrThrow(tag: CompoundTag) {
-        tag.putByteArray("left", left)
-        tag.putByteArray("right", right)
-        tag.put("format", CompoundTag().also { format.saveOrThrow(it) })
+    override fun encode(buf: FriendlyByteBuf) {
+        buf.writeBytes(left)
+        buf.writeBytes(right)
+        format.encode(buf)
     }
 
-    override fun loadOrThrow(tag: CompoundTag) {
-        left = tag.getByteArrayOrNull("left") ?: byteArrayOf()
-        right = tag.getByteArrayOrNull("right") ?: byteArrayOf()
-        tag.getCompound("format").let { format.loadOrThrow(it) }
+    override fun decode(buf: FriendlyByteBuf) {
+        buf.readBytes(left)
+        buf.readBytes(right)
+        format.decode(buf)
     }
 
     override fun tempReset() {

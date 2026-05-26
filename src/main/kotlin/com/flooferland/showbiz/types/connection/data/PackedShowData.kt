@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types.connection.data
 
-import net.minecraft.nbt.*
+import net.minecraft.network.*
+import net.minecraft.network.codec.*
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.connection.ConnectionData
 
@@ -9,16 +10,16 @@ data class PackedShowData(
     val signal: SignalFrame = SignalFrame(),
     var mapping: String? = null
 ) : ConnectionData<PackedShowData>("show") {
-    override fun saveOrThrow(tag: CompoundTag) {
-        signal.saveTo("signal", tag)
-        tag.putBoolean("playing", playing)
-        mapping?.let { tag.putString("mapping", it) }
+    override fun encode(buf: FriendlyByteBuf) {
+        signal.saveTo(buf)
+        buf.writeBoolean(playing)
+        buf.writeNullable(mapping, ByteBufCodecs.STRING_UTF8)
     }
 
-    override fun loadOrThrow(tag: CompoundTag) {
-        signal.loadFrom("signal", tag)
-        playing = tag.getBoolean("playing")
-        mapping = tag.getString("mapping")
+    override fun decode(buf: FriendlyByteBuf) {
+        signal.loadFrom(buf)
+        playing = buf.readBoolean()
+        mapping = buf.readNullable(ByteBufCodecs.STRING_UTF8)
     }
 
     override fun tempReset() {

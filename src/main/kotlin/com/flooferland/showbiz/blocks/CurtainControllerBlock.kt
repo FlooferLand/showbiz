@@ -1,19 +1,19 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.BlockPos
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.RenderShape
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.core.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.state.*
+import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
 class CurtainControllerBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::CurtainControllerBlock)!!
@@ -31,9 +31,9 @@ class CurtainControllerBlock(props: Properties) : FacingEntityBlock(props) {
 
     companion object {
         init {
-            ServerPlayNetworking.registerGlobalReceiver(CurtainControllerEditPacket.type) { packet, context ->
-                val player = context.player() ?: return@registerGlobalReceiver
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? CurtainControllerBlockEntity ?: return@registerGlobalReceiver
+            ServerPackets.listen(CurtainControllerEditPacket.type) { packet, context ->
+                val player = context.player() ?: return@listen
+                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? CurtainControllerBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                     blockEntity.bitFilterOpen = packet.bitFilterOpen

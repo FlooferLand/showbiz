@@ -79,7 +79,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
         connectionManager.save(tag)
-        pendingShow.save(tag)
+        // pendingShow.save(tag)
 
         if (level?.isClientSide == false) {
             botId?.let { tag.putString("bot_id", it.toString()) }
@@ -89,7 +89,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
         connectionManager.load(tag)
-        pendingShow.load(tag)
+        // pendingShow.load(tag)
 
         tag.getStringOrNull("bot_id")?.let { botId ->
             var id = ResourceId.of(botId)

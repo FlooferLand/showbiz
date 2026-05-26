@@ -1,36 +1,39 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.network.codec.StreamCodec
+import net.minecraft.network.*
+import net.minecraft.network.codec.*
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioFormat.Encoding
 import kotlin.math.roundToInt
 
 /** Better than Java's stinky dinky 30 decade year old AudioFormat :tm: */
-data class FriendlyAudioFormat(var sampleRate: Int = 44_100, var sampleBits: Int = 16, var stereo: Boolean = false, var signed: Boolean = true, var bigEndian: Boolean = false) : IUnsafeCompoundable {
+data class FriendlyAudioFormat(var sampleRate: Int = 44_100, var sampleBits: Int = 16, var stereo: Boolean = false, var signed: Boolean = true, var bigEndian: Boolean = false) : IPacketable {
     val mono: Boolean get() = !stereo
     val channels: Byte get() = if (stereo) 2 else 1
 
-    override fun saveOrThrow(tag: CompoundTag) {
-        tag.putInt("sample_rate", sampleRate)
-        tag.putByte("sample_bits", sampleBits.toByte())
-        tag.putBoolean("stereo", stereo)
-        tag.putBoolean("signed", signed)
-        tag.putBoolean("big_endian", bigEndian)
+    override fun encode(buf: FriendlyByteBuf) {
+        buf.writeInt(sampleRate)
+        buf.writeInt(sampleBits)
+        buf.writeBoolean(stereo)
+        buf.writeBoolean(signed)
+        buf.writeBoolean(bigEndian)
     }
 
-    override fun loadOrThrow(tag: CompoundTag) {
-        tag.getInt("sample_rate").also { sampleRate = it }
-        tag.getByte("sample_bits").also { sampleBits = it.toInt() }
-        tag.getBoolean("stereo").also { stereo = it }
-        tag.getBoolean("signed").also { signed = it }
-        tag.getBoolean("big_endian").also { bigEndian = it }
+    override fun decode(buf: FriendlyByteBuf) {
+        sampleRate = buf.readInt()
+        sampleBits = buf.readInt()
+        stereo = buf.readBoolean()
+        signed = buf.readBoolean()
+        bigEndian = buf.readBoolean()
         if (sampleRate == 0) reset()
     }
 
     fun reset() {
-        load(CompoundTag().also { FriendlyAudioFormat().save(it) })
+        sampleRate = 44_100
+        sampleBits = 16
+        stereo = false
+        signed = true
+        bigEndian = false
     }
 
     companion object {

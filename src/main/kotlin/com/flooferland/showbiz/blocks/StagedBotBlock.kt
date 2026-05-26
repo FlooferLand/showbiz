@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
-import net.minecraft.sounds.SoundSource
+import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.context.*
@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -19,7 +20,6 @@ import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.mojang.serialization.MapCodec
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
@@ -64,8 +64,8 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
         val facing = GigaDirectionProperty("facing")
 
         init {
-            ServerPlayNetworking.registerGlobalReceiver(BotListSelectPacket.type) { packet, ctx ->
-                val blockEntity = ctx.player().level().getBlockEntity(packet.blockPos) as? StagedBotBlockEntity ?: return@registerGlobalReceiver
+            ServerPackets.listen(BotListSelectPacket.type) { packet, ctx ->
+                val blockEntity = ctx.player().level().getBlockEntity(packet.blockPos) as? StagedBotBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     botId = packet.id
                 }

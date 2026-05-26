@@ -69,6 +69,7 @@ object Showbiz : ModInitializer {
             FileStorage
             FileServer
             UpdateChecker
+            ServerPackets.init()
         }
 
         // Services
@@ -85,18 +86,18 @@ object Showbiz : ModInitializer {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(AddonDataReloadListener)
 
         // Bot selection
-        ServerPlayNetworking.registerGlobalReceiver(BotListPacket.type) { _, ctx ->
+        ServerPackets.listen(BotListPacket.type) { _, ctx ->
             ServerPlayNetworking.send(ctx.player(), BotListPacket(toClient = true, bots = Showbiz.bots))
         }
 
         // Programming
-        ServerPlayNetworking.registerGlobalReceiver(ProgrammerKeyPressPacket.type) { packet, ctx ->
+        ServerPackets.listen(ProgrammerKeyPressPacket.type) { packet, ctx ->
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
             data.heldKeys[packet.key] = packet.pressed
             data.saveToPlayer(player)
         }
-        ServerPlayNetworking.registerGlobalReceiver(ProgrammerPlayerUpdatePacket.type) { packet, ctx ->
+        ServerPackets.listen(ProgrammerPlayerUpdatePacket.type) { packet, ctx ->
             val player = ctx.player()
             val data = PlayerProgrammingData.getFromPlayer(player)
             packet.keysToBits.forEachIndexed { i, receivedBits ->
