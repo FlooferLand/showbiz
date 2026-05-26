@@ -33,7 +33,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
     }
 
     fun botFilter(bot: Map.Entry<ResourceId, AddonBotEntry>) =
-        bot.value.name.contains(searchText)
+        bot.value.name.contains(searchText, ignoreCase = true)
 
     fun botSelected(botId: ResourceId) {
         ClientPlayNetworking.send(BotListSelectPacket(selectMenu.data.blockPos, botId))
@@ -72,7 +72,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == GLFW.GLFW_KEY_ENTER && this.focused is EditBox) {
-            val handled = bots.filter({ botFilter(it) }).keys.firstOrNull()?.let { botSelected(it); true } ?: false
+            val handled = bots.filter { botFilter(it) }.keys.firstOrNull()?.let { botSelected(it); true } ?: false
             return handled
         }
         return super.keyPressed(keyCode, scanCode, modifiers)

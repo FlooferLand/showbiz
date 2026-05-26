@@ -34,8 +34,8 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     fun refresh() {
         clearWidgets()
-        val maxWidth = (width * 0.7).toInt()
-        val maxHeight = (height * 0.7).toInt()
+        val maxWidth = (width * 0.8).toInt()
+        val maxHeight = (height * 0.8).toInt()
 
         val filename = ReelItem.getFilename(reelStack)
 
