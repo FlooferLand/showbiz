@@ -39,17 +39,17 @@ class PlushBlock(properties: Properties) : BaseEntityBlock(properties) {
     override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
         val blockEntity = level.getBlockEntity(pos) as? PlushBlockEntity ?: return
         blockEntity.applyChange(true) {
-            blockEntity.stack = stack
+            blockEntity.itemStack = stack
         }
     }
 
     override fun getDrops(state: BlockState, params: LootParams.Builder): List<ItemStack> {
         val blockEntity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) as? PlushBlockEntity ?: return listOf()
-        return blockEntity.stack?.let { listOf(it) } ?: listOf()
+        return listOf(blockEntity.itemStack)
     }
 
     override fun getCloneItemStack(level: LevelReader, pos: BlockPos, state: BlockState): ItemStack =
-        (level.getBlockEntity(pos) as? PlushBlockEntity)?.stack ?: super.getCloneItemStack(level, pos, state)
+        (level.getBlockEntity(pos) as? PlushBlockEntity)?.itemStack ?: super.getCloneItemStack(level, pos, state)
 
     override fun getOcclusionShape(state: BlockState, level: BlockGetter, pos: BlockPos) = Shapes.empty()!!
 

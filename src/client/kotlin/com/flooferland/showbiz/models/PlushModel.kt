@@ -23,7 +23,7 @@ class PlushModel<T : GeoAnimatable> : GeoModel<T>() {
     override fun getAnimationResource(animatable: T) = null
 
     private fun getPlushId(animatable: T) = when (animatable) {
-        is PlushBlockEntity -> animatable.stack?.get(ModComponents.Plush.type)?.id
+        is PlushBlockEntity -> animatable.itemStack.get(ModComponents.Plush.type)?.id
         is PlushBlockItem -> PlushItemRenderer.currentStack?.get(ModComponents.Plush.type)?.id
         else -> null
     }

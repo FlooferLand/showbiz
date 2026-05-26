@@ -19,15 +19,16 @@ class PlushBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModB
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = geckoCache
 
-    var stack: ItemStack? = null
+    val defaultItem = ModBlocks.Plush.item.defaultInstance!!
+    var itemStack: ItemStack = defaultItem
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        if (stack != ItemStack.EMPTY)
-            stack?.save(registries)?.let { tag.put("item", it) }
+        if (itemStack != ItemStack.EMPTY)
+            itemStack.save(registries)?.let { tag.put("item", it) }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        stack = tag.getOrNull("item")?.let { ItemStack.parse(registries, it).getOrNull() }
+        itemStack = tag.getOrNull("item")?.let { ItemStack.parse(registries, it).getOrNull() } ?: defaultItem
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
