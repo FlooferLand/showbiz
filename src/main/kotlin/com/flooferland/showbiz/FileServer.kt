@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import kotlin.io.path.name
 
 object FileServer {
     var serverPlayerUploads = mutableMapOf<Int, ServerPlayerFileUpload>()
@@ -43,7 +42,10 @@ object FileServer {
             val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@listen
             val filename = packet.selected
             val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-            if (shows?.find { it.name == filename } == null) return@listen
+            if (shows?.containsKey(filename) != true) {
+                serverError("Show file '$filename' does not exist", ctx.player())
+                return@listen
+            }
             reel.applyComponentsAndValidate(
                 DataComponentPatch.builder()
                     .set(ModComponents.FileName.type, filename)
@@ -109,6 +111,10 @@ object FileServer {
         }
     }
 
+    fun serverError(text: String, player: ServerPlayer? = null) {
+        Showbiz.log.error("SERVER ERROR: $text")
+        player?.sendSystemMessage(Component.literal("Server error: $text").withStyle(ChatFormatting.RED))
+    }
     fun serverError(throwable: Throwable, player: ServerPlayer? = null) {
         Showbiz.log.error("SERVER ERROR:", throwable)
         player?.sendSystemMessage(Component.literal("Server error: $throwable").withStyle(ChatFormatting.RED))
@@ -127,18 +133,18 @@ object FileServer {
         key.reset()
 
         if (changed) {
-            val files = fetchShows(recache = true).map { it.name }.toTypedArray()
+            val ids = fetchShows(recache = true).keys.sorted().toCollection(LinkedHashSet())
             server.playerList.players.forEach {
-                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = files, playerAuthorized = Permissions.canWriteReels(it)))
+                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, fileIds = ids, playerAuthorized = Permissions.canWriteReels(it)))
             }
         }
     }
 
     /** Responds to a client's request to send the file */
     fun sendShowsToClient(player: ServerPlayer) {
-        val files = fetchShows().map { it.name }.toTypedArray()
+        val ids = fetchShows().keys.sorted().toCollection(LinkedHashSet())
         val authorized = Permissions.canWriteReels(player)
-        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = files, playerAuthorized = authorized))
+        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, fileIds = ids, playerAuthorized = authorized))
     }
 
     enum class FileAction {

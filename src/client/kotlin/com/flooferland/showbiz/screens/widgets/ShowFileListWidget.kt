@@ -4,7 +4,6 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
-import net.minecraft.util.FastColor
 import com.flooferland.showbiz.Showbiz
 import com.mojang.blaze3d.systems.RenderSystem
 import kotlin.math.roundToInt
@@ -33,7 +32,7 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
         }
     }
 
-    public fun setFiles(files: List<String>, click: (String) -> Unit) {
+    public fun setFiles(files: Collection<String>, click: (String) -> Unit) {
         clearEntries()
         files.forEach { addEntry(FileEntry(it) { click(it) }) }
     }
@@ -47,18 +46,7 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
             .tooltip(Tooltip.create(Component.literal(filename)))
             .build()!!
 
-        override fun render(
-            guiGraphics: GuiGraphics,
-            index: Int,
-            top: Int,
-            left: Int,
-            width: Int,
-            height: Int,
-            mouseX: Int,
-            mouseY: Int,
-            hovering: Boolean,
-            partialTick: Float
-        ) {
+        override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
             button.x = left + (width - button.width) / 2
             button.y = top
             button.render(guiGraphics, mouseX, mouseY, partialTick)

@@ -51,3 +51,9 @@ name = "Beach Bear"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[uncle_klunk]
+name = "Uncle Klunk (W.I.P, innacurate)"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false

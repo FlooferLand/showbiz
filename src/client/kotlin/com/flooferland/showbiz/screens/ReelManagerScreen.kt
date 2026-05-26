@@ -19,7 +19,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
 class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Manager")) {
-    var files = mutableListOf<String>()
+    var files = mutableSetOf<String>()
     var loading = true
     var authorized = false
 
@@ -106,7 +106,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     fun isLocalServer() = Minecraft.getInstance().isLocalServer
 
-    fun updateFiles(paths: Array<String>) {
+    fun updateFiles(paths: Set<String>) {
         loading = false
         files.clear()
         files.addAll(paths)
@@ -126,7 +126,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
             ClientPackets.listen(ShowFileListPacket.type) { packet, _ ->
                 val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@listen
                 screen.authorized = packet.playerAuthorized
-                screen.updateFiles(packet.files)
+                screen.updateFiles(packet.fileIds)
             }
         }
     }

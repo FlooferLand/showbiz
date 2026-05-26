@@ -55,7 +55,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var loading = false
     var isLoaded = false
 
-    fun getFilePath(filename: String) = Path("${FileStorage.SHOWS_DIR}/$filename")
+    fun getFilePath(filename: String) = FileStorage.cachedShows[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isEmpty() = !isLoaded
 
     fun load(filename: String, onLoad: ((ShowData?) -> Unit)? = null) {

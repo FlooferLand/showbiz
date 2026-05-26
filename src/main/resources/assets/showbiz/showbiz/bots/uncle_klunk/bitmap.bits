@@ -1,0 +1,129 @@
+set rae klunk
+
+rae 2td {
+    flow 0.7
+    rotate "Left Ear" y:20
+}
+rae 3td {
+    flow 0.7
+    rotate "Right Ear" y:-20
+}
+rae 4td {
+    flow 1.2
+    move "Left Eye" x:-0.3
+    move "Right Eye" x:-0.3
+}
+rae 5td {
+    flow 1.2
+    move "Left Eye" x:0.3
+    move "Right Eye" x:0.3
+}
+rae 6td {
+    flow 3.0
+    move "Left Eyelid" y:0.3
+}
+rae 7td {
+    flow 3.0
+    move "Left Eyelid" y:-1.5
+}
+rae 8td {
+    flow 3.0
+    move "Right Eyelid" y:0.3
+}
+rae 9td {
+    flow 3.0
+    move "Right Eyelid" y:-1.5
+}
+rae 1td {
+    flow 2.0
+    rotate "Jaw" x:-30
+    rotate "Face:" x:5
+}
+rae 10td {
+    flow ease-in 0.28
+    rotate "Head" x:17.5
+}
+rae 11td {
+    flow ease-in 0.28
+    rotate "Head" y:30
+}
+rae 12td {
+    flow ease-in 0.28
+    rotate "Head" y:-30
+}
+rae 13td {
+    flow 0.7
+    rotate "Left Arm" y:30
+}
+rae 14td {
+    flow 0.7
+    rotate "Left Arm" z:-75
+}
+rae 15td {
+    flow 0.7
+    rotate "Left Arm" y:40
+    rotate "Left Arm" x:20
+}
+rae 16td {
+    flow 0.7
+    rotate "Left Elbow" x:40
+    rotate "Left Elbow" y:-10
+    move "Left Elbow" z:-1
+}
+rae 97td {
+    flow 1.2
+    rotate "Left Hand" z:180
+    move "Left Hand" y:-2
+    move "Left Hand" x:-0.5
+}
+rae 98td {
+    flow 1.2
+    rotate "Left Hand" x:30
+    rotate "Left Hand" x:-7.5
+}
+rae 99td {
+    flow 1.2
+    rotate "Left Hand" x:-10
+}
+rae 104td {
+    flow 1.2
+    rotate "Left Foot" x:20
+}
+rae 100 {
+    flow 0.7
+    rotate "Right Arm" z:75
+}
+rae 101 {
+    flow 0.7
+    rotate "Right Arm" y:-75
+}
+rae 102td {
+    flow 0.7
+    rotate "Right Elbow" x:-15
+    rotate "Right Hand" x:60
+}
+rae 103td {
+    flow 1.2
+    rotate "Right Hand" y:-15
+}
+rae 17td {
+    flow 0.28
+    rotate "Seat" y:10
+    rotate "Left Leg" y:10
+    rotate "Right Leg" y:10
+    rotate "Right Knee" z:10
+    rotate "Right Foot" z:-10
+}
+rae 18td {
+    flow 0.28
+    rotate "Seat" y:-10
+    rotate "Left Leg" y:-10
+    rotate "Right Leg" y:-10
+    rotate "Right Knee" z:-10
+    rotate "Right Foot" z:10  
+}
+rae 19td {
+    flow 0.28
+    rotate "Seat" x:7.5
+    rotate "Left Leg" x:7.5
+}
