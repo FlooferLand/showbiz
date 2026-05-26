@@ -81,7 +81,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 val path = getFilePath(filename)
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
                 out.onFailure { throwable ->
-                    Showbiz.log.error("BizlibNative failed to load '${path}'", throwable)
+                    Showbiz.log.error("BizlibNative failed to load '${path}'. Using fallback Java-based reader", throwable)
                 }
                 out.getOrNull() ?: LegacyRshowFormat().readFile(path)
             }
