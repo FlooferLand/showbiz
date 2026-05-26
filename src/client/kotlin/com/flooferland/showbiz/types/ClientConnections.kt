@@ -2,6 +2,7 @@ package com.flooferland.showbiz.types
 
 import net.minecraft.client.*
 import net.minecraft.core.*
+import net.minecraft.network.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
@@ -10,6 +11,7 @@ import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.connection.ServerConnections.CLIENT_UPDATE_INTERVAL
 import com.flooferland.showbiz.types.connection.ServerConnections.MAX_VIEW_DISTANCE_SQR
 import com.flooferland.showbiz.types.connection.ServerConnections.Point
+import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 
@@ -28,7 +30,9 @@ object ClientConnections {
             val level = Minecraft.getInstance().level ?: return@listen
             val blockEntity = level.getBlockEntity(packet.blockPos) as? IConnectable ?: return@listen
             val port = blockEntity.connectionManager.inputs[packet.portId] ?: return@listen
-            port.data.decode(packet.data)
+            val buf = FriendlyByteBuf(Unpooled.wrappedBuffer(packet.data))
+            port.data.decode(buf)
+            buf.release()
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { listener, minecraft ->

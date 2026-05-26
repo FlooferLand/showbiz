@@ -96,7 +96,12 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 if (!level.isClientSide) {
                     val byteBuf = FriendlyByteBuf(io.netty.buffer.Unpooled.buffer())
                     data.encode(byteBuf)
-                    val packet = ConnectionDataPacket(pos, id, byteBuf)
+
+                    val bytes = ByteArray(byteBuf.readableBytes())
+                    byteBuf.readBytes(bytes)
+                    byteBuf.release()
+
+                    val packet = ConnectionDataPacket(pos, id, bytes)
                     for (player in (level as ServerLevel).players()) {
                         ServerPlayNetworking.send(player, packet)
                     }

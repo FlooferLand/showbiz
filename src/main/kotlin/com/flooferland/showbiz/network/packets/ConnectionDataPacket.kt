@@ -6,7 +6,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.utils.rl
 
-class ConnectionDataPacket(val blockPos: BlockPos, val portId: String, val data: FriendlyByteBuf) : CustomPacketPayload {
+class ConnectionDataPacket(val blockPos: BlockPos, val portId: String, val data: ByteArray) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -15,14 +15,12 @@ class ConnectionDataPacket(val blockPos: BlockPos, val portId: String, val data:
             { buf, packet ->
                 buf.writeBlockPos(packet.blockPos)
                 buf.writeUtf(packet.portId, 16)
-                buf.writeVarInt(packet.data.readableBytes())
-                buf.writeBytes(packet.data)
+                buf.writeByteArray(packet.data)
             },
             { buf ->
                 val blockPos = buf.readBlockPos()
                 val portId = buf.readUtf(16)
-                val size = buf.readVarInt()
-                val data = FriendlyByteBuf(buf.readBytes(size))
+                val data = buf.readByteArray()
                 ConnectionDataPacket(blockPos, portId, data)
             }
         )!!
