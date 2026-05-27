@@ -20,10 +20,6 @@ class GreyboxBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBloc
     }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Both) {
         send(it)
-        if (!this.hasListeners()) {
-            val level = level as? ServerLevel ?: return@port
-            it.broadcastAudio(level, blockPos)
-        }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
