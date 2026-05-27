@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.renderers.base
 
-import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.client.renderer.*
+import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -19,6 +19,7 @@ open class GeoFixedBlockEntityRenderer<T>(model: GeoModel<T>) : GeoBlockRenderer
     val hook = GeoWorkaroundRenderHook()
 
     override fun renderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
+        if (bone.isHidden) return
         hook.beforeRenderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour)
         super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour)
     }
