@@ -275,7 +275,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         ClientboundBlockEntityDataPacket.create(this)
 
     fun getNearbyContainer() =
-        arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south()).firstNotNullOfOrNull { level?.getBlockEntity(it) as? Container }
+        arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south())
+            .mapNotNull { level?.getBlockEntity(it) as? Container }
+            .firstOrNull { it !is ReelToReelBlockEntity }
 
     // region | Container
     override fun getContainerSize() = 1
