@@ -1,17 +1,12 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.sounds.SoundEvent
-import net.minecraft.sounds.SoundSource
+import net.minecraft.client.multiplayer.*
+import net.minecraft.core.registries.*
+import net.minecraft.resources.*
+import net.minecraft.sounds.*
 import net.minecraft.util.*
-import com.flooferland.bizlib.bits.AnimCommand
-import com.flooferland.bizlib.bits.BitMappingData
-import com.flooferland.bizlib.bits.BitUtils
-import com.flooferland.bizlib.bits.Easing
-import com.flooferland.bizlib.bits.Movements
+import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
@@ -87,10 +82,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         // TODO: Make bots work when they receive any mapping, even an empty one
         val mapping = animatable.show.data.mapping
         if (mapping.isNullOrBlank()) return
-        val bitmapBits = bot.bitmap.bits[mapping] ?: run {
-            Showbiz.log.warn("Mapping '$mapping' not found for bot '${animatable.botId}'. Skipping bot animation step")
-            return
-        }
+        val bitmapBits = bot.bitmap.bits[mapping] ?: return
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
