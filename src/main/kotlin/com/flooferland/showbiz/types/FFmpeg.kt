@@ -24,7 +24,9 @@ object FFmpeg {
         val colorChannels = 3
         val frameSize = output.width * output.height * colorChannels
 
+        // TODO: Make sure FFmpeg can't block or pause the thread
         fun nextFrame(): ByteArray? {
+            if (!process.isAlive) return null
             val buffer = ByteArray(frameSize)
             var offset = 0
             while (offset < frameSize) {
