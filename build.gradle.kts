@@ -91,7 +91,7 @@ dependencies {
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
     // Veil
-    modImplementation("foundry.veil:veil-$loader-$minecraft:${dep("veil")}") {
+    modCompileOnly("foundry.veil:veil-$loader-$minecraft:${dep("veil")}") {
         exclude(group="maven.modrinth")
         exclude(group="me.fallenbreath")
     }

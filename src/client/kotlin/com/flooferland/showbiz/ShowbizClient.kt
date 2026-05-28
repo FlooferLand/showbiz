@@ -28,6 +28,7 @@ import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import com.flooferland.showbiz.utils.ShowbizUtils
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
@@ -58,7 +59,10 @@ object ShowbizClient : ClientModInitializer {
             ModPackets
             ModClientEntities
             ModClientCommands
-            ModClientVeil
+            if (ShowbizUtils.clientHasVeil()) {
+                @Suppress("RedundantLambdaOrAnonymousFunction")
+                { ModClientVeil.load() }()
+            }
             ClientConnections
             ClientPackets.init()
         }

@@ -17,9 +17,7 @@ import org.joml.Quaternionf
 object ModClientVeil {
     val spotlights = hashMapOf<BlockPos, LightRenderHandle<AreaLightData>>()
 
-    init {
-        // TODO: Make it fucking rotate up and down
-        //       I need a pay raise from myself
+    fun load() {
         VeilEventPlatform.INSTANCE.onVeilRenderLevelStage { stage, renderer, source, stack, fc, fc2, i, tracker, camera, frustum ->
             for ((blockPos, lightRef) in ModClientVeil.spotlights) {
                 val blockEntity = Minecraft.getInstance().level?.getBlockEntity(blockPos) as? SpotlightBlockEntity ?: continue

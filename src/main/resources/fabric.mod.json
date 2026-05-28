@@ -40,7 +40,9 @@
         "java": ">=$java",
         "fabric-language-kotlin": "~$fabric_language_kotlin",
         "geckolib": "^$geckolib",
-        "veil": ">=$veil",
         "fabric-api": "^$fabric_api"
+    },
+    "suggests": {
+        "veil": ">=$veil"
     }
 }

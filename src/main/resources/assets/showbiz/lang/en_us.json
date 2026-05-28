@@ -36,7 +36,7 @@
     "tooltip.showbiz.block.show_selector": "Allows people to select a reel to be played\nwhen hooked up to a reel-to-reel",
     "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nConnect one of them to a Curtain Controller\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
-    "tooltip.showbiz.block.spotlight": "Work-in-progress",
+    "tooltip.showbiz.block.spotlight": "Work-in-progress\nOnly works with Veil installed\nVeil is known to cause bugs",
     "tooltip.showbiz.block.bit_view": "Shows bits and their names live when plugged into a show",
     "tooltip.showbiz.block.programmer": "Allows you to record in bits",
     "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or maybe not)",
