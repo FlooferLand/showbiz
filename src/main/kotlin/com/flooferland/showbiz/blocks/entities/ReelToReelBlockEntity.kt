@@ -231,6 +231,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (playing) setPlaying(false)
         hasFinished = false
         signal.reset()
+        lastVideoFrameIndex = 0
         showData.video?.let {
             video.data.tempReset()
             video.send()
