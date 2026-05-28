@@ -76,7 +76,8 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
     /** Sends the current data through this port and notifies the listeners */
     fun send() {
-        (owner as? BlockEntity)?.level?.let { level ->
+        val ownerEntity = owner as? BlockEntity ?: return
+        ownerEntity.level?.let { level ->
             @Suppress("UNCHECKED_CAST")
             listeners.forEach { pos ->
                 val entity = level.getBlockEntity(pos) as? IConnectable ?: return@forEach

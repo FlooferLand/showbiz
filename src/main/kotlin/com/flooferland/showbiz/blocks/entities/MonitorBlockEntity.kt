@@ -9,21 +9,11 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
-import com.flooferland.showbiz.types.connection.data.PackedAudioData
-import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.types.connection.data.PackedVideoData
 
-class GreyboxBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.Greybox.entityType!!, pos, state), IConnectable {
+class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Monitor.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.Both, autoUseReceived = false) {
-        send(it)
-    }
-    val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Both) {
-        send(it)
-    }
-    val video = connectionManager.port("video", PackedVideoData(), PortDirection.Both) {
-        send(it)
-    }
+    val video = connectionManager.port("video", PackedVideoData(), PortDirection.In)
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
@@ -41,4 +31,9 @@ class GreyboxBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBloc
 
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
+
+    companion object {
+        const val VIDEO_DIST = 24f
+        const val VIDEO_DIST_SQUARE = VIDEO_DIST * VIDEO_DIST
+    }
 }

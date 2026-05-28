@@ -10,6 +10,7 @@ import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -25,6 +26,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.io.path.Path
+import kotlin.io.path.div
+import kotlin.io.path.nameWithoutExtension
+import kotlin.time.Duration
 
 // TODO: Ensure the file is saved correctly,
 //       even when the user spams the record button and does whatever weird things users do
@@ -39,6 +43,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     // TODO: Convert signal to a list of longs and pack bit ids using bitwise operations
     val signal: MutableList<BitIdArray> = ArrayList()
     var audio: ByteArray = ByteArray(0)
+    var videoInputInfo: FFmpeg.VideoInfo? = null
+    var video: FFmpeg.VideoStream? = null
     var id: UUID? = null
     var name: String? = null
     var format: AudioFormat? = null
@@ -77,8 +83,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         Showbiz.log.debug("Loading tape '${name}' ($mapping)")
 
         val coro = CoroutineScope(Dispatchers.IO).launch {
+            val path = getFilePath(filename)
             val loaded = run {
-                val path = getFilePath(filename)
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
                 out.onFailure { throwable ->
                     Showbiz.log.error("BizlibNative failed to load '${path}'. Using fallback Java-based reader", throwable)
@@ -111,16 +117,30 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                     current.add(s.toBitId())
                 }
             }
+
+            // Reading video
+            val videoPath = path.parent / Path(path.nameWithoutExtension + ".mp4")
+            if (Files.exists(videoPath) && FFmpeg.localAvailable) {
+                val result = CoroutineScope(Dispatchers.IO).launch {
+                    this@ShowData.videoInputInfo = FFmpeg.probeVideo(videoPath)
+                    this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(path, 128, 128, 24.0), Duration.ZERO)
+                }
+                result.invokeOnCompletion {
+                    if (it != null || videoInputInfo == null) {
+                        Showbiz.log.error("Failed to read video", it ?: Throwable("Unknown error"))
+                    }
+                }
+            }
         }
         coro.invokeOnCompletion { err ->
             loading = false
             isLoaded = audio.isNotEmpty() || err == null
             if (isLoaded) {
-                Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size})")
+                Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)")
                 onLoad?.invoke(this)
                 return@invokeOnCompletion
             }
-            Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size})", err)
+            Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)", err)
             onLoad?.invoke(null)
         }
     }
@@ -203,6 +223,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         id = null
         name = null
         mapping = null
+        videoInputInfo = null
+        video?.close()
         System.gc()
     }
 }

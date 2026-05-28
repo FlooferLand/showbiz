@@ -4,7 +4,7 @@ import net.minecraft.client.multiplayer.*
 import net.minecraft.core.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
+import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackStatePacket
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -16,7 +16,7 @@ object ShowbizShowAudio {
     val sources = mutableMapOf<BlockPos, Source>()
 
     fun init() {
-        ClientPackets.listen(PlaybackChunkPacket.type) { payload, context ->
+        ClientPackets.listen(PlaybackAudioChunkPacket.type) { payload, context ->
             context.client().execute {
                 val source = sources.getOrPut(payload.blockPos) { Source(payload.format, payload.blockPos.center) }
                 if (payload.playing) {
@@ -35,12 +35,6 @@ object ShowbizShowAudio {
                     state.close()
                     sources.remove(packet.blockPos)
                     return@execute
-                }
-                if (packet.paused) {
-                    state.pause()
-                } else {
-                    if (!state.isOpen()) state.open()
-                    state.resume()
                 }
             }
         }

@@ -2,7 +2,7 @@ package com.flooferland.showbiz.audio
 
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
+import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
@@ -65,7 +65,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         lastReceivedChunkId = -1
         source = 0
     }
-    fun write(packet: PlaybackChunkPacket) {
+    fun write(packet: PlaybackAudioChunkPacket) {
         if (!isValidSource()) return
         if (paused) return
         updatePosition()

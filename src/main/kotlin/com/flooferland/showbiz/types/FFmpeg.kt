@@ -3,10 +3,14 @@ package com.flooferland.showbiz.types
 import com.flooferland.showbiz.Showbiz
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
+import kotlin.io.path.absolutePathString
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 // TODO: Figure out a way to network FFmpeg (ex: If the client has it, encode/decode on the client. If only the server has it, encode/decode on the server)
 
@@ -14,23 +18,53 @@ import kotlinx.coroutines.withContext
 object FFmpeg {
     data class AudioSettings(val codec: String, val channels: Int, val sampleRate: Int)
     data class Settings(val outputFormat: String, val audio: AudioSettings)
+    data class VideoInfo(val path: Path, val width: Int, val height: Int, val fps: Double)
+    class VideoStream(private var process: Process, val input: VideoInfo, val output: VideoInfo) : AutoCloseable {
+        private val stdout = process.inputStream
+        val colorChannels = 3
+        val frameSize = output.width * output.height * colorChannels
 
-    private var file: File? = null
+        fun nextFrame(): ByteArray? {
+            val buffer = ByteArray(frameSize)
+            var offset = 0
+            while (offset < frameSize) {
+                val read = stdout.read(buffer, offset, frameSize - offset)
+                if (read == -1) return null
+                offset += read
+            }
+            return buffer
+        }
+
+        /** Creates a new process because FFmpeg doesn't seem to support seeking */
+        fun seek(seek: Duration) {
+            FFmpeg.openVideoStream(input, output, seek)?.let {
+                process.destroy()
+                process = it.process
+            }
+        }
+        override fun close() = process.destroy()
+    }
+
+    private var mainFile: File? = null
+    private var probeFile: File? = null
     private var error: String? = null
 
-    val localAvailable get() = file?.exists() == true
+    val localAvailable get() = mainFile?.exists() == true
     var serverAvailable = false
 
+    init { init() }
+
     fun init() {
-        if (file != null) return
-        val ffmpeg = findFile() ?: run { setError("Failed to find executable"); return }
-        Showbiz.log.info("FFmpeg found at '${ffmpeg.absolutePath}'")
+        if (mainFile != null) return
+        mainFile = findFile("ffmpeg") ?: run { setError("Failed to find FFmpeg executable"); return }
+        probeFile = findFile("ffprobe") ?: run { setError("Failed to find FFprobe executable"); return }
+        Showbiz.log.info("FFmpeg found at '${mainFile?.absolutePath}'")
     }
 
     fun getLastError() = error
 
     suspend fun encode(inputBytes: ByteArray, settings: Settings): ByteArray? = withContext(Dispatchers.IO) {
-        val ffmpeg = file?.absolutePath ?: run {
+        val ffmpeg = mainFile?.absolutePath ?: run {
             setError("Executable was not found during encode")
             return@withContext null
         }
@@ -65,26 +99,60 @@ object FFmpeg {
         }
     }
 
+    suspend fun probeVideo(path: Path): VideoInfo? = withContext(Dispatchers.IO) {
+        val ffprobe = probeFile?.absolutePath ?: return@withContext null
+        val process = ProcessBuilder(
+            ffprobe,
+            "-v", "quiet",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height,r_frame_rate",
+            "-of", "csv=p=0",
+            path.absolutePathString()
+        ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
+
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+
+        val parts = output.split(",")
+        if (parts.size < 3) return@withContext null
+
+        val (num, den) = parts[2].split("/").map { it.toDouble() }
+        VideoInfo(path, parts[0].toInt(), parts[1].toInt(), num / den)
+    }
+
+    fun openVideoStream(input: VideoInfo, output: VideoInfo = input, seek: Duration): VideoStream? {
+        val ffmpeg = mainFile?.absolutePath ?: run { setError("FFmpeg not found"); return null }
+        val process = ProcessBuilder(
+            ffmpeg,
+            "-ss", seek.toDouble(DurationUnit.SECONDS).toString(),
+            "-i", input.path.absolutePathString(),
+            "-f", "rawvideo",
+            "-pix_fmt", "rgb24",
+            "-r", output.fps.toString(),
+            "-vf", "scale=${output.width}:${output.height}",
+            "-an",
+            "pipe:1"
+        ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
+        return VideoStream(process, input, output)
+    }
+
     private fun setError(text: String) {
         error = text
         Showbiz.log.error("FFmpeg error: $text")
     }
 
-    private fun findFile(): File? {
+    private fun findFile(name: String): File? {
         val isWindows = System.getProperty("os.name").contains("win", ignoreCase = true)
-        val binaryName = if (isWindows) "ffmpeg.exe" else "ffmpeg"
+        val binaryName = if (isWindows) "$name.exe" else name
 
         val pathEnv = System.getenv("PATH") ?: return null
         val pathSep = if (isWindows) ";" else ":"
 
-        file = pathEnv.split(pathSep)
+        return pathEnv.split(pathSep)
             .asSequence()
             .filter { it.isNotEmpty() }
             .map { Paths.get(it).resolve(binaryName) }
             .firstOrNull { Files.isRegularFile(it) && Files.isExecutable(it) }
             ?.toFile()
-        return file
     }
-
-    init { init() }
 }

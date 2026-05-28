@@ -1,23 +1,13 @@
 package com.flooferland.showbiz.items
 
-import net.minecraft.ChatFormatting
+import net.minecraft.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
-import com.flooferland.showbiz.blocks.entities.BitViewBlockEntity
-import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
-import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
-import com.flooferland.showbiz.blocks.entities.GreyboxBlockEntity
-import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
-import com.flooferland.showbiz.blocks.entities.ShowSelectorBlockEntity
-import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity
-import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -90,7 +80,8 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 is SpotlightBlockEntity,
                 is CurtainControllerBlockEntity,
                 is BitViewBlockEntity,
-                is ProgrammerBlockEntity
+                is ProgrammerBlockEntity,
+                is MonitorBlockEntity
                 -> {
                     first.pos = Optional.of(lastEntity.blockPos)
                     finish(sound = ModSounds.End, anim = "fire", message = "Select the next block")
@@ -116,6 +107,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     reelToReel.applyChange(true) {
                         show.bindListener(greybox)
                         audio.bindListener(greybox)
+                        video.bindListener(greybox)
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Reel-to-reel added")
@@ -164,6 +156,15 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                     }
                     first.pos = Optional.empty()
                     finish(sound = ModSounds.End, anim = "retract", message = "Bit View added")
+                    return InteractionResult.SUCCESS
+                }
+                is GreyboxBlockEntity if firstEntity is MonitorBlockEntity -> {
+                    val (greybox, monitor) = Pair(lastEntity, firstEntity)
+                    greybox.applyChange(true) {
+                        video.bindListener(monitor)
+                    }
+                    first.pos = Optional.empty()
+                    finish(sound = ModSounds.End, anim = "retract", message = "Monitor added")
                     return InteractionResult.SUCCESS
                 }
                 is CurtainControllerBlockEntity if firstEntity is CurtainBlockEntity -> {

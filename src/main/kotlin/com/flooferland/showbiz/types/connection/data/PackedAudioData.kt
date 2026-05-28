@@ -4,7 +4,7 @@ import net.minecraft.core.*
 import net.minecraft.network.*
 import net.minecraft.server.level.*
 import com.flooferland.showbiz.blocks.entities.SpeakerBlockEntity.Companion.AUDIO_DIST_SQUARE
-import com.flooferland.showbiz.network.packets.PlaybackChunkPacket
+import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import com.flooferland.showbiz.types.connection.ConnectionData
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -20,14 +20,10 @@ data class PackedAudioData(
         set(value) { left = value }
 
     override fun encode(buf: FriendlyByteBuf) {
-        buf.writeBytes(left)
-        buf.writeBytes(right)
         format.encode(buf)
     }
 
     override fun decode(buf: FriendlyByteBuf) {
-        buf.readBytes(left)
-        buf.readBytes(right)
         format.decode(buf)
     }
 
@@ -48,7 +44,7 @@ data class PackedAudioData(
         chunkId++
         for (player in level.players()) {
             if (player.distanceToSqr(origin.center) > AUDIO_DIST_SQUARE) continue
-            val payload = PlaybackChunkPacket(chunkId, origin, mono, format)
+            val payload = PlaybackAudioChunkPacket(chunkId, origin, mono, format)
             ServerPlayNetworking.send(player, payload)
         }
     }

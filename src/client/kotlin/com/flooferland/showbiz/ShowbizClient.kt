@@ -102,6 +102,7 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
             add(ModBlocks.Cymbal, ::CymbalBlockEntityRenderer)
             add(ModBlocks.ReelHolder, ::ReelHolderBlockEntityRenderer)
+            add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
         }

@@ -27,6 +27,7 @@ import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
 import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.connection.data.PackedVideoData
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -44,6 +45,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         recordQueue.add(received.signal.clone())
     }
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.Out)
+    val video = connectionManager.port("video", PackedVideoData(), PortDirection.Out)
     val showSelect = connectionManager.port("select", PackedControlData(), PortDirection.In) { data ->
         val level = level as? ServerLevel ?: return@port
         val reelToReel = this@ReelToReelBlockEntity
@@ -150,6 +152,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 }
             }
 
+            // Video
+            val stream = showData.video
+            if (stream != null) {
+                if (seekInt % 2 == 0) {
+                    val raw = stream.nextFrame()
+                    if (raw != null) {
+                        video.data.bytes = raw
+                        video.data.width = stream.output.width
+                        video.data.height = stream.output.height
+                        video.send()
+                    }
+                }
+            }
+
             // Setting playing to false when the show ends
             if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
                 setPlaying(false)
@@ -207,6 +223,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (playing) setPlaying(false)
         hasFinished = false
         signal.reset()
+        showData.video?.let {
+            video.data.tempReset()
+            video.send()
+            it.close()
+        }
         setChanged()
     }
 

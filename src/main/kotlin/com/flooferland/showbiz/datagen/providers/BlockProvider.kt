@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.datagen.providers
 
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.*
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.blockPath
@@ -65,6 +65,9 @@ object BlockProvider {
                         ?.second
                         ?: combination.first()
                     putJsonObject(key) {
+                        if (primary.name.name == null) {
+                            error("Name is null for $primary (${block.id})")
+                        }
                         put("model", rl(primary.name.name!!).blockPath().toString())
                         combination.sumOf { it.state.x }.let { if (it != 0) put("x", it) }
                         combination.sumOf { it.state.y }.let { if (it != 0) put("y", it) }

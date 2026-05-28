@@ -1,0 +1,12 @@
+{
+    "variants": {
+        "facing=north,hanged=false": {"model": "showbiz:block/monitor"},
+        "facing=north,hanged=true": {"model": "showbiz:block/monitor_hanged"},
+        "facing=south,hanged=false": {"model": "showbiz:block/monitor", "y": -180},
+        "facing=south,hanged=true": {"model": "showbiz:block/monitor_hanged", "y": -180},
+        "facing=west,hanged=false": {"model": "showbiz:block/monitor", "y": -90},
+        "facing=west,hanged=true": {"model": "showbiz:block/monitor_hanged", "y": -90},
+        "facing=east,hanged=false": {"model": "showbiz:block/monitor", "y": 90},
+        "facing=east,hanged=true": {"model": "showbiz:block/monitor_hanged", "y": 90}
+    }
+}

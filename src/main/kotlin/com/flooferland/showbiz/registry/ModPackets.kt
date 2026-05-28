@@ -8,7 +8,7 @@ import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 
 sealed class ModPackets<T: CustomPacketPayload> {
-    data object PlaybackChunk : ModPackets<PlaybackChunkPacket>(ServerToClient, PlaybackChunkPacket.type, PlaybackChunkPacket.codec)
+    data object PlaybackAudioChunk : ModPackets<PlaybackAudioChunkPacket>(ServerToClient, PlaybackAudioChunkPacket.type, PlaybackAudioChunkPacket.codec)
     data object PlaybackState : ModPackets<PlaybackStatePacket>(ServerToClient, PlaybackStatePacket.type, PlaybackStatePacket.codec)
     data object ShowParserData : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
     data object SpotlightEdit : ModPackets<SpotlightEditPacket>(Bidirectional, SpotlightEditPacket.type, SpotlightEditPacket.codec)

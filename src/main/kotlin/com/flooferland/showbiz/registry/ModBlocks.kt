@@ -137,6 +137,15 @@ enum class ModBlocks {
         modelPreset = BlockModelId.Custom,
         entity = Entity(::ProgrammerBlockEntity, isGeckolib = false),
     ),
+    Monitor(
+        "monitor", ::MonitorBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = Entity(::MonitorBlockEntity, isGeckolib = false),
+    ),
     Plush(
         "plush", ::PlushBlock,
         Properties.of()
