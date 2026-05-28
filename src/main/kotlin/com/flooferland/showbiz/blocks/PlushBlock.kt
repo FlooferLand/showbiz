@@ -1,7 +1,10 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
+import net.minecraft.sounds.*
+import net.minecraft.world.*
 import net.minecraft.world.entity.*
+import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import net.minecraft.world.level.*
@@ -10,9 +13,11 @@ import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.level.storage.loot.*
 import net.minecraft.world.level.storage.loot.parameters.*
+import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
 class PlushBlock(properties: Properties) : BaseEntityBlock(properties) {
@@ -41,6 +46,11 @@ class PlushBlock(properties: Properties) : BaseEntityBlock(properties) {
         blockEntity.applyChange(true) {
             blockEntity.itemStack = stack
         }
+    }
+
+    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+        level.playSound(player, pos, ModSounds.Boop.event, SoundSource.BLOCKS, 1.0f, 1.0f)
+        return InteractionResult.SUCCESS
     }
 
     override fun getDrops(state: BlockState, params: LootParams.Builder): List<ItemStack> {

@@ -156,16 +156,31 @@ enum class ModRecipes {
     ),
     MitziPlush(
         "WWW",
-        "WSW",
+        "WDW",
         "WWW",
         mapOf(
             "W" to Ingredient(tag="wool"),
-            "S" to Ingredient("green_dye"),
+            "D" to Ingredient("green_dye"),
         ),
         id = "plush_mitzi",
         outputItem = {
             ModBlocks.Plush.item.defaultInstance.apply {
                 set(ModComponents.Plush.type, PlushComponent(rl("mitzi")))
+            }
+        }
+    ),
+    DookPlush(
+        "WWW",
+        "WDW",
+        "WWW",
+        mapOf(
+            "W" to Ingredient(tag="wool"),
+            "D" to Ingredient("brown_dye"),
+        ),
+        id = "plush_dook",
+        outputItem = {
+            ModBlocks.Plush.item.defaultInstance.apply {
+                set(ModComponents.Plush.type, PlushComponent(rl("dook")))
             }
         }
     )

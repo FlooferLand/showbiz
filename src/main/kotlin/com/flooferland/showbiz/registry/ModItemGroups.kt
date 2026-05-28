@@ -18,6 +18,7 @@ enum class ModItemGroups {
             out.accept(disc.item)
         }
         out.accept(ModRecipes.MitziPlush.outputProvider())
+        out.accept(ModRecipes.DookPlush.outputProvider())
     });
 
     constructor(name: String, generator: CreativeModeTab.DisplayItemsGenerator) {

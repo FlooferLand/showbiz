@@ -17,7 +17,7 @@ class PlushModel<T : GeoAnimatable> : GeoModel<T>() {
 
     override fun getTextureResource(animatable: T): ResourceLocation {
         val id = getPlushId(animatable) ?: return rl("textures/empty.png")
-        return id.withPrefix("textures/plush_").withSuffix(".png")
+        return id.withPrefix("textures/block/plush_").withSuffix(".png")
     }
 
     override fun getAnimationResource(animatable: T) = null

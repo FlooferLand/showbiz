@@ -4,6 +4,9 @@
     64,
     64
   ],
+  "textures": {
+    "particle": "showbiz:block/plush_mitzi"
+  },
   "display": {
     "thirdperson_righthand": {
       "rotation": [
