@@ -123,13 +123,14 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             if (Files.exists(videoPath) && FFmpeg.localAvailable) {
                 val result = CoroutineScope(Dispatchers.IO).launch {
                     this@ShowData.videoInputInfo = FFmpeg.probeVideo(videoPath)
-                    this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(path, 128, 128, 24.0), Duration.ZERO)
+                    this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(videoPath, 128, 128, 24.0), Duration.ZERO)
                 }
                 result.invokeOnCompletion {
                     if (it != null || videoInputInfo == null) {
                         Showbiz.log.error("Failed to read video", it ?: Throwable("Unknown error"))
                     }
                 }
+                result.join()
             }
         }
         coro.invokeOnCompletion { err ->

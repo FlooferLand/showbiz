@@ -81,6 +81,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private val tickDelta = (50 * 0.001) // ms
     private val fps = 60  // Tied to rshw
     private var seekInt = 0
+    private var lastVideoFrameIndex = 0
     private val recordQueue = mutableListOf<SignalFrame>()
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
@@ -155,13 +156,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             // Video
             val stream = showData.video
             if (stream != null) {
-                if (seekInt % 2 == 0) {
+                val fps = stream.output.fps
+                val videoFrameIndex = (seek * fps).toInt()
+
+                if (videoFrameIndex > lastVideoFrameIndex) {
+                    val skippedFrames = (videoFrameIndex - lastVideoFrameIndex - 1).coerceAtLeast(0)
+                    repeat(skippedFrames) { stream.nextFrame() }
+
                     val raw = stream.nextFrame()
                     if (raw != null) {
                         video.data.bytes = raw
                         video.data.width = stream.output.width
                         video.data.height = stream.output.height
                         video.send()
+                        lastVideoFrameIndex = videoFrameIndex
                     }
                 }
             }
