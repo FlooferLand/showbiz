@@ -13,7 +13,7 @@ class CollidePartEntityRenderer(val context: EntityRendererProvider.Context) : E
         if (Minecraft.getInstance()?.gui?.debugOverlay?.showDebugScreen() != true) return
         val dispatcher = entityRenderDispatcher
         val scale = 0.01f
-        val text = entity.id.toString()
+        val text = entity.partId.toString()
 
         poseStack.pushPose()
         poseStack.translate(0.0, entity.eyeHeight / 2.0, 0.0)

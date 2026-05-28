@@ -24,7 +24,7 @@ class ClientCollidePartInstance(val owner: ICollidePartInteractable) : CollidePa
         val level = level as? ClientLevel ?: return
 
         spawned.entries.removeIf { (partId, entity) ->
-            entity.isRemoved || entity.id == CollidePartId.None
+            entity.isRemoved || entity.partId == CollidePartId.None
         }
 
         if (spawned.isEmpty()) refresh(level, pos)

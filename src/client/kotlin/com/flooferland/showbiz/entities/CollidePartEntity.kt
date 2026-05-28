@@ -14,10 +14,11 @@ import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollidePartId = CollidePartId.None, val owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
+class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: CollidePartId = CollidePartId.None, val owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -43,7 +44,8 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollideP
     var punched = false
 
     init {
-        if (id == CollidePartId.None) remove(RemovalReason.DISCARDED)
+        id = nextEntityId.getAndDecrement()
+        if (partId == CollidePartId.None) remove(RemovalReason.DISCARDED)
         initialPos?.let {
             setPos(it)
             targetPos = it
@@ -59,7 +61,7 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollideP
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
         colliding += player
         punched = true
-        return InteractionResult.PASS
+        return InteractionResult.SUCCESS
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
@@ -88,7 +90,7 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollideP
         if (newCollisions.isNotEmpty()) run {
             val hitter = newCollisions.first()
             val hitDir = calculateHitDirection(hitter)
-            if (id == CollidePartId.Cymbal) {
+            if (partId == CollidePartId.Cymbal) {
                 val forceV = abs(hitDir.y.toFloat())
                 val forceH = hitDir.horizontalDistance().toFloat()
                 val force = forceH + (forceV * 4f)
@@ -118,5 +120,10 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val id: CollideP
             val dir = position().subtract(hitter.position()).normalize()
             Vec3(dir.x, dir.y, dir.z).scale(0.2)
         }
+    }
+
+    companion object {
+        /// Required to manually set the ID because the client assign its ID to the player and causes the player to freeze
+        private val nextEntityId = AtomicInteger(-1000)
     }
 }

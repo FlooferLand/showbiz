@@ -19,7 +19,7 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
 
     override fun setCustomAnimations(animatable: CymbalBlockEntity, instanceId: Long, animState: AnimationState<CymbalBlockEntity>) {
         val instance = animatable.collidePartInstance.clientInstance as? ClientCollidePartInstance ?: return
-        val entity = instance.spawned.values.firstOrNull { it.id == CollidePartId.Cymbal } ?: return
+        val entity = instance.spawned.values.firstOrNull { it.partId == CollidePartId.Cymbal } ?: return
 
         val cymbal = animationProcessor.getBone("cymbal") ?: return
         cymbal.updateRotation(0f, 0f, 0f)
