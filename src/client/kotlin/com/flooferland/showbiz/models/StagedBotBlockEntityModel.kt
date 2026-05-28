@@ -58,25 +58,21 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val bot = ShowbizClient.bots[animatable.botId] ?: return
         val model = currentModel ?: return
 
-        // Getting the animation controller/state
-        // TODO: Figure out why caching these won't work
-        /*val greybox = this.greybox ?: animatable.greyboxPos?.let {
-            animatable.level?.getBlockEntity(it) as? GreyboxBlockEntity
+        // Resetting bones
+        val instanceCache = animatable.getAnimatableInstanceCache()
+        val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
+        for ((boneName, initMove) in model.initBoneMoves) {
+            val bone = animationProcessor.getBone(boneName) ?: continue
+            bone.posX = initMove.x
+            bone.posY = initMove.y
+            bone.posZ = initMove.z
         }
-        val reelToReel = this.reelToReel ?: greybox?.reelToReelPos?.let {
-            animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
+        for ((boneName, initRot) in model.initBoneRots) {
+            val bone = animationProcessor.getBone(boneName) ?: continue
+            bone.rotX = initRot.x
+            bone.rotY = initRot.y
+            bone.rotZ = initRot.z
         }
-        if (this.greybox == null || this.reelToReel == null) {
-            this.greybox = greybox
-            this.reelToReel = reelToReel
-        }*/
-        /*val greybox = animatable.greyboxPos?.let {
-            animatable.level?.getBlockEntity(it) as? GreyboxBlockEntity
-        }
-        val reelToReel = greybox?.reelToReelPos?.let {
-            animatable.level?.getBlockEntity(it) as? ReelToReelBlockEntity
-        }
-        if (greybox == null || reelToReel == null) return*/
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
@@ -84,33 +80,15 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         if (mapping.isNullOrBlank()) return
         val bitmapBits = bot.bitmap.bits[mapping] ?: return
 
-        // Resetting bones
-        val instanceCache = animatable.getAnimatableInstanceCache()
-        val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
-        for ((_, data) in bitmapBits) {
-            for (rotate in data.rotates) {
-                val bone = animationProcessor.getBone(rotate.bone) ?: continue
-                val initRot = model.initBoneRots[bone.name]
-                bone.rotX = initRot?.x ?: 0f
-                bone.rotY = initRot?.y ?: 0f
-                bone.rotZ = initRot?.z ?: 0f
-            }
-
-            for (move in data.moves) {
-                val bone = animationProcessor.getBone(move.bone) ?: continue
-                val initMove = model.initBoneMoves[bone.name]
-                bone.posX = initMove?.x ?: 0f
-                bone.posY = initMove?.y ?: 0f
-                bone.posZ = initMove?.z ?: 0f
-            }
-
-            if (!animatable.show.data.playing) {
+        // Resetting animations
+        if (!animatable.show.data.playing) {
+            for ((bit, data) in bitmapBits) {
                 for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
-                animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
             }
+            animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
         }
 
         // Getting bot storage & show playing guard
