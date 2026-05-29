@@ -7,8 +7,10 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -22,6 +24,7 @@ import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -41,10 +44,30 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var angle = 45f
     var color: Int = 0xffffff
 
+    var startPos = Vec3.ZERO!!
+    var endPos = Vec3.ZERO!!
+
     val geckoCache = GeckoLibUtil.createInstanceCache(this)!!
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = geckoCache
+
+    fun tick(level: Level, pos: BlockPos, state: BlockState) {
+        if (!level.isClientSide) return
+        if (!ShowbizUtils.clientHasVeil()) return // Using Veil lighting instead
+        // if (!isOn) return
+        /*val clip = level.clip(ClipContext(startPos, endPos, ClipContext.Block.VISUAL, ClipContext.Fluid.ANY, CollisionContext.empty()))
+        if (clip.blockPos == pos) return
+
+        for (x in pos.x..clip.blockPos.x) {
+            for (y in pos.y..clip.blockPos.y) {
+                for (z in pos.z..clip.blockPos.z) {
+                    val p = BlockPos(x, y, z)
+                    level.setBlock(p, level.getBlockState(p).setValue(LightBlock.LEVEL, 15), 5)
+                }
+            }
+        }*/
+    }
 
     override fun getDisplayName() = Component.literal("Spotlight")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {

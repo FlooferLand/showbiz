@@ -1,5 +1,5 @@
 {
-	"format_version": "1.12.0",
+	"format_version": "1.21.110",
 	"minecraft:geometry": [
 		{
 			"description": {
@@ -67,9 +67,28 @@
 					]
 				},
 				{
-					"name": "lightHolder",
+					"name": "start",
 					"parent": "head",
-					"pivot": [0, 10, -6.25]
+					"pivot": [0, 10, 4.25],
+					"cubes": [
+						{
+							"origin": [-1, 9, 2.25],
+							"size": [2, 2, 2],
+							"uv": {}
+						}
+					]
+				},
+				{
+					"name": "end",
+					"parent": "head",
+					"pivot": [0, 10, -6.25],
+					"cubes": [
+						{
+							"origin": [-1, 9, -8.25],
+							"size": [2, 2, 2],
+							"uv": {}
+						}
+					]
 				}
 			]
 		}

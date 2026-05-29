@@ -2,9 +2,10 @@
 
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.world.phys.Vec3
+import net.minecraft.client.*
+import net.minecraft.client.renderer.*
+import net.minecraft.world.phys.*
+import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
@@ -35,13 +36,25 @@ class GeoWorkaroundRenderHook() {
     }
 
     fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        val instance = (animatable as? ICollidePartInteractable)?.collidePartInstance ?: return
-        val clientInstance = instance.clientInstance as? ClientCollidePartInstance ?: return
-        for ((bone, id) in instance.bonesToIds) {
-            model.getBone(bone).getOrNull()?.let { bone ->
-                val entity = clientInstance.spawned[id] ?: return@let
-                entity.targetPos = bonePosFromCapture(bone) ?: return@let
-                entity.targetSize = bone.calculateBounds { capturedBoneMatrices[it.name] }
+        when (animatable) {
+            is SpotlightBlockEntity -> {
+                val startBone = model.getBone("start").getOrNull() ?: return
+                val startPos = bonePosFromCapture(startBone) ?: return
+                animatable.startPos = startPos
+                val endBone = model.getBone("end").getOrNull() ?: return
+                val endPos = bonePosFromCapture(endBone) ?: return
+                animatable.endPos = endPos
+            }
+            is ICollidePartInteractable -> {
+                val instance = animatable.collidePartInstance
+                val clientInstance = instance.clientInstance as? ClientCollidePartInstance ?: return
+                for ((bone, id) in instance.bonesToIds) {
+                    model.getBone(bone).getOrNull()?.let { bone ->
+                        val entity = clientInstance.spawned[id] ?: return@let
+                        entity.targetPos = bonePosFromCapture(bone) ?: return@let
+                        entity.targetSize = bone.calculateBounds { capturedBoneMatrices[it.name] }
+                    }
+                }
             }
         }
     }

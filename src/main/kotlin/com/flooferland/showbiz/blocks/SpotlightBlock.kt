@@ -5,10 +5,12 @@ import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
+import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
@@ -20,6 +22,9 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.INVISIBLE
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.Spotlight.entityType!!.create(pos, state)!!
+
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
+        BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? SpotlightBlockEntity)?.tick(level, pos, blockState) }
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
         if (level.isClientSide) return InteractionResult.PASS
