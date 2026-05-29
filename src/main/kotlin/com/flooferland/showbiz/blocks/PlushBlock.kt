@@ -44,7 +44,7 @@ class PlushBlock(properties: Properties) : BaseEntityBlock(properties) {
     override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
         val blockEntity = level.getBlockEntity(pos) as? PlushBlockEntity ?: return
         blockEntity.applyChange(true) {
-            blockEntity.itemStack = stack
+            blockEntity.itemStack = stack.copyWithCount(1)
         }
     }
 
