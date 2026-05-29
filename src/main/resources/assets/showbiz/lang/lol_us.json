@@ -1,0 +1,20 @@
+{
+    "text.mod.description": "nuhuhfficial Rocking Fires BOOM simulator foah cube game made by FlooferLands and Monsterwaills !!",
+    "config.prop.audio.playPneumaticSounds": "playz pnumatic sounds",
+    "config.prop.audio.playBotEffects": "playz clanker pewpews",
+    "config.prop.permissions.restrict": "restrict pawmissions (server-only)",
+
+    "itemGroup.showbiz.main": "showbiz",
+
+    "block.showbiz.staged_bot": "staged clanker",
+    "block.showbiz.reel_to_reel": "reel 2 reel",
+    "block.showbiz.greybox": "box",
+    "block.showbiz.speaker": "speaker",
+
+    "item.showbiz.wand": "magic",
+    "item.showbiz.reel": "real",
+
+    "tooltip.showbiz.block.staged_bot": "knownz as clankers\n- click right 2 change models\n- place a block on top to hide",
+
+    "message.showbiz.show_load_fail": "failed to load show :( check teh logz!!"
+}
