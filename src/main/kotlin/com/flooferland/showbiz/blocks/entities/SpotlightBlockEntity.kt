@@ -54,19 +54,9 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         if (!level.isClientSide) return
-        if (!ShowbizUtils.clientHasVeil()) return // Using Veil lighting instead
-        // if (!isOn) return
-        /*val clip = level.clip(ClipContext(startPos, endPos, ClipContext.Block.VISUAL, ClipContext.Fluid.ANY, CollisionContext.empty()))
-        if (clip.blockPos == pos) return
-
-        for (x in pos.x..clip.blockPos.x) {
-            for (y in pos.y..clip.blockPos.y) {
-                for (z in pos.z..clip.blockPos.z) {
-                    val p = BlockPos(x, y, z)
-                    level.setBlock(p, level.getBlockState(p).setValue(LightBlock.LEVEL, 15), 5)
-                }
-            }
-        }*/
+        if (ShowbizUtils.clientHasVeil()) return // Using Veil lighting instead
+        // TODO: Figure out how to render vanilla lights
+        //       Might be able to hook into WorldRenderer and intercept it getting the light coordinates
     }
 
     override fun getDisplayName() = Component.literal("Spotlight")!!
