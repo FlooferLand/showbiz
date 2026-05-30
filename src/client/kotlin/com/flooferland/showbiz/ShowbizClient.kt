@@ -16,6 +16,7 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -109,6 +110,7 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
+            EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
         }
 
         // GeckoLib renderers
@@ -117,6 +119,13 @@ object ShowbizClient : ClientModInitializer {
             var renderer: WandItemRenderer? = null
             override fun getGeoItemRenderer(): WandItemRenderer {
                 if (renderer == null) renderer = WandItemRenderer()
+                return renderer!!
+            }
+        }
+        (ModItems.Plush.item as PlushItem).renderProviderHolder.value = object : GeoRenderProvider {
+            var renderer: PlushItemRenderer? = null
+            override fun getGeoItemRenderer(): PlushItemRenderer {
+                if (renderer == null) renderer = PlushItemRenderer()
                 return renderer!!
             }
         }

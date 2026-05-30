@@ -79,7 +79,10 @@ object DataGenerator {
                 log("Skipping '${path.relativeTo(generatedPath)}' (already exists in src/main)", tag = "-->")
                 return
             }
-            if (data == null) warn("JSON is null for path '$path'")
+            if (data == null) {
+                warn("JSON is null for path '$path'")
+                return
+            }
 
             log("Writing '${path.relativeTo(generatedPath)}'", tag = "...")
             fileList.add(path)

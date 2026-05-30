@@ -2,7 +2,8 @@ package com.flooferland.showbiz.models
 
 import net.minecraft.resources.*
 import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
-import com.flooferland.showbiz.items.PlushBlockItem
+import com.flooferland.showbiz.entities.PlushEntity
+import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.renderers.PlushItemRenderer
 import com.flooferland.showbiz.utils.rl
@@ -17,14 +18,15 @@ class PlushModel<T : GeoAnimatable> : GeoModel<T>() {
 
     override fun getTextureResource(animatable: T): ResourceLocation {
         val id = getPlushId(animatable) ?: return rl("textures/empty.png")
-        return id.withPrefix("textures/block/plush_").withSuffix(".png")
+        return id.withPrefix("textures/item/plush_").withSuffix(".png")
     }
 
     override fun getAnimationResource(animatable: T) = null
 
     private fun getPlushId(animatable: T) = when (animatable) {
+        is PlushEntity -> animatable.itemStack.get(ModComponents.Plush.type)?.id
         is PlushBlockEntity -> animatable.itemStack.get(ModComponents.Plush.type)?.id
-        is PlushBlockItem -> PlushItemRenderer.currentStack?.get(ModComponents.Plush.type)?.id
+        is PlushItem -> PlushItemRenderer.currentStack?.get(ModComponents.Plush.type)?.id
         else -> null
     }
 }

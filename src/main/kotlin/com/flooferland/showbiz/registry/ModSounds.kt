@@ -20,7 +20,7 @@ enum class ModSounds {
     HihatClosed("hihat_closed"),
     Cymbal("cymbal"),
     EnderEarl("ender_earl"),
-    Boop("boop")
+    Honk("honk")
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {

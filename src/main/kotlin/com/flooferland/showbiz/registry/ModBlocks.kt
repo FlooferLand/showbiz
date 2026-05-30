@@ -13,7 +13,6 @@ import com.flooferland.showbiz.blocks.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
-import com.flooferland.showbiz.items.PlushBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.utils.rl
 
@@ -151,9 +150,9 @@ enum class ModBlocks {
         Properties.of()
             .strength(0.5f)
             .sound(SoundType.WOOL)
-            .noOcclusion(),
+            .noOcclusion()
+            .dynamicShape(),
         modelPreset = BlockModelId.Custom,
-        item = ::PlushBlockItem,
         entity = Entity(::PlushBlockEntity, isGeckolib = true),
         hideFromPlayer = true
     ),
@@ -215,5 +214,5 @@ enum class ModBlocks {
     }
 
     typealias BlockItemConstructor = (ResourceLocation, Block, Item.Properties) -> BlockItem
-    data class Entity(val entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity), val isGeckolib: Boolean)
+    private data class Entity(val entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity), val isGeckolib: Boolean)
 }

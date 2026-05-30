@@ -5,8 +5,10 @@ import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.Item.*
 import com.flooferland.showbiz.components.OptionBlockPos
+import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
 import com.flooferland.showbiz.items.EnderEarl
+import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.utils.rl
@@ -27,6 +29,11 @@ enum class ModItems {
         { stacksTo(24) },
         model = ItemModelId.Generated,
         hideFromPlayer = true
+    ),
+    Plush(
+        "plush", ::PlushItem,
+        { stacksTo(1).component(ModComponents.Plush.type, PlushComponent(rl("mitzi"))) },
+        model = ItemModelId.Custom
     )
     ;
 

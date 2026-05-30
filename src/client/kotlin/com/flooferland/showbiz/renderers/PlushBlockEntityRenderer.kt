@@ -16,19 +16,8 @@ class PlushBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : GeoBl
     override fun preRender(poseStack: PoseStack, animatable: PlushBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         if (!isReRender) run {
             val level = animatable.level ?: return@run
-            val belowPos = animatable.blockPos.below()
-            val below = level.getBlockState(belowPos) ?: return@run
-            if (below.isAir) return@run
-            val belowShape = below.getShape(level, belowPos)
-
-            if (belowShape.isEmpty) return@run
-            val underShape = below.getShape(level, belowPos)
-            if (underShape.isEmpty) return@run
-            val seatHeight = underShape.toAabbs()
-                .filter { it.minX <= 0.5 && it.maxX >= 0.5 && it.minZ <= 0.5 && it.maxZ >= 0.5 }
-                .maxOfOrNull { it.maxY }
-                ?: underShape.bounds().maxY.coerceAtMost(1.0)
-            poseStack.translate(0.0, seatHeight - 1.0, 0.0)
+            val sitHeight = PlushBlock.getSittingOffset(level, animatable.blockPos)
+            poseStack.translate(0.0, sitHeight, 0.0)
         }
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
