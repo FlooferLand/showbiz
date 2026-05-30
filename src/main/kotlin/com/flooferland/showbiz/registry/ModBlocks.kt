@@ -145,17 +145,6 @@ enum class ModBlocks {
         modelPreset = BlockModelId.Custom,
         entity = Entity(::MonitorBlockEntity, isGeckolib = false),
     ),
-    Plush(
-        "plush", ::PlushBlock,
-        Properties.of()
-            .strength(0.5f)
-            .sound(SoundType.WOOL)
-            .noOcclusion()
-            .dynamicShape(),
-        modelPreset = BlockModelId.Custom,
-        entity = Entity(::PlushBlockEntity, isGeckolib = true),
-        hideFromPlayer = true
-    ),
     Cymbal(
         "cymbal", ::CymbalBlock,
         Properties.of()

@@ -104,7 +104,6 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.ShowSelector, ::ShowSelectorBlockEntityRenderer)
             add(ModBlocks.CurtainBlock, ::CurtainBlockEntityRenderer)
             add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
-            add(ModBlocks.Plush, ::PlushBlockEntityRenderer)
             add(ModBlocks.Cymbal, ::CymbalBlockEntityRenderer)
             add(ModBlocks.ReelHolder, ::ReelHolderBlockEntityRenderer)
             add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
@@ -136,7 +135,6 @@ object ShowbizClient : ClientModInitializer {
                 var renderer: GeoItemRenderer<*>? = null
                 override fun getGeoItemRenderer(): GeoItemRenderer<*> {
                     if (renderer == null) renderer = when (block) {
-                        ModBlocks.Plush -> PlushItemRenderer()
                         else -> object : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id)) {}
                     }
                     return renderer!!

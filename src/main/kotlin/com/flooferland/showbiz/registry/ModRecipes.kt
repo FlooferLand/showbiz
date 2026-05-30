@@ -164,7 +164,7 @@ enum class ModRecipes {
         ),
         id = "plush_mitzi",
         outputItem = {
-            ModBlocks.Plush.item.defaultInstance.apply {
+            ModItems.Plush.item.defaultInstance.apply {
                 set(ModComponents.Plush.type, PlushComponent(rl("mitzi")))
             }
         }
@@ -179,7 +179,7 @@ enum class ModRecipes {
         ),
         id = "plush_dook",
         outputItem = {
-            ModBlocks.Plush.item.defaultInstance.apply {
+            ModItems.Plush.item.defaultInstance.apply {
                 set(ModComponents.Plush.type, PlushComponent(rl("dook")))
             }
         }

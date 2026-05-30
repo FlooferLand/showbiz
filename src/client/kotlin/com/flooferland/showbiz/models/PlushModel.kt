@@ -1,7 +1,6 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.resources.*
-import com.flooferland.showbiz.blocks.entities.PlushBlockEntity
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.registry.ModComponents
@@ -25,7 +24,6 @@ class PlushModel<T : GeoAnimatable> : GeoModel<T>() {
 
     private fun getPlushId(animatable: T) = when (animatable) {
         is PlushEntity -> animatable.itemStack.get(ModComponents.Plush.type)?.id
-        is PlushBlockEntity -> animatable.itemStack.get(ModComponents.Plush.type)?.id
         is PlushItem -> PlushItemRenderer.currentStack?.get(ModComponents.Plush.type)?.id
         else -> null
     }

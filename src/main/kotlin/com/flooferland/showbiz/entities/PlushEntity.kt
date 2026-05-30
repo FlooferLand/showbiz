@@ -12,8 +12,8 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.items.PlushItem
-import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModEntities
+import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.getOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
@@ -106,6 +106,6 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
 
     companion object {
         val itemStackAccessor = SynchedEntityData.defineId(PlushEntity::class.java, EntityDataSerializers.ITEM_STACK)!!
-        val defaultItem = ModBlocks.Plush.item.defaultInstance!!
+        val defaultItem = ModItems.Plush.item.defaultInstance!!
     }
 }

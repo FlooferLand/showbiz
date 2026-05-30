@@ -33,7 +33,8 @@ enum class ModItems {
     Plush(
         "plush", ::PlushItem,
         { stacksTo(1).component(ModComponents.Plush.type, PlushComponent(rl("mitzi"))) },
-        model = ItemModelId.Custom
+        model = ItemModelId.Custom,
+        hideFromPlayer = true
     )
     ;
 
