@@ -15,6 +15,7 @@ rae right_elbow {
 rae head_right {
     flow ease-in 0.28
     rotate "Head" y:-25
+    wigglemul 2.0
 }
 rae head_tip_right {
     flow ease-in 0.28
@@ -31,6 +32,7 @@ rae left_elbow {
 rae head_left {
     flow ease-in 0.28
     rotate "Head" y:25
+    wigglemul 2.0
 }
 rae head_tip_left {
     flow ease-in 0.28
@@ -39,12 +41,14 @@ rae head_tip_left {
 rae head_up {
     flow ease-in 0.28
     rotate "Head" x:15
+    wigglemul 2.5
 }
 rae body_lean {
     flow 0.3
     rotate "Waist" x:10
     rotate "Right Elbow" x:-10
     rotate "Left Elbow" x:-10
+    wigglemul 2.0
 }
 rae eyes_left {
     flow 0.8

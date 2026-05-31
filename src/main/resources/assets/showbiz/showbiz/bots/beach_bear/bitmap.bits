@@ -3,6 +3,7 @@ set rae beach_bear
 rae body_lean {
     flow 0.4
     rotate "Upper Body" x:10
+    wigglemul 1.5
 }
 
 # Face
@@ -16,14 +17,17 @@ rae jaw {
 rae head_left {
     flow 0.45
     rotate "Head" y:35
+    wigglemul 2.0
 }
 rae head_right {
     flow 0.45
     rotate "Head" y:-35
+    wigglemul 2.0
 }
 rae head_up {
     flow 0.7
     rotate "Head" x:20
+    wigglemul 2.0
 }
 
 # Eyes
@@ -43,12 +47,18 @@ rae eye_cross {
 
 # Arms
 rae right_arm_raise {
-    flow 0.45
+    flow 0.4
     rotate "Right Arm" z:60
+    wigglemul 2.0
+}
+rae right_arm_twist {
+    flow 0.4
+    rotate "Right Arm" y:-65
 }
 rae right_wrist {
     flow 1.0
     rotate "Right Hand" y:-50
+    wigglemul 2.0
 }
 rae right_elbow_twist {  # Guitar strum
     flow ease-in 1.1

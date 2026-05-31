@@ -3,31 +3,37 @@ set rae rolfe
 rae body_lean {
     flow 0.3
     rotate "torso" x:-5
+    wigglemul 2.0
 }
 
 rae body_twist_left {
-    flow 0.6
+    flow 0.4
     rotate "torso" y:25
+    wigglemul 2.0
 }
 
 rae body_twist_right {
-    flow 0.6
+    flow 0.4
     rotate "torso" y:-25
+    wigglemul 2.0
 }
 
 rae head_up {
     flow 0.8
     rotate "head" x:13
+    wigglemul 2.5
 }
 
 rae head_left {
     flow 0.6
     rotate "head" y:35
+    wigglemul 2.5
 }
 
 rae head_right {
     flow 0.6
     rotate "head" y:-35
+    wigglemul 2.5
 }
 
 rae earl_head_tilt {

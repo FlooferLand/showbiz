@@ -40,7 +40,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     fun getSpringStiff() = 0.6f
     fun getSpringDamp() = 0.2f
     fun getSpringImpulse() = 0.15f
-    fun getSpringScale(data: BitMappingData) = (0.3f + data.wiggleMul.toFloat())
+    fun getSpringScale(data: BitMappingData) = 1.4f * data.wiggleMul.toFloat()
 
     var triggeredBadAnimationError = false
 
@@ -100,7 +100,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val movements = BitUtils.readBitmap(mapping)?.get(bot.getId())
 
         // Driving animation
-        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks
+        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtMost(1.25f)
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
     }
 

@@ -4,6 +4,7 @@ set faz bonnie
 any body_lean {
     flow 0.2
     rotate "torso" x:10
+    wigglemul 2.0
 }
 
 rae body_twist_left, faz body_turn_l {
@@ -19,16 +20,19 @@ rae body_twist_right, faz body_turn_r {
 any head_up {
     flow 0.5
     rotate "head" x:13
+    wigglemul 3.0
 }
 
 rae head_left {
     flow 0.15
     rotate "head" y:45
+    wigglemul 3.0
 }
 
 rae head_right {
     flow 0.15
     rotate "head" y:-45
+    wigglemul 3.0
 }
 
 rae head_tip_left {
@@ -46,11 +50,13 @@ rae head_tip_right {
 rae right_arm_raise {
     flow 0.15
     rotate "arm_r" z:110
+    wigglemul 1.5
 }
 
 rae right_arm_twist {
     flow 0.13
     rotate "arm_r" x:90
+    wigglemul 1.5
 }
 
 rae right_elbow_twist {  # guitar strum
@@ -67,6 +73,7 @@ rae left_arm_slide {
 rae right_wrist {
     flow 0.4
     rotate "hand_r" z:40
+    wigglemul 2.0
 }
 
 rae guitar_raise {

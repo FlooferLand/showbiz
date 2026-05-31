@@ -28,31 +28,37 @@ rae right_eyelid {
 rae head_left {
     flow 0.45
     rotate "head" y:30
+    wigglemul 2.0
 }
 
 rae head_right {
     flow 0.45
     rotate "head" y:-30
+    wigglemul 2.0
 }
 
 rae head_up {
     flow 0.5
     rotate "head" x:13
+    wigglemul 2.0
 }
 
 rae body_twist_left {
     flow 0.3
     rotate "chest" y:15
+    wigglemul 2.0
 }
 
 rae body_twist_right {
     flow 0.3
     rotate "chest" y:-15
+    wigglemul 2.0
 }
 
 rae body_lean {
     flow 0.3
     rotate "chest" x:-10
+    wigglemul 2.0
 }
 
 rae left_arm_twist {
