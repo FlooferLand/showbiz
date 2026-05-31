@@ -37,13 +37,10 @@ class StagedBotBlockEntityModel : BaseBotModel() {
     }
 
     // Spring properties -- methods so I can hot reload code to modify them >:)
-    fun getSpringStiff() = 0.1f
-    fun getSpringDamp() = 0.88f
-    fun getSpringImpulse() = 0.1f
-    fun getSpringScale(data: BitMappingData) = 2.0f + data.wiggleMul.toFloat()
-
-    // var reelToReel: ReelToReelBlockEntity? = null
-    // var greybox: GreyboxBlockEntity? = null
+    fun getSpringStiff() = 0.6f
+    fun getSpringDamp() = 0.2f
+    fun getSpringImpulse() = 0.15f
+    fun getSpringScale(data: BitMappingData) = (0.3f + data.wiggleMul.toFloat())
 
     var triggeredBadAnimationError = false
 
@@ -162,18 +159,15 @@ class StagedBotBlockEntityModel : BaseBotModel() {
             storage.bitSmooths[bit] = bitSmooth.let { if (it.isNaN()) 0f else it }
 
             // Spring
-            val (springVel, springOffset) = run {
-                val diff = (bitSmooth - oldSmooth)
-                var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
-                var springVel = storage.bitSpringVelocity.getOrDefault(bit, 0f)
-                springVel = (springVel + diff * getSpringImpulse() - springOffset * getSpringStiff()) * getSpringDamp()
-                springOffset += springVel * delta
-                Pair(springVel, springOffset)
-            }
+            val diff = (bitSmooth - oldSmooth)
+            var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
+            var springVel = storage.bitSpringVelocity.getOrDefault(bit, 0f)
+            val acceleration = (-getSpringStiff() * springOffset) - (getSpringDamp() * springVel)
+            springVel += acceleration * delta
+            springVel += diff * getSpringImpulse()
+            springOffset += springVel * delta
             storage.bitSpringOffset[bit] = springOffset.let { if (it.isNaN()) 0f else it }
             storage.bitSpringVelocity[bit] = springVel.let { if (it.isNaN()) 0f else it }
-
-            // TODO: Add a way to set easing per-movement in the Bitsmap format (flow 1.0 ease-in)
 
             // Easing: https://easings.net/#easeOutSine
             val eased = when (flowEase) {
@@ -191,9 +185,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
 
                 // Applying wiggle
-                var boneSizeMul = getBoneSize(bone) / 2f
-                boneSizeMul = boneSizeMul.coerceIn(0f..2f)
-                val affect = (springVel * boneSizeMul * getSpringScale(data))
+                val affect = (springOffset * getSpringScale(data))
                     .coerceIn(-2f, 2f)
                     .let { if (it.isNaN()) 0f else it }
                 bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * affect

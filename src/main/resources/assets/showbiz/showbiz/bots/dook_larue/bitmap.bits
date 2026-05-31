@@ -27,6 +27,7 @@ rae left_elbow {
 rae head_up {
     flow 0.7
     rotate "Head" x:25
+    wigglemul 2.0
 }
 rae left_foot_hihat {
     flow 1.2
@@ -50,10 +51,12 @@ rae body_lean {
 rae right_ear {
     flow 0.8
     rotate "EarR" z:50
+    wigglemul 3.0
 }
 rae left_ear {
     flow 0.8
     rotate "EarL" z:-50
+    wigglemul 3.0
 }
 rae eyes_left {
     flow 1.2
