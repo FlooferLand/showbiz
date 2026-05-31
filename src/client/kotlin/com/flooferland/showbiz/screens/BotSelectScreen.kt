@@ -63,6 +63,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         searchBar.setResponder { name ->
             searchText = name;
             botListWidget.setBots(bots.filter { botFilter(it) }) { botSelected(it) }
+            botListWidget.scrollAmount = 0.0
         }
         searchBar.isFocused = true
         searchBar.setCanLoseFocus(true)
