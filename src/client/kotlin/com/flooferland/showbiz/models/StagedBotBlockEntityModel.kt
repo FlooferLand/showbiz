@@ -12,6 +12,7 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
 import software.bernie.geckolib.animatable.GeoAnimatable
@@ -46,39 +47,38 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
     var triggeredBadAnimationError = false
 
-    fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
-        val id = if (bitOn)
-            anim.on ?: "${anim.id}.on"
-        else
-            anim.off ?: "${anim.id}.off"
-        return "animation.${animatable.botId?.path}.${id}"
-    }
-
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
-        val bot = ShowbizClient.bots[animatable.botId] ?: return
-        val model = currentModel ?: return
-
-        // Resetting bones
-        val instanceCache = animatable.getAnimatableInstanceCache()
-        val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
-        for ((boneName, initMove) in model.initBoneMoves) {
-            val bone = animationProcessor.getBone(boneName) ?: continue
-            bone.posX = initMove.x
-            bone.posY = initMove.y
-            bone.posZ = initMove.z
-        }
-        for ((boneName, initRot) in model.initBoneRots) {
-            val bone = animationProcessor.getBone(boneName) ?: continue
-            bone.rotX = initRot.x
-            bone.rotY = initRot.y
-            bone.rotZ = initRot.z
-        }
+        val bot = ShowbizClient.bots[animatable.botId] ?: run { resetAll(); return }
+        val model = currentModel ?:  run { resetAll(); return }
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
         val mapping = animatable.show.data.mapping
-        if (mapping.isNullOrBlank()) return
-        val bitmapBits = bot.bitmap.bits[mapping] ?: return
+        if (mapping.isNullOrBlank()) run { resetAll(); return }
+        val bitmapBits = bot.bitmap.bits[mapping] ?:  run { resetAll(); return }
+
+        // Resetting bones
+        val instanceCache = animatable.getAnimatableInstanceCache()
+        val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
+        for ((_, data) in bitmapBits) {
+            for (rotate in data.rotates) {
+                val bone = animationProcessor.getBone(rotate.bone) ?: continue
+                val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
+                bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
+            }
+            for (move in data.moves) {
+                val bone = animationProcessor.getBone(move.bone) ?: continue
+                val initMove = model.initBoneMoves[bone.name] ?: Vec3fc()
+                bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
+            }
+            if (!animatable.show.data.playing) {
+                for (anim in data.anim) {
+                    animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
+                    animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
+                }
+                animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
+            }
+        }
 
         // Resetting animations
         if (!animatable.show.data.playing) {
@@ -239,6 +239,26 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val soundEvent = SoundEvent.createVariableRangeEvent(sound)
         val level = animatable.level as? ClientLevel ?: return
         level.playSound(ClientUtil.getClientPlayer(), animatable.blockPos, soundEvent, SoundSource.BLOCKS, 0.5f, 1.0f)
+    }
+
+    fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
+        val id = if (bitOn)
+            anim.on ?: "${anim.id}.on"
+        else
+            anim.off ?: "${anim.id}.off"
+        return "animation.${animatable.botId?.path}.${id}"
+    }
+
+    fun resetAll() {
+        val model = currentModel ?: return
+        for ((name, initMove) in model.initBoneMoves) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
+        }
+        for ((name, initRot) in model.initBoneRots) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
+        }
     }
 
     /** Gets how large a bone is based off cubes */
