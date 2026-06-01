@@ -5,6 +5,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
@@ -57,10 +58,11 @@ object FFmpeg {
     init { init() }
 
     fun init() {
-        if (mainFile != null) return
-        mainFile = findFile("ffmpeg") ?: run { setError("Failed to find FFmpeg executable"); return }
-        probeFile = findFile("ffprobe") ?: run { setError("Failed to find FFprobe executable"); return }
-        Showbiz.log.info("FFmpeg found at '${mainFile?.absolutePath}'")
+        if (mainFile != null && probeFile != null) return
+        mainFile = findFile("ffmpeg") ?: run { setError("Failed to find FFmpeg executable"); return@run null }
+        probeFile = findFile("ffprobe") ?: run { setError("Failed to find FFprobe executable"); return@run null }
+        Showbiz.log.info("FFmpeg: '${mainFile?.absolutePath}'")
+        Showbiz.log.info("FFprobe: '${probeFile?.absolutePath}'")
     }
 
     fun getLastError() = error
@@ -82,7 +84,7 @@ object FFmpeg {
                 "-ac", settings.audio.channels.toString(),
                 "-ar", settings.audio.sampleRate.toString(),
                 tempOut.absolutePath
-            ).start()
+            ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
 
             val exitCode = process.onExit().await().exitValue()
             if (exitCode != 0) {
@@ -90,8 +92,7 @@ object FFmpeg {
                 setError("Encode failed (exitCode=${exitCode}):\n${errorLog}")
                 return@withContext null
             }
-
-            tempOut.readBytes()
+            return@withContext tempOut.readBytes()
         } catch (e: Exception) {
             setError("Failed during encode: $e")
             null
@@ -143,6 +144,7 @@ object FFmpeg {
         Showbiz.log.error("FFmpeg error: $text")
     }
 
+    // TODO: Get path from '(Get-Command ffmpeg).Source' if PowerShell is installed as a backup in case FFmpeg isn't found in the path
     private fun findFile(name: String): File? {
         val isWindows = System.getProperty("os.name").contains("win", ignoreCase = true)
         val binaryName = if (isWindows) "$name.exe" else name
@@ -150,11 +152,30 @@ object FFmpeg {
         val pathEnv = System.getenv("PATH") ?: return null
         val pathSep = if (isWindows) ";" else ":"
 
-        return pathEnv.split(pathSep)
+        val foundInPath = pathEnv.split(pathSep)
             .asSequence()
             .filter { it.isNotEmpty() }
             .map { Paths.get(it).resolve(binaryName) }
             .firstOrNull { Files.isRegularFile(it) && Files.isExecutable(it) }
             ?.toFile()
+        if (foundInPath != null) {
+            Showbiz.log.info("$name found at path: '${foundInPath}'")
+            return foundInPath
+        }
+        Showbiz.log.warn("$name wasn't found in the path.. Searching elsewhere")
+
+        if (isWindows) {
+            val process = ProcessBuilder("powershell", "-c", "(Get-Command $name).Source")
+                .redirectError(ProcessBuilder.Redirect.DISCARD)
+                .start()
+            val output = process.inputStream.bufferedReader().readText().trim()
+            process.waitFor(3, TimeUnit.SECONDS)
+            if (output.isNotEmpty()) {
+                Showbiz.log.info("$name found through PowerShell (output='$output')")
+                return Paths.get(output).toFile()
+            }
+            Showbiz.log.warn("$name wasn't found through PowerShell (output='$output')")
+        }
+        return null
     }
 }

@@ -47,6 +47,13 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
             addRenderableWidget(input)
             inputs.add(input)
         }
+        inputs.lastOrNull()?.let { lastInput ->
+            val clearButton = Button.builder(Component.literal("Clear all")) {
+                inputs.forEach { it.values.clearCharts() }
+                Minecraft.getInstance().setScreen(null)
+            }.pos(lastInput.x, lastInput.bottom + 15).size(lastInput.width, 20).build()
+            addRenderableWidget(clearButton)
+        }
     }
 
     override fun onClose() {

@@ -14,6 +14,7 @@ import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
+import com.flooferland.showbiz.utils.Sounds
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
@@ -24,6 +25,7 @@ import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.io.path.Path
 import kotlin.io.path.div
@@ -49,6 +51,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var name: String? = null
     var format: AudioFormat? = null
     var mapping: String? = null
+    var loadJob: Job? = null
 
     val targetFormat = AudioFormat(
         44100f,
@@ -82,7 +85,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
         Showbiz.log.debug("Loading tape '${name}' ($mapping)")
 
-        val coro = CoroutineScope(Dispatchers.IO).launch {
+        loadJob = CoroutineScope(Dispatchers.IO).launch {
             val path = getFilePath(filename)
             val loaded = run {
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
@@ -133,7 +136,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 result.join()
             }
         }
-        coro.invokeOnCompletion { err ->
+        loadJob?.invokeOnCompletion { err ->
             loading = false
             isLoaded = audio.isNotEmpty() || err == null
             if (isLoaded) {
@@ -184,6 +187,13 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             for (bitId in array) signalInt[i++] = bitId.toInt()
             signalInt[i++] = 0
         }
+        if (signalInt.isEmpty()) {
+            toNotify?.let { Sounds.bad(it) }
+            val message = "Failed to save show '$filename' (signal=0)"
+            toNotify?.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.RED), true)
+            Showbiz.log.info(message)
+            return
+        }
 
         // Audio
         val audio = run {
@@ -216,6 +226,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     /** Frees / deletes and resets everything regarding the show data */
     fun unload(toNotify: Player? = null) {
         if (owner.recording && !(owner.level?.isClientSide ?: true)) saveToDisk(toNotify)
+        loadJob?.cancel()
+        loadJob = null
         owner.recording = false
         signal.clear()
         audio = ByteArray(0)

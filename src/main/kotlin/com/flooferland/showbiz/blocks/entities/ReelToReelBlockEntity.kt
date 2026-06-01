@@ -115,17 +115,17 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 val newFrame = BitIdArray(mergedBits.size)
                 mergedBits.forEachIndexed { i, bit -> newFrame[i] = bit }
 
-                // Extending the show file if the player keeps recording
-                if (seekInt >= showData.signal.size) {
-                    for (i in showData.signal.size..seekInt) {
-                        showData.signal.add(bitIdArrayOf())
+                if (recording) {
+                    // Extending the show file if the player keeps recording
+                    if (seekInt >= showData.signal.size) {
+                        for (i in showData.signal.size..seekInt) {
+                            showData.signal.add(bitIdArrayOf())
+                        }
                     }
+                    // Writing to the show
+                    showData.signal[seekInt] = newFrame
                 }
-
-                // Writing to the show
-                if (recording) showData.signal[seekInt] = newFrame
                 recordQueue.clear()
-
                 signal.set(newFrame)
             } else {
                 signal.set(frame)
@@ -226,9 +226,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun resetPlayback() {
         seek = 0.0
+        seekInt = 0
         audioBytesWritten = 0
         audio.data.chunkId = 0
         if (playing) setPlaying(false)
+        recordQueue.clear()
         hasFinished = false
         signal.reset()
         lastVideoFrameIndex = 0
@@ -258,6 +260,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 showData.saveToDisk(player)
                 Sounds.exit(player)
             } else if (playing) {
+                if (show.readListeners().none { level.getBlockEntity(it) is ProgrammerBlockEntity }) {
+                    player.displayClientMessage(Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW), true)
+                }
                 recording = true
                 Sounds.enter(player)
             } else {
