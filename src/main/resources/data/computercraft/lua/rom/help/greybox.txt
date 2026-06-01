@@ -1,0 +1,14 @@
+A Showbiz peripheral that can control bots, among other things
+
+setBits(array)
+	Sets the bits for the current tick.
+	Can be set to an empty table to clear the bits
+
+hasBit(int) -> bool
+	Checks if a bit is in the current tick's bits
+
+setMapping(string)
+	Sets the mapping / bit chart ID (ex: "rae", "faz")
+
+getRegisteredMappings() -> array[string]
+	Sets the mapping / bit chart ID (ex: "rae", "faz")

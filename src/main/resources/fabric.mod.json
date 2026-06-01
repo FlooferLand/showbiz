@@ -43,6 +43,7 @@
         "fabric-api": "^$fabric_api"
     },
     "suggests": {
-        "veil": ">=$veil"
+        "veil": ">=$veil",
+        "computercraft": ">=$cctweaked"
     }
 }

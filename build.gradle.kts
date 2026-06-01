@@ -43,6 +43,7 @@ repositories {
     maven("https://www.jitpack.io") { name = "Jitpack" }
     maven("https://maven.terraformersmc.com/") { name = "Terraformers" }
     maven("https://maven.blamejared.com") { name = "BlameJared Maven (CrT / Bookshelf)" }
+    maven("https://maven.squiddev.cc") { content { includeGroup("cc.tweaked") } }
 
     exclusiveContent {
         forRepository {
@@ -95,6 +96,10 @@ dependencies {
         exclude(group="maven.modrinth")
         exclude(group="me.fallenbreath")
     }
+
+    // CC Tweaked
+    modCompileOnly("cc.tweaked:cc-tweaked-$minecraft-$loader-api:${dep("cctweaked")}")
+    modRuntimeOnly("cc.tweaked:cc-tweaked-$minecraft-$loader:${dep("cctweaked")}")
 
     // Modmenu
     modApi("com.terraformersmc:modmenu:${dep("modmenu")}")
@@ -177,8 +182,9 @@ tasks.withType<ProcessResources>().configureEach {
         "fabric_loader" to dep("fabric_loader"),
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),
-        "veil" to dep("veil"),
         "geckolib" to dep("geckolib"),
+        "veil" to dep("veil"),
+        "cctweaked" to dep("cctweaked"),
         "archivesName" to modId,
         "archivesBaseName" to modId
     )

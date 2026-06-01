@@ -66,6 +66,7 @@ object Showbiz : ModInitializer {
             ModPlayerSynchedData
             ModCommands
             ModScreenHandlers
+            ModPeripherals.register()
             ServerConnections
             FileStorage
             FileServer
