@@ -82,7 +82,7 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
         refreshDimensions()
         setPos(targetPos)
 
-        val boxCollisions = level.getEntitiesOfClass(CollidePartEntity::class.java, boundingBox).filter { it != this }
+        val boxCollisions = level.getEntities(this, boundingBox).filter { it != this }
         colliding += boxCollisions.filter { it.position() != position() }  // Filter prevents a weird bug triggering all of them at once upon join
         used.removeIf { it !in colliding }
 
