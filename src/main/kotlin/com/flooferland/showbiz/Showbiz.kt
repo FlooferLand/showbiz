@@ -15,6 +15,7 @@ import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
+import com.flooferland.showbiz.utils.ShowbizUtils
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ModInitializer
@@ -66,7 +67,7 @@ object Showbiz : ModInitializer {
             ModPlayerSynchedData
             ModCommands
             ModScreenHandlers
-            ModPeripherals.register()
+            if (ShowbizUtils.hasComputerCraft()) run { ModPeripherals.register() }
             ServerConnections
             FileStorage
             FileServer

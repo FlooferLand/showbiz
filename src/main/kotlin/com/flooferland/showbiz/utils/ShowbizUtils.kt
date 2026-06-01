@@ -17,6 +17,7 @@ object ShowbizUtils {
         else -> false
     }
     fun clientHasVeil() = FabricLoader.getInstance()?.getModContainer("veil")?.isPresent == true
+    fun hasComputerCraft() = FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
     fun loadBakedModel(location: ResourceLocation, json: String) = runCatching {
         val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
         val geo = GeometryTree.fromModel(model)
