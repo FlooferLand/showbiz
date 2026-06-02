@@ -18,7 +18,9 @@ enum class ModSounds {
     ReelExit("reel_exit"),
     ReelPlay("reel_play"),
     HihatClosed("hihat_closed"),
+    HihatOpen("hihat_open"),
     Cymbal("cymbal"),
+    Snare("snare"),
     EnderEarl("ender_earl"),
     Honk("honk")
     ;

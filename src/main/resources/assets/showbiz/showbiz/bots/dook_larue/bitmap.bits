@@ -17,12 +17,14 @@ rae right_foot_bass_drum {
     rotate "Right Foot" x:-15
 }
 rae right_elbow {
-    flow 2.0
-    rotate "RightElbow" x:-47.5
+    flow ease-in 1.9
+    rotate "RightElbow" x:-47
+    wigglemul 0.3
 }
 rae left_elbow {
-    flow 2.0
-    rotate "LeftElbow" x:-47.5
+    flow ease-in 1.9
+    rotate "LeftElbow" x:-47
+    wigglemul 0.3
 }
 rae head_up {
     flow 0.7
@@ -37,16 +39,19 @@ rae left_foot_hihat {
 rae head_right {
     flow ease-in 0.28
     rotate "Head" y:-40
+    wigglemul 2.0
 }
 rae head_left {
     flow ease-in 0.28
     rotate "Head" y:40
+    wigglemul 2.0
 }
 rae body_lean {
     flow 0.3
     rotate "Waist" x:10
     rotate "RightElbow" x:-10
     rotate "LeftElbow" x:-10
+    wigglemul 2.0
 }
 rae right_ear {
     flow 0.8

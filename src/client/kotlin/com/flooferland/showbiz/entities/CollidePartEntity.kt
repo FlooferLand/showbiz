@@ -10,8 +10,11 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import java.util.concurrent.atomic.AtomicInteger
@@ -33,7 +36,7 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
     override fun canCollideWith(entity: Entity) = (entity is CollidePartEntity) || (entity is Player)
     override fun canBeHitByProjectile() = true
     override fun getDimensions(pose: Pose): EntityDimensions =
-        targetSize.let { EntityDimensions.fixed(it.x.toFloat(), it.y.toFloat()) }
+        targetSize.let { EntityDimensions.fixed(it.x.toFloat().coerceAtLeast(0.1f), it.y.toFloat().coerceAtLeast(0.1f)) }
 
     val colliding = mutableSetOf<Entity>()
     val used = mutableSetOf<Entity>()
@@ -87,20 +90,38 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
         used.removeIf { it !in colliding }
 
         val newCollisions = colliding.filter { it !in used }
-        if (newCollisions.isNotEmpty()) run {
+        if (newCollisions.isNotEmpty() && Showbiz.config.audio.playBotEffects) run {
             val hitter = newCollisions.first()
             val hitDir = calculateHitDirection(hitter)
-            if (partId == CollidePartId.Cymbal) {
+            val (downHitVolume, downHitPitch) = run {
                 val forceV = abs(hitDir.y.toFloat())
                 val forceH = hitDir.horizontalDistance().toFloat()
                 val force = forceH + (forceV * 4f)
                 val strength = force * if (hitDir.y.toFloat() < 0.0f) 1.5f else 0.2f
-                if (strength < 0.1f) return@run
+                if (strength < 0.1f) return@run Pair(0f, 0f)
                 val hitFreq = ((tickCount - lastHitTime) / 8f).coerceIn(0.1f, 1.0f)
                 val volume = (hitFreq * strength * 1.5f).coerceIn(0.05f, 1.0f)
-                val pitch = 1f + (level.random.nextFloat() - level.random.nextFloat()) * 0.02f
-                level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, volume, pitch, false)
-                used += newCollisions
+                val pitch = 1f + (level.random.nextFloat() - level.random.nextFloat()) * 0.05f
+                Pair(volume, pitch)
+            }
+            when (partId) {
+                CollidePartId.Cymbal -> {
+                    level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                    used += newCollisions
+                }
+                CollidePartId.Snare -> {
+                    level.playLocalSound(x, y, z, ModSounds.Snare.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                    used += newCollisions
+                }
+                CollidePartId.HiHat -> {
+                    val closed = owner is StagedBotBlockEntity
+                            && owner.show.data.mapping == BitChartStore.RAE_ID
+                            && owner.show.data.signal.frameHas(32) // Dook High Hat Close
+                    val sound = if (closed) ModSounds.HihatClosed else ModSounds.HihatOpen
+                    level.playLocalSound(x, y, z, sound.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                    used += newCollisions
+                }
+                else -> {}
             }
 
             lastHitTime = tickCount

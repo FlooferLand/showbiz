@@ -4,6 +4,10 @@ package com.flooferland.showbiz.types.collidepart
 enum class CollidePartId {
     None,
     Player,
-    RolfeStick,
-    Cymbal
+    Stick,
+    LeftStick,
+    RightStick,
+    Snare,
+    Cymbal,
+    HiHat
 }

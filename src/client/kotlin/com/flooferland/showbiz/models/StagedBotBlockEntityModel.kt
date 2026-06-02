@@ -10,11 +10,18 @@ import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
+import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.models.CymbalModel.Companion.updateAnimation
+import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
+import com.flooferland.showbiz.models.CymbalModel.CymbalState
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.types.ClientCollidePartInstance
+import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
+import java.util.WeakHashMap
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimatableManager
@@ -28,12 +35,12 @@ import kotlin.math.sin
 
 /** Responsible for fancy animation */
 class StagedBotBlockEntityModel : BaseBotModel() {
-    // TODO: Remove instance IDs when bots are removed (memory leak)
-    val localStorage = mutableMapOf<Long, LocalBotStorage>()
+    val localStorage = WeakHashMap<StagedBotBlockEntity, LocalBotStorage>()
     class LocalBotStorage {
         val bitSmooths = mutableMapOf<BitId, Float>()
         val bitSpringOffset = mutableMapOf<BitId, Float>()
         val bitSpringVelocity = mutableMapOf<BitId, Float>()
+        val cymbalStates = mutableMapOf<String, CymbalState>()
     }
 
     // Spring properties -- methods so I can hot reload code to modify them >:)
@@ -46,13 +53,13 @@ class StagedBotBlockEntityModel : BaseBotModel() {
 
     override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: run { resetAll(); return }
-        val model = currentModel ?:  run { resetAll(); return }
+        val model = currentModel ?: run { resetAll(); return }
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
         val mapping = animatable.show.data.mapping
-        if (mapping.isNullOrBlank()) run { resetAll(); return }
-        val bitmapBits = bot.bitmap.bits[mapping] ?:  run { resetAll(); return }
+        val bitmapBits = bot.bitmap.bits[mapping] ?: mutableMapOf()
+        if (bitmapBits.isEmpty()) resetAll()
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -89,19 +96,29 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         }
 
         // Getting bot storage & show playing guard
-        val storage = if (animatable.show.data.playing) {
-            localStorage.getOrPut(instanceId) { LocalBotStorage() }
-        } else {
-            localStorage.remove(instanceId)
-            return
-        }
+        val storage = localStorage.getOrPut(animatable) { LocalBotStorage() }
 
         // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
-        val movements = BitUtils.readBitmap(mapping)?.get(bot.getId())
+        val movements = mapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
 
         // Driving animation
         val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtMost(1.25f)
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
+        driveCollideParts(animatable, model, storage, state.partialTick)
+    }
+
+    private fun driveCollideParts(animatable: StagedBotBlockEntity, model: BotModelData, storage: LocalBotStorage, partialTick: Float) {
+        val instance = animatable.collidePartInstance.clientInstance as? ClientCollidePartInstance ?: return
+        animationProcessor.getBone("Cymbal")?.let { bone ->
+            val state = storage.cymbalStates.getOrPut(bone.name) { CymbalState() }
+            val entity = instance.spawned.values.firstOrNull { it.partId == CollidePartId.Cymbal } ?: return@let
+            if (entity.lastHitTime != state.lastHitTime) updateState(animatable, entity, state)
+            updateAnimation(bone, entity, state, partialTick)
+        }
+        animationProcessor.getBone("Snare")?.let { bone ->
+            val entity = instance.spawned.values.firstOrNull { it.partId == CollidePartId.Snare } ?: return@let
+            bone.posY = if (entity.used.isNotEmpty()) -0.1f else 0f
+        }
     }
 
     // TODO: Make this function not a mess

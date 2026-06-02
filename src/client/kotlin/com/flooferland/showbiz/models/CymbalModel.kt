@@ -1,7 +1,11 @@
 package com.flooferland.showbiz.models
 
+import net.minecraft.core.*
+import net.minecraft.world.level.block.entity.*
+import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.CymbalBlockEntity
+import com.flooferland.showbiz.entities.CollidePartEntity
 import com.flooferland.showbiz.types.ClientCollidePartInstance
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.math.Vec3f
@@ -9,7 +13,9 @@ import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.rl
 import java.util.WeakHashMap
 import software.bernie.geckolib.animation.AnimationState
+import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -25,29 +31,36 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
         cymbal.updateRotation(0f, 0f, 0f)
 
         val state = states.getOrPut(animatable) { CymbalState() }
-        if (entity.lastHitTime != state.lastHitTime) {
+        if (entity.lastHitTime != state.lastHitTime) updateState(animatable, entity, state)
+        updateAnimation(cymbal, entity, state, animState.partialTick)
+        states[animatable] = state
+    }
+
+    companion object {
+        fun updateState(animatable: BlockEntity, entity: CollidePartEntity, state: CymbalState) {
             state.lastHitTime = entity.lastHitTime
 
             val length = sqrt(entity.hitDirection.x * entity.hitDirection.x + entity.hitDirection.z * entity.hitDirection.z)
             val nx = if (length > 0f) entity.hitDirection.x / length else 1.0
             val nz = if (length > 0f) entity.hitDirection.z / length else 0.0
 
-            val facing = animatable.blockState.getValue(FacingEntityBlock.FACING)
-            val (sx, sz) = Pair(facing.stepX.toDouble(), facing.stepZ.toDouble())
+            val normal = animatable.blockState.getOptionalValue(FacingEntityBlock.FACING).getOrNull()?.normal
+                ?: animatable.blockState.getOptionalValue(StagedBotBlock.facing).getOrNull()?.normal
+                ?: Vec3i.ZERO
+            val (sx, sz) = Pair(normal.x.toDouble(), normal.z.toDouble())
             state.force.x = (nx * sz - nz * sx).toFloat()
             state.force.z = (nx * sx + nz * sz).toFloat()
         }
-
-        val ticks = entity.tickCount + animState.partialTick
-        val timeSinceHit = ticks - state.lastHitTime
-        val duration = (2.3).secsToTicks().toDouble()
-        if (timeSinceHit in 0.0..duration) {
-            val decay = (duration - timeSinceHit) / duration
-            val wobble = sin(timeSinceHit) * 0.4f * decay
-            cymbal.rotX += wobble.toFloat() * state.force.z
-            cymbal.rotZ += wobble.toFloat() * -state.force.x
+        fun updateAnimation(bone: GeoBone, entity: CollidePartEntity, state: CymbalState, partialTick: Float) {
+            val ticks = entity.tickCount + partialTick
+            val timeSinceHit = ticks - state.lastHitTime
+            val duration = (2.3).secsToTicks().toDouble()
+            if (timeSinceHit in 0.0..duration) {
+                val decay = (duration - timeSinceHit) / duration
+                val wobble = sin(timeSinceHit) * 0.4f * decay
+                bone.rotX += wobble.toFloat() * state.force.z
+                bone.rotZ += wobble.toFloat() * -state.force.x
+            }
         }
-
-        states[animatable] = state
     }
 }
