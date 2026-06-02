@@ -51,6 +51,8 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
                 map("RightStickCollision", CollidePartId.RightStick)
                 map("HiHatCollision", CollidePartId.HiHat)
                 map("CymbalCollision", CollidePartId.Cymbal)
+                map("KickFootCollision", CollidePartId.KickFoot)
+                map("Kick", CollidePartId.Kick)
                 map("Snare", CollidePartId.Snare)
             }
         }

@@ -13,7 +13,7 @@ rae left_arm_swing {
     rotate "Left Arm" y:30
 }
 rae right_foot_bass_drum {
-    flow 1.2
+    flow 1.7
     rotate "Right Foot" x:-15
 }
 rae right_elbow {

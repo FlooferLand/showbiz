@@ -7,6 +7,8 @@ enum class CollidePartId {
     Stick,
     LeftStick,
     RightStick,
+    Kick,
+    KickFoot,
     Snare,
     Cymbal,
     HiHat

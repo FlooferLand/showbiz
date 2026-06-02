@@ -21,6 +21,7 @@ enum class ModSounds {
     HihatOpen("hihat_open"),
     Cymbal("cymbal"),
     Snare("snare"),
+    Kick("kick"),
     EnderEarl("ender_earl"),
     Honk("honk")
     ;

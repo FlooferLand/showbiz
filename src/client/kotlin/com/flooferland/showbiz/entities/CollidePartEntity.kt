@@ -113,6 +113,10 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
                     level.playLocalSound(x, y, z, ModSounds.Snare.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
                     used += newCollisions
                 }
+                CollidePartId.Kick -> {
+                    level.playLocalSound(x, y, z, ModSounds.Kick.event, SoundSource.BLOCKS, downHitVolume * 0.8f, downHitPitch, false)
+                    used += newCollisions
+                }
                 CollidePartId.HiHat -> {
                     val closed = owner is StagedBotBlockEntity
                             && owner.show.data.mapping == BitChartStore.RAE_ID
