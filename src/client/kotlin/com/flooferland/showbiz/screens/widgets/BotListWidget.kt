@@ -14,7 +14,8 @@ import kotlin.math.roundToInt
 
 /** Lists bots mainly for [com.flooferland.showbiz.screens.BotSelectScreen] (or anything that requires a bot selection list) */
 class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSelectionList<BotListWidget.BotEntry>(Minecraft.getInstance(), width, height, y, 18) {
-    var hiddenCategories = mutableSetOf<String>()
+    var visibleCategories = mutableSetOf<String>()
+    var onHover: (ResourceId) -> Unit = {}
 
     init {
         setPosition(x, y)
@@ -36,27 +37,39 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
         clearEntries()
 
         val grouped = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }
+        if (grouped.keys.size <= 2) visibleCategories = grouped.keys.toMutableSet()
         grouped.forEach { (namespace, entries) ->
             val category = BotEntry(category = namespace) {
-                if (namespace !in hiddenCategories) {
-                    hiddenCategories.add(namespace)
+                if (namespace !in visibleCategories) {
+                    visibleCategories.add(namespace)
                 } else {
-                    hiddenCategories.remove(namespace)
+                    visibleCategories.remove(namespace)
                 }
                 setBots(bots, click)
             }
             addEntry(category)
-            if (namespace !in hiddenCategories) entries.forEach { (botId, bot) ->
+            if (namespace in visibleCategories) entries.forEach { (botId, bot) ->
                 if (botId.toString() == "showbiz:conner") return@forEach
-                addEntry(BotEntry(bot = bot) { click(botId) })
+                addEntry(BotEntry(botId, bot) { click(botId) })
             }
         }
     }
 
-    inner class BotEntry(val bot: AddonBotEntry? = null, val category: String? = null, val click: (BotEntry) -> Unit) : Entry<BotEntry>() {
+    inner class BotEntry(val botId: ResourceId? = null, val bot: AddonBotEntry? = null, val category: String? = null, val click: (BotEntry) -> Unit) : Entry<BotEntry>() {
         val name = bot?.name
         val authorString = bot?.authors?.joinToString(", ")
-        val button = Button.builder(Component.literal(name ?: "")) { click(this) }.size(width - 70, itemHeight)
+        val nameComp = run {
+            val comp = Component.empty()!!
+            var insideParen = false
+            for (char in name ?: "") {
+                if (char == '(') insideParen = true
+                val color = if (insideParen) 0xFFDDDDDD.toInt() else 0xFFFFFFFF.toInt()
+                comp.append(Component.literal(char.toString()).withColor(color))
+                if (char == ')') insideParen = false
+            }
+            comp
+        }
+        val button = Button.builder(nameComp) { click(this) }.size(width - 70, itemHeight)
             .tooltip(Tooltip.create(Component.literal("By $authorString")))
             .build()!!
 
@@ -65,7 +78,6 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
             // Category
             category?.let { category ->
-                val comp = Component.literal(category).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)
                 val pad = 4
                 val rect = Rect2i(
                     left + (width - button.width) / 2,
@@ -79,13 +91,19 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
                 val outlineColor = if (hovered) 0xAAFFFFFF.toInt() else 0x88000000.toInt()
                 guiGraphics.renderOutline(rect.x, rect.y, rect.width, rect.height, outlineColor)
+
+                val compColor = if (category in visibleCategories) ChatFormatting.WHITE else ChatFormatting.GRAY
+                val comp = Component.literal(category).withStyle(compColor, ChatFormatting.BOLD)
                 guiGraphics.drawCenteredString(font, comp, left + (width / 2), top + (height / 2), 0xfff)
             }
 
             // Bot / category button
             button.x = left + (width - button.width) / 2
             button.y = top
-            if (bot != null) button.render(guiGraphics, mouseX, mouseY, partialTick)
+            if (bot != null && botId != null) {
+                button.render(guiGraphics, mouseX, mouseY, partialTick)
+                if (button.isHoveredOrFocused) onHover(botId)
+            }
 
             // Bot supported formats
             runCatching {

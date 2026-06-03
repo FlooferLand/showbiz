@@ -14,6 +14,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.IBotSoundHandler
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
@@ -30,14 +31,14 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, ExtendedScreenHandlerFactory<BotListSelectPacket>, ICollidePartInteractable {
+class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, IBot, ExtendedScreenHandlerFactory<BotListSelectPacket>, ICollidePartInteractable {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
         pendingShow.merge(received)
     }
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
-    var botId: ResourceId? = null
+    override var botId: ResourceId? = null
 
     override val collidePartInstance = CollidePartManager.create(this) {
         val botId = botId ?: return@create

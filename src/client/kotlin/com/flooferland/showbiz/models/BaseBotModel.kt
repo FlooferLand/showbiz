@@ -4,9 +4,10 @@ import net.minecraft.client.*
 import net.minecraft.resources.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
+import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.model.GeoModel
@@ -14,7 +15,7 @@ import software.bernie.geckolib.model.GeoModel
 /**
  * Handles lower-level stuff, separated so it doesn't bloat up the main model file.
  */
-open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
+open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     protected var currentModel: BotModelData? = null
 
     enum class Error {
@@ -29,13 +30,13 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
             this.context = context
             return this
         }
-        fun withBot(animatable: StagedBotBlockEntity): Error {
+        fun withBot(animatable: IBot): Error {
             this.botId = animatable.botId.toString()
             return this
         }
     }
 
-    override fun getModelResource(animatable: StagedBotBlockEntity): ResourceLocation {
+    override fun getModelResource(animatable: T): ResourceLocation {
         val botId = animatable.botId ?: return emptyModel
         val bot = ShowbizClient.bots[botId] ?: run {
             errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
@@ -46,7 +47,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
         return bot.getDefaultModel()
     }
 
-    override fun getTextureResource(animatable: StagedBotBlockEntity): ResourceLocation {
+    override fun getTextureResource(animatable: T): ResourceLocation {
         val botId = animatable.botId ?: return emptyTexture
         val bot = ShowbizClient.bots[botId] ?: run {
             errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
@@ -58,7 +59,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
     }
 
     // TODO: QUICK: Make this cache the animation based on the bot ID, loading the cached version if cached
-    override fun getAnimationResource(animatable: StagedBotBlockEntity): ResourceLocation? {
+    override fun getAnimationResource(animatable: T): ResourceLocation? {
         val botId = animatable.botId ?: return null
         ShowbizClient.bots[botId]?.let { bot ->
             bot.animations?.let { anims -> return anims }
@@ -66,7 +67,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
         return null
     }
 
-    fun hasGlowTexture(animatable: StagedBotBlockEntity): Boolean {
+    public fun hasGlowTexture(animatable: T): Boolean {
         val texture = getTextureResource(animatable)
         val glowTexture = rlCustom(
             texture.namespace,
@@ -93,7 +94,7 @@ open class BaseBotModel : GeoModel<StagedBotBlockEntity>() {
         return model.bakedModel
     }
 
-    override fun getAnimation(animatable: StagedBotBlockEntity, name: String): Animation? {
+    override fun getAnimation(animatable: T, name: String): Animation? {
         val res = getAnimationResource(animatable) ?: run {
             errorsTriggered.add(Error.MissingAnimation.withContext("Couldn't find animation file for animation '$name'"))
             null

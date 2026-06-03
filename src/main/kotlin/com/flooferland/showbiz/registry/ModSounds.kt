@@ -23,6 +23,7 @@ enum class ModSounds {
     Snare("snare"),
     Kick("kick"),
     EnderEarl("ender_earl"),
+    Boop("boop"),
     Honk("honk")
     ;
 

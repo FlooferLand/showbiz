@@ -33,7 +33,7 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 /** Responsible for fancy animation */
-class StagedBotBlockEntityModel : BaseBotModel() {
+class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
     val localStorage = WeakHashMap<StagedBotBlockEntity, LocalBotStorage>()
     class LocalBotStorage {
         val bitSmooths = mutableMapOf<BitId, Float>()

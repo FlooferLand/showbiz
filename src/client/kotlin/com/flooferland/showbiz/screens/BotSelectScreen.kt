@@ -14,6 +14,7 @@ import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.screens.widgets.BotListWidget
+import com.flooferland.showbiz.screens.widgets.BotPreviewWidget
 import com.flooferland.showbiz.types.ResourceId
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import org.lwjgl.glfw.GLFW
@@ -42,13 +43,20 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
 
     fun refresh() {
         clearWidgets()
-        val maxWidth = (width * 0.8).toInt()
-        val maxHeight = (height * 0.8).toInt()
+        val searchBarHeight = 20
+        val maxWidth = (width * 0.9).toInt()
+        val maxHeight = (height * 0.9).toInt() - searchBarHeight
+
+        // Bot preview
+        val botPreview = BotPreviewWidget((width - maxWidth) / 2, (height - maxHeight) / 2, 130, 200)
+        botPreview.bots = bots
+        addRenderableWidget(botPreview)
 
         // Bot listing
         val botListWidget = BotListWidget(
-            (width - maxWidth) / 2, (height - maxHeight) / 2, maxWidth, maxHeight
+            botPreview.right + 4, (height - maxHeight) / 2, maxWidth - botPreview.width, maxHeight
         )
+        botListWidget.onHover = { botPreview.botId = it }
         botListWidget.setBots(bots) { botSelected(it) }
         addRenderableWidget(botListWidget)
 
@@ -58,14 +66,25 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         )
 
         // Search bar
-        val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, 20, Component.literal("Search") )
+        val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, searchBarHeight, Component.literal("Search") )
         searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
         searchBar.setResponder { name ->
-            if (name == searchText) return@setResponder
+            fun set(bots: Map<ResourceId, AddonBotEntry>) {
+                botListWidget.setBots(bots) { botSelected(it) }
+                botListWidget.scrollAmount = 0.0
+                botPreview.bots = bots
+            }
+            if (name.isEmpty()) {
+                set(bots);
+                botPreview.bots = emptyMap()
+                return@setResponder
+            }
+
             searchText = name;
-            botListWidget.hiddenCategories.clear()
-            botListWidget.setBots(bots.filter { botFilter(it) }) { botSelected(it) }
-            botListWidget.scrollAmount = 0.0
+            val bots = bots.filter { botFilter(it) }
+            val categories = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }.keys.toMutableSet()
+            botListWidget.visibleCategories = categories
+            set(bots)
         }
         searchBar.isFocused = true
         searchBar.setCanLoseFocus(true)
