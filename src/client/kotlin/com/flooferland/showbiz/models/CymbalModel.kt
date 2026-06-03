@@ -24,11 +24,11 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
     val states = WeakHashMap<CymbalBlockEntity, CymbalState>()
 
     override fun setCustomAnimations(animatable: CymbalBlockEntity, instanceId: Long, animState: AnimationState<CymbalBlockEntity>) {
-        val instance = animatable.collidePartInstance.clientInstance as? ClientCollidePartInstance ?: return
-        val entity = instance.spawned.values.firstOrNull { it.partId == CollidePartId.Cymbal } ?: return
-
         val cymbal = animationProcessor.getBone("cymbal") ?: return
         cymbal.updateRotation(0f, 0f, 0f)
+
+        val instance = animatable.collidePartInstance.clientInstance as? ClientCollidePartInstance ?: return
+        val entity = instance.spawned.values.firstOrNull { it.partId == CollidePartId.Cymbal } ?: return
 
         val state = states.getOrPut(animatable) { CymbalState() }
         if (entity.lastHitTime != state.lastHitTime) updateState(animatable, entity, state)
@@ -52,6 +52,8 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
             state.force.z = (nx * sx + nz * sz).toFloat()
         }
         fun updateAnimation(bone: GeoBone, entity: CollidePartEntity, state: CymbalState, partialTick: Float) {
+            bone.rotX = 0f
+            bone.rotZ = 0f
             val ticks = entity.tickCount + partialTick
             val timeSinceHit = ticks - state.lastHitTime
             val duration = (2.3).secsToTicks().toDouble()
@@ -61,6 +63,8 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
                 bone.rotX += wobble.toFloat() * state.force.z
                 bone.rotZ += wobble.toFloat() * -state.force.x
             }
+            bone.rotX = bone.rotX.coerceIn(-0.3f..0.3f)
+            bone.rotZ = bone.rotZ.coerceIn(-0.3f..0.3f)
         }
     }
 }

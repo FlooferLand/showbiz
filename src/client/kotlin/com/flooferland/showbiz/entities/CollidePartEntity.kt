@@ -36,7 +36,10 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
     override fun canCollideWith(entity: Entity) = (entity is CollidePartEntity) || (entity is Player)
     override fun canBeHitByProjectile() = true
     override fun getDimensions(pose: Pose): EntityDimensions =
-        targetSize.let { EntityDimensions.fixed(it.x.toFloat().coerceAtLeast(0.1f), it.y.toFloat().coerceAtLeast(0.1f)) }
+        targetSize.let { EntityDimensions.fixed(
+            it.x.toFloat().coerceIn(0.1f..1f),
+            it.y.toFloat().coerceIn(0.1f..1f)
+        ) }
 
     val colliding = mutableSetOf<Entity>()
     val used = mutableSetOf<Entity>()
@@ -52,12 +55,6 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
         initialPos?.let {
             setPos(it)
             targetPos = it
-        }
-    }
-
-    override fun playerTouch(player: Player) {
-        if (boundingBox.intersects(player.boundingBox)) {
-            colliding += player
         }
     }
 
