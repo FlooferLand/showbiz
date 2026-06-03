@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.Font
+import net.minecraft.client.*
+import net.minecraft.client.gui.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.entity.*
 import com.flooferland.showbiz.entities.CollidePartEntity
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 
 class CollidePartEntityRenderer(val context: EntityRendererProvider.Context) : EntityRenderer<CollidePartEntity>(context) {
@@ -15,6 +16,7 @@ class CollidePartEntityRenderer(val context: EntityRendererProvider.Context) : E
         val scale = 0.01f
         val text = entity.partId.toString()
 
+        RenderSystem.disableDepthTest()
         poseStack.pushPose()
         poseStack.translate(0.0, entity.eyeHeight / 2.0, 0.0)
         poseStack.mulPose(dispatcher.cameraOrientation())
@@ -23,5 +25,6 @@ class CollidePartEntityRenderer(val context: EntityRendererProvider.Context) : E
         val matrix = poseStack.last().pose()
         font.drawInBatch(text, xOffset, 0f, 0xffff, true, matrix, bufferSource, Font.DisplayMode.NORMAL, 0, packedLight)
         poseStack.popPose()
+        RenderSystem.enableDepthTest()
     }
 }

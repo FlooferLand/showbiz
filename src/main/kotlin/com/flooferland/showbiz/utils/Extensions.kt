@@ -52,7 +52,6 @@ object Extensions {
         this.childBones.forEach { bones.addAll(it.getChildrenFlattened()) }
         return bones
     }
-
     fun BakedGeoModel.getAllBones(): HashSet<GeoBone> {
         val bones = hashSetOf<GeoBone>()
         topLevelBones.forEach {

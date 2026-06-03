@@ -1,21 +1,19 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.Registry
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.MobCategory
-import net.minecraft.world.level.Level
+import net.minecraft.core.*
+import net.minecraft.core.registries.*
+import net.minecraft.resources.*
+import net.minecraft.world.entity.*
+import net.minecraft.world.level.*
 import com.flooferland.showbiz.entities.CollidePartEntity
+import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.entities.ModelPartEntity
 import com.flooferland.showbiz.utils.rl
 
 sealed class ModClientEntities<T: Entity> {
     object ModelPart : ModClientEntities<ModelPartEntity>("model_part", ::ModelPartEntity)
     object CollidePart : ModClientEntities<CollidePartEntity>("collide_part", ::CollidePartEntity)
+    object Decor : ModClientEntities<DecorEntity>("decor", ::DecorEntity)
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>

@@ -71,6 +71,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
             pendingShow.tempReset()
         }
 
+        decor?.tick(this, level, pos, state)
         soundHandler?.tick(this, level, pos, state)
         collidePartInstance.tick(level, pos, state)
         if (botId != prevBotId) {
@@ -120,7 +121,11 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun getUpdatePacket() = ClientboundBlockEntityDataPacket.create(this)!!
 
+    interface IDecor {
+        fun tick(owner: StagedBotBlockEntity, level: Level, pos: BlockPos, state: BlockState)
+    }
     companion object {
         var soundHandler: IBotSoundHandler? = null
+        var decor: IDecor? = null
     }
 }

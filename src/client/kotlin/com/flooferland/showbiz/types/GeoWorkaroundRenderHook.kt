@@ -6,6 +6,8 @@ import net.minecraft.client.*
 import net.minecraft.client.renderer.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
@@ -36,6 +38,14 @@ class GeoWorkaroundRenderHook() {
     }
 
     fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+        if (animatable is StagedBotBlockEntity) run {
+            val entities = DecorEntity.decorEntities[animatable] ?: return@run
+            entities.forEach { entity ->
+                val bone = entity.boneName?.let { model.getBone(it).getOrNull() } ?: return@forEach
+                val bonePos = bonePosFromCapture(bone) ?: return@forEach
+                entity.setPos(bonePos)
+            }
+        }
         when (animatable) {
             is SpotlightBlockEntity -> {
                 val startBone = model.getBone("start").getOrNull() ?: return

@@ -77,6 +77,6 @@ class ModelPartEntity(level: Level, val partId: String? = null, val displayName:
 
     companion object {
         /// Required to manually set the ID because the client assign its ID to the player and causes the player to freeze
-        private val nextEntityId = AtomicInteger(-4000)
+        private val nextEntityId = AtomicInteger(-3000)
     }
 }

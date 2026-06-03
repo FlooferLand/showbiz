@@ -16,6 +16,7 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
@@ -109,6 +110,7 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
+            EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
         }
 
@@ -214,6 +216,7 @@ object ShowbizClient : ClientModInitializer {
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
         ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
+        StagedBotBlockEntity.decor = DecorEntity.decorTick
     }
 
     fun resetAssetErrors() {
