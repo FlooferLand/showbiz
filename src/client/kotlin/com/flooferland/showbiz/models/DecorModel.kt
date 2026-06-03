@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.models
 
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.utils.lerp
@@ -21,8 +22,10 @@ class DecorModel : GeoModel<DecorEntity>() {
         val root = animationProcessor.getBone("root") ?: return
         val bottom = animationProcessor.getBone("bottom") ?: return
 
+
         val delta = ShowbizClient.getDeltaTime().coerceAtMost(0.25f)
         val pos = animatable.position()
+        if (animatable.oldPos == Vec3.ZERO) animatable.oldPos = pos
         val diff = pos.subtract(animatable.oldPos).scale(30.0)
         val vSquish = (0.8f + diff.y.toFloat()).coerceIn(0.6f..1f)
         val hSquish = (1.3f - diff.y.toFloat()).coerceIn(0.6f..1f)

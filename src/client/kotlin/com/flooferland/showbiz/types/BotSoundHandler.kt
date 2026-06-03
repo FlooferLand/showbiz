@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types
 
+import net.minecraft.client.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.core.*
 import net.minecraft.sounds.*
@@ -36,15 +37,18 @@ class BotSoundHandler : IBotSoundHandler {
             if (data.type == MoveType.Effect) continue
 
             if (prevState != null && prevState != bitOn) {
+                val playerDist = Minecraft.getInstance().player?.distanceToSqr(pos.center) ?: 0.0
+                val playerDistMul = if (playerDist < 6.0) 3f else 0.5f
+                val pos = entity.blockPos.above().above()
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
                 val flow = data.flow.speed.toFloat().coerceIn(0.1f, 1.0f)
                 val pitch = 0.4f + (flow * 0.8f)
-                val volume = 0.5f + (flow * 0.5f)
+                val volume = (0.5f * playerDistMul) + (flow * 0.5f)
                 level.playLocalSound(
-                    entity.blockPos.above().above(),
+                    pos,
                     sound.event,
                     SoundSource.BLOCKS,
-                    clamp(volume * 0.05f, 0.005f, 0.05f), pitch, false
+                    clamp(volume * 0.08f, 0.08f, 0.08f * playerDistMul), pitch, false
                 )
             }
 
