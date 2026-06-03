@@ -63,6 +63,12 @@
 					]
 				},
 				{
+					"name": "PomR",
+					"parent": "HandR",
+					"pivot": [-5, 13, -1],
+					"rotation": [0, 0, -45]
+				},
+				{
 					"name": "ArmL",
 					"parent": "chest",
 					"pivot": [5, 28, 0],
@@ -86,6 +92,12 @@
 					"cubes": [
 						{"origin": [3.5, 12, -1.5], "size": [3, 3, 3], "uv": [19, 96]}
 					]
+				},
+				{
+					"name": "PomL",
+					"parent": "HandL",
+					"pivot": [5, 13, -1],
+					"rotation": [0, 0, 45]
 				},
 				{
 					"name": "head",

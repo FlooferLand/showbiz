@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.client.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
@@ -102,7 +101,7 @@ class StagedBotBlockEntityModel : BaseBotModel() {
         val movements = mapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
 
         // Driving animation
-        val delta = Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtMost(1.25f)
+        val delta = ShowbizClient.getDeltaTime()
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
         driveCollideParts(animatable, model, storage, state.partialTick)
     }

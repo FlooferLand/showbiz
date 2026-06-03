@@ -43,7 +43,7 @@ class GeoWorkaroundRenderHook() {
             entities.forEach { entity ->
                 val bone = entity.boneName?.let { model.getBone(it).getOrNull() } ?: return@forEach
                 val bonePos = bonePosFromCapture(bone) ?: return@forEach
-                entity.setPos(bonePos)
+                entity.moveDecor(bonePos)
             }
         }
         when (animatable) {

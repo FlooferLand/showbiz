@@ -1829,9 +1829,9 @@
 			"primary_selected": false
 		},
 		{
-			"name": "pomR",
+			"name": "PomR",
 			"uuid": "a6f72032-1305-9400-6216-1fb5f9604c51",
-			"export": false,
+			"export": true,
 			"locked": false,
 			"scope": 0,
 			"selected": false,
@@ -1848,7 +1848,7 @@
 			"mirror_uv": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1898,9 +1898,9 @@
 			"primary_selected": false
 		},
 		{
-			"name": "pomL",
+			"name": "PomL",
 			"uuid": "20b2e864-47c3-5493-e116-f070c016cc54",
-			"export": false,
+			"export": true,
 			"locked": false,
 			"scope": 0,
 			"selected": false,
@@ -1917,7 +1917,7 @@
 			"mirror_uv": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": true
 		},
 		{
@@ -2208,7 +2208,7 @@
 										"0b5e5640-09f6-d47c-5668-ec668e6b7aca",
 										{
 											"uuid": "a6f72032-1305-9400-6216-1fb5f9604c51",
-											"isOpen": false,
+											"isOpen": true,
 											"children": [
 												"f7246052-83b7-8e1f-3b63-814b7c945043",
 												"cdc45791-7f5a-72aa-e145-4cc575dafc5e",
@@ -2239,7 +2239,7 @@
 										"db83d4e6-b6f5-0606-0bdc-efb81fef90c6",
 										{
 											"uuid": "20b2e864-47c3-5493-e116-f070c016cc54",
-											"isOpen": false,
+											"isOpen": true,
 											"children": [
 												"b9dd21b1-edba-5fd2-5e1f-2167a5daad18",
 												"86559b25-9129-32d5-75aa-593093a95fd9",

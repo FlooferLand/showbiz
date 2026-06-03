@@ -219,6 +219,9 @@ object ShowbizClient : ClientModInitializer {
         StagedBotBlockEntity.decor = DecorEntity.decorTick
     }
 
+    fun getDeltaTime() =
+        Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtMost(1.25f)
+
     fun resetAssetErrors() {
         BaseBotModel.errorsTriggered.clear()
         StagedBotBlockBlockEntityRenderer.renderExceptionCountdown = 0f
