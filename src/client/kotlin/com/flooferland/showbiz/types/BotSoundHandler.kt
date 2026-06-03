@@ -38,7 +38,7 @@ class BotSoundHandler : IBotSoundHandler {
 
             if (prevState != null && prevState != bitOn) {
                 val playerDist = Minecraft.getInstance().player?.distanceToSqr(pos.center) ?: 0.0
-                val playerDistMul = if (playerDist < 6.0) 3f else 0.5f
+                val playerDistMul = if (playerDist < 3 * 3) 3f else 0.5f
                 val pos = entity.blockPos.above().above()
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
                 val flow = data.flow.speed.toFloat().coerceIn(0.1f, 1.0f)
