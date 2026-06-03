@@ -61,7 +61,9 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, 20, Component.literal("Search") )
         searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
         searchBar.setResponder { name ->
+            if (name == searchText) return@setResponder
             searchText = name;
+            botListWidget.hiddenCategories.clear()
             botListWidget.setBots(bots.filter { botFilter(it) }) { botSelected(it) }
             botListWidget.scrollAmount = 0.0
         }
