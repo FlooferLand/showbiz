@@ -11,6 +11,7 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.math.Vec2f
 import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import software.bernie.geckolib.animatable.GeoEntity
@@ -25,12 +26,14 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
     override fun readAdditionalSaveData(compound: CompoundTag) = Unit
     override fun addAdditionalSaveData(compound: CompoundTag) = Unit
 
+    val size = Vec2f(0.4f, 0.8f)
+
     override fun isPushable() = false
     override fun isPickable() = false
     override fun isAttackable() = false
     override fun canBeCollidedWith() = false
     override fun canBeHitByProjectile() = false
-    override fun getDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.25f, 0.25f)
+    override fun getDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(size.x, size.y)
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
     override fun getAnimatableInstanceCache() = cache
 
@@ -50,7 +53,8 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
     }
 
     fun moveDecor(bonePos: Vec3) {
-        setPosRaw(bonePos.x, bonePos.y, bonePos.z)
+        val bonePos = bonePos.add(0.0, (-size.y).toDouble(), 0.0)
+        moveTo(bonePos.x, bonePos.y, bonePos.z)
     }
 
     override fun tick() {
@@ -81,7 +85,7 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
 
         fun spawn(owner: StagedBotBlockEntity, level: ClientLevel, attachedTo: String, decorId: Id) {
             val entity = DecorEntity(level, attachedTo, decorId, owner)
-            entity.setPos(owner.blockPos.above().center)
+            entity.moveTo(owner.blockPos.above().center)
             level.addEntity(entity)
 
             val entities = decorEntities[owner] ?: mutableSetOf()

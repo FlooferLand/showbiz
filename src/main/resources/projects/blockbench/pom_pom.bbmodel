@@ -30,11 +30,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -8, 0],
-			"to": [8, 1, 0],
+			"from": [-8, 5, 0],
+			"to": [8, 14, 0],
 			"autouv": 0,
 			"color": 8,
-			"origin": [0, -7, 0],
+			"origin": [0, 6, 0],
 			"faces": {
 				"north": {
 					"uv": [0, 0, 2, 1.125],
@@ -72,11 +72,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -16, 0.05],
-			"to": [8, -7, 0.05],
+			"from": [-8, -3, 0.05],
+			"to": [8, 6, 0.05],
 			"autouv": 0,
 			"color": 8,
-			"origin": [0, -12, 0.05],
+			"origin": [0, 1, 0.05],
 			"faces": {
 				"north": {
 					"uv": [2, 1.125, 4, 2],
@@ -114,12 +114,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -8, 0],
-			"to": [8, 1, 0],
+			"from": [-8, 5, 0],
+			"to": [8, 14, 0],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [0, -90, 0],
-			"origin": [0, -7, 0],
+			"origin": [0, 6, 0],
 			"faces": {
 				"north": {
 					"uv": [2, 0, 4, 1.125],
@@ -157,12 +157,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-7.975, -16, 0],
-			"to": [8.025, -7, 0],
+			"from": [-7.975, -3, 0],
+			"to": [8.025, 6, 0],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [0, -90, 0],
-			"origin": [0.025, -12, 0],
+			"origin": [0.025, 1, 0],
 			"faces": {
 				"north": {
 					"uv": [0, 1.125, 2, 2],
@@ -200,12 +200,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -8, 0],
-			"to": [8, 1, 0],
+			"from": [-8, 5, 0],
+			"to": [8, 14, 0],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [0, -45, 0],
-			"origin": [0, -7, 0],
+			"origin": [0, 6, 0],
 			"faces": {
 				"north": {
 					"uv": [0, 0, 2, 1.125],
@@ -243,12 +243,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -8, 0],
-			"to": [8, 1, 0],
+			"from": [-8, 5, 0],
+			"to": [8, 14, 0],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [180, -45, 180],
-			"origin": [0, -7, 0],
+			"origin": [0, 6, 0],
 			"faces": {
 				"north": {
 					"uv": [2, 0, 4, 1.125],
@@ -286,12 +286,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-8, -16, 0.05],
-			"to": [8, -7, 0.05],
+			"from": [-8, -3, 0.05],
+			"to": [8, 6, 0.05],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [0, -45, 0],
-			"origin": [0, -12, 0.05],
+			"origin": [0, 1, 0.05],
 			"faces": {
 				"north": {
 					"uv": [0, 1.125, 2, 2],
@@ -329,12 +329,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-7.975, -16, 0],
-			"to": [8.025, -7, 0],
+			"from": [-7.975, -3, 0],
+			"to": [8.025, 6, 0],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [180, -45, 180],
-			"origin": [0.025, -12, 0],
+			"origin": [0.025, 1, 0],
 			"faces": {
 				"north": {
 					"uv": [2, 1.125, 4, 2],
@@ -377,7 +377,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 0, 0],
+			"origin": [0, 13, 0],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -387,7 +387,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "bottom",
@@ -400,7 +400,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, -8, 0],
+			"origin": [0, 5, 0],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
