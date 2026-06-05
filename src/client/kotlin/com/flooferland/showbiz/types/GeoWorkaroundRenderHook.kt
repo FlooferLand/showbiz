@@ -38,6 +38,7 @@ class GeoWorkaroundRenderHook() {
     }
 
     fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
+        if (isReRender) return
         if (animatable is StagedBotBlockEntity) run {
             val entities = DecorEntity.decorEntities[animatable] ?: return@run
             entities.forEach { entity ->

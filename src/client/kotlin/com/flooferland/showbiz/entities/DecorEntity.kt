@@ -14,6 +14,7 @@ import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.math.Vec2f
 import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
@@ -45,6 +46,7 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     var oldPos = Vec3.ZERO!!
+    var newPos = Vec3.ZERO!!
 
     init {
         id = nextEntityId.getAndDecrement()
@@ -54,7 +56,7 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
 
     fun moveDecor(bonePos: Vec3) {
         val bonePos = bonePos.add(0.0, (-size.y).toDouble(), 0.0)
-        moveTo(bonePos.x, bonePos.y, bonePos.z)
+        newPos = bonePos
     }
 
     override fun tick() {
@@ -80,6 +82,16 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
                     spawn(owner, level, "PomL", Id.PomPom)
                     spawn(owner, level, "PomR", Id.PomPom)
                 }
+            }
+        }
+
+        /**
+         * Workaround required for shaders to work.
+         * Called at the end of world rendering
+         */
+        fun moveAll(ctx: WorldRenderContext) {
+            decorEntities.forEach { (botEntity, entities) ->
+                entities.forEach { it.moveTo(it.newPos) }
             }
         }
 

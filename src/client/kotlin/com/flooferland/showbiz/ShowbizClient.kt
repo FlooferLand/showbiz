@@ -151,21 +151,23 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // World
-        WorldRenderEvents.LAST.register { context ->
-            if (context == null) return@register
+        WorldRenderEvents.LAST.register { ctx ->
+            if (ctx == null) return@register
             val mc = Minecraft.getInstance() ?: return@register
             val player = mc.player ?: return@register
             val level = player.clientLevel ?: return@register
-            val partialTick = context.tickCounter().getGameTimeDeltaPartialTick(true)
-            val view = context.camera()?.position ?: return@register
+            val partialTick = ctx.tickCounter().getGameTimeDeltaPartialTick(true)
+            val view = ctx.camera()?.position ?: return@register
 
-            val pose = context.matrixStack() ?: return@register
+            val pose = ctx.matrixStack() ?: return@register
             pose.pushPose()
             pose.translate(-view.x, -view.y, -view.z)
             JukeboxLyricRenderer.render(level, player, mc.renderBuffers().bufferSource(), pose)
             ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
+
+            DecorEntity.moveAll(ctx)
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
             if (StagedBotBlockBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
