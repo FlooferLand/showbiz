@@ -1,0 +1,29 @@
+[beach_bear]
+name = "Beach Bear"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[dingo_starr]
+name = "Dingo Starr"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[fats_gorilla]
+name = "Fats Gorilla (W.I.P)"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[mini_mozzarella]
+name = "Mini Mozzarella"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[wolfman]
+name = "Wolfman (W.I.P)"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false

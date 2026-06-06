@@ -1,83 +1,83 @@
-set rae duke
+set rae dook
 
-any jaw {
+rae 30 {
     flow 2.0
     rotate "jaw" x:-25
 }
-rae right_arm_swing {
+rae 34 {
     flow 0.7
     rotate "Right Arm" y:-45
 }
-rae left_arm_swing {
+rae 33 {
     flow 0.7
     rotate "Left Arm" y:30
 }
-rae right_foot_bass_drum {
+rae 63 {
     flow 1.7
     rotate "Right Foot" x:-15
 }
-rae right_elbow {
+rae 31 {
     flow ease-in 1.9
     rotate "RightElbow" x:-47
     wigglemul 0.3
 }
-rae left_elbow {
+rae 35 {
     flow ease-in 1.9
     rotate "LeftElbow" x:-47
     wigglemul 0.3
 }
-rae head_up {
+rae 22 {
     flow 0.7
     rotate "Head" x:25
     wigglemul 2.0
 }
-rae left_foot_hihat {
+rae 32 {
     flow 1.2
     rotate "Left Foot" x:-15
     anim "hihat"
 }
-rae head_right {
+rae 21 {
     flow ease-in 0.28
     rotate "Head" y:-40
     wigglemul 2.0
 }
-rae head_left {
+rae 25 {
     flow ease-in 0.28
     rotate "Head" y:40
     wigglemul 2.0
 }
-rae body_lean {
+rae 64 {
     flow 0.3
     rotate "Waist" x:10
     rotate "RightElbow" x:-10
     rotate "LeftElbow" x:-10
     wigglemul 2.0
 }
-rae right_ear {
+rae 24 {
     flow 0.8
     rotate "EarR" z:50
     wigglemul 3.0
 }
-rae left_ear {
+rae 23 {
     flow 0.8
     rotate "EarL" z:-50
     wigglemul 3.0
 }
-rae eyes_left {
+rae 28 {
     flow 1.2
     move "Left Eye" x:0.4
     move "Right Eye" x:0.4
 }
-rae eyes_right {
+rae 29 {
     flow 1.2
     move "Left Eye" x:-0.4
     move "Right Eye" x:-0.4
 }
-rae left_eyelid {
+rae 26 {
     flow 3.0
     move "Left Eyelid" y:0.6
 }
-rae right_eyelid {
+rae 27 {
     flow 3.0
     move "Right Eyelid" y:0.6
 }

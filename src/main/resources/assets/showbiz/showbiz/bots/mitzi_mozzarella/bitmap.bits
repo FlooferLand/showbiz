@@ -1,102 +1,102 @@
 set rae mitzi
 
-rae jaw {
+rae 185 {
     flow 1.8
     rotate "jaw" x:-18
 }
 
-rae eyes_right {
+rae 184 {
     flow 0.6
     move "Eyes" x:-0.35
 }
 
-rae eyes_left {
+rae 183 {
     flow 0.6
     move "Eyes" x:0.35
 }
 
-rae left_eyelid {
+rae 181 {
     flow 0.7
     move "LidL" y:-1.5
 }
 
-rae right_eyelid {
+rae 182 {
     flow 0.6
     move "LidR" y:-1.5
 }
 
-rae head_left {
+rae 178 {
     flow 0.45
     rotate "head" y:30
     wigglemul 2.0
 }
 
-rae head_right {
+rae 179 {
     flow 0.45
     rotate "head" y:-30
     wigglemul 2.0
 }
 
-rae head_up {
+rae 180 {
     flow 0.5
     rotate "head" x:13
     wigglemul 2.0
 }
 
-rae body_twist_left {
+rae 186 {
     flow 0.3
     rotate "chest" y:15
     wigglemul 2.0
 }
 
-rae body_twist_right {
+rae 187 {
     flow 0.3
     rotate "chest" y:-15
     wigglemul 2.0
 }
 
-rae body_lean {
+rae 188 {
     flow 0.3
     rotate "chest" x:-10
     wigglemul 2.0
 }
 
-rae left_arm_twist {
+rae 175 {
     flow 0.4
     rotate "ArmL" y:45
 }
 
-rae left_elbow {
+rae 174 {
     flow 0.4
     rotate "ArmL2" x:40
 }
 
-rae left_arm_raise {
+rae 173 {
     flow 0.4
     rotate "ArmL" z:-50
 }
 
-rae right_arm_twist {
+rae 170 {
     flow 0.4
     rotate "ArmR" y:-45
 }
 
-rae right_elbow {
+rae 169 {
     flow 0.4
     rotate "ArmR1" x:40
 }
 
-rae right_arm_raise {
+rae 168 {
     flow 0.4
     rotate "ArmR" z:50
 }
 
-rae left_ear {
+rae 176 {
     flow 0.4
     rotate "earL" x:25
 }
 
-rae right_ear {
+rae 177 {
     flow 0.4
     rotate "earR" x:25
 }

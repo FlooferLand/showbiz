@@ -1,0 +1,51 @@
+set rae dook
+set wp5 dingo
+
+wp5 mouth, rae mouth {
+    flow 1.0
+    rotate "Jaw" x:-35
+    rotate "Snout" x:7.5
+}
+wp5 28, rae 28 {
+    flow 2.0
+    move "EyelidL" y:0.6
+}
+wp5 29, rae 29 {
+    flow 2.0
+    move "EyelidR" y:0.6
+}
+wp5 30, rae 23 {
+    flow 1.0
+    rotate "EarL" z:-45
+}
+wp5 31, rae 24 {
+    flow 1.0
+    rotate "EarR" z:45
+}
+wp5 32, rae 22 {
+    flow 0.7
+    rotate "Head" x:15
+}
+wp5 33, rae 25 {
+    flow 0.7
+    rotate "Head" y:25
+}
+wp5 34, rae 21 {
+    flow 0.7
+    rotate "Head" y:-25
+}
+
+# FIXME: Elbows are swapped ??
+wp5 35, rae 35 {
+    flow 1.3
+    rotate "ElbowL" x:-47.5
+}
+wp5 36, rae 31 {
+    flow 1.3
+    rotate "ElbowR" x:-47.5
+}
+
+wp5 37, rae 64 {
+    flow 0.3
+    rotate "Waist" x:15
+}

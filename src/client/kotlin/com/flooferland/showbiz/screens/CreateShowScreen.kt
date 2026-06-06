@@ -41,7 +41,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
         showName.setHint(editHint)
         showName.setFormatter { string, _ ->
             if (string.contains('.') || showName.cursorPosition != showName.value.length) return@setFormatter Component.literal(string).visualOrderText
-            Component.literal(string).append(Component.literal(".${Showbiz.charts.idsToInfo[selectedFormat]?.extension}").withStyle(ChatFormatting.DARK_GRAY)).visualOrderText
+            Component.literal(string).append(Component.literal(".${Showbiz.charts.idsToInfo[selectedFormat]?.extensions?.firstOrNull()}").withStyle(ChatFormatting.DARK_GRAY)).visualOrderText
         }
         showName.setResponder { string ->
             for ((ext, id) in Showbiz.charts.extensionToId) {
@@ -68,7 +68,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
                     updateWidgets()
                 }
                 .size(font.width(" $chartId "), 20)
-                .tooltip(Tooltip.create(Component.literal("The ${Showbiz.charts.idsToInfo[chartId]?.extension} file format")))
+                .tooltip(Tooltip.create(Component.literal("The ${Showbiz.charts.idsToInfo[chartId]?.extensions?.firstOrNull()} file format")))
                 .build()
             chartButtons += button
             addRenderableWidget(button)
@@ -101,8 +101,8 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
 
         // Submit button
         submitButton = Button.Builder(Component.literal("Create")) {
-                val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extension ?: return@Builder
-                val file = showName.value.alwaysEndsWith(".$ext")
+                val exts = Showbiz.charts.idsToInfo[selectedFormat]?.extensions ?: return@Builder
+                val file = showName.value.alwaysEndsWith(exts.map { ".$it" })
                 ClientPlayNetworking.send(ShowFileEditPacket(file, FileServer.FileAction.Create))
                 minecraft?.setScreen(null)
             }
@@ -121,7 +121,7 @@ class CreateShowScreen(val parent: Screen? = null) : Screen(Component.literal("C
     }
 
     fun updateWidgets() {
-        val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extension
+        val ext = Showbiz.charts.idsToInfo[selectedFormat]?.extensions?.firstOrNull()
         showName.setHint(ext?.let { editHint.copy().append(".$it") } ?: editHint)
 
         val noticeText = if (!FFmpeg.serverAvailable) "Consider installing FFmpeg to support more audio formats!" else ""

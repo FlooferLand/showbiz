@@ -1,0 +1,9 @@
+[addon]
+id = "showbiz-wp5"
+name = "Showbiz Wolf Pack 5"
+authors = ["FlooferLand", "xion_no.i"]
+version = "$version" # Filled by build.gradle.kts
+description = '''
+    The band created by CEI before the Rock-afire Explosion
+'''
+format = 1

@@ -1,27 +1,27 @@
 package com.flooferland.showbiz.addons.assets
 
+import net.minecraft.resources.*
+import net.minecraft.server.packs.*
+import net.minecraft.server.packs.resources.*
+import net.minecraft.util.profiling.*
 import com.akuleshov7.ktoml.Toml
 import com.flooferland.bizlib.bits.BitsMap
 import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
+import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
 import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
-import net.minecraft.resources.*
-import net.minecraft.server.packs.*
-import net.minecraft.server.packs.resources.*
-import net.minecraft.util.profiling.*
-import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.utils.ShowbizUtils
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 
@@ -118,7 +118,9 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     fun getBits(filename: String): BotBitmapFile? {
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
                         val res = getResAsString(path) ?: run { err("Failed to find bitsmap file '$path'"); return null }
-                        val bits = runCatching { BitsMap().load(res.byteInputStream()) }
+                        val format = BitsMap()
+                        format.warnHandler = { message -> Showbiz.log.warn("Warning for '$namespace:$id': $message") }
+                        val bits = runCatching { format.load(res.byteInputStream()) }
                         bits.exceptionOrNull()?.let { throwable -> err("Failed to load bitsmap file '$filename' on '$path'", throwable) }
                         return bits.getOrNull()
                     }

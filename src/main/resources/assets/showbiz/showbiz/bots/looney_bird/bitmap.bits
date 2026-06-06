@@ -1,33 +1,33 @@
 set rae looney_bird
 
-rae head_right {
+rae 171 {
     flow 0.25
     rotate "head" y:-78
     wigglemul 2.0
 }
 
-rae jaw {
+rae 167 {
     flow 1.5
     rotate "mouth" x:-25
 }
 
-rae raise {
+rae 172 {
     flow linear 0.25
     move "looney" y:11
     wigglemul 2.0
 }
 
-rae left_eyelid {
+rae 191 {
     flow 0.8
     move "eyelid_l" y:-2
 }
 
-rae right_eyelid {
+rae 192 {
     flow 0.8
     move "eyelid_r" y:-2
 }
 
-rae eye_cross {
+rae 193 {
     flow 1.0
     anim "eyes_cross"
 }

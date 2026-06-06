@@ -1,0 +1,60 @@
+set rae fatz
+set wp5 fats
+
+wp5 23, rae 57 { # Left arm swing
+    flow 0.5
+    rotate "ArmL" y:-20
+}
+
+wp5 23, rae 58 { # Right arm swing
+    flow 0.5
+    rotate "ArmR" y:-20
+}
+
+wp5 25, rae 62 { # Body lean
+    flow 0.3
+    rotate "Waist" x:10
+    move "ElbowR" z:1
+    move "ElbowL" z:1
+    wigglemul 2.0
+}
+
+wp5 22, rae 59 { # Left elbow
+    flow 0.5
+    rotate "ElbowL" x:-25
+}
+
+wp5 24, rae 60 { # Right elbow
+    flow 0.5
+    rotate "ElbowR" x:25
+}
+
+wp5 20, rae 54 { # Head left
+    flow ease-in 0.28
+    rotate "Head" y:25
+    wigglemul 2.0
+}
+wp5 21, rae 51 { # Head tilt left
+    flow ease-in 0.28
+    rotate "Head" z:15
+}
+
+wp5 17, rae 45 { # Mouth
+    flow 0.5
+    rotate "jaw" x:-45
+}
+
+wp5 18, rae 41 { # Left eyelid
+    flow 2.0
+    move "EyelidL" y:-1.6
+}
+
+wp5 19, rae 42 { # Right eyelid
+    flow 2.0
+    move "EyelidR" y:-1.6
+}
+
+wp5 26, rae 61 {
+    flow 0.7
+    rotate "Foot" x:10
+}

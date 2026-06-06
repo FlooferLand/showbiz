@@ -1,0 +1,80 @@
+set rae mitzi
+set wp5 queenie
+
+wp5 50, rae 185 {
+    flow 0.8
+    rotate "Jaw" x:-40
+    rotate "Snout" x:7.5
+}
+wp5 51, rae 181 {
+    flow 2.0
+    move "EyelidL" y:-1.5
+}
+wp5 52, rae 182 {
+    flow 2.0
+    move "EyelidR" y:-1.5
+}
+wp5 53, rae 176 {
+    flow 0.7
+    rotate "EarL" x:25
+    wigglemul 2.0
+}
+wp5 54, rae 177 {
+    flow 0.7
+    rotate "EarR" x:25
+    wigglemul 2.0
+}
+wp5 55, rae 180 {
+    flow 0.7
+    rotate "Head" x:15
+    wigglemul 2.0
+}
+wp5 56, rae 178 {
+    flow 0.7
+    rotate "Head" y:15
+    wigglemul 2.0
+}
+wp5 57, rae 179 {
+    flow 0.7
+    rotate "Head" y:-15
+    wigglemul 2.0
+}
+wp5 58, rae 173 {
+    flow 0.3
+    rotate "ArmL" z:-70
+}
+wp5 59, rae 168 {
+    flow 0.3
+    rotate "ArmR" z:70
+}
+wp5 60, rae 174 {
+    flow 0.7
+    rotate "ArmL2" x:45
+}
+wp5 61, rae 169 {
+    flow 0.7
+    rotate "ArmR2" x:45
+}
+wp5 62, rae 175 {
+    flow 0.7
+    rotate "ArmL3" x:20
+}
+wp5 63, rae 170 {
+    flow 0.7
+    rotate "ArmR3" x:20
+}
+wp5 64, rae 188 {
+    flow 0.3
+    rotate "Chest" x:-15
+    wigglemul 2.0
+}
+wp5 65, rae 187 {
+    flow 0.3
+    rotate "Chest" y:-20
+    wigglemul 2.0
+}
+rae 186 {
+    flow 0.3
+    rotate "Chest" y:20
+    wigglemul 2.0
+}

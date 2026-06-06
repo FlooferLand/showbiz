@@ -1,45 +1,28 @@
 set rae rolfe
+set wp5 wolfman
 
-rae 16 {
+wp5 14, rae 16 {
     flow 0.3
     rotate "torso" x:-5
     wigglemul 2.0
 }
 
-rae 14 {
+wp5 13, rae 14 {
     flow 0.4
     rotate "torso" y:25
     wigglemul 2.0
 }
 
-rae 15 {
-    flow 0.4
-    rotate "torso" y:-25
-    wigglemul 2.0
-}
-
-rae 8 {
+wp5 7, rae 8 {
     flow 0.8
     rotate "head" x:13
     wigglemul 2.5
 }
 
-rae 6 {
+wp5 9, rae 6 {
     flow 0.6
     rotate "head" y:35
     wigglemul 2.5
-}
-
-rae 7 {
-    flow 0.6
-    rotate "head" y:-35
-    wigglemul 2.5
-}
-
-rae 20 {
-    flow 0.5
-    rotate "earl_head" z:-25
-    wigglemul 1.5
 }
 
 # arms
@@ -79,7 +62,7 @@ rae 13 {
 }
 
 # face
-rae 1 {
+wp5 1, rae 1 {
     flow 0.9
     rotate "jaw" x:-35
     rotate "snout" x:5
@@ -88,7 +71,7 @@ rae 36 {
     flow 2.0
     rotate "earl_jaw" x:40
 }
-rae 4 {
+wp5 2, rae 4 {
     flow 0.5
     move "eyes" x:1
 }

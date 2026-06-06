@@ -1,82 +1,81 @@
 set rae billy_bob
-set faz bonnie
 
-any body_lean {
+rae 213 {
     flow 0.2
     rotate "torso" x:10
     wigglemul 2.0
 }
 
-rae body_twist_left, faz body_turn_l {
+rae 211 {
     flow 0.2
     rotate "torso" y:25
 }
 
-rae body_twist_right, faz body_turn_r {
+rae 212 {
     flow 0.2
     rotate "torso" y:-25
 }
 
-any head_up {
+rae 205 {
     flow 0.5
     rotate "head" x:13
     wigglemul 3.0
 }
 
-rae head_left {
+rae 201 {
     flow 0.15
     rotate "head" y:45
     wigglemul 3.0
 }
 
-rae head_right {
+rae 202 {
     flow 0.15
     rotate "head" y:-45
     wigglemul 3.0
 }
 
-rae head_tip_left {
+rae 203 {
     flow 0.3
     rotate "head" z:10
 }
 
-rae head_tip_right {
+rae 204 {
     flow 0.3
     rotate "head" z:-10
 }
 
 # arms
 
-rae right_arm_raise {
+rae 206 {
     flow 0.15
     rotate "arm_r" z:110
     wigglemul 1.5
 }
 
-rae right_arm_twist {
+rae 207 {
     flow 0.13
     rotate "arm_r" x:90
     wigglemul 1.5
 }
 
-rae right_elbow_twist {  # guitar strum
+rae 208 {  # guitar strum
     flow 1.2
     rotate "hand_r" y:-35
     wigglemul 2.0
 }
 
-rae left_arm_slide {
+rae 189 {
     flow 0.4
     rotate "arm_l" x:-15
 }
 
-rae right_wrist {
+rae 209 {
     flow 0.4
     rotate "hand_r" z:40
     wigglemul 2.0
 }
 
-rae guitar_raise {
+rae 190 {
     flow 0.4
     rotate "banjo" z:-15
     rotate "arm_l" y:-20
@@ -84,30 +83,30 @@ rae guitar_raise {
 
 # legs
 
-rae foot_tap {
+rae 194 {
     flow 0.4
     rotate "toes_r" x:20
 }
 
 # face
 
-any jaw {
+rae 196 {
     flow 1.2
     rotate "jaw" x:-15
     rotate "snout" x:5
 }
 
-any eyes_left {
+rae 199 {
     flow 0.5
     move "eyes" x:1
 }
 
-any eyes_right {
+rae 200 {
     flow 0.5
     move "eyes" x:-1
 }
 
-rae left_eyelid, rae right_eyelid {
+rae 197, rae 198 {
     flow 0.8
     anim "eyelids"
 }

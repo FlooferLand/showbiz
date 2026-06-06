@@ -12,6 +12,9 @@ class BitChartStore {
         add(id = RAE_ID,
             BitChartInfo(extension = "rshw", color = 0xFFAF4F2B.toInt())
         )
+        add(id = WP5_ID,
+            BitChartInfo(extension = "wp5shw", color = 0xFF8D6320.toInt())
+        )
         add(id = FAZ_ID,
             BitChartInfo(extension = "fshw", color = 0xFF8D6320.toInt())
         )
@@ -25,19 +28,24 @@ class BitChartStore {
 
     fun add(id: String, info: BitChartInfo) {
         ids.add(id)
-        extensions.add(info.extension)
+        extensions.addAll(info.extensions)
         idsToInfo[id] = info
-        extensionToInfo[info.extension] = info
-        extensionToId[info.extension] = id
+        for (ext in info.extensions) {
+            extensionToInfo[ext] = info
+            extensionToId[ext] = id
+        }
     }
 
     fun getColor(id: String? = null, ext: String? = null): Int =
         id?.let { idsToInfo[it]?.color } ?: ext?.let { extensionToInfo[it]?.color } ?: 0xFFFFFFFF.toInt()
 
-    data class BitChartInfo(val extension: String, val color: Int)
+    data class BitChartInfo(val extensions: List<String>, val color: Int) {
+        constructor(extension: String, color: Int) : this(listOf(extension), color)
+    }
 
     companion object {
         const val RAE_ID = "rae"
+        const val WP5_ID = "wp5"
         const val FAZ_ID = "faz"
         const val CEC_ID = "cec"
         const val FAZTOYS_ID = "toy"

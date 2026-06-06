@@ -109,6 +109,10 @@ object Extensions {
     //endregion
 
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
+    fun String.alwaysEndsWith(suffixes: Collection<String>): String {
+        if (suffixes.any { it.endsWith(it) } || suffixes.isEmpty()) return this
+        return this + suffixes.first()
+    }
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
     fun Int.secsToTicks(): Int = this * 20

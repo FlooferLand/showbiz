@@ -1,48 +1,48 @@
 set faz bonnie
 set rae beach_bear
 
-faz arm_bend_l, rae guitar_raise {
+faz 46, rae 155 {
     flow 0.3
     rotate "upper_arm_l" z:-15
 }
 
-faz arm_twist_r, rae right_arm_raise {
+faz 43, rae 161 {
     flow 0.2
     rotate "upper_arm_r" z:10
 }
 
-faz head_turn_l, rae head_left {
+faz 52, rae 156 {
     flow 1.0
     rotate "head" y:15
 }
 
-faz head_turn_r, rae head_right {
+faz 51, rae 157 {
     flow 1.0
     rotate "head" y:-15
 }
 
-any head_up {
+faz 34, rae 158 {
     flow 0.7
     rotate "head" x:15
 }
 
-any body_lean {
+faz 55, rae 165 {
     flow 0.8
     anim "body_tilt"
 }
 
-any jaw {
+faz 33, rae 166 {
     flow 1.5
     rotate "jaw" x:-30
 }
 
-faz eyes_left, rae left_eyelid {
+faz 36, rae 151 {
     flow 0.6
     move "left_eye" x:1
     move "right_eye" x:1
 }
 
-faz eyes_right, rae right_eyelid {
+faz 35, rae 152 {
     flow 0.6
     move "left_eye" x:-1
     move "right_eye" x:-1
