@@ -22,14 +22,17 @@ wp5 41, rae 152 {
 wp5 42, rae 158 {
     flow 0.7
     rotate "Head" x:22.5
+    wigglemul 2.0
 }
 wp5 43, rae 156 {
     flow 0.7
     rotate "Head" y:20
+    wigglemul 2.0
 }
 wp5 44, rae 157 {
     flow 0.7
     rotate "Head" y:-20
+    wigglemul 2.0
 }
 wp5 45, rae 155 {
     flow 0.7
@@ -44,12 +47,14 @@ wp5 46, rae 154 {
     rotate "ElbowL" x:10
 }
 wp5 47, rae 163 {  # Strum
-    flow 0.7
-    rotate "HandR" y:30
+    flow 0.8
+    rotate "HandR" y:35
+    wigglemul 2.0
 }
 wp5 48, rae 165 {
     flow 0.3
     rotate "Waist" x:10
+    wigglemul 2.5
 }
 wp5 49 {
     flow 1.0

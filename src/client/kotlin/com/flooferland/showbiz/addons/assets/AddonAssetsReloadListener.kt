@@ -131,11 +131,9 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 }
 
                 if (bots.isNotEmpty()) {
-                    for ((botId, bot) in bots) {
-                        if (bot == null) {
-                            err("Bot '${botId}' has no associated data. Missing files")
-                            continue@namespace
-                        }
+                    bots.entries.removeIf { (botId, bot) ->
+                        if (bot == null) err("Bot '${botId}' has no associated data. Missing files")
+                        bot == null
                     }
                     val assets = AddonAssets(
                         id = namespace,

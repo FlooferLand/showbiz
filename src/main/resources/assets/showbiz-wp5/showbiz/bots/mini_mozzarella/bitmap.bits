@@ -42,26 +42,32 @@ wp5 57, rae 179 {
 wp5 58, rae 173 {
     flow 0.3
     rotate "ArmL" z:-70
+    wigglemul 2.5
 }
 wp5 59, rae 168 {
     flow 0.3
     rotate "ArmR" z:70
+    wigglemul 2.5
 }
 wp5 60, rae 174 {
     flow 0.7
     rotate "ArmL2" x:45
+    wigglemul 2.5
 }
 wp5 61, rae 169 {
     flow 0.7
     rotate "ArmR2" x:45
+    wigglemul 2.5
 }
 wp5 62, rae 175 {
     flow 0.7
     rotate "ArmL3" x:20
+    wigglemul 2.5
 }
 wp5 63, rae 170 {
     flow 0.7
     rotate "ArmR3" x:20
+    wigglemul 2.5
 }
 wp5 64, rae 188 {
     flow 0.3

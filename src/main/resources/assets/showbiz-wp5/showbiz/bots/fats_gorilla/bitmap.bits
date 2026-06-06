@@ -14,8 +14,8 @@ wp5 23, rae 58 { # Right arm swing
 wp5 25, rae 62 { # Body lean
     flow 0.3
     rotate "Waist" x:10
-    move "ElbowR" z:1
-    move "ElbowL" z:1
+    move "ArmR" z:4
+    move "ArmL" z:4
     wigglemul 2.0
 }
 
@@ -30,13 +30,13 @@ wp5 24, rae 60 { # Right elbow
 }
 
 wp5 20, rae 54 { # Head left
-    flow ease-in 0.28
-    rotate "Head" y:25
+    flow 0.4
+    rotate "Head" y:80
     wigglemul 2.0
 }
 wp5 21, rae 51 { # Head tilt left
     flow ease-in 0.28
-    rotate "Head" z:15
+    rotate "Head" z:10
 }
 
 wp5 17, rae 45 { # Mouth

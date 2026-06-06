@@ -1,7 +1,7 @@
 set rae dook
 set wp5 dingo
 
-wp5 mouth, rae mouth {
+wp5 27, rae 30 {
     flow 1.0
     rotate "Jaw" x:-35
     rotate "Snout" x:7.5
