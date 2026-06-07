@@ -63,7 +63,7 @@ rae 13 {
 
 # face
 wp5 1, rae 1 {
-    flow 0.3
+    flow 0.5
     rotate "jaw" x:-35
     rotate "snout" x:5
 }
