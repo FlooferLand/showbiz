@@ -16,6 +16,12 @@ authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
+[piano]
+name = "Fats' Piano"
+authors = ["Creative Engineering", "Monsterwaill", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
 [mini_mozzarella]
 name = "Mini Mozzarella"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
