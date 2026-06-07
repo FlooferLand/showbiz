@@ -2,6 +2,7 @@ package com.flooferland.showbiz.types.connection.data
 
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.connection.ConnectionData
 
@@ -30,7 +31,9 @@ data class PackedShowData(
     override fun merge(other: PackedShowData): Boolean {
         signal += other.signal
         playing = playing || other.playing
-        if (mapping == null) mapping = other.mapping
+        mapping = other.mapping
+        if (mapping !in Showbiz.charts.ids)
+            mapping = null
         return true
     }
 }

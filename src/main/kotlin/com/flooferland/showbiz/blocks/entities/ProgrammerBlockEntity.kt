@@ -9,7 +9,6 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -43,16 +42,16 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Show recording
         if (operators.isEmpty()) return
-        if (show.data.mapping.isNullOrEmpty()) show.data.mapping = BitChartStore.DEFAULT
         show.data.signal.reset()
         show.data.playing = true
-        val mapping = show.data.mapping ?: BitChartStore.DEFAULT
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)
             for (i in 0 until data.heldKeys.size) {
                 if (!data.heldKeys[i]) continue
-                val mappedBits = data.mapKeyToBit(i)?.get(mapping) ?: continue
-                show.data.signal += mappedBits
+                val mappedBits = data.mapKeyToBit(i) ?: continue
+                val (mapping, bit) = mappedBits.getFirstNotEmpty() ?: continue
+                show.data.mapping = mapping
+                show.data.signal += bit
             }
         }
         show.send()

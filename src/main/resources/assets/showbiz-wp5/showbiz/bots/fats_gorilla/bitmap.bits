@@ -8,18 +8,18 @@ wp5 23, rae 57 { # Left arm swing (horizontal)
 
 wp5 22, rae 59 { # Left elbow keypress
     flow 0.5
-    rotate "ElbowL3" z:-25
+    rotate "ElbowL3" z:-20
     wigglemul 3.0
 }
 
 wp5 24, rae 60 { # Right elbow keypress
     flow 0.5
-    rotate "ElbowR3" z:25
+    rotate "ElbowR3" z:20
     wigglemul 3.0
 }
 
 wp5 25, rae 62 { # Body lean
-    flow 0.3
+    flow 0.25
     rotate "Waist" x:8
     move "ElbowR" y:0.4
     move "ElbowL" y:0.4
@@ -29,18 +29,20 @@ wp5 25, rae 62 { # Body lean
 }
 
 wp5 20, rae 54 { # Head left
-    flow 0.4
-    rotate "Head_Turn" x:10 y:80
-    wigglemul 2.0
+    flow 0.35
+    rotate "Head_Turn" x:3 y:80
+    move "Head_Turn" z:-1
+    wigglemul 0.0
 }
 wp5 21, rae 51 { # Head tilt left
-    flow ease-in 0.28
-    rotate "Head" z:10
+    flow 0.4
+    rotate "Head_Tilt" z:13
+    move "Head_Tilt" y:0.25
     wigglemul 2.0
 }
 
 wp5 17, rae 45 { # Mouth
-    flow 0.5
+    flow 0.6
     rotate "jaw" x:-45
 }
 
@@ -55,6 +57,6 @@ wp5 19, rae 42 { # Right eyelid
 }
 
 wp5 26, rae 61 {
-    flow 0.7
-    rotate "Foot" x:10
+    flow 0.8
+    rotate "Foot" x:15
 }

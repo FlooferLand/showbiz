@@ -18,7 +18,7 @@ accepts.fnaf1 = false
 
 [piano]
 name = "Fats' Piano"
-authors = ["Creative Engineering", "Monsterwaill", "FlooferLand"]
+authors = ["Creative Engineering", "Monsterwaill"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 

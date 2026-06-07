@@ -15,6 +15,15 @@ data class MappedBits(val inner: HashMap<String, MutableSet<BitId>> = HashMap<St
     val charts get() = inner.keys
     val bits get() = inner.values.flatten()
 
+    /** Gets the first chart that contains bits */
+    fun getFirstNotEmpty(): Pair<String, MutableSet<BitId>>? {
+        charts.forEach { mapping ->
+            val bits = inner[mapping] ?: return@forEach
+            if (bits.isNotEmpty()) return Pair(mapping, bits)
+        }
+        return null
+    }
+
     fun getOrPutDefault(key: String) = inner.getOrPut(key) { mutableSetOf() }
     fun addBit(chartId: String, bit: BitId) {
         val bits = getOrPutDefault(chartId)
