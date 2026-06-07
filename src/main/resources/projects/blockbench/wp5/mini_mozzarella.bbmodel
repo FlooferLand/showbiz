@@ -4568,6 +4568,29 @@
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
+		},
+		{
+			"name": "Booper",
+			"uuid": "cae0ebf0-86be-66b9-66f1-f5b3bda5cc27",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [0, 25.6, -6.4],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"visibility": true,
+			"autouv": 0,
+			"isOpen": true,
+			"primary_selected": true
 		}
 	],
 	"outliner": [
@@ -4701,7 +4724,11 @@
 										"a00d119e-4d96-79f9-0905-ba505866f1e9",
 										"58ec1a98-4983-0f47-8903-dec17823bb52",
 										"bdeebbd4-5ea4-c3b8-de24-0b73144aea32",
-										"e036ad7b-468b-2800-199d-b8eb1a7549dd",
+										{
+											"uuid": "cae0ebf0-86be-66b9-66f1-f5b3bda5cc27",
+											"isOpen": true,
+											"children": ["e036ad7b-468b-2800-199d-b8eb1a7549dd"]
+										},
 										"3c795766-95fe-a92e-f382-a8216403b84c",
 										"59f5fb0e-299c-fbdb-0c2b-5c5377621c0e",
 										"e04ee03d-a2cc-2b5e-04aa-60d1eec8e041",

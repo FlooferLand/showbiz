@@ -11,5 +11,6 @@ enum class CollidePartId {
     KickFoot,
     Snare,
     Cymbal,
+    Boop,
     HiHat
 }

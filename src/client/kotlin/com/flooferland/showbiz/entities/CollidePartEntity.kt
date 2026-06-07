@@ -122,6 +122,10 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
                     level.playLocalSound(x, y, z, sound.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
                     used += newCollisions
                 }
+                CollidePartId.Boop if punched -> {
+                    level.playLocalSound(x, y, z, ModSounds.Honk.event, SoundSource.BLOCKS, 1.0f, 1.0f, false)
+                    used += newCollisions
+                }
                 else -> {}
             }
 

@@ -2937,7 +2937,7 @@
 		},
 		{
 			"uuid": "c06458e1-3914-9843-5a5b-8748e5ca54cc",
-			"name": "animation.rolfe_dewolfe.eyelids.on",
+			"name": "animation.wolfman.eyelids.on",
 			"loop": "hold",
 			"override": false,
 			"length": 0.5,
@@ -3078,17 +3078,131 @@
 							"interpolation": "linear"
 						}
 					]
+				},
+				"fdf8bc08-9b49-247a-9e1b-f165705f6aed": {
+					"name": "head",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"a7f52d3b-ba26-63bb-85b9-4b093fe48a84": {
+					"name": "face",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0cd6a0c9-ebdb-4a89-bd7c-41d9faccae3d": {
+					"name": "jaw",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"45789a22-53de-2d4f-f279-8b112691a0e2": {
+					"name": "torso",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"1c1bd8d1-d97f-fe7d-a5c0-b5f6ceb9eb48": {
+					"name": "left_leg",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"03892ec5-fadd-8066-4f87-ed6071ef1943": {
+					"name": "right_leg",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"545ea7e1-338a-3542-7391-bb7a561ceabd": {
+					"name": "ArmL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e609dce8-d1ef-dab8-ac53-2e67573abfe8": {
+					"name": "ArmL2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d1290d89-bc09-dcc2-4a63-52f1a841380a": {
+					"name": "arm_r",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"a231ac2c-528f-f154-5f5c-06048d22a8c8": {
+					"name": "arm_r_inner",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"55b67c6a-6047-ef77-c5ab-01f45b6eff35": {
+					"name": "arm_l_up_pivot",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"2c9cf0d6-2646-f4ee-2a31-fb6102c32754": {
+					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0749f8e1-3571-5db5-2fbc-8be4745e7f06": {
+					"name": "ear_l",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"f6a2f4ed-2cd3-228f-13a9-7441ddd0bf70": {
+					"name": "ear_r",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"86a7ffd4-009a-28f2-8a0e-6178d591bd55": {
+					"name": "snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"cf1d0aa4-0175-e867-be22-2dfc090f8e7a": {
+					"name": "torso_offset",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8aee30d2-2f7b-7458-8244-38425d15fad4": {
+					"name": "head_offset",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"64f6e29c-f954-4ccf-9295-6419a64acc57": {
+					"name": "floof",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"bc4039fa-dbd2-5393-cfe1-68e0a1f5b0fc": {
+					"name": "eyelids",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
 				}
 			}
 		},
 		{
 			"uuid": "a81ecf71-1d6b-6c38-d082-c3bdf3ba67c0",
-			"name": "animation.rolfe_dewolfe.eyelids.off",
+			"name": "animation.wolfman.eyelids.off",
 			"loop": "hold",
 			"override": false,
 			"length": 0.5,
 			"snapping": 10,
-			"selected": false,
+			"selected": true,
 			"saved": true,
 			"path": "../../../assets/showbiz-wp5/showbiz/bots/wolfman/models/wolfman.animation.json",
 			"scope": 0,
@@ -3224,9 +3338,124 @@
 							"interpolation": "linear"
 						}
 					]
+				},
+				"fdf8bc08-9b49-247a-9e1b-f165705f6aed": {
+					"name": "head",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"a7f52d3b-ba26-63bb-85b9-4b093fe48a84": {
+					"name": "face",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0cd6a0c9-ebdb-4a89-bd7c-41d9faccae3d": {
+					"name": "jaw",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"45789a22-53de-2d4f-f279-8b112691a0e2": {
+					"name": "torso",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"1c1bd8d1-d97f-fe7d-a5c0-b5f6ceb9eb48": {
+					"name": "left_leg",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"03892ec5-fadd-8066-4f87-ed6071ef1943": {
+					"name": "right_leg",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"545ea7e1-338a-3542-7391-bb7a561ceabd": {
+					"name": "ArmL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e609dce8-d1ef-dab8-ac53-2e67573abfe8": {
+					"name": "ArmL2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d1290d89-bc09-dcc2-4a63-52f1a841380a": {
+					"name": "arm_r",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"a231ac2c-528f-f154-5f5c-06048d22a8c8": {
+					"name": "arm_r_inner",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"55b67c6a-6047-ef77-c5ab-01f45b6eff35": {
+					"name": "arm_l_up_pivot",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"2c9cf0d6-2646-f4ee-2a31-fb6102c32754": {
+					"name": "eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0749f8e1-3571-5db5-2fbc-8be4745e7f06": {
+					"name": "ear_l",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"f6a2f4ed-2cd3-228f-13a9-7441ddd0bf70": {
+					"name": "ear_r",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"86a7ffd4-009a-28f2-8a0e-6178d591bd55": {
+					"name": "snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"cf1d0aa4-0175-e867-be22-2dfc090f8e7a": {
+					"name": "torso_offset",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8aee30d2-2f7b-7458-8244-38425d15fad4": {
+					"name": "head_offset",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"64f6e29c-f954-4ccf-9295-6419a64acc57": {
+					"name": "floof",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"bc4039fa-dbd2-5393-cfe1-68e0a1f5b0fc": {
+					"name": "eyelids",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
 				}
 			}
 		}
 	],
+	"display": {},
 	"geckolib_model_type": "Entity"
 }

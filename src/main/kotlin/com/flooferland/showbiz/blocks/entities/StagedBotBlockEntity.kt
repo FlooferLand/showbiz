@@ -47,6 +47,9 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
                 map("cymbal", CollidePartId.Cymbal)
                 map("stick", CollidePartId.Stick)
             }
+            botId.matches("showbiz-wp5:mini_mozzarella") -> {
+                map("Booper", CollidePartId.Boop)
+            }
             botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
                 map("LeftStickCollision", CollidePartId.LeftStick)
                 map("RightStickCollision", CollidePartId.RightStick)
