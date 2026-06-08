@@ -34,7 +34,7 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
 
     var itemStack: ItemStack
         get() = entityData.get(itemStackAccessor)
-        set(value) { entityData.set(itemStackAccessor, value) }
+        set(value) { entityData.set(itemStackAccessor, value.copyWithCount(1)) }
 
     init {
         this.itemStack = itemStack
@@ -65,7 +65,7 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
             entity.yRot = 180f + player.yRot
             entity.itemStack = player.mainHandItem
             level.addFreshEntity(entity)
-            player.setItemInHand(hand, ItemStack.EMPTY)
+            player.mainHandItem.shrink(1)
             return InteractionResult.SUCCESS
         }
 
@@ -81,7 +81,11 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
     override fun hurt(source: DamageSource, amount: Float): Boolean {
         level().playSound(null, blockPosition(), ModSounds.Honk.event, SoundSource.BLOCKS, 1.0f, 1.0f)
         val attacker = source.entity ?: return false
-        if (attacker is Player) grab(attacker)
+        if (attacker is Player) {
+            if (attacker.isCreative && amount > 0f)
+                remove(RemovalReason.DISCARDED)
+                else grab(attacker)
+        }
         return false
     }
 
@@ -100,7 +104,7 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
     }
     override fun addAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
-        if (itemStack != ItemStack.EMPTY)
+        if (!itemStack.isEmpty)
             itemStack.save(registryAccess)?.let { tag.put("item", it) }
     }
 
