@@ -11,7 +11,7 @@ accepts.rockafire = true
 accepts.fnaf1 = false
 
 [fats_gorilla]
-name = "Fats Gorilla (W.I.P)"
+name = "Fats Gorilla"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
 accepts.rockafire = true
 accepts.fnaf1 = false

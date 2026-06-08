@@ -5068,7 +5068,7 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": true
+			"primary_selected": false
 		}
 	],
 	"outliner": [

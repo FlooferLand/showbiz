@@ -3,7 +3,8 @@ set wp5 fats
 
 wp5 23, rae 57 { # Left arm swing (horizontal)
     flow 0.5
-    rotate "ArmL" x:-35
+    rotate "ArmL" x:-25
+    move "ArmL" z:2  # Fixes a shoulder gap
 }
 
 wp5 22, rae 59 { # Left elbow keypress
@@ -23,8 +24,8 @@ wp5 25, rae 62 { # Body lean
     rotate "Waist" x:8
     move "ElbowR" y:0.4
     move "ElbowL" y:0.4
-    move "ShoulderR" y:1.4
-    move "ShoulderL" y:1.4
+    move "ShoulderR" y:1.6
+    move "ShoulderL" y:1.6
     wigglemul 2.0
 }
 
