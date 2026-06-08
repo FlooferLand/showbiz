@@ -145,22 +145,21 @@ object FFmpeg {
     }
 
     // TODO: Get path from '(Get-Command ffmpeg).Source' if PowerShell is installed as a backup in case FFmpeg isn't found in the path
-    private fun findFile(name: String): File? {
+    private fun findFile(name: String): File? = runCatching {
         val isWindows = System.getProperty("os.name").contains("win", ignoreCase = true)
         val binaryName = if (isWindows) "$name.exe" else name
 
         val pathEnv = System.getenv("PATH") ?: return null
         val pathSep = if (isWindows) ";" else ":"
 
-        val foundInPath = pathEnv.split(pathSep)
+        val foundPath = pathEnv.split(pathSep)
             .asSequence()
             .filter { it.isNotEmpty() }
-            .map { Paths.get(it).resolve(binaryName) }
-            .firstOrNull { Files.isRegularFile(it) && Files.isExecutable(it) }
-            ?.toFile()
-        if (foundInPath != null) {
-            Showbiz.log.info("$name found at path: '${foundInPath}'")
-            return foundInPath
+            .map { File(it.replace("\"", ""), binaryName) }
+            .firstOrNull { it.isFile && it.canExecute() }
+        if (foundPath != null && foundPath.exists()) {
+            Showbiz.log.info("$name found at path: '${foundPath}'")
+            return foundPath
         }
         Showbiz.log.warn("$name wasn't found in the path.. Searching elsewhere")
 
@@ -177,5 +176,7 @@ object FFmpeg {
             Showbiz.log.warn("$name wasn't found through PowerShell (output='$output')")
         }
         return null
-    }
+    }.also {
+        it.onFailure { throwable -> Showbiz.log.error("Unknown exception triggered while trying to find '$name': ", throwable) }
+    }.getOrNull()
 }
