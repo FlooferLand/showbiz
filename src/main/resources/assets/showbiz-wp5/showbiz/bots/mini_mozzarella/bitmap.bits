@@ -77,10 +77,12 @@ wp5 64, rae 188 {
 wp5 65, rae 187 {
     flow 0.3
     rotate "Chest" y:-20
-    wigglemul 2.0
+    rotate "Skirt" y:-20
+    wigglemul 3.0
 }
 rae 186 {
     flow 0.3
     rotate "Chest" y:20
-    wigglemul 2.0
+    rotate "Skirt" y:20
+    wigglemul 3.0
 }

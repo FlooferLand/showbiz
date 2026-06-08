@@ -30,13 +30,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0.5, 0, -2],
-			"to": [3.5, 11, 1],
+			"from": [0.45, 0, -2],
+			"to": [3.45, 11, 1],
 			"autouv": 0,
 			"color": 9,
 			"mirror_uv": true,
 			"rotation": [0, -12.5, 0],
-			"origin": [1.5, 11.5, -0.5],
+			"origin": [1.45, 11.5, -0.5],
 			"uv_offset": [0, 40],
 			"faces": {
 				"north": {
@@ -75,12 +75,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0.5, 0, -4],
-			"to": [3.5, 2, -2],
+			"from": [0.45, 0, -4],
+			"to": [3.45, 2, -2],
 			"autouv": 0,
 			"color": 9,
 			"rotation": [0, -12.5, 0],
-			"origin": [1.5, 11.5, -0.5],
+			"origin": [1.45, 11.5, -0.5],
 			"uv_offset": [36, 14],
 			"faces": {
 				"north": {
@@ -119,12 +119,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-3.5, 0, -2],
-			"to": [-0.5, 11, 1],
+			"from": [-3.45, 0, -2],
+			"to": [-0.45, 11, 1],
 			"autouv": 0,
 			"color": 9,
 			"rotation": [0, 12.5, 0],
-			"origin": [-1.5, 11.5, -0.5],
+			"origin": [-1.45, 11.5, -0.5],
 			"uv_offset": [0, 40],
 			"faces": {
 				"north": {
@@ -163,13 +163,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-3.5, 0, -4],
-			"to": [-0.5, 2, -2],
+			"from": [-3.45, 0, -4],
+			"to": [-0.45, 2, -2],
 			"autouv": 0,
 			"color": 9,
 			"mirror_uv": true,
 			"rotation": [0, 12.5, 0],
-			"origin": [-1.5, 11.5, -0.5],
+			"origin": [-1.45, 11.5, -0.5],
 			"uv_offset": [36, 14],
 			"faces": {
 				"north": {
@@ -897,12 +897,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-3.58815, 2, -1.99178],
-			"to": [-0.38815, 4, 1.20822],
+			"from": [-3.53815, 2, -1.99178],
+			"to": [-0.33815, 4, 1.20822],
 			"autouv": 0,
 			"color": 9,
 			"rotation": [0, 12.5, 0],
-			"origin": [-1.98815, 3, -0.39178],
+			"origin": [-1.93815, 3, -0.39178],
 			"uv_offset": [0, 55],
 			"faces": {
 				"north": {
@@ -941,12 +941,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0.38815, 2, -1.99178],
-			"to": [3.58815, 4, 1.20822],
+			"from": [0.33815, 2, -1.99178],
+			"to": [3.53815, 4, 1.20822],
 			"autouv": 0,
 			"color": 9,
 			"rotation": [0, -12.5, 0],
-			"origin": [1.98815, 3, -0.39178],
+			"origin": [1.93815, 3, -0.39178],
 			"uv_offset": [0, 55],
 			"faces": {
 				"north": {
@@ -4290,7 +4290,7 @@
 			"mirror_uv": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -4590,7 +4590,30 @@
 			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
+		},
+		{
+			"name": "Skirt",
+			"uuid": "7b63babd-061b-fca5-40c1-f1135bf66038",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [0, 13, 0],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"visibility": true,
+			"autouv": 0,
+			"isOpen": true,
+			"primary_selected": false
 		}
 	],
 	"outliner": [
@@ -4598,10 +4621,14 @@
 			"uuid": "27f17258-8b06-01c5-ad4e-d65757dbc78b",
 			"isOpen": true,
 			"children": [
-				"18df15ab-d214-ac3a-a5be-58b7f4a2354c",
+				{
+					"uuid": "7b63babd-061b-fca5-40c1-f1135bf66038",
+					"isOpen": true,
+					"children": ["18df15ab-d214-ac3a-a5be-58b7f4a2354c"]
+				},
 				{
 					"uuid": "c321a5f7-643f-3068-19a0-47a01de9f56d",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						"4cf1ed44-b60d-fe13-4f87-68998d3da0fc",
 						"0c8a3680-2490-1f64-cfcc-df4a24d611fb",

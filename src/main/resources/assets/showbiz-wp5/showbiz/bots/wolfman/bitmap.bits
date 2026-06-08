@@ -2,19 +2,19 @@ set rae rolfe
 set wp5 wolfman
 
 wp5 14, rae 16 {
-    flow 0.3
+    flow 0.25
     rotate "torso" x:-5
     wigglemul 3.0
 }
 
 wp5 13, rae 14 {
-    flow 0.4
+    flow 0.35
     rotate "torso" y:25
     wigglemul 3.0
 }
 
 wp5 7, rae 8 {
-    flow 0.8
+    flow 0.7
     rotate "head" x:13
     wigglemul 2.5
 }
@@ -26,38 +26,30 @@ wp5 9, rae 6 {
 }
 
 # arms
-rae 17 {
-    flow 0.15
-    rotate "arm_r" z:50
-    wigglemul 1.5
-}
-
-rae 18 {
+wp5 15, rae 18 {  # mic swing
     flow 0.35
-    rotate "arm_r" y:22
+    rotate "arm_r" y:5 z:-10
+    rotate "arm_r_inner" x:-10 y:10 z:-8
+    rotate "mic" x:2 z:13
+    rotate "mic_hand" y:5
+    move "mic_hand" y:0.5
     wigglemul 1.5
 }
 
-rae 19 {
-    flow 0.35
-    rotate "arm_r_inner" y:-75
-    wigglemul 1.5
-}
-
-rae 11 {
+wp5 10, rae 11 {
     flow 0.3
     rotate "arm_l_up_pivot" z:-70
     wigglemul 1.5
 }
 
-rae 12 {
-    flow 0.5
+wp5 11, rae 12 {
+    flow 0.4
     rotate "ArmL" y:60
     wigglemul 1.5
 }
-rae 13 {
-    flow 0.5
-    rotate "ArmL2" x:-50
+wp5 12, rae 13 {
+    flow 0.4
+    rotate "ArmL2" x:30
     wigglemul 1.5
 }
 
@@ -73,15 +65,19 @@ rae 36 {
 }
 wp5 2, rae 4 {
     flow 0.5
-    move "eyes" x:0.7
+    move "eyes" x:0.5
 }
 rae 5 {
     flow 0.5
-    move "eyes" x:-0.7
+    move "eyes" x:-0.5
 }
-rae 2, rae 3 {
-    flow 1.2
-    anim "eyelids"
+wp5 3, rae 2 {
+    flow 0.8
+    move "eyelid_l" y:-1.25
+}
+wp5 4, rae 3 {
+    flow 0.8
+    move "eyelid_r" y:-1.25
 }
 rae 37 {
     flow 1.8

@@ -17,35 +17,43 @@ wp5 29, rae 29 {
 wp5 30, rae 23 {
     flow 1.0
     rotate "EarL" z:-45
+    wigglemul 3.0
 }
 wp5 31, rae 24 {
     flow 1.0
     rotate "EarR" z:45
+    wigglemul 3.0
 }
 wp5 32, rae 22 {
     flow 0.7
     rotate "Head" x:15
+    wigglemul 1.5
 }
 wp5 33, rae 25 {
     flow 0.7
     rotate "Head" y:25
+    wigglemul 1.5
 }
 wp5 34, rae 21 {
     flow 0.7
     rotate "Head" y:-25
+    wigglemul 1.5
 }
 
 # FIXME: Elbows are swapped ??
 wp5 35, rae 35 {
     flow 1.3
     rotate "ElbowL" x:-47.5
+    wigglemul 1.5
 }
 wp5 36, rae 31 {
     flow 1.3
     rotate "ElbowR" x:-47.5
+    wigglemul 1.5
 }
 
 wp5 37, rae 64 {
     flow 0.3
     rotate "Waist" x:15
+    wigglemul 1.5
 }
