@@ -11,4 +11,4 @@ setMapping(string)
 	Sets the mapping / bit chart ID (ex: "rae", "faz")
 
 getRegisteredMappings() -> array[string]
-	Sets the mapping / bit chart ID (ex: "rae", "faz")
+	Gets the mapping / bit chart IDs
