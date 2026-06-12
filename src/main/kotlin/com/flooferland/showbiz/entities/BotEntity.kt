@@ -92,7 +92,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         if (!level().isClientSide) {  // Preventing calling onSyncedDataUpdated again
             entityData.set(persistentDataAccessor, tag)
         }
-        connectionManager.load(entityData.get(persistentDataAccessor))
+        connectionManager.load(tag)
     }
 
     companion object {

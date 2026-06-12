@@ -16,17 +16,20 @@ sealed class ConnectionOwnerId() {
     abstract fun grabConnectable(level: Level): IConnectable?
     abstract fun grabBlockPos(level: Level): BlockPos?
     abstract fun grabPos(level: Level): Vec3?
+    abstract fun isLoaded(level: Level): Boolean
 
     data class BlockId(val blockPos: BlockPos) : ConnectionOwnerId() {
         override fun grabConnectable(level: Level) = level.getBlockEntity(blockPos) as? IConnectable
         override fun grabBlockPos(level: Level) = blockPos
         override fun grabPos(level: Level) = blockPos.center!!
+        override fun isLoaded(level: Level): Boolean = grabBlockPos(level).let { level.isLoaded(it) }
     }
 
     class EntityId(val entityUuid: UUID, var entityLocalId: Int? = null) : ConnectionOwnerId() {
         override fun grabConnectable(level: Level) = grabEntity(level) as? IConnectable
         override fun grabBlockPos(level: Level) = grabEntity(level)?.blockPosition()
         override fun grabPos(level: Level) = grabEntity(level)?.position()
+        override fun isLoaded(level: Level) = true  // TODO: Should figure out if the entity is loaded or not
         fun grabEntity(level: Level): Entity? {
             val id = entityLocalId
             if (id != null && level.isClientSide) {
@@ -41,9 +44,6 @@ sealed class ConnectionOwnerId() {
         override fun equals(other: Any?) = other is EntityId && entityUuid == other.entityUuid
         override fun hashCode() = entityUuid.hashCode()
     }
-
-    fun isLoaded(level: Level): Boolean =
-        grabBlockPos(level)?.let { level.isLoaded(it) } ?: false
 
     fun matches(connectable: IConnectable) = ConnectionOwnerId.of(connectable)?.let { it == this } ?: false
 
