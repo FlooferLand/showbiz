@@ -7,6 +7,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.resources.*
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.types.connection.ConnectionOwnerId
 import com.flooferland.showbiz.utils.rl
 import com.mojang.serialization.Codec
 
@@ -14,6 +15,10 @@ sealed class ModComponents<T> {
     data object BlockOwner : ModComponents<OptionBlockPos>(
         "block_owner",
         { b -> b.persistent(OptionBlockPos.CODEC).networkSynchronized(OptionBlockPos.STREAM_CODEC) }
+    )
+    data object HeldConnection : ModComponents<ConnectionOwnerId>(
+        "held_connection",
+        { b -> b.persistent(ConnectionOwnerId.CODEC).networkSynchronized(ConnectionOwnerId.STREAM_CODEC) }
     )
     data object FileName : ModComponents<String>(
         "filename",

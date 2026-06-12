@@ -10,13 +10,15 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateAnimation
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
 import com.flooferland.showbiz.models.CymbalModel.CymbalState
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.ClientCollidePartInstance
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.utils.lerp
 import java.lang.Math.clamp
@@ -33,8 +35,8 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 /** Responsible for fancy animation */
-class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
-    val localStorage = WeakHashMap<StagedBotBlockEntity, LocalBotStorage>()
+class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
+    val localStorage = WeakHashMap<T, LocalBotStorage>()
     class LocalBotStorage {
         val bitSmooths = mutableMapOf<BitId, Float>()
         val bitSpringOffset = mutableMapOf<BitId, Float>()
@@ -50,14 +52,15 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
 
     var triggeredBadAnimationError = false
 
-    override fun setCustomAnimations(animatable: StagedBotBlockEntity, instanceId: Long, state: AnimationState<StagedBotBlockEntity>) {
+    override fun setCustomAnimations(animatable: T, instanceId: Long, state: AnimationState<T>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: run { resetAll(); return }
         val model = currentModel ?: run { resetAll(); return }
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
-        val mapping = animatable.show.data.mapping
-        val bitmapBits = bot.bitmap.bits[mapping] ?: mutableMapOf()
+        val showMapping = animatable.show?.data?.mapping
+        val showPlaying = animatable.show?.data?.playing == true
+        val bitmapBits = bot.bitmap.bits[showMapping] ?: mutableMapOf()
         if (bitmapBits.isEmpty()) resetAll()
 
         // Resetting bones
@@ -74,7 +77,7 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
                 val initMove = model.initBoneMoves[bone.name] ?: Vec3fc()
                 bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
             }
-            if (!animatable.show.data.playing) {
+            if (!showPlaying) {
                 for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
@@ -84,7 +87,7 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
         }
 
         // Resetting animations
-        if (!animatable.show.data.playing) {
+        if (!showPlaying) {
             for ((bit, data) in bitmapBits) {
                 for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
@@ -98,7 +101,7 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
         val storage = localStorage.getOrPut(animatable) { LocalBotStorage() }
 
         // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
-        val movements = mapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
+        val movements = showMapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
 
         // Driving animation
         val delta = ShowbizClient.getDeltaTime()
@@ -106,7 +109,9 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
         driveCollideParts(animatable, model, storage, state.partialTick)
     }
 
-    private fun driveCollideParts(animatable: StagedBotBlockEntity, model: BotModelData, storage: LocalBotStorage, partialTick: Float) {
+    private fun driveCollideParts(animatable: T, model: BotModelData, storage: LocalBotStorage, partialTick: Float) {
+        if (animatable !is ICollidePartInteractable) return
+
         val instance = animatable.collidePartInstance.clientInstance as? ClientCollidePartInstance ?: return
         animationProcessor.getBone("Cymbal")?.let { bone ->
             val state = storage.cymbalStates.getOrPut(bone.name) { CymbalState() }
@@ -121,10 +126,10 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
     }
 
     // TODO: Make this function not a mess
-    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: StagedBotBlockEntity, animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot, movements: Movements?) {
+    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T, animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot, movements: Movements?) {
         for ((bit, data) in bitmapBits) {
             // Getting things
-            val frame = animatable.show.data.signal
+            val frame = animatable.show?.data?.signal ?: SignalFrame()
             val flowSpeed = (data.flow.speed.toFloat() * 0.3f)
             val flowEase = data.flow.easing
             val bitOn = frame.frameHas(bit)
@@ -236,20 +241,21 @@ class StagedBotBlockEntityModel : BaseBotModel<StagedBotBlockEntity>() {
         }
     }
 
-    fun soundKeyframeHandler(animatable: StagedBotBlockEntity, state: SoundKeyframeEvent<GeoAnimatable>) {
+    fun soundKeyframeHandler(animatable: T, state: SoundKeyframeEvent<GeoAnimatable>) {
         if (!Showbiz.config.audio.playBotEffects) return
-        if (animatable.isRemoved) return
+        if (animatable.botRemoved) return
         val sound = ResourceLocation.parse(state.keyframeData.sound)
         if (!BuiltInRegistries.SOUND_EVENT.containsKey(sound)) {
             Showbiz.log.warn("Sound event '$sound' was not found for bot '${animatable.botId}'")
             return
         }
+        val pos = animatable.botPos ?: return
         val soundEvent = SoundEvent.createVariableRangeEvent(sound)
-        val level = animatable.level as? ClientLevel ?: return
-        level.playSound(ClientUtil.getClientPlayer(), animatable.blockPos, soundEvent, SoundSource.BLOCKS, 0.5f, 1.0f)
+        val level = animatable.botLevel as? ClientLevel ?: return
+        level.playSound(ClientUtil.getClientPlayer(), pos.x, pos.y, pos.z, soundEvent, SoundSource.BLOCKS, 0.5f, 1.0f)
     }
 
-    fun getAnimId(animatable: StagedBotBlockEntity, bitOn: Boolean, anim: AnimCommand): String {
+    fun getAnimId(animatable: T, bitOn: Boolean, anim: AnimCommand): String {
         val id = if (bitOn)
             anim.on ?: "${anim.id}.on"
         else

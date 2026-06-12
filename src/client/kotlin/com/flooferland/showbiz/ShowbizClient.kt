@@ -3,6 +3,7 @@ package com.flooferland.showbiz
 import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.screens.*
+import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.network.chat.*
@@ -30,6 +31,7 @@ import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import com.flooferland.showbiz.utils.MainClientUtils
 import com.flooferland.showbiz.utils.ShowbizUtils
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
@@ -100,7 +102,7 @@ object ShowbizClient : ClientModInitializer {
                     renderer
                 )
             JukeboxLyricRenderer.register()
-            add(ModBlocks.StagedBot, ::StagedBotBlockBlockEntityRenderer)
+            add(ModBlocks.StagedBot, ::StagedBotBlockEntityRenderer)
             add(ModBlocks.ReelToReel, ::ReelToReelBlockEntityRenderer)
             add(ModBlocks.ShowSelector, ::ShowSelectorBlockEntityRenderer)
             add(ModBlocks.CurtainBlock, ::CurtainBlockEntityRenderer)
@@ -112,6 +114,7 @@ object ShowbizClient : ClientModInitializer {
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
+            EntityRendererRegistry.register(ModEntities.Bot.type, ::BotEntityRenderer)
         }
 
         // GeckoLib renderers
@@ -170,7 +173,7 @@ object ShowbizClient : ClientModInitializer {
             DecorEntity.moveAll(ctx)
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
-            if (StagedBotBlockBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
+            if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
                 for (err in BaseBotModel.errorsTriggered) {
                     val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
                     Showbiz.log.error(message)
@@ -179,9 +182,9 @@ object ShowbizClient : ClientModInitializer {
                         false
                     )
                 }
-                StagedBotBlockBlockEntityRenderer.renderExceptionCountdown = 5f.secsToTicks().toFloat()
+                StagedBotBlockEntityRenderer.renderExceptionCountdown = 5f.secsToTicks().toFloat()
             } else {
-                StagedBotBlockBlockEntityRenderer.renderExceptionCountdown -= 1
+                StagedBotBlockEntityRenderer.renderExceptionCountdown -= 1
             }
             BaseBotModel.errorsTriggered.clear()
         }
@@ -215,6 +218,7 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // DARN YOU SPLIT SOURCESETS
+        MainClientUtils.getEntityByUuid = { level, uuid -> (level as? ClientLevel)?.entitiesForRendering()?.firstOrNull { it.uuid == uuid } }
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
         ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
@@ -226,6 +230,6 @@ object ShowbizClient : ClientModInitializer {
 
     fun resetAssetErrors() {
         BaseBotModel.errorsTriggered.clear()
-        StagedBotBlockBlockEntityRenderer.renderExceptionCountdown = 0f
+        StagedBotBlockEntityRenderer.renderExceptionCountdown = 0f
     }
 }

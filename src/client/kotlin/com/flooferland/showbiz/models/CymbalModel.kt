@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.models
 
 import net.minecraft.core.*
+import net.minecraft.world.entity.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
@@ -16,6 +17,7 @@ import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -37,16 +39,21 @@ class CymbalModel : DefaultedBlockGeoModel<CymbalBlockEntity>(rl("cymbal")) {
     }
 
     companion object {
-        fun updateState(animatable: BlockEntity, entity: CollidePartEntity, state: CymbalState) {
+        fun updateState(animatable: Any, entity: CollidePartEntity, state: CymbalState) {
             state.lastHitTime = entity.lastHitTime
 
             val length = sqrt(entity.hitDirection.x * entity.hitDirection.x + entity.hitDirection.z * entity.hitDirection.z)
             val nx = if (length > 0f) entity.hitDirection.x / length else 1.0
             val nz = if (length > 0f) entity.hitDirection.z / length else 0.0
 
-            val normal = animatable.blockState.getOptionalValue(FacingEntityBlock.FACING).getOrNull()?.normal
-                ?: animatable.blockState.getOptionalValue(StagedBotBlock.facing).getOrNull()?.normal
-                ?: Vec3i.ZERO
+            val normal = when (animatable) {
+                is BlockEntity ->
+                    animatable.blockState.getOptionalValue(FacingEntityBlock.FACING).getOrNull()?.normal
+                    ?: animatable.blockState.getOptionalValue(StagedBotBlock.facing).getOrNull()?.normal
+                is Entity ->
+                    entity.forward.normalize().let { Vec3i(it.x.roundToInt(), it.y.roundToInt(), it.z.roundToInt()) }
+                else -> null
+            } ?: Vec3i.ZERO
             val (sx, sz) = Pair(normal.x.toDouble(), normal.z.toDouble())
             state.force.x = (nx * sz - nz * sx).toFloat()
             state.force.z = (nx * sx + nz * sz).toFloat()

@@ -33,12 +33,15 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.StagedBot.entityType!!, pos, blockState), GeoBlockEntity, IConnectable, IBot, ExtendedScreenHandlerFactory<BotListSelectPacket>, ICollidePartInteractable {
     override val connectionManager = ConnectionManager(this)
-    val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
+    override val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
         pendingShow.merge(received)
     }
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override var botId: ResourceId? = null
+    override val botLevel get() = level
+    override val botPos get() = blockPos.center!!
+    override val botRemoved get() = isRemoved
 
     override val collidePartInstance = CollidePartManager.create(this) {
         val botId = botId ?: return@create

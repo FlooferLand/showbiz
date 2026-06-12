@@ -4,6 +4,7 @@ import net.minecraft.core.component.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.*
@@ -13,6 +14,7 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
+import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.roundToInt
@@ -43,6 +45,7 @@ object Extensions {
     }
 
     //region Level
+    fun Level.getEntity(uuid: UUID) = (this as? ServerLevel)?.getEntity(uuid) ?: MainClientUtils.getEntityByUuid(this, uuid)
     fun Level.getNearbyPlayers(area: AABB) = this.players().filter { area.contains(it.position()) }
     //endregion
 

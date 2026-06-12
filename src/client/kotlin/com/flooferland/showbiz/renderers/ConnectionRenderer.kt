@@ -28,10 +28,12 @@ object ConnectionRenderer {
 
     fun render(player: Player, source: MultiBufferSource.BufferSource, partialTick: Float) {
         if (!isHoldingWand(player)) return
-        for ((pos, points) in ClientConnections.entries) {
+        val level = player.level() ?: return
+        for ((ownerId, points) in ClientConnections.entries) {
+            val pos = ownerId.grabPos(level) ?: continue
             for (point in points) {
                 val yOffset = getYOffset(point.index, points.size)
-                val pointPos = pos.center.add(0.0, yOffset, 0.0)
+                val pointPos = pos.add(0.0, yOffset, 0.0)
 
                 // Points
                 deferRender { pose, consumer -> renderPoint(pose, consumer, point, pointPos) }
@@ -40,8 +42,8 @@ object ConnectionRenderer {
                 val connectionSnapshot = point.connections.toList()
                 for (connection in connectionSnapshot) {
                     val targetPoint = connection.point
-                    val endYOffset = getYOffset(targetPoint.index, ClientConnections.entries[connection.pos]?.size ?: 1)
-                    val end = connection.pos.center.add(0.0, endYOffset, 0.0)
+                    val endYOffset = getYOffset(targetPoint.index, ClientConnections.entries[connection.id]?.size ?: 1)
+                    val end = connection.id.grabPos(level)?.add(0.0, endYOffset, 0.0) ?: continue
                     deferRender { pose, consumer -> renderConnection(pose, consumer, pointPos, end) }
                 }
             }

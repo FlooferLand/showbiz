@@ -1,16 +1,16 @@
 package com.flooferland.showbiz.types.connection
 
-import net.minecraft.core.*
-import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.Level
+import net.minecraft.network.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.copy
 import com.google.common.math.IntMath.pow
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 
@@ -20,37 +20,42 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 /** Server-only object for handling entity connections/links (See the client-side object -> ClientConnections) */
 object ServerConnections {
     val loaded = mutableListOf<IConnectable>()
-    val entries = mutableMapOf<BlockPos, MutableList<Point>>()
+    val points = mutableMapOf<ConnectionOwnerId, MutableList<Point>>()
 
     const val CLIENT_UPDATE_INTERVAL = 10L // ticks
     final val MAX_VIEW_DISTANCE_SQR = pow(32, 2)
 
-    init {
-        ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { blockEntity, level ->
-            if (level.dimension() != Level.OVERWORLD) return@register
-            if (blockEntity !is IConnectable) return@register
-            loaded.add(blockEntity)
+    fun loadEntity(connectable: Any, level: Level) {
+        if (level.dimension() != Level.OVERWORLD) return
+        if (connectable !is IConnectable) return
+        loaded.add(connectable)
+    }
+    fun unloadEntity(connectable: Any, level: Level) {
+        if (level.dimension() != Level.OVERWORLD) return
+        if (connectable !is IConnectable) return
+        loaded.remove(connectable)
+        for ((_, points) in points) {
+            points.forEach { point -> point.connections.removeIf { it.id.matches(connectable) } }
         }
-        ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { blockEntity, level ->
-            if (level.dimension() != Level.OVERWORLD) return@register
-            if (blockEntity !is IConnectable) return@register
-            loaded.remove(blockEntity)
-            for ((_, points) in entries) {
-                points.forEach { point ->
-                    point.connections.removeIf { it.pos == blockEntity.blockPos }
-                }
-            }
-            entries.remove(blockEntity.blockPos)
 
-            val packet = UpdateConnectionsPacket(blockEntity.blockPos, emptyList())
-            level.server.playerList.players.forEach { ServerPlayNetworking.send(it, packet) }
-        }
+        val id = ConnectionOwnerId.of(connectable) ?: return
+        points.remove(id)
+        val packet = UpdateConnectionsPacket(id, emptyList())
+        level.server?.playerList?.players?.forEach { ServerPlayNetworking.send(it, packet) }
+    }
+
+    init {
+        ServerEntityEvents.ENTITY_LOAD.register { entity, level -> loadEntity(entity, level) }
+        ServerEntityEvents.ENTITY_UNLOAD.register { blockEntity, level -> unloadEntity(blockEntity, level) }
+        ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level -> loadEntity(entity, level) }
+        ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { blockEntity, level -> unloadEntity(blockEntity, level) }
+
         ServerTickEvents.END_WORLD_TICK.register { level ->
             if (level.dimension() != Level.OVERWORLD) return@register
             val queued = mutableListOf<IConnectable>()
-            for (connectable in loaded) {
-                if (connectable !is BlockEntity) continue
+            for (connectable in loaded.copy()) {
                 val manager = connectable.connectionManager
+                val id = ConnectionOwnerId.of(connectable) ?: continue
 
                 val points = mutableListOf<Point>()
                 var index = 0
@@ -62,11 +67,11 @@ object ServerConnections {
                     points.add(Point(index++, manager.outputs.size, key, PointType.Output))
                 }
 
-                entries[connectable.blockPos] = points
+                ServerConnections.points[id] = points
                 queued.add(connectable)
 
                 // Checking that I didn't forget to use the save/load functions of ConnectionManager
-                if (Showbiz.log.isDebugEnabled) {
+                if (Showbiz.log.isDebugEnabled && connectable is BlockEntity) {
                     val tag = connectable.saveCustomOnly(level.registryAccess())
                     connectable.loadCustomOnly(tag, level.registryAccess())
                     val blockId = BlockEntityType.getKey(connectable.type)?.path
@@ -94,19 +99,25 @@ object ServerConnections {
     }
 
     fun updateConnections(connectable: IConnectable) {
-        if (connectable !is BlockEntity) return
         val manager = connectable.connectionManager
 
+        val id = ConnectionOwnerId.of(connectable)
+        val level = connectable.grabLevel()
+        val centerPos = connectable.grabCenterPos()
+
         // Clearing invalid listeners
-        for ((_, port) in manager.outputs) {
-            port.removeListeners {
-                val entity = connectable.level?.getBlockEntity(it) ?: return@removeListeners true
-                entity !is IConnectable || entity.isRemoved
+        if (level != null && level.gameTime > 100L && !level.isClientSide) {
+            for ((_, port) in manager.outputs) {
+                port.removeListeners { ownerId ->
+                    val missing = ownerId.grabConnectable(level) == null
+                    val unloaded = !ownerId.isLoaded(level)
+                    connectable.grabRemoved() || (missing && unloaded)
+                }
             }
         }
 
         // Cleaning connections
-        val points = entries[connectable.blockPos] ?: return
+        val points = points[id] ?: return
         points.forEach { it.connections.clear() }
 
         // Adding listeners from the other side
@@ -114,21 +125,21 @@ object ServerConnections {
             val fromIndex = points.indexOfFirst { it.id == portId && it.type == PointType.Output }
             if (fromIndex == -1) continue
 
-            for (pos in port.readListeners()) {
-                val otherPoints = entries[pos] ?: continue
+            // TODO: "id" being used here isn't correct? No fucking clue why using listenerId breaks things
+            for (listenerId in port.readListeners()) {
+                val otherPoints = ServerConnections.points[id] ?: continue
                 val otherPoint = otherPoints.firstOrNull { it.id == portId && it.type == PointType.Input } ?: continue
-                points[fromIndex].connections.add(Connection(pos, otherPoint))
+                points[fromIndex].connections.add(Connection(listenerId, otherPoint))
             }
         }
 
         // Sending a packet to the client while they hold the wand
-        val level = connectable.level ?: return
-        val server = level.server ?: return
-        if (level.gameTime % CLIENT_UPDATE_INTERVAL == 0L) {
+        val server = level?.server ?: return
+        if (level.gameTime % CLIENT_UPDATE_INTERVAL == 0L && id != null) {
             for (player in server.playerList.players) {
                 if (!canDisplayConnections(player)) continue
-                if (player.distanceToSqr(connectable.blockPos.center) < MAX_VIEW_DISTANCE_SQR) {
-                    ServerPlayNetworking.send(player, UpdateConnectionsPacket(connectable.blockPos, points))
+                if (centerPos == null || player.distanceToSqr(centerPos) < MAX_VIEW_DISTANCE_SQR) {
+                    ServerPlayNetworking.send(player, UpdateConnectionsPacket(id, points))
                 }
             }
         }
@@ -138,14 +149,14 @@ object ServerConnections {
         player.isHolding(ModItems.Wand.item)
 
     enum class PointType { Input, Output }
-    data class Connection(val pos: BlockPos, val point: Point) {
+    data class Connection(val id: ConnectionOwnerId, val point: Point) {
         companion object {
             fun encode(buf: FriendlyByteBuf, connection: Connection) {
-                buf.writeBlockPos(connection.pos)
+                connection.id.encode(buf)
                 Point.encode(buf, connection.point, shallow = true)
             }
             fun decode(buf: FriendlyByteBuf): Connection = Connection(
-                pos = buf.readBlockPos(),
+                id = ConnectionOwnerId.decode(buf),
                 point = Point.decode(buf, shallow = true)
             )
         }

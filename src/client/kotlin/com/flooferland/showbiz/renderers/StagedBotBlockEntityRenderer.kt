@@ -7,7 +7,7 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.models.BaseBotModel
-import com.flooferland.showbiz.models.StagedBotBlockEntityModel
+import com.flooferland.showbiz.models.BotModel
 import com.flooferland.showbiz.renderers.base.GeoFixedBlockEntityRenderer
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -17,7 +17,7 @@ import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 
-class StagedBotBlockBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoFixedBlockEntityRenderer<StagedBotBlockEntity>(StagedBotBlockEntityModel()) {
+class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoFixedBlockEntityRenderer<StagedBotBlockEntity>(BotModel()) {
     init {
         addRenderLayer(AutoGlowingGeoLayer(this))
     }
@@ -62,7 +62,7 @@ class StagedBotBlockBlockEntityRenderer(val context: BlockEntityRendererProvider
         if (animatable.botId == null) return
         poseStack.pushPose()
         try {
-            val botModel = model as StagedBotBlockEntityModel
+            val botModel = model as BotModel
             this.animatable = animatable
 
             val renderColor = getRenderColor(animatable, partialTick, packedLight).argbInt()

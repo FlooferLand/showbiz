@@ -15,4 +15,9 @@ class BotPreviewAnimatable(override var botId: ResourceId?) : GeoAnimatable, IBo
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) {
         controllers.add(AnimationController(this, "main") { PlayState.CONTINUE })
     }
+
+    override val botLevel = null
+    override val botPos = null
+    override val botRemoved = false
+    override val show = null
 }

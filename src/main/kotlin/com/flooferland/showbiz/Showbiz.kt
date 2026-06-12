@@ -1,10 +1,13 @@
 package com.flooferland.showbiz
 
+import net.minecraft.server.level.*
 import net.minecraft.server.packs.*
+import net.minecraft.world.*
 import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
+import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.BotListPacket
 import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
@@ -21,6 +24,7 @@ import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
@@ -121,6 +125,14 @@ object Showbiz : ModInitializer {
             data.cleanBasic()
             data.saveToPlayer(newPlayer)
             FileServer.serverPlayerUploads.remove(oldPlayer.id)
+        }
+
+        // Other events
+        UseEntityCallback.EVENT.register { player, level, hand, entity, result ->
+            val stack = player.getItemInHand(hand)
+            val item = stack.item as? WandItem ?: return@register InteractionResult.PASS
+            if (level !is ServerLevel) return@register InteractionResult.SUCCESS
+            return@register item.useOnEntity(player, level, stack, entity, result)
         }
 
         // Finished

@@ -1,29 +1,28 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.BlockPos
-import net.minecraft.core.HolderLookup
-import net.minecraft.core.component.DataComponents
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.core.*
+import net.minecraft.core.component.*
+import net.minecraft.nbt.*
+import net.minecraft.network.protocol.game.*
+import net.minecraft.server.level.*
+import net.minecraft.sounds.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.level.*
+import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.BitChartStore
-import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
-import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
+import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -69,8 +68,8 @@ class ShowSelectorBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mo
 
         // TODO: Make the show selector not constantly check blocks around the reel-to-reel for performance reasosn..
         if (level is ServerLevel && level.gameTime % 5L == 0L) {
-            for (pos in showSelect.readListeners()) {
-                val reelToReel = level.getBlockEntity(pos) as? ReelToReelBlockEntity ?: continue
+            for (ownerId in showSelect.readListeners()) {
+                val reelToReel = ownerId.grabConnectable(level) as? ReelToReelBlockEntity ?: continue
                 val container = reelToReel.getNearbyContainer() ?: continue
                 slotNames.clear()
                 for (slot in 0 until container.containerSize) {

@@ -49,7 +49,7 @@ object ProgrammerRenderer {
                 else (if (pressed) slotTextureOn else slotTextureOff)
 
             // Drawing textures
-            if (isConfigKey && programmer?.show?.readListeners()?.any { (level.getBlockEntity(it) as? ReelToReelBlockEntity)?.recording ?: false } ?: false) {
+            if (isConfigKey && programmer?.show?.readListeners()?.any { (it.grabConnectable(level) as? ReelToReelBlockEntity)?.recording ?: false } ?: false) {
                 guiGraphics.fill(x - 1, y - 1, x + size.x + 1, y + size.y + 1, 0xFFFF0000.toInt())
                 RenderSystem.setShaderColor(1f, 0.8f, 0.8f, 1f)
             }

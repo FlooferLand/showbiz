@@ -1,11 +1,10 @@
 package com.flooferland.showbiz.types.connection
 
 import net.minecraft.nbt.*
-import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 
-class ConnectionManager(val entity: BlockEntity) {
+class ConnectionManager(val entity: IConnectable) {
     /** Ports that take in information */
     val inputs = hashMapOf<String, ConnectionPort<*>>()
 
@@ -27,7 +26,7 @@ class ConnectionManager(val entity: BlockEntity) {
     }
 
     fun <T: ConnectionData<T>> port(id: String, data: T, direction: PortDirection, autoUseReceived: Boolean = true, react: ConnectionPort<T>.(T) -> Unit = {}) =
-        ConnectionPort(this.entity as IConnectable, id, data, direction, autoUseReceived, react)
+        ConnectionPort(this.entity, id, data, direction, autoUseReceived, react)
 
     /** Saves connections to a tag */
     fun save(tag: CompoundTag) {
@@ -52,8 +51,8 @@ class ConnectionManager(val entity: BlockEntity) {
     fun load(tag: CompoundTag) {
         loadCalled = true
         val tag = tag.getCompoundOrNull("connections") ?: return
-        inputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
-        outputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
+        //inputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
+        //outputs.values.forEach { if (it.direction != PortDirection.In) it.removeListeners { true } }
 
         inputs.forEach { (id, port) ->
             val loaded = runCatching { tag.getCompoundOrNull(id)?.let { port.loadOrThrow(it) } }
