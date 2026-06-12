@@ -9,6 +9,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.types.IPacketable
 import com.flooferland.showbiz.types.IUnsafeCompoundable
+import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -124,8 +125,8 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
         @Suppress("UNCHECKED_CAST")
         listeners.forEach { ownerId ->
-            val entity = ownerId.grabConnectable(level) ?: return@forEach
-            val listener = entity.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
+            val connectable = ownerId.grabConnectable(level) ?: return@forEach
+            val listener = connectable.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
 
             listener.dataReceived = data
             if (listener.autoUseReceived) {
@@ -138,7 +139,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 listener.react(listener, listener.dataReceived)
             }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
 
-            if (!level.isClientSide) {
+            if (level is ServerLevel) {
                 val byteBuf = FriendlyByteBuf(Unpooled.buffer())
                 data.encode(byteBuf)
 
@@ -147,7 +148,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 byteBuf.release()
 
                 val packet = ConnectionDataPacket(ownerId, id, bytes)
-                for (player in (level as ServerLevel).players()) {
+                for (player in level.players()) {
                     ServerPlayNetworking.send(player, packet)
                 }
             }

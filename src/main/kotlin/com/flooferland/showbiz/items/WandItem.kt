@@ -12,6 +12,7 @@ import net.minecraft.world.item.context.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.types.connection.AutoConnection
 import com.flooferland.showbiz.types.connection.ConnectionOwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import java.util.function.Consumer
@@ -35,39 +36,28 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
     val fireAnim = RawAnimation.begin().thenPlay("animation.wand.fire")?.then("animation.wand.shake", Animation.LoopType.LOOP)!!
     val retractAnim = RawAnimation.begin().thenPlayAndHold("animation.wand.retract")!!
 
-    fun link(player: Player, stack: ItemStack, level: ServerLevel, target: IConnectable?): InteractionResult {
+    fun link(player: Player, stack: ItemStack, level: ServerLevel, last: IConnectable?): InteractionResult {
         val owner = stack.get(ModComponents.HeldConnection.type)
-        if (target != null && owner == null) {
-            stack.set(ModComponents.HeldConnection.type, ConnectionOwnerId.of(target))
+        if (last != null && owner == null) {
+            stack.set(ModComponents.HeldConnection.type, ConnectionOwnerId.of(last))
             finish(player, stack, level, ModSounds.End, "fire", "First target selected!")
             return InteractionResult.SUCCESS
         }
 
         val first = owner?.grabConnectable(level)
-        if (first == null || target == null) {
+        if (first == null || last == null) {
             reset(player, stack, level, "First target cleared")
             return InteractionResult.CONSUME
         }
-        if (first == target) {
+        if (first == last) {
             reset(player, stack, level, "You can't connect something to itself, what are you doing!!!")
             return InteractionResult.CONSUME
         }
 
-        var connected = false
-        first.connectionManager.outputs.forEach { (id, portOut) ->
-            if (!target.connectionManager.inputs.containsKey(id)) return@forEach
-            portOut.bindListener(target)
-            connected = true
-        }
-        target.connectionManager.outputs.forEach { (id, portOut) ->
-            if (!first.connectionManager.inputs.containsKey(id)) return@forEach
-            portOut.bindListener(first)
-            connected = true
-        }
-
-        if (connected) {
+        val result = AutoConnection.make(first, last) ?: AutoConnection.make(last, first)
+        if (result != null) {
             stack.remove(ModComponents.HeldConnection.type)
-            finish(player, stack, level, ModSounds.End, "retract", "Connected!")
+            finish(player, stack, level, ModSounds.End, "retract", result)
         } else {
             reset(player, stack, level, "No matching ports found")
         }
