@@ -17,9 +17,10 @@ import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.IRedstoneExtras
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
-class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock(properties) {
+class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock(properties), IRedstoneExtras {
     override val codec = simpleCodec(::ShowParserBlock)!!
     val shape = Shapes.create(0.05, 0.0, 0.05, 0.95, 0.1, 0.95)!!
 
@@ -69,6 +70,16 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
     }
 
     override fun isSignalSource(state: BlockState) = true
+
+    override fun wireShouldConnectTo(state: BlockState, direction: Direction): Boolean {
+        val direction = direction.opposite
+        val facing = state.getValue(FacingEntityBlock.FACING)
+        return when (direction) {
+            facing -> true
+            facing.opposite -> true
+            else -> false
+        }
+    }
 
     override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
         val direction = direction.opposite

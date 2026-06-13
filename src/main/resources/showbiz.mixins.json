@@ -9,7 +9,8 @@
     ],
     "mixins": [
         "JukeboxBlockEntityMixin",
-        "PlayerMixin"
+        "PlayerMixin",
+        "RedStoneWireBlockMixin"
     ],
     "injectors": {
         "defaultRequire": 1
