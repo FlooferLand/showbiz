@@ -25,7 +25,7 @@ public class JukeboxBlockEntityMixin implements ILyricHolder {
 	@Override public @NotNull String showbiz_getLyric() { return showbiz_lyric; }
 	@Override public void showbiz_setLyric(@NotNull String lyric) { showbiz_lyric = lyric; }
 
-	@Inject(method = "tick", at = @At("HEAD"))
+	@Inject(method = "tick", at = @At("HEAD"), require = 0)
 	private static void showbiz_tick(Level level0, BlockPos pos, BlockState state, JukeboxBlockEntity jukebox, CallbackInfo ci) {
 		if (!(level0 instanceof ServerLevel level)) return;
 		if (!(jukebox instanceof ILyricHolder lyricHolder)) return;
@@ -54,7 +54,7 @@ public class JukeboxBlockEntityMixin implements ILyricHolder {
 		}
 	}
 
-	@Inject(method = "popOutTheItem", at = @At("HEAD"))
+	@Inject(method = "popOutTheItem", at = @At("HEAD"), require = 0)
 	private void showbiz_popOutTheItem(CallbackInfo ci) {
 		var jukebox = (JukeboxBlockEntity) (Object) this;
 		if (!(jukebox instanceof ILyricHolder lyricHolder)) return;

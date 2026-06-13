@@ -35,10 +35,15 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
 
     val defaultItem = defaultItem.copyWithCount(1)!!
     private var itemStack = this.defaultItem
+    fun updateItemStack(stack: ItemStack) {
+        this.itemStack = stack
+        if (!level().isClientSide)
+            entityData.set(itemStackAccessor, stack)
+    }
 
     init {
         refreshDimensions()
-        entityData.set(itemStackAccessor, itemStack)
+        updateItemStack(itemStack)
     }
 
     override fun isInvulnerable() = true
@@ -117,7 +122,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     override fun readAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
         itemStack = tag.getOrNull("item")?.let { ItemStack.parse(registryAccess, it).getOrNull() } ?: defaultItem
-        if (!level().isClientSide) entityData.set(itemStackAccessor, itemStack)
+        updateItemStack(itemStack)
     }
     override fun addAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return

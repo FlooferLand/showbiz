@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SplashManager.class)
 class SplashManagerMixin {
-	@Inject(method = "getSplash", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "getSplash", at = @At("HEAD"), cancellable = true, require = 0)
 	public void showbiz_getSplash(CallbackInfoReturnable<SplashRenderer> cir) {
 		// Inside joke
 		if (ShowbizUtils.INSTANCE.isSilly()) {

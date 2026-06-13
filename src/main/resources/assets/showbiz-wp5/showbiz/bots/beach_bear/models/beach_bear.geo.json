@@ -1823,14 +1823,6 @@
 					]
 				},
 				{
-					"name": "IrisL2",
-					"parent": "Head",
-					"pivot": [0, -0.2, 0],
-					"cubes": [
-						{"origin": [1, 30.8, -3.7], "size": [1, 1, 1], "uv": [44, 29], "mirror": true}
-					]
-				},
-				{
 					"name": "Jaw",
 					"parent": "Head",
 					"pivot": [0, 27.8, -4],

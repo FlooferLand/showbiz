@@ -9849,50 +9849,6 @@
 			},
 			"type": "cube",
 			"uuid": "1e187a21-7de8-982f-8663-302db457a1f1"
-		},
-		{
-			"name": "cube",
-			"box_uv": true,
-			"render_order": "default",
-			"locked": false,
-			"export": true,
-			"scope": 0,
-			"allow_mirror_modeling": true,
-			"from": [-2, 30.8, -3.7],
-			"to": [-1, 31.8, -2.7],
-			"autouv": 0,
-			"color": 7,
-			"mirror_uv": true,
-			"origin": [0, -0.2, 0],
-			"uv_offset": [44, 29],
-			"faces": {
-				"north": {
-					"uv": [46, 30, 45, 31],
-					"texture": 0
-				},
-				"east": {
-					"uv": [47, 30, 46, 31],
-					"texture": 0
-				},
-				"south": {
-					"uv": [48, 30, 47, 31],
-					"texture": 0
-				},
-				"west": {
-					"uv": [45, 30, 44, 31],
-					"texture": 0
-				},
-				"up": {
-					"uv": [45, 30, 46, 29],
-					"texture": 0
-				},
-				"down": {
-					"uv": [46, 29, 47, 30],
-					"texture": 0
-				}
-			},
-			"type": "cube",
-			"uuid": "4a80f392-0aa7-8f37-9cbb-3427f34e1322"
 		}
 	],
 	"groups": [
@@ -10422,7 +10378,7 @@
 			"mirror_uv": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -10562,29 +10518,6 @@
 			"autouv": 0,
 			"isOpen": false,
 			"primary_selected": false
-		},
-		{
-			"name": "IrisL2",
-			"uuid": "8407e321-a665-e855-1557-62e62d44b6b8",
-			"export": true,
-			"locked": false,
-			"scope": 0,
-			"selected": false,
-			"_static": {
-				"properties": {},
-				"temp_data": {}
-			},
-			"origin": [0, -0.2, 0],
-			"rotation": [0, 0, 0],
-			"color": 0,
-			"children": [],
-			"reset": false,
-			"shade": true,
-			"mirror_uv": false,
-			"visibility": true,
-			"autouv": 0,
-			"isOpen": true,
-			"primary_selected": false
 		}
 	],
 	"outliner": [
@@ -10664,7 +10597,7 @@
 		},
 		{
 			"uuid": "b643351a-0bc3-2e40-3f99-8d313d2f88ae",
-			"isOpen": false,
+			"isOpen": true,
 			"children": [
 				"f3015b29-48a4-2b14-1118-2deba9b0de75",
 				"15425f4f-1683-5db9-db67-72e9bbbfadc6",
@@ -10940,11 +10873,6 @@
 									"uuid": "664554ee-0ae8-091d-c76d-02bf0bede445",
 									"isOpen": true,
 									"children": ["99295923-1ed3-6a83-cc7f-31e8cba9a88a"]
-								},
-								{
-									"uuid": "8407e321-a665-e855-1557-62e62d44b6b8",
-									"isOpen": true,
-									"children": ["4a80f392-0aa7-8f37-9cbb-3427f34e1322"]
 								},
 								"cbf25a2f-ad49-67c0-c232-2847c44c4927",
 								"9643f113-f854-d428-f6bd-527bc11b482c",
