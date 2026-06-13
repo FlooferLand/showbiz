@@ -26,7 +26,6 @@ class BotItem(properties: Properties) : Item(properties) {
                     .sortedWith(compareBy({ it.namespace != MOD_ID }, { it.toString() }))
                     .firstOrNull()
             }
-            println("Found bot $botId")
             if (botId == null) {
                 player.displayClientMessage(Component.literal("Failed to select a default bot"), true)
                 return InteractionResult.SUCCESS

@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.*
-import com.flooferland.showbiz.blocks.base.FancyBlockItem
+import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId

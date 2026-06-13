@@ -2,7 +2,7 @@ package com.flooferland.showbiz.items.base
 
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.block.*
-import com.flooferland.showbiz.blocks.base.FancyBlockItem
+import com.flooferland.showbiz.items.base.FancyBlockItem
 import java.util.function.Consumer
 import org.apache.commons.lang3.mutable.MutableObject
 import software.bernie.geckolib.animatable.GeoItem

@@ -31,8 +31,10 @@ object ShowbizUtils {
         BakedModelFactory.getForNamespace(location.namespace).constructGeoModel(geo)
     }.onFailure { Showbiz.log.error("Failed to load GeckoLib model '${location}'", it) }.getOrNull()
 
-    fun itemTooltip(id: ResourceLocation, tooltip: MutableList<Component>) {
-        val comp = Component.translatableWithFallback("tooltip.${id.namespace}.block.${id.path}", "")
+    fun itemTooltip(id: ResourceLocation, tooltip: MutableList<Component>) = tooltip(id.withPrefix("item."), tooltip)
+    fun blockTooltip(id: ResourceLocation, tooltip: MutableList<Component>) = tooltip(id.withPrefix("block."), tooltip)
+    fun tooltip(id: ResourceLocation, tooltip: MutableList<Component>) {
+        val comp = Component.translatableWithFallback("tooltip.${id.namespace}.${id.path}", "")
         if (comp.string.isEmpty()) return
         for (text in comp.string.split('\n')) {
             var comp = Component.literal(text).withStyle(ChatFormatting.GRAY)

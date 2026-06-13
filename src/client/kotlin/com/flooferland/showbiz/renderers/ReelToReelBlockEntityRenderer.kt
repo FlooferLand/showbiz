@@ -114,10 +114,10 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             val text = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
             val textWidth = minecraft.font.width(text)
             poseStack.pushPose()
-            poseStack.translate(0.5, 0.35, 0.3)
+            poseStack.translate(0.5, 0.3, 0.37)
             poseStack.scale(0.004f, -0.004f, 0.004f)
             poseStack.mulPose(Axis.YP.rotationDegrees(180f))
-            minecraft.font.drawInBatch(text, -(textWidth / 2f), 0f, 0xFF_FF_FF_FF.toInt(), false, poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0x00_00_00_00, packedLight)
+            minecraft.font.drawInBatch(text, -(textWidth / 2f), 0f, 0xFF_FF_FF_FF.toInt(), false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0x00_00_00_00, packedLight)
             poseStack.popPose()
         }
 
