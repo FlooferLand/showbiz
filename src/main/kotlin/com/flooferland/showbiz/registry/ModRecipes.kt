@@ -8,7 +8,7 @@ import com.flooferland.showbiz.utils.rlString
 
 enum class ModRecipes {
     StagedBot(
-        "I_I",
+        " _ ",
         "I-I",
         "IRI",
         mapOf(
@@ -18,6 +18,16 @@ enum class ModRecipes {
             "R" to Ingredient("redstone"),
         ),
         outputItem = { ModBlocks.StagedBot.item.defaultInstance }
+    ),
+    Bot(
+        "I-I",
+        "IRI",
+        mapOf(
+            "I" to Ingredient("iron_ingot"),
+            "-" to Ingredient("iron_bars"),
+            "R" to Ingredient("redstone"),
+        ),
+        outputItem = { ModItems.Bot.item.defaultInstance }
     ),
     ReelToReel(
         "I I",
@@ -55,7 +65,7 @@ enum class ModRecipes {
         outputItem = { ModBlocks.Speaker.item.defaultInstance }
     ),
     ShowParser(
-        arrayOf(
+        listOf(
             Ingredient("repeater"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
@@ -63,7 +73,7 @@ enum class ModRecipes {
         outputItem = { ModBlocks.ShowParser.item.defaultInstance }
     ),
     ShowSelector(
-        arrayOf(
+        listOf(
             Ingredient(tag="buttons"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
@@ -92,7 +102,7 @@ enum class ModRecipes {
         outputItem = { ModBlocks.CurtainController.item.defaultInstance }
     ),
     SpotlightBlock(
-        arrayOf(
+        listOf(
             Ingredient("redstone_lamp"),
             Ingredient("redstone"),
             Ingredient("copper_ingot")
@@ -148,7 +158,7 @@ enum class ModRecipes {
         outputItem = { ModItems.Reel.item.defaultInstance }
     ),
     EnderEarl(
-        arrayOf(
+        listOf(
             Ingredient("yellow_dye"),
             Ingredient("ender_pearl")
         ),
@@ -191,29 +201,32 @@ enum class ModRecipes {
     val customId: String?
 
     /** Shaped recipe */
+    constructor(line1: String, mapping: Map<String, Ingredient>, id: String? = null, outputItem: () -> ItemStack) : this(line1, "", "", mapping, id, outputItem) {}
+    constructor(line1: String, line2: String, mapping: Map<String, Ingredient>, id: String? = null, outputItem: () -> ItemStack) : this(line1, line2, "", mapping, id, outputItem) {}
     constructor(line1: String, line2: String, line3: String, mapping: Map<String, Ingredient>, id: String? = null, outputItem: () -> ItemStack) {
-        data = ShapedRecipeData(line1, line2, line3, mapping)
-        outputProvider = outputItem
+        val lines = listOf(line1, line2, line3).filter { it.isNotBlank() }
+        data = ShapedRecipeData(lines, mapping)
         customId = id
+        outputProvider = outputItem
     }
 
     /** Shapeless recipe */
-    constructor(ingredients: Array<Ingredient>, id: String? = null, outputItem: () -> ItemStack) {
+    constructor(ingredients: List<Ingredient>, id: String? = null, outputItem: () -> ItemStack) {
         data = ShapelessRecipeData(ingredients)
-        outputProvider = outputItem
         customId = id
+        outputProvider = outputItem
     }
 
-    fun fetchIngredients() = when (data) {
-        is ShapedRecipeData -> data.mapping.values.toTypedArray()
+    fun fetchIngredients(): List<Ingredient> = when (data) {
+        is ShapedRecipeData -> data.mapping.values.toTypedArray().asList()
         is ShapelessRecipeData -> data.ingredients
     }
 
     sealed interface IRecipeData {
         val type: String
     }
-    data class ShapedRecipeData(val line1: String, val line2: String, val line3: String, val mapping: Map<String, Ingredient>, override val type: String = "crafting_shaped") : IRecipeData
-    data class ShapelessRecipeData(val ingredients: Array<Ingredient>, override val type: String = "crafting_shapeless") : IRecipeData
+    data class ShapedRecipeData(val lines: List<String>, val mapping: Map<String, Ingredient>, override val type: String = "crafting_shaped") : IRecipeData
+    data class ShapelessRecipeData(val ingredients: List<Ingredient>, override val type: String = "crafting_shapeless") : IRecipeData
     data class Ingredient(var item: ResourceLocation? = null, val tag: ResourceLocation? = null) {
         init { if (item == null && tag == null) error("No ingredient string provided") }
         constructor(block: ModBlocks) : this(item = block.id)

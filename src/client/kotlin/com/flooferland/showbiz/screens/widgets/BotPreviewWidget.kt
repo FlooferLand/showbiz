@@ -9,6 +9,7 @@ import net.minecraft.client.resources.sounds.*
 import net.minecraft.client.sounds.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.ModSounds
@@ -26,6 +27,7 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
     var bots = mapOf<ResourceId, AddonBotEntry>()
     var botId: ResourceId? = null
     var scale = 40f
+    var rotation = 0f
     val previewBotAnimatable = BotPreviewAnimatable(null)
     val previewBotModel = BaseBotModel<BotPreviewAnimatable>()
     val previewBotRenderer = object : GeoRenderer<BotPreviewAnimatable> {
@@ -39,6 +41,7 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
 
     fun renderBot(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         if (botId == null) return
+        val delta = ShowbizClient.getDeltaTime()
         val model = previewBotModel
         val renderer = previewBotRenderer
         val animatable = previewBotAnimatable
@@ -48,6 +51,18 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         guiGraphics.fill(x, y, x + width, y + height, 0x88000000.toInt())
         guiGraphics.renderOutline(x, y, width, height, 0xFFFFFFFF.toInt())
 
+        if (isHovered) {
+            val rotateDir = if (mouseX < x + (width / 2)) -1f else 1f
+            rotation += (rotateDir * 4f) * delta
+            if (rotateDir < 0f) {
+                guiGraphics.fill(x, y, x + 2, y + height, 0xFFFFFFFF.toInt())
+            } else {
+                guiGraphics.fill((x + width) - 2, y, x + width, y + height, 0xFFFFFFFF.toInt())
+            }
+        } else {
+            rotation = 0f
+        }
+
         val depth = 100.0
         val heightOffset = 0.3f * height
         val poseStack = guiGraphics.pose()
@@ -55,7 +70,7 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         poseStack.translate(x.toDouble() + (width / 2), y.toDouble() + (height) - heightOffset + 10, depth)
         poseStack.scale(scale, -scale, scale)
         poseStack.mulPose(Axis.XP.rotationDegrees(15f))
-        poseStack.mulPose(Axis.YP.rotationDegrees(180f + 45f))
+        poseStack.mulPose(Axis.YP.rotationDegrees(180f + 45f + rotation))
 
         Lighting.setupFor3DItems()
         val texture = model.getTextureResource(animatable)

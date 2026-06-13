@@ -70,8 +70,12 @@ object DataGenerator {
         val fileListPath = generatedPath / "generated.txt"
         val json = Json { prettyPrint = true }
         val fileList = mutableListOf<Path>()
+        var warnCount = 0
         fun log(message: String, tag: String? = null) = println((tag?.let { "[ ${it} ] " } ?: "") + message)
-        fun warn(message: String) = log(message, tag = "/!\\")
+        fun warn(message: String) {
+            log(message, tag = "/!\\")
+            warnCount += 1
+        }
         fun writeAsset(path: Path, data: JsonObject?) {
             path.createParentDirectories()
             val override = (rootPath / path.relativeTo(generatedPath)).normalize()
@@ -187,7 +191,7 @@ object DataGenerator {
                 }
                 // Shaped
                 if (modRecipe.data is ModRecipes.ShapedRecipeData) {
-                    for (char in modRecipe.data.let { it.line1 + it.line2 + it.line3 }) {
+                    for (char in modRecipe.data.lines.joinToString("")) {
                         if (!modRecipe.data.mapping.keys.contains(char.toString()) && char != ' ') {
                             error("No idea what to map '$char' to for recipe '${modRecipe.name}'")
                         }
@@ -231,5 +235,8 @@ object DataGenerator {
             }
         }
         Files.writeString(fileListPath, fileList.joinToString("\n"))
+
+        // End message
+        println("Finished data generation with $warnCount warnings")
     }
 }

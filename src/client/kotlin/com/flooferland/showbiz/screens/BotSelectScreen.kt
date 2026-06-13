@@ -26,6 +26,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
     override fun getMenu() = selectMenu
     override fun isPauseScreen() = false
 
+    val selected get() = menu.data.id
     var searchText: String = ""
 
     override fun init() {
@@ -49,6 +50,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
 
         // Bot preview
         val botPreview = BotPreviewWidget((width - maxWidth) / 2, (height - maxHeight) / 2, 130, 200)
+        botPreview.botId = selected
         botPreview.bots = bots
         addRenderableWidget(botPreview)
 
@@ -56,7 +58,8 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val botListWidget = BotListWidget(
             botPreview.right + 4, (height - maxHeight) / 2, maxWidth - botPreview.width, maxHeight
         )
-        botListWidget.onHover = { botPreview.botId = it }
+        botListWidget.selected = selected
+        botListWidget.onHover = { if (it != null) botPreview.botId = it }
         botListWidget.setBots(bots) { botSelected(it) }
         addRenderableWidget(botListWidget)
 
@@ -74,8 +77,9 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
                 botListWidget.scrollAmount = 0.0
                 botPreview.bots = bots
             }
-            if (name.isEmpty()) {
-                set(bots);
+            if (name.isBlank()) {
+                botListWidget.visibleCategories = mutableSetOf()
+                set(bots)
                 botPreview.bots = emptyMap()
                 return@setResponder
             }

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.renderer.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.ResourceId
@@ -15,7 +16,8 @@ import kotlin.math.roundToInt
 /** Lists bots mainly for [com.flooferland.showbiz.screens.BotSelectScreen] (or anything that requires a bot selection list) */
 class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSelectionList<BotListWidget.BotEntry>(Minecraft.getInstance(), width, height, y, 18) {
     var visibleCategories = mutableSetOf<String>()
-    var onHover: (ResourceId) -> Unit = {}
+    var onHover: (ResourceId?) -> Unit = {}
+    var selected: ResourceId? = null
 
     init {
         setPosition(x, y)
@@ -37,8 +39,12 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
         clearEntries()
 
         val grouped = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }
-        if (grouped.keys.size <= 2) visibleCategories = grouped.keys.toMutableSet()
-        grouped.forEach { (namespace, entries) ->
+        selected?.let { visibleCategories.add(it.namespace) }
+
+        // All visible if you have no addons
+        if (grouped.keys.all { it == MOD_ID }) visibleCategories = grouped.keys.toMutableSet()
+
+        grouped.forEach { (namespace, botEntries) ->
             val category = BotEntry(category = namespace) {
                 if (namespace !in visibleCategories) {
                     visibleCategories.add(namespace)
@@ -48,7 +54,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 setBots(bots, click)
             }
             addEntry(category)
-            if (namespace in visibleCategories) entries.forEach { (botId, bot) ->
+            if (namespace in visibleCategories) botEntries.forEach { (botId, bot) ->
                 if (botId.toString() == "showbiz:conner") return@forEach
                 addEntry(BotEntry(botId, bot) { click(botId) })
             }
@@ -72,6 +78,13 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
         val button = Button.builder(nameComp) { click(this) }.size(width - 70, itemHeight)
             .tooltip(Tooltip.create(Component.literal("By $authorString")))
             .build()!!
+            .also {
+                if (selected == botId) {
+                    it.active = false
+                    it.message = Component.literal(it.message.string).withStyle(ChatFormatting.GRAY)
+                    it.tooltip = Tooltip.create(Component.literal("Already selected"))
+                }
+            }
 
         override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
             val font = Minecraft.getInstance().font
@@ -85,14 +98,15 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                     button.width,
                     font.lineHeight + (pad * 2)
                 )
+                val open = category in visibleCategories
                 val hovered = rect.contains(mouseX, mouseY)
-                val color = if (hovered) 0xCC222222.toInt() else 0x99222222.toInt()
-                guiGraphics.fill(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, color)
+                val bgColor = if (hovered || open) 0xEE444444.toInt() else 0xAA333333.toInt()
+                guiGraphics.fill(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, bgColor)
 
                 val outlineColor = if (hovered) 0xAAFFFFFF.toInt() else 0x88000000.toInt()
                 guiGraphics.renderOutline(rect.x, rect.y, rect.width, rect.height, outlineColor)
 
-                val compColor = if (category in visibleCategories) ChatFormatting.WHITE else ChatFormatting.GRAY
+                val compColor = if (open) ChatFormatting.WHITE else ChatFormatting.GRAY
                 val comp = Component.literal(category).withStyle(compColor, ChatFormatting.BOLD)
                 guiGraphics.drawCenteredString(font, comp, left + (width / 2), top + (height / 2), 0xfff)
             }
@@ -102,6 +116,9 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             button.y = top
             if (bot != null && botId != null) {
                 button.render(guiGraphics, mouseX, mouseY, partialTick)
+                if (botId == selected && !button.isHoveredOrFocused) {
+                    guiGraphics.renderOutline(button.x - 1, button.y - 1, button.width + 1, button.height + 1, 0xDDFFFFFF.toInt())
+                }
                 if (button.isHoveredOrFocused) onHover(botId)
             }
 

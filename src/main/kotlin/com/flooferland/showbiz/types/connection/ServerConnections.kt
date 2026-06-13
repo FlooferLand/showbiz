@@ -122,11 +122,7 @@ object ServerConnections {
         // Clearing invalid listeners
         if (level != null && level is ServerLevel) {
             for ((_, port) in manager.outputs) {
-                port.removeListeners { ownerId ->
-                    val missing = ownerId.grabConnectable(level) == null
-                    val unloaded = !ownerId.isLoaded(level)
-                    connectable.grabRemoved() || missing || unloaded
-                }
+                port.removeListeners { connectable.grabRemoved() }
             }
         }
 

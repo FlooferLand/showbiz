@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.datagen.providers
 
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.*
 import com.flooferland.showbiz.registry.ModRecipes
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.serialization.JsonOps
@@ -11,7 +11,9 @@ object RecipeProvider {
         put("type", rlVanilla(recipe.data.type).toString())
         when (recipe.data) {
             is ModRecipes.ShapedRecipeData -> {
-                putJsonArray("pattern") { add(recipe.data.line1); add(recipe.data.line2); add(recipe.data.line3) }
+                putJsonArray("pattern") {
+                    recipe.data.lines.forEach { add(it) }
+                }
                 putJsonObject("key") {
                     for ((key, ingredient) in recipe.data.mapping) {
                         putJsonObject(key) {
