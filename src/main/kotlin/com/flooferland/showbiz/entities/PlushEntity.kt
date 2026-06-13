@@ -16,8 +16,11 @@ import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModEntities
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.utils.Extensions.getLongOrNull
+import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.getOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
@@ -35,11 +38,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
 
     val defaultItem = defaultItem.copyWithCount(1)!!
     private var itemStack = this.defaultItem
-    fun updateItemStack(stack: ItemStack) {
-        this.itemStack = stack
-        if (!level().isClientSide)
-            entityData.set(itemStackAccessor, stack)
-    }
+    private var lastHonked = 0L
 
     init {
         refreshDimensions()
@@ -55,6 +54,12 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     override fun getPickResult() = itemStack.copy()!!
 
     fun getPlushComp() = itemStack.copy().get(ModComponents.Plush.type)
+
+    fun updateItemStack(stack: ItemStack) {
+        this.itemStack = stack
+        if (!level().isClientSide)
+            entityData.set(itemStackAccessor, stack)
+    }
 
     fun grab(player: Player): InteractionResult {
         player.handItem(itemStack.copyWithCount(1))
@@ -83,7 +88,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
-        val attacker = source.entity ?: return false
+        val attacker = source.entity
         fun playSound(sound: ModSounds) {
             level().playSound(null, blockPosition(), sound.event, SoundSource.BLOCKS, 1.0f, 1.0f)
         }
@@ -105,8 +110,19 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
 
     override fun tick() {
         super.tick()
+        val level = level() ?: return
         setDeltaMovement(0.0, -0.2, 0.0)
         move(MoverType.SELF, deltaMovement)
+
+        if (level is ServerLevel) {
+            // Random honking
+            if (level.gameTime > lastHonked + 2.secsToTicks() && level.random.nextIntBetweenInclusive(0, 300) == 7) {
+                val nearby = level.getNearbyPlayers(AABB.ofSize(position(), 2.0, 2.0, 2.0))
+                if (!nearby.isEmpty())
+                    level().playSound(null, blockPosition(), ModSounds.Honk.event, SoundSource.BLOCKS, 0.05f, 0.95f)
+                lastHonked = level.gameTime
+            }
+        }
     }
 
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
@@ -122,10 +138,12 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     override fun readAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
         itemStack = tag.getOrNull("item")?.let { ItemStack.parse(registryAccess, it).getOrNull() } ?: defaultItem
+        lastHonked = tag.getLongOrNull("last_honked") ?: lastHonked
         updateItemStack(itemStack)
     }
     override fun addAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
+        tag.putLong("last_honked", lastHonked)
         if (!itemStack.isEmpty)
             itemStack.save(registryAccess)?.let { tag.put("item", it) }
     }
