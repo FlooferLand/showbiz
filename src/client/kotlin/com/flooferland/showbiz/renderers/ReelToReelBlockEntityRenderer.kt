@@ -6,8 +6,10 @@ import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
 import net.minecraft.client.resources.model.*
 import net.minecraft.world.item.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
@@ -18,6 +20,8 @@ import org.joml.Vector3f
 class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
     override fun render(entity: ReelToReelBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val facing = entity.blockState.getValue(FacingEntityBlock.FACING) ?: return
+        val minecraft = Minecraft.getInstance() ?: return
+        val reelStack = entity.getItem(0)
 
         // Time
         val rotationAngle = entity.seek.toFloat() * 200f
@@ -29,7 +33,6 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
 
         // Recording
         run {
-            val minecraft = Minecraft.getInstance() ?: return@run
             val modelId = if (entity.recording) rlVanilla("redstone_block") else rlVanilla("gray_concrete")
             val item = if (entity.recording) Items.REDSTONE_BLOCK else Items.GRAY_CONCRETE
             val recordModel = minecraft.modelManager.getModel(ModelResourceLocation(modelId, "inventory")) ?: return@run
@@ -84,7 +87,6 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         for (i in 0..1) {
             val offset = if (i == 0) 1f else -1f
             runCatching {
-                val itemStack = ModItems.Reel.item.defaultInstance
                 val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
                 if (entity.showData.isLoaded || i == 1) {
                     poseStack.pushPose()
@@ -93,7 +95,7 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
                     poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 0f, 1f), -rotationAngle))
                     poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(1f, 0f, 0f), 90.0f))
                     Minecraft.getInstance().itemRenderer.render(
-                        itemStack,
+                        if (!reelStack.isEmpty) reelStack else ModItems.Reel.item.defaultInstance,
                         ItemDisplayContext.NONE,
                         false,
                         poseStack,
@@ -106,6 +108,19 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
                 }
             }.onFailure { poseStack.popPose() }
         }
+
+        // Rendering information about the loaded reel
+        if (!reelStack.isEmpty && (minecraft.hitResult as? BlockHitResult)?.blockPos == entity.blockPos) {
+            val text = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
+            val textWidth = minecraft.font.width(text)
+            poseStack.pushPose()
+            poseStack.translate(0.5, 0.35, 0.3)
+            poseStack.scale(0.004f, -0.004f, 0.004f)
+            poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+            minecraft.font.drawInBatch(text, -(textWidth / 2f), 0f, 0xFF_FF_FF_FF.toInt(), false, poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0x00_00_00_00, packedLight)
+            poseStack.popPose()
+        }
+
         poseStack.popPose()
     }
 }
