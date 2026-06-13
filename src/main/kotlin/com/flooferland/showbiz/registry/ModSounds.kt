@@ -24,7 +24,8 @@ enum class ModSounds {
     Kick("kick"),
     EnderEarl("ender_earl"),
     Boop("boop"),
-    Honk("honk")
+    Honk("honk"),
+    HonkBye("honk_bye")
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {

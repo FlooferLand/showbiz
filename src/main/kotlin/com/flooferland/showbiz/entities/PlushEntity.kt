@@ -12,6 +12,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.items.PlushItem
+import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModEntities
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
@@ -22,8 +23,8 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 import kotlin.jvm.optionals.getOrNull
 
-class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush.type, level), GeoEntity {
-    constructor(level: Level) : this(level, defaultItem)
+class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plush.type, level), GeoEntity {
+    constructor(level: Level) : this(level, ModItems.Plush.item.defaultInstance!!)
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -32,13 +33,12 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
         return EntityDimensions.fixed(0.4f, 0.75f)
     }
 
-    var itemStack: ItemStack
-        get() = entityData.get(itemStackAccessor)
-        set(value) { entityData.set(itemStackAccessor, value.copyWithCount(1)) }
+    val defaultItem = defaultItem.copyWithCount(1)!!
+    private var itemStack = this.defaultItem
 
     init {
-        this.itemStack = itemStack
         refreshDimensions()
+        entityData.set(itemStackAccessor, itemStack)
     }
 
     override fun isInvulnerable() = true
@@ -49,9 +49,11 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
     override fun canBeHitByProjectile() = true
     override fun getPickResult() = itemStack.copy()!!
 
+    fun getPlushComp() = itemStack.copy().get(ModComponents.Plush.type)
+
     fun grab(player: Player): InteractionResult {
-        remove(RemovalReason.DISCARDED)
         player.handItem(itemStack.copyWithCount(1))
+        remove(RemovalReason.DISCARDED)
         return InteractionResult.SUCCESS
     }
 
@@ -59,13 +61,10 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
         val level = level() as? ServerLevel ?: return InteractionResult.SUCCESS
 
         // Stacking plushies
-        if (player.mainHandItem.item is PlushItem && hand == InteractionHand.MAIN_HAND) {
-            val entity = PlushEntity(level)
-            entity.setPos(position().add(vec))
-            entity.yRot = 180f + player.yRot
-            entity.itemStack = player.mainHandItem
-            level.addFreshEntity(entity)
-            player.mainHandItem.shrink(1)
+        val stack = player.getItemInHand(hand).copyWithCount(1)
+        val item = stack.item
+        if (item is PlushItem && hand == InteractionHand.MAIN_HAND) {
+            item.place(level, player, stack, position().add(vec))
             return InteractionResult.SUCCESS
         }
 
@@ -79,13 +78,23 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
-        level().playSound(null, blockPosition(), ModSounds.Honk.event, SoundSource.BLOCKS, 1.0f, 1.0f)
         val attacker = source.entity ?: return false
-        if (attacker is Player) {
-            if (attacker.isCreative && amount > 0f)
-                remove(RemovalReason.DISCARDED)
-                else grab(attacker)
+        fun playSound(sound: ModSounds) {
+            level().playSound(null, blockPosition(), sound.event, SoundSource.BLOCKS, 1.0f, 1.0f)
         }
+        if (attacker !is Player) {
+            playSound(ModSounds.Honk)
+            return false
+        }
+
+        if (attacker.isCreative && amount > 0f) {
+            playSound(ModSounds.HonkBye.event)
+            remove(RemovalReason.DISCARDED)
+        } else {
+            playSound(ModSounds.Honk.event)
+            grab(attacker)
+        }
+
         return false
     }
 
@@ -98,9 +107,17 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
         builder.define(itemStackAccessor, ItemStack.EMPTY)
     }
+
+    override fun onSyncedDataUpdated(dataAccessor: EntityDataAccessor<*>) {
+        super.onSyncedDataUpdated(dataAccessor)
+        if (dataAccessor == itemStackAccessor && level().isClientSide) {
+            itemStack = entityData.get(itemStackAccessor)
+        }
+    }
     override fun readAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
         itemStack = tag.getOrNull("item")?.let { ItemStack.parse(registryAccess, it).getOrNull() } ?: defaultItem
+        if (!level().isClientSide) entityData.set(itemStackAccessor, itemStack)
     }
     override fun addAdditionalSaveData(tag: CompoundTag) {
         val registryAccess = level()?.registryAccess() ?: return
@@ -110,6 +127,5 @@ class PlushEntity(level: Level, itemStack: ItemStack) : Entity(ModEntities.Plush
 
     companion object {
         val itemStackAccessor = SynchedEntityData.defineId(PlushEntity::class.java, EntityDataSerializers.ITEM_STACK)!!
-        val defaultItem = ModItems.Plush.item.defaultInstance!!
     }
 }

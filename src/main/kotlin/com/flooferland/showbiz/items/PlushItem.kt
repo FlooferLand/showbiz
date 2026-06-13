@@ -2,8 +2,11 @@ package com.flooferland.showbiz.items
 
 import net.minecraft.network.chat.*
 import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import net.minecraft.world.level.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.registry.ModComponents
@@ -33,21 +36,25 @@ class PlushItem(properties: Properties) : Item(properties), GeoItem {
     }
 
     override fun useOn(context: UseOnContext): InteractionResult {
-        val level = context.level ?: return InteractionResult.PASS
+        val level = context.level ?: return InteractionResult.SUCCESS
         val player = context.player ?: return InteractionResult.PASS
         if (level.isClientSide) return InteractionResult.SUCCESS
 
         val placeState = level.getBlockState(context.clickedPos.above())
         val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, context.clickedPos.above())
-        if (canPlaceOnBlock && context.hand == InteractionHand.MAIN_HAND) {
-            val entity = PlushEntity(level)
-            entity.setPos(context.clickLocation)
-            entity.yRot = 180f + context.rotation
-            entity.itemStack = context.itemInHand
-            level.addFreshEntity(entity)
-            player.setItemInHand(context.hand, ItemStack.EMPTY)
+        if (canPlaceOnBlock) {
+            place(level, player, context.itemInHand, context.clickLocation)
         }
-        return InteractionResult.PASS
+        return InteractionResult.SUCCESS
+    }
+
+    fun place(level: Level, player: Player, stack: ItemStack, pos: Vec3) {
+        if (stack.isEmpty) return
+        val entity = PlushEntity(level, stack)
+        entity.setPos(pos)
+        entity.yRot = 180f + player.yRot
+        level.addFreshEntity(entity)
+        stack.shrink(1)
     }
 
     override fun getDefaultInstance() =

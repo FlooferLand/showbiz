@@ -137,9 +137,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
         botId = tag.getStringOrNull("bot_id")?.let { if (it.isNotBlank()) ResourceId.of(it) else null }
-        if (!level().isClientSide) {  // Preventing calling onSyncedDataUpdated again
-            entityData.set(persistentDataAccessor, tag)
-        }
+        if (!level().isClientSide) entityData.set(persistentDataAccessor, tag)
         connectionManager.load(tag)
     }
 
