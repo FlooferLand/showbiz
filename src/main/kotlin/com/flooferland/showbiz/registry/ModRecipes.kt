@@ -168,30 +168,42 @@ enum class ModRecipes {
         "WWW",
         "WDW",
         "WWW",
-        mapOf(
-            "W" to Ingredient(tag="wool"),
-            "D" to Ingredient("green_dye"),
-        ),
+        mapOf("W" to Ingredient(tag="wool"), "D" to Ingredient("green_dye")),
         id = "plush_mitzi",
         outputItem = {
-            ModItems.Plush.item.defaultInstance.apply {
-                set(ModComponents.Plush.type, PlushComponent(rl("mitzi")))
-            }
+            ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("mitzi"))) }
+        }
+    ),
+    MiniPlush(
+        "WFW",
+        "WDW",
+        "WWW",
+        mapOf("W" to Ingredient(tag="wool"), "F" to Ingredient("cyan_dye"), "D" to Ingredient("green_dye")),
+        id = "plush_mini",
+        outputItem = {
+            ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("mini"))) }
         }
     ),
     DookPlush(
         "WWW",
         "WDW",
         "WWW",
-        mapOf(
-            "W" to Ingredient(tag="wool"),
-            "D" to Ingredient("brown_dye"),
-        ),
+        mapOf("W" to Ingredient(tag="wool"), "D" to Ingredient("brown_dye")),
         id = "plush_dook",
         outputItem = {
             ModItems.Plush.item.defaultInstance.apply {
                 set(ModComponents.Plush.type, PlushComponent(rl("dook")))
             }
+        }
+    ),
+    GullyDookPlush(
+        "WFW",
+        "WDW",
+        "WWW",
+        mapOf("W" to Ingredient(tag="wool"), "F" to Ingredient("cyan_dye"), "D" to Ingredient("brown_dye")),
+        id = "plush_gully_dook",
+        outputItem = {
+            ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("gully_dook"))) }
         }
     )
     ;

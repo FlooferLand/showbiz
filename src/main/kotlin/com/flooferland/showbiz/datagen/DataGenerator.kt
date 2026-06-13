@@ -2,8 +2,10 @@ package com.flooferland.showbiz.datagen
 
 import net.minecraft.*
 import net.minecraft.core.registries.*
+import net.minecraft.data.registries.*
+import net.minecraft.resources.*
 import net.minecraft.server.*
-import com.flooferland.showbiz.Showbiz
+import net.minecraft.world.item.crafting.*
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel.Model
@@ -11,6 +13,8 @@ import com.flooferland.showbiz.datagen.providers.*
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.Extensions.itemPath
+import com.google.gson.JsonParser
+import com.mojang.serialization.JsonOps
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -26,6 +30,12 @@ import kotlin.io.path.relativeTo
 
 object DataGenerator {
     val engaged = runCatching { System.getProperty("$MOD_ID.datagen") }.getOrNull() == "true"
+
+    val rootPath: Path = Path.of("..", "..", "src", "main", "resources")
+    val generatedPath: Path = Path.of("src", "main", "generated", "resources")
+    val dataRoot = generatedPath / "data" / MOD_ID
+    val assetsRoot = generatedPath / "assets" / MOD_ID
+    val fileListPath = generatedPath / "generated.txt"
 
     fun registryCall(name: String) {
         val func = BuiltInRegistries::class.java.getDeclaredMethod(name)
@@ -60,18 +70,42 @@ object DataGenerator {
         }
         registryCall("freeze")
         Bootstrap.validate()
+
+        // Checking recipes
+        val lookupProvider = VanillaRegistries.createLookup()
+        val ops = RegistryOps.create(JsonOps.INSTANCE, lookupProvider)
+        val errors = mutableSetOf<String>()
+        for (modRecipe in ModRecipes.entries) {
+            val stack = modRecipe.outputProvider()
+            val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
+            val filename = "${modRecipe.customId ?: itemId.path}.json"
+            val expectedPath = dataRoot / "recipe" / filename
+            if (!Files.exists(expectedPath)) {
+                errors += "No recipe found at '$expectedPath'"
+                continue
+            }
+
+            val result = runCatching {
+                val jsonString = Files.readString(expectedPath)
+                val jsonElement = JsonParser.parseString(jsonString)
+                val result = Recipe.CODEC.parse(ops, jsonElement)
+                result.ifError { error("Malformed file: ${it.message()}") }
+            }
+            result.onFailure { err ->
+                errors += "Failed to read '$filename': $err"
+            }
+        }
+        println("Recipe validation found ${errors.size} errors")
+        for (error in errors) {
+            println("[ RECIPE ] $error")
+        }
     }
 
     fun generate() {
-        val rootPath = Path.of("..", "..", "src", "main", "resources")
-        val generatedPath = Path.of("src", "main", "generated", "resources")
-        val dataRoot = generatedPath / "data" / Showbiz.MOD_ID
-        val assetsRoot = generatedPath / "assets" / Showbiz.MOD_ID
-        val fileListPath = generatedPath / "generated.txt"
         val json = Json { prettyPrint = true }
         val fileList = mutableListOf<Path>()
         var warnCount = 0
-        fun log(message: String, tag: String? = null) = println((tag?.let { "[ ${it} ] " } ?: "") + message)
+        fun log(message: String, tag: String? = null) = println((tag?.let { "[ $it ] " } ?: "") + message)
         fun warn(message: String) {
             log(message, tag = "/!\\")
             warnCount += 1
