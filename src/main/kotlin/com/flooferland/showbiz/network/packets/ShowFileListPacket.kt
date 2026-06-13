@@ -3,9 +3,10 @@ package com.flooferland.showbiz.network.packets
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
+import com.flooferland.showbiz.types.ShowFileInfo
 import com.flooferland.showbiz.utils.rl
 
-class ShowFileListPacket(val toClient: Boolean = false, val playerAuthorized: Boolean = false, val fileIds: Set<String> = setOf()) : CustomPacketPayload {
+class ShowFileListPacket(val toClient: Boolean = false, val playerAuthorized: Boolean = false, val files: Set<ShowFileInfo> = setOf()) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -15,10 +16,8 @@ class ShowFileListPacket(val toClient: Boolean = false, val playerAuthorized: Bo
                 buf.writeBoolean(packet.toClient)
                 buf.writeBoolean(packet.playerAuthorized)
                 if (packet.toClient) {
-                    buf.writeShort(packet.fileIds.size)
-                    for (entry in packet.fileIds) {
-                        buf.writeUtf(entry)
-                    }
+                    buf.writeShort(packet.files.size)
+                    for (entry in packet.files) entry.encode(buf)
                 }
             },
             { buf ->
@@ -26,7 +25,7 @@ class ShowFileListPacket(val toClient: Boolean = false, val playerAuthorized: Bo
                 val playerAuthorized = buf.readBoolean()
                 if (isResponse) {
                     val size = buf.readShort().toInt()
-                    val files = MutableList(size) { buf.readUtf() }
+                    val files = MutableList(size) { ShowFileInfo.decode(buf) }
                     ShowFileListPacket(true, playerAuthorized, files.toSet())
                 } else {
                     ShowFileListPacket(false)

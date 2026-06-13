@@ -8,6 +8,7 @@ import com.flooferland.bizlib.RawShowData
 import com.flooferland.bizlib.formats.LegacyRshowFormat
 import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage
+import com.flooferland.showbiz.FileStorage.getShowVideo
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
@@ -25,7 +26,7 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import kotlinx.coroutines.*
-import kotlin.io.path.*
+import kotlin.io.path.Path
 import kotlin.time.Duration
 
 // TODO: Ensure the file is saved correctly,
@@ -60,7 +61,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var loading = false
     var isLoaded = false
 
-    fun getFilePath(filename: String) = FileStorage.cachedShows[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
+    fun getFilePath(filename: String) = FileStorage.cachedShowPaths[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isEmpty() = !isLoaded
 
     fun load(filename: String, onLoadOrErr: (data: ShowData?, error: Component?) -> Unit = { _, _ -> }) {
@@ -117,9 +118,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
 
             // Reading video
-            var videoPath = runCatching { path.parent.listDirectoryEntries().firstOrNull { it.extension.lowercase() in FFmpeg.videoExtensions } }.getOrNull()
-            if (videoPath == null) videoPath = path.parent / Path(path.nameWithoutExtension + ".mp4")
-            if (Files.exists(videoPath) && FFmpeg.localAvailable) {
+            val videoPath = getShowVideo(path)
+            if (videoPath != null && FFmpeg.localAvailable) {
                 val result = CoroutineScope(Dispatchers.IO).launch {
                     this@ShowData.videoInputInfo = FFmpeg.probeVideo(videoPath)
                     this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(videoPath, 128, 128, 24.0), Duration.ZERO)

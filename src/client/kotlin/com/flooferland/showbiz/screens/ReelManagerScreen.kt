@@ -14,12 +14,13 @@ import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
+import com.flooferland.showbiz.types.ShowFileInfo
 import com.flooferland.showbiz.utils.PlatformUtils
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
 class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Manager")) {
-    var files = mutableSetOf<String>()
+    var files = mutableSetOf<ShowFileInfo>()
     var loading = true
     var authorized = false
 
@@ -106,10 +107,10 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     fun isLocalServer() = Minecraft.getInstance().isLocalServer
 
-    fun updateFiles(paths: Set<String>) {
+    fun updateFiles(files: Set<ShowFileInfo>) {
         loading = false
-        files.clear()
-        files.addAll(paths)
+        this.files.clear()
+        this.files.addAll(files)
         refresh()
     }
 
@@ -126,7 +127,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
             ClientPackets.listen(ShowFileListPacket.type) { packet, _ ->
                 val screen = (Minecraft.getInstance().screen as? ReelManagerScreen) ?: return@listen
                 screen.authorized = packet.playerAuthorized
-                screen.updateFiles(packet.fileIds)
+                screen.updateFiles(packet.files)
             }
         }
     }

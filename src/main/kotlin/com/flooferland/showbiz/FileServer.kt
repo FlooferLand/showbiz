@@ -7,7 +7,7 @@ import net.minecraft.server.*
 import net.minecraft.server.level.*
 import com.flooferland.bizlib.RawShowData
 import com.flooferland.bizlib.formats.RshowFormat
-import com.flooferland.showbiz.FileStorage.fetchShows
+import com.flooferland.showbiz.FileStorage.fetchShowInfos
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.network.packets.FileUploadResponsePacket.ServerMessage
@@ -41,15 +41,19 @@ object FileServer {
         ServerPackets.listen(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
         ServerPackets.listen(ShowFileSelectPacket.type) { packet, ctx ->
             val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@listen
-            val filename = packet.selected
-            val shows = runCatching { FileStorage.fetchShows() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
-            if (shows?.containsKey(filename) != true) {
-                serverError("Show file '$filename' does not exist", ctx.player())
+            val selected = packet.selected
+            val shows = runCatching { FileStorage.fetchShowPaths() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
+            if (shows.isNullOrEmpty()) {
+                serverError("No shows found on the server", ctx.player())
+                return@listen
+            }
+            if (shows.none { it.key == selected.id }) {
+                serverError("Show file '$selected' does not exist", ctx.player())
                 return@listen
             }
             reel.applyComponentsAndValidate(
                 DataComponentPatch.builder()
-                    .set(ModComponents.FileName.type, filename)
+                    .set(ModComponents.FileName.type, selected.id)
                     .build()
             )
         }
@@ -138,18 +142,18 @@ object FileServer {
         key.reset()
 
         if (changed) {
-            val ids = fetchShows(recache = true).keys.sorted().toCollection(LinkedHashSet())
+            val shows = fetchShowInfos(recache = true).toCollection(LinkedHashSet())
             server.playerList.players.forEach {
-                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, fileIds = ids, playerAuthorized = Permissions.canWriteReels(it)))
+                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = shows, playerAuthorized = Permissions.canWriteReels(it)))
             }
         }
     }
 
     /** Responds to a client's request to send the file */
     fun sendShowsToClient(player: ServerPlayer) {
-        val ids = fetchShows().keys.sorted().toCollection(LinkedHashSet())
+        val shows = fetchShowInfos(recache = true).toCollection(LinkedHashSet())
         val authorized = Permissions.canWriteReels(player)
-        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, fileIds = ids, playerAuthorized = authorized))
+        ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = shows, playerAuthorized = authorized))
     }
 
     enum class FileAction {

@@ -1,6 +1,9 @@
 package com.flooferland.showbiz
 
+import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.ShowFileInfo
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import kotlin.io.path.*
@@ -13,11 +16,13 @@ object FileStorage {
     init {
         SHOWS_DIR.toFile().mkdirs()
         ServerLifecycleEvents.SERVER_STARTED.register { _ ->
-            cachedShows.clear()
+            cachedShowPaths.clear()
+            cachedShowInfo.clear()
         }
     }
 
-    val cachedShows = hashMapOf<String, Path>()
+    val cachedShowPaths = hashMapOf<String, Path>()
+    val cachedShowInfo = hashMapOf<String, ShowFileInfo>()
 
     private fun addRecursive(dir: File, shows: HashMap<String, Path>) {
         val list = runCatching { dir.listFiles() }
@@ -38,8 +43,23 @@ object FileStorage {
         }
     }
 
-    fun fetchShows(recache: Boolean = false): Map<String, Path> {
-        if (!recache && cachedShows.isNotEmpty()) return cachedShows
+    fun getShowVideo(showPath: Path): Path? {
+        var videoPath = runCatching {
+            showPath.parent.listDirectoryEntries()
+                .firstOrNull { it.nameWithoutExtension == showPath.nameWithoutExtension && it.extension.lowercase() in FFmpeg.videoExtensions }
+        }.getOrNull()
+        if (videoPath == null)
+            videoPath = showPath.parent / Path(showPath.nameWithoutExtension + ".mp4")
+        return if (Files.exists(videoPath)) videoPath else null
+    }
+
+    fun fetchShowInfos(recache: Boolean = false) = fetchShowPaths(recache).map { (id, path) ->
+        val videoPath = getShowVideo(path)
+        ShowFileInfo(id, videoPath != null)
+    }.sortedBy { it.id }
+
+    fun fetchShowPaths(recache: Boolean = false): Map<String, Path> {
+        if (!recache && cachedShowPaths.isNotEmpty()) return cachedShowPaths
 
         val shows = hashMapOf<String, Path>()
         runCatching {
@@ -48,8 +68,8 @@ object FileStorage {
             addRecursive(dir, shows)
         }
 
-        cachedShows.clear()
-        cachedShows.putAll(shows)
-        return cachedShows
+        cachedShowPaths.clear()
+        cachedShowPaths.putAll(shows)
+        return cachedShowPaths
     }
 }
