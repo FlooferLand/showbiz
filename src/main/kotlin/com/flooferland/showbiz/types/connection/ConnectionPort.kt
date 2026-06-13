@@ -9,7 +9,6 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.types.IPacketable
 import com.flooferland.showbiz.types.IUnsafeCompoundable
-import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -67,11 +66,20 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
             Showbiz.log.warn("Something tried to listen to port '$name', yet this port is an input port.")
             return
         }
-        ConnectionOwnerId.of(listening)?.let { listeners.add(it) }
+
+        val id = ConnectionOwnerId.of(listening)
+        if (id != null) listeners.add(id)
+
         owner.connectionChanged()
         listening.connectionChanged()
         (owner as? BlockEntity)?.markDirtyNotifyAll()
         (listening as? BlockEntity)?.markDirtyNotifyAll()
+
+        val ownerId = ConnectionOwnerId.of(owner)
+        (listening.grabLevel() as? ServerLevel)?.let {
+            if (ownerId != null) ServerConnections.broadcastUpdate(ownerId, it)
+            if (id != null) ServerConnections.broadcastUpdate(id, it)
+        }
     }
 
     @Throws

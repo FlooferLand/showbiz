@@ -9,6 +9,7 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
@@ -37,16 +38,24 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
     val retractAnim = RawAnimation.begin().thenPlayAndHold("animation.wand.retract")!!
 
     fun link(player: Player, stack: ItemStack, level: ServerLevel, last: IConnectable?): InteractionResult {
-        val owner = stack.get(ModComponents.HeldConnection.type)
-        if (last != null && owner == null) {
+        // Starting a link
+        val heldConnection = stack.get(ModComponents.HeldConnection.type)
+        if (last != null && heldConnection == null) {
+            if (player.isCrouching) {  // TODO: Add a way to clear the connections from the ports sending things to the listener too (senders, not listeners)
+                var count = 0
+                last.connectionManager.outputs.forEach { (_, port) -> port.removeListeners { count += 1; true } }
+                reset(player, stack, level, "Cleared $count listeners!")
+                return InteractionResult.SUCCESS
+            }
             stack.set(ModComponents.HeldConnection.type, ConnectionOwnerId.of(last))
             finish(player, stack, level, ModSounds.End, "fire", "First target selected!")
             return InteractionResult.SUCCESS
         }
 
-        val first = owner?.grabConnectable(level)
+        // Checks
+        val first = heldConnection?.grabConnectable(level)
         if (first == null || last == null) {
-            reset(player, stack, level, "First target cleared")
+            reset(player, stack, level, null)
             return InteractionResult.CONSUME
         }
         if (first == last) {
@@ -54,35 +63,44 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
             return InteractionResult.CONSUME
         }
 
+        // Finishing a link
         val result = AutoConnection.make(first, last) ?: AutoConnection.make(last, first)
         if (result != null) {
             stack.remove(ModComponents.HeldConnection.type)
             finish(player, stack, level, ModSounds.End, "retract", result)
         } else {
-            reset(player, stack, level, "No matching ports found")
+            reset(player, stack, level, "These two can't be connected")
         }
         return InteractionResult.SUCCESS
     }
 
-    fun finish(player: Player, stack: ItemStack, level: ServerLevel, sound: ModSounds, anim: String, msg: String) {
+    fun finish(player: Player, stack: ItemStack, level: ServerLevel, sound: ModSounds, anim: String, msg: String?) {
         triggerAnim<WandItem>(player, GeoItem.getOrAssignId(stack, level), "main", anim)
         player.playNotifySound(sound.event, SoundSource.PLAYERS, 1.0f, 1.0f)
         val message = Component.empty()
-        for (string in msg.lines()) message.append(Component.literal(string))
+        for (string in msg?.lines() ?: listOf()) message.append(Component.literal(string))
         player.displayClientMessage(message, true)
     }
 
-    fun reset(player: Player, stack: ItemStack, level: ServerLevel, error: String) {
+    fun reset(player: Player, stack: ItemStack, level: ServerLevel, message: String?) {
         stack.remove(ModComponents.HeldConnection.type)
-        finish(player, stack, level, sound = ModSounds.Deselect, anim = "retract", msg = error)
+        finish(player, stack, level, sound = ModSounds.Deselect, anim = "retract", msg = message)
+    }
+
+    override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
+        val item = player.getItemInHand(usedHand)
+        if (player.isCrouching && level is ServerLevel) {
+            reset(player, player.getItemInHand(usedHand), level, "Cleared!")
+            return InteractionResultHolder.success(item)
+        }
+        return InteractionResultHolder.pass(item)
     }
 
     // Connecting blocks
     override fun useOn(ctx: UseOnContext): InteractionResult {
-        if (ctx.level.isClientSide) return super.useOn(ctx)
+        val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = ctx.player ?: return InteractionResult.PASS
-        val level = ctx.level as? ServerLevel ?: return InteractionResult.PASS
-        val target = level.getBlockEntity(ctx.clickedPos) as? IConnectable ?: return InteractionResult.PASS
+        val target = level.getBlockEntity(ctx.clickedPos) as? IConnectable
         return link(player, ctx.itemInHand, level, target)
     }
 
@@ -107,6 +125,9 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
         )
         tooltip.add(
             Component.literal("to create wires between blocks").withStyle(ChatFormatting.GRAY)
+        )
+        tooltip.add(
+            Component.literal("Shift right-click to clear connections").withStyle(ChatFormatting.GRAY)
         )
     }
 }

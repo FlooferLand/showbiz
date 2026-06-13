@@ -1,9 +1,11 @@
 package com.flooferland.showbiz.types.connection
 
 import net.minecraft.network.*
+import net.minecraft.server.level.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
 import com.flooferland.showbiz.registry.ModItems
@@ -42,6 +44,19 @@ object ServerConnections {
         points.remove(id)
         val packet = UpdateConnectionsPacket(id, emptyList())
         level.server?.playerList?.players?.forEach { ServerPlayNetworking.send(it, packet) }
+    }
+    fun broadcastUpdate(id: ConnectionOwnerId, level: ServerLevel) {
+        val points = points[id] ?: return
+        val server = level.server
+        val connectable = id.grabConnectable(level)
+        val centerPos = connectable?.grabCenterPos() ?: Vec3.ZERO
+
+        for (player in server.playerList.players) {
+            if (!canDisplayConnections(player)) continue
+            if (connectable == null || player.distanceToSqr(centerPos) < MAX_VIEW_DISTANCE_SQR) {
+                ServerPlayNetworking.send(player, UpdateConnectionsPacket(id, points))
+            }
+        }
     }
 
     init {
@@ -103,7 +118,6 @@ object ServerConnections {
 
         val id = ConnectionOwnerId.of(connectable)
         val level = connectable.grabLevel()
-        val centerPos = connectable.grabCenterPos()
 
         // Clearing invalid listeners
         if (level != null && level.gameTime > 100L && !level.isClientSide) {
@@ -134,14 +148,8 @@ object ServerConnections {
         }
 
         // Sending a packet to the client while they hold the wand
-        val server = level?.server ?: return
-        if (level.gameTime % CLIENT_UPDATE_INTERVAL == 0L && id != null) {
-            for (player in server.playerList.players) {
-                if (!canDisplayConnections(player)) continue
-                if (centerPos == null || player.distanceToSqr(centerPos) < MAX_VIEW_DISTANCE_SQR) {
-                    ServerPlayNetworking.send(player, UpdateConnectionsPacket(id, points))
-                }
-            }
+        if (level is ServerLevel && level.gameTime % CLIENT_UPDATE_INTERVAL == 0L && id != null) {
+            broadcastUpdate(id, level)
         }
     }
 
