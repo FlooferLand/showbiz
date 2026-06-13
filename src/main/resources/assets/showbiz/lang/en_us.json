@@ -43,6 +43,6 @@
     "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or not)",
     "tooltip.showbiz.item.bot": "Shift right-click to pick it back up\nRight click to customize",
 
-    "message.showbiz.show_load_fail": "Failed to load show. Check the server logs.",
+    "message.showbiz.show_load_fail": "Failed to load show",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!"
 }

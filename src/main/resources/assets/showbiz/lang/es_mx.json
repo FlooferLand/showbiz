@@ -33,6 +33,6 @@
     "tooltip.showbiz.block.bit_view": "Muestra bits y sus nombres en vivo cuando se conecta a un show",
     "tooltip.showbiz.block.programmer": "Permite grabar bits",
 
-    "message.showbiz.show_load_fail": "El show no pudo cargar. Revisa los registros del servidor.",
+    "message.showbiz.show_load_fail": "El show no pudo cargar",
     "message.showbiz.empty_reel_warning": "¡Este carrete no tiene ningún show en él!"
 }

@@ -33,7 +33,6 @@ import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
-import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -343,20 +342,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val filename = ReelItem.getFilename(stack) ?: return
             resetPlayback()
             showData.isLoaded = true
-            showData.load(filename) { data ->
-                markDirtyNotifyAll()
+            showData.load(filename) { data, err ->
                 val level = level as? ServerLevel ?: return@load
-                val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
-                if (data == null) {
-                    nearby.forEach {
-                        it.displayClientMessage(
-                            Component.translatable("message.showbiz.show_load_fail").withStyle(ChatFormatting.RED),
-                            true
-                        )
-                    }
-                    return@load
+                if (err != null) {
+                    val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
+                    nearby.forEach { it.displayClientMessage(err, true) }
                 }
-                applyChange(true) {
+                if (data != null) applyChange(true) {
                     setPlaying(true)
                 }
             }

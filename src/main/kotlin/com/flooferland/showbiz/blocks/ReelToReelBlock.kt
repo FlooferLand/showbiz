@@ -23,7 +23,7 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handItem
-import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.Extensions.setInventoryChanged
 import com.flooferland.showbiz.utils.Sounds
 
 class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
@@ -85,20 +85,14 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     // Playback
                     if (player is ServerPlayer) {
                         entity.resetPlayback()
-                        entity.showData.load(filename) { data ->
-                            entity.markDirtyNotifyAll()
+                        entity.showData.load(filename) { _, err ->
                             if (player.isRemoved) return@load
-                            if (data == null) {  // Error happened, giving back the reel
+                            if (err != null) {  // Error happened, giving back the reel
                                 player.handItem(stackCopy)
-                                player.displayClientMessage(
-                                    Component.translatable("message.showbiz.show_load_fail").withStyle(ChatFormatting.RED), true
-                                )
-                                player.inventoryMenu.broadcastChanges()
-                                return@load
-                            }
+                                player.displayClientMessage(err, true)
+                            } else player.displayClientMessage(Component.empty(), true)
                             Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
-                            player.displayClientMessage(Component.empty(), true)
-                            player.inventoryMenu.broadcastChanges()
+                            player.setInventoryChanged()
                         }
                     }
                 } else {
@@ -114,7 +108,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     entity.applyChange(true) {
                         entity.setPlaying(false)
                         entity.showData.unload(player)
-                        player.inventoryMenu.broadcastChanges()
+                        player.setInventoryChanged()
                     }
                 }
             }

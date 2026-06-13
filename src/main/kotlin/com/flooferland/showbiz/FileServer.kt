@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import kotlin.io.path.extension
 
 object FileServer {
     var serverPlayerUploads = mutableMapOf<Int, ServerPlayerFileUpload>()
@@ -57,9 +58,13 @@ object FileServer {
                 ctx.player().sendSystemMessage(Component.literal("You don't have the permission to write files"))
                 return@listen
             }
-            val path = FileStorage.SHOWS_DIR.resolve(packet.file)
+            var path = FileStorage.SHOWS_DIR.resolve(packet.file)
             val player = ctx.player()
             val server = ctx.server()
+            if (path.extension.isBlank()) {
+                serverError("Failed to make a show. Missing file extension ('${path}')", player)
+                return@listen
+            }
 
             when (packet.action) {
                 FileAction.Create -> CoroutineScope(Dispatchers.IO).launch {

@@ -48,6 +48,8 @@ object FFmpeg {
         override fun close() = process.destroy()
     }
 
+    val videoExtensions = setOf("mp4", "webm", "mkv", "avi", "mov")
+
     private var mainFile: File? = null
     private var probeFile: File? = null
     private var error: String? = null

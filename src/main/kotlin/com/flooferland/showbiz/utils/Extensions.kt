@@ -4,7 +4,7 @@ import net.minecraft.core.component.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
-import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.*
 import net.minecraft.util.*
 import net.minecraft.world.*
 import net.minecraft.world.entity.*
@@ -35,6 +35,11 @@ object Extensions {
     fun BlockEntity.markDirtyNotifyAll() {
         setChanged()
         level?.sendBlockUpdated(this.blockPos, blockState, blockState, Block.UPDATE_ALL)
+    }
+
+    fun Player.setInventoryChanged() {
+        inventoryMenu.broadcastChanges()
+        inventory.setChanged()
     }
 
     @DslMarker annotation class BlockEntityApplyDsl;
@@ -113,7 +118,7 @@ object Extensions {
 
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
     fun String.alwaysEndsWith(suffixes: Collection<String>): String {
-        if (suffixes.any { it.endsWith(it) } || suffixes.isEmpty()) return this
+        if (suffixes.any { this.endsWith(it) } || suffixes.isEmpty()) return this
         return this + suffixes.first()
     }
 

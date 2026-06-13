@@ -14,6 +14,7 @@ import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Sounds
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -23,13 +24,8 @@ import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.io.path.Path
-import kotlin.io.path.div
-import kotlin.io.path.nameWithoutExtension
+import kotlinx.coroutines.*
+import kotlin.io.path.*
 import kotlin.time.Duration
 
 // TODO: Ensure the file is saved correctly,
@@ -67,25 +63,24 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     fun getFilePath(filename: String) = FileStorage.cachedShows[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isEmpty() = !isLoaded
 
-    fun load(filename: String, onLoad: ((ShowData?) -> Unit)? = null) {
+    fun load(filename: String, onLoadOrErr: (data: ShowData?, error: Component?) -> Unit = { _, _ -> }) {
         unload()
-        loading = true
         name = filename
+        loading = true
         id = UUID.randomUUID()
-        mapping = run {
-            val ext = name?.split('.', limit = 2)?.last() ?: run {
-                Showbiz.log.error("Error loading show '${filename}'. Format is missing a file extension")
-                return
-            }
-            Showbiz.charts.extensionToId[ext] ?: run {
-                Showbiz.log.error("Error loading show '${filename}'. Format '${ext}' is not supported")
-                return
-            }
-        }
 
-        Showbiz.log.debug("Loading tape '${name}' ($mapping)")
+        Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
 
-        loadJob = CoroutineScope(Dispatchers.IO).launch {
+        val exceptionHandler = CoroutineExceptionHandler { context, throwable ->  }
+        loadJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
+            mapping = run {
+                val ext = if (filename.contains('.')) filename.substringAfterLast('.') else run {
+                    error("The file is missing a file extension")
+                }
+                Showbiz.charts.extensionToId[ext] ?: run {
+                    error("Format '${ext}' was not among: [${Showbiz.charts.extensions.joinToString()}]")
+                }
+            }
             val path = getFilePath(filename)
             val loaded = run {
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
@@ -122,31 +117,37 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
 
             // Reading video
-            val videoPath = path.parent / Path(path.nameWithoutExtension + ".mp4")
+            var videoPath = runCatching { path.parent.listDirectoryEntries().firstOrNull { it.extension.lowercase() in FFmpeg.videoExtensions } }.getOrNull()
+            if (videoPath == null) videoPath = path.parent / Path(path.nameWithoutExtension + ".mp4")
             if (Files.exists(videoPath) && FFmpeg.localAvailable) {
                 val result = CoroutineScope(Dispatchers.IO).launch {
                     this@ShowData.videoInputInfo = FFmpeg.probeVideo(videoPath)
                     this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(videoPath, 128, 128, 24.0), Duration.ZERO)
                 }
                 result.invokeOnCompletion {
-                    if (it != null || videoInputInfo == null) {
+                    if (it != null || videoInputInfo == null)
                         Showbiz.log.error("Failed to read video", it ?: Throwable("Unknown error"))
-                    }
                 }
                 result.join()
             }
         }
-        loadJob?.invokeOnCompletion { err ->
+        loadJob?.invokeOnCompletion { err -> owner.level?.server?.execute {
             loading = false
-            isLoaded = audio.isNotEmpty() || err == null
-            if (isLoaded) {
+            if (audio.isNotEmpty() && err == null) {
+                isLoaded = true
                 Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)")
-                onLoad?.invoke(this)
-                return@invokeOnCompletion
+                onLoadOrErr.invoke(this, null)
+                owner.markDirtyNotifyAll()
+                return@execute
             }
-            Showbiz.log.error("Show failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)", err)
-            onLoad?.invoke(null)
-        }
+            Showbiz.log.error("Show '${filename}' failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)", err)
+            val errComp = Component.empty()
+                .append(Component.translatable("message.showbiz.show_load_fail"))
+                .append(Component.literal(": ${err?.message}"))
+                .withStyle(ChatFormatting.RED)
+            onLoadOrErr.invoke(null, errComp)
+            owner.markDirtyNotifyAll()
+        } }
     }
 
     fun loadNBT(tag: CompoundTag?) {
