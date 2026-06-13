@@ -5,10 +5,12 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModScreenHandlers
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import com.flooferland.showbiz.types.IBot
 
 class BotSelectMenu(containerId: Int, val data: BotListSelectPacket) : AbstractContainerMenu(ModScreenHandlers.BotSelect.type, containerId) {
     override fun quickMoveStack(player: Player, index: Int) = ItemStack.EMPTY!!
-    override fun stillValid(player: Player) =
-        (player.level().getBlockEntity(data.blockPos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(data.blockPos.center) < 12.0f * 12.0f
+    override fun stillValid(player: Player): Boolean {
+        val botPos = (data.bot.grabConnectable(player.level()) as? IBot)?.botPos
+        return botPos != null && player.distanceToSqr(botPos) < 12.0f * 12.0f
+    }
 }

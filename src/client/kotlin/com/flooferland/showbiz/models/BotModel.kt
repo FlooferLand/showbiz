@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.models
 
+import net.minecraft.client.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.sounds.*
 import net.minecraft.util.*
+import net.minecraft.world.entity.*
 import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
@@ -42,6 +44,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         val bitSpringOffset = mutableMapOf<BitId, Float>()
         val bitSpringVelocity = mutableMapOf<BitId, Float>()
         val cymbalStates = mutableMapOf<String, CymbalState>()
+        var lastFrameTime = -1.0
     }
 
     // Spring properties -- methods so I can hot reload code to modify them >:)
@@ -104,7 +107,20 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         val movements = showMapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
 
         // Driving animation
-        val delta = ShowbizClient.getDeltaTime()
+        val delta = run {
+            // Doing the hardest thing in Minecraft modding.. Getting the delta time..
+            // Making the Create mod is easy. Making Aeronautics is easy.. Compared to getting the delta time *thunder sound effect*
+            val currentFrameTime = when (animatable) {
+                is Entity -> animatable.tickCount + state.partialTick
+                else -> {
+                    (Minecraft.getInstance()?.timer?.gameTimeDeltaTicks ?: 0f) + state.partialTick
+                }
+            }.toDouble()
+            val lastFrameTime = if (storage.lastFrameTime > 0f) storage.lastFrameTime else currentFrameTime
+            val deltaTicks = (currentFrameTime - lastFrameTime).coerceIn(0.0..1.25)
+            storage.lastFrameTime = currentFrameTime
+            deltaTicks.toFloat()
+        }
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
         driveCollideParts(animatable, model, storage, state.partialTick)
     }

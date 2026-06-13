@@ -37,7 +37,7 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         bot.value.name.contains(searchText, ignoreCase = true)
 
     fun botSelected(botId: ResourceId) {
-        ClientPlayNetworking.send(BotListSelectPacket(selectMenu.data.blockPos, botId))
+        ClientPlayNetworking.send(BotListSelectPacket(selectMenu.data.bot, botId))
         Minecraft.getInstance().setScreen(null)
     }
 

@@ -21,11 +21,13 @@ import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
+import com.flooferland.showbiz.types.connection.ConnectionOwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import org.checkerframework.checker.units.qual.g
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -90,10 +92,10 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun getDisplayName() = Component.literal("Staged Bot")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
-        return BotSelectMenu(i, getScreenOpeningData(player))
+        return getScreenOpeningData(player)?.let { BotSelectMenu(i, it) }
     }
-    override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket =
-        BotListSelectPacket(worldPosition, botId)
+    override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket? =
+        ConnectionOwnerId.of(this)?.let { BotListSelectPacket(it, botId) }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)

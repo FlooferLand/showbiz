@@ -18,8 +18,11 @@ import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
+import foundry.veil.api.network.VeilPacketManager.level
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
@@ -65,10 +68,9 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
         init {
             ServerPackets.listen(BotListSelectPacket.type) { packet, ctx ->
-                val blockEntity = ctx.player().level().getBlockEntity(packet.blockPos) as? StagedBotBlockEntity ?: return@listen
-                blockEntity.applyChange(true) {
-                    botId = packet.id
-                }
+                val bot = packet.bot.grabConnectable(ctx.player().level()) as? IBot ?: return@listen
+                bot.botId = packet.id
+                if (bot is BlockEntity) bot.markDirtyNotifyAll()
                 ctx.player().playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
             }
         }

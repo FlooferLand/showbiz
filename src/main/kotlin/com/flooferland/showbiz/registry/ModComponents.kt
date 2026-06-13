@@ -7,6 +7,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.resources.*
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ConnectionOwnerId
 import com.flooferland.showbiz.utils.rl
 import com.mojang.serialization.Codec
@@ -27,6 +28,10 @@ sealed class ModComponents<T> {
     data object Plush : ModComponents<PlushComponent>(
         "plush",
         { b -> b.persistent(PlushComponent.CODEC).networkSynchronized(PlushComponent.STREAM_CODEC) }
+    )
+    data object BotId : ModComponents<ResourceId>(
+        "bot",
+        { b -> b.persistent(ResourceId.CODEC).networkSynchronized(ResourceId.STREAM_CODEC) }
     )
     ;
 

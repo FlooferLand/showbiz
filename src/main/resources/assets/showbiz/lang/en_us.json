@@ -23,6 +23,7 @@
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
+    "item.showbiz.bot": "Bot (W.I.P)",
     "item.showbiz.plush.mitzi": "Mitzi Plush",
     "item.showbiz.plush.dook": "Dook Plush",
     "item.showbiz.music_disc": "Music Disc",
@@ -39,7 +40,8 @@
     "tooltip.showbiz.block.spotlight": "Work-in-progress\nOnly works with Veil installed\nVeil is known to cause bugs",
     "tooltip.showbiz.block.bit_view": "Shows bits and their names live when plugged into a show",
     "tooltip.showbiz.block.programmer": "Allows you to record in bits",
-    "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or maybe not)",
+    "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or not)",
+    "tooltip.showbiz.item.bot": "Shift right-click to pick it back up\nRight click to customize",
 
     "message.showbiz.show_load_fail": "Failed to load show. Check the server logs.",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!"
