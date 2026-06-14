@@ -36,11 +36,11 @@
     "mixins": ["showbiz.mixins.json"],
     "depends": {
         "fabricloader": ">=$fabric_loader",
+        "fabric-api": ">=$fabric_api",
         "minecraft": "$minecraft",
         "java": ">=$java",
         "fabric-language-kotlin": "~$fabric_language_kotlin",
-        "geckolib": "^$geckolib",
-        "fabric-api": "^$fabric_api"
+        "geckolib": "^$geckolib"
     },
     "suggests": {
         "veil": ">=$veil",

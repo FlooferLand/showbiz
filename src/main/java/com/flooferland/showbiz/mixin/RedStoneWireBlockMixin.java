@@ -22,6 +22,7 @@ public class RedStoneWireBlockMixin {
 		require = 0
 	)
 	private static void showbiz$shouldConnectTo(BlockState state, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+		if (state == null || direction == null) return;
 		if (state.getBlock() instanceof IRedstoneExtras extras) {
 			cir.setReturnValue(extras.wireShouldConnectTo(state, direction));
 		}
@@ -34,10 +35,11 @@ public class RedStoneWireBlockMixin {
 		require = 0
 	)
 	private static void showbiz$getConnectingSide(BlockGetter level, BlockPos pos, Direction direction, boolean nonNormalCubeAbove, CallbackInfoReturnable<RedstoneSide> cir) {
+		if (level == null || pos == null) return;
 		var neighbourState = level.getBlockState(pos.relative(direction));
 
 		if (neighbourState.getBlock() instanceof IRedstoneExtras extras) {
-			if (extras.wireShouldConnectTo(neighbourState, direction))
+			if (direction == null || extras.wireShouldConnectTo(neighbourState, direction))
 				cir.setReturnValue(RedstoneSide.SIDE);
 			else
 				cir.setReturnValue(RedstoneSide.NONE);

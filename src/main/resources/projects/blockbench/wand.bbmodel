@@ -9,10 +9,10 @@
 	"front_gui_light": false,
 	"visible_box": [2, 1.5, 0.25],
 	"variable_placeholders": "",
+	"multi_file_ruleset": "",
 	"variable_placeholder_buttons": [],
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
-	"activity_tracker": 768,
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
 		"display": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\models\\item\\wand.json",
@@ -29,6 +29,8 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
+			"export": true,
+			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [-1, 0, -4],
 			"to": [1, 2, 2],
@@ -69,6 +71,8 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
+			"export": true,
+			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [-0.5, 0, -5.75],
 			"to": [0.5, 2, -3.75],
@@ -111,6 +115,8 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
+			"export": true,
+			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [-0.5, 0.5, -1],
 			"to": [0.5, 1.5, 4],
@@ -152,6 +158,8 @@
 			"box_uv": true,
 			"render_order": "default",
 			"locked": false,
+			"export": true,
+			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [-0.5, 0.5, 3.5],
 			"to": [0.5, 1.5, 5.5],
@@ -192,38 +200,50 @@
 	],
 	"groups": [
 		{
+			"name": "wand",
 			"uuid": "88bbdb5d-5f6a-f806-03d0-100070b52fa4",
 			"export": true,
 			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
 			"origin": [0, 1, -2.25],
 			"rotation": [0, 0, 0],
 			"color": 0,
-			"name": "wand",
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": true
+			"isOpen": true,
+			"primary_selected": false
 		},
 		{
+			"name": "cylinder",
 			"uuid": "9fd3a1bf-3c6c-c490-deaf-ed8df99c4725",
 			"export": true,
 			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
 			"origin": [0, 1, -1],
 			"rotation": [0, 0, 0],
 			"color": 0,
-			"name": "cylinder",
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"selected": false,
 			"visibility": true,
 			"autouv": 0,
-			"isOpen": false
+			"isOpen": false,
+			"primary_selected": false
 		}
 	],
 	"outliner": [
@@ -249,6 +269,7 @@
 			"namespace": "showbiz",
 			"id": "0",
 			"group": "",
+			"scope": 0,
 			"width": 32,
 			"height": 32,
 			"uv_width": 16,
@@ -257,9 +278,12 @@
 			"use_as_default": false,
 			"layers_enabled": false,
 			"sync_to_project": "",
+			"file_format": "png",
 			"render_mode": "default",
 			"render_sides": "auto",
+			"wrap_mode": "limited",
 			"pbr_channel": "color",
+			"fps": 7,
 			"frame_time": 1,
 			"frame_order_type": "loop",
 			"frame_order": "",
@@ -279,9 +303,10 @@
 			"override": false,
 			"length": 0.25,
 			"snapping": 12,
-			"selected": true,
+			"selected": false,
 			"saved": true,
 			"path": "../../assets/showbiz/animations/item/wand.animation.json",
+			"scope": 0,
 			"anim_time_update": "",
 			"blend_weight": "",
 			"start_delay": "",
@@ -441,6 +466,7 @@
 			"selected": false,
 			"saved": true,
 			"path": "../../assets/showbiz/animations/item/wand.animation.json",
+			"scope": 0,
 			"anim_time_update": "",
 			"blend_weight": "",
 			"start_delay": "",
@@ -522,6 +548,7 @@
 			"selected": false,
 			"saved": true,
 			"path": "../../assets/showbiz/animations/item/wand.animation.json",
+			"scope": 0,
 			"anim_time_update": "",
 			"blend_weight": "",
 			"start_delay": "",
@@ -693,14 +720,19 @@
 			"rotation": [-101.8, 1.3, 10.12],
 			"translation": [0.5, 0, -2.75]
 		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
 		"gui": {
 			"rotation": [-91.47, -33.39, 18.03],
 			"translation": [0.5, 0, -2.75],
 			"scale": [1.5, 1.5, 1.5]
 		},
 		"fixed": {
-			"rotation": [89.95, 1.3, 10.12],
-			"translation": [0.5, 0, -2.75]
+			"rotation": [-90, 0, -180],
+			"translation": [0, 0, -0.75]
 		}
-	}
+	},
+	"geckolib_model_type": "Item"
 }

@@ -9,10 +9,10 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.*
-import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
+import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.utils.rl
 
@@ -32,7 +32,8 @@ enum class ModBlocks {
         Properties.of()
             .strength(0.5f)
             .sound(SoundType.METAL)
-            .noOcclusion(),
+            .noOcclusion()
+            .forceSolidOff(),
         modelPreset = BlockModelId.Custom.transparent(),
         entity = Entity(::ReelToReelBlockEntity, isGeckolib = false),
     ),

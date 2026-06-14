@@ -82,7 +82,7 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
 
         // What i gotta do just to get this aligned :sob:
         // Reverse winding order + flipping the pose backward
-        val consumer = buffer.getBuffer(RenderType.entityCutout(id))
+        val consumer = buffer.getBuffer(RenderType.beaconBeam(id, false))
         val matrix = poseStack.last()
         fun vert(x: Float, y: Float, z: Float, u: Float, v: Float) =
             consumer.addVertex(matrix, x, y, z).setColor(-1).setUv(u, v).setOverlay(packedOverlay).setLight(LightTexture.FULL_BRIGHT).setNormal(matrix, 0f, 0f, -1f)

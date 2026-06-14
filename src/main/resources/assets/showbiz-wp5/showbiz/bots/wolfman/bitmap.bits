@@ -10,7 +10,7 @@ wp5 14, rae 16 {
 
 wp5 16 {
     flow 0.25
-    rotate "Tail" z:-60
+    rotate "Tail" z:-70
     wigglemul 3.0
 }
 
@@ -23,14 +23,20 @@ wp5 13, rae 14 {
     wigglemul 3.0
 }
 
+# head
 wp5 7, rae 8 {
-    flow 0.7
-    rotate "Head" x:13
+    flow 0.5
+    rotate "Head" x:14
+    wigglemul 2.5
+}
+wp5 8 {
+    flow 0.5
+    rotate "Head" x:-14
     wigglemul 2.5
 }
 
 wp5 9, rae 6 {
-    flow 0.6
+    flow 0.4
     rotate "Head" y:35
     wigglemul 2.5
 }
@@ -38,7 +44,7 @@ wp5 9, rae 6 {
 # arms
 wp5 15, rae 18 {  # mic swing
     flow 0.35
-    rotate "Mic Pole" z:12.5
+    rotate "Mic Stand" z:12.5
     rotate "Right Arm" y:12.5
     rotate "Right Arm" x:7.5
     rotate "Right Elbow" x:-10
@@ -56,12 +62,12 @@ wp5 10, rae 11 {
 wp5 11, rae 12 {
     flow 0.4
     rotate "Left Arm" y:60
-    wigglemul 1.5
+    wigglemul 2.0
 }
 wp5 12, rae 13 {
     flow 0.4
-    rotate "Left Elbow" x:30
-    wigglemul 1.5
+    rotate "Left Elbow" x:55
+    wigglemul 2.5
 }
 
 # face
