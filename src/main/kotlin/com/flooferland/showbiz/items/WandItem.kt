@@ -14,7 +14,7 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.connection.AutoConnection
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import java.util.function.Consumer
 import org.apache.commons.lang3.mutable.MutableObject
@@ -47,7 +47,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
                 reset(player, stack, level, "Cleared $count listeners!")
                 return InteractionResult.SUCCESS
             }
-            stack.set(ModComponents.HeldConnection.type, ConnectionOwnerId.of(last))
+            stack.set(ModComponents.HeldConnection.type, OwnerId.of(last))
             finish(player, stack, level, ModSounds.End, "fire", "First target selected!")
             return InteractionResult.SUCCESS
         }

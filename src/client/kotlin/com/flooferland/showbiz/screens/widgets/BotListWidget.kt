@@ -79,7 +79,8 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             .tooltip(Tooltip.create(Component.literal("By $authorString")))
             .build()!!
             .also {
-                if (selected == botId) {
+                it.active = true
+                if (selected == botId && category == null) {
                     it.active = false
                     it.message = Component.literal(it.message.string).withStyle(ChatFormatting.GRAY)
                     it.tooltip = Tooltip.create(Component.literal("Already selected"))

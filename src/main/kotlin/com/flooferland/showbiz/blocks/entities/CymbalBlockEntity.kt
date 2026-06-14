@@ -5,6 +5,7 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
@@ -23,6 +24,7 @@ class CymbalBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mod
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        collidePartInstance.tick(level, pos, state)
+        val id = OwnerId.of(pos)
+        collidePartInstance.tick(level, id)
     }
 }

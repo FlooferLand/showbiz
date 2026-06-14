@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.entity.*
 import net.minecraft.util.*
@@ -14,7 +14,6 @@ class ModelPartEntityRenderer(val context: EntityRendererProvider.Context) : Ent
         if (dispatcher.crosshairPickEntity != entity) return
         val scale = 0.006f
         val textColor = FastColor.ARGB32.color(255, 255, 255, 255)
-        val backgroundColor = FastColor.ARGB32.color(200, 50, 50, 850)
         val text = entity.getName()
 
         poseStack.pushPose()
@@ -23,8 +22,7 @@ class ModelPartEntityRenderer(val context: EntityRendererProvider.Context) : Ent
         poseStack.scale(scale, -scale, scale)
         val xOffset = -font.width(text) / 2f
         val matrix = poseStack.last().pose()
-        font.drawInBatch(text, xOffset, 0f, backgroundColor, false, matrix, bufferSource, Font.DisplayMode.NORMAL, backgroundColor, packedLight)
-        font.drawInBatch(text, xOffset, 0f, textColor, true, matrix, bufferSource, Font.DisplayMode.NORMAL, 0, packedLight)
+        font.drawInBatch(text, xOffset, 0f, textColor, false, matrix, bufferSource, Font.DisplayMode.SEE_THROUGH, 0, packedLight)
         poseStack.popPose()
     }
 }

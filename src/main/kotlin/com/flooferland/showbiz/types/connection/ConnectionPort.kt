@@ -9,6 +9,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.types.IPacketable
 import com.flooferland.showbiz.types.IUnsafeCompoundable
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongArrayOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -30,7 +31,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     @NotNull var data: T = initData
     @NotNull var dataReceived: T = initData
 
-    private var listeners = hashSetOf<ConnectionOwnerId>()
+    private var listeners = hashSetOf<OwnerId>()
 
     init {
         when (direction) {
@@ -44,10 +45,10 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     }
 
     fun hasListeners(): Boolean = listeners.isNotEmpty()
-    fun readListeners(): HashSet<ConnectionOwnerId> = listeners
-    fun removeListeners(block: (ConnectionOwnerId) -> Boolean) {
+    fun readListeners(): HashSet<OwnerId> = listeners
+    fun removeListeners(block: (OwnerId) -> Boolean) {
         if (direction == PortDirection.In) Showbiz.log.warn("Port $name is an input port. Failed to remove listeners")
-        val removedList = mutableSetOf<ConnectionOwnerId>()
+        val removedList = mutableSetOf<OwnerId>()
         val anyRemoved = listeners.removeIf {
             if (!block(it)) return@removeIf false
             removedList.add(it)
@@ -67,7 +68,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
             return
         }
 
-        val id = ConnectionOwnerId.of(listening)
+        val id = OwnerId.of(listening)
         if (id != null) listeners.add(id)
 
         owner.connectionChanged()
@@ -75,7 +76,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
         (owner as? BlockEntity)?.markDirtyNotifyAll()
         (listening as? BlockEntity)?.markDirtyNotifyAll()
 
-        val ownerId = ConnectionOwnerId.of(owner)
+        val ownerId = OwnerId.of(owner)
         (listening.grabLevel() as? ServerLevel)?.let {
             if (ownerId != null) ServerConnections.broadcastUpdate(ownerId, it)
             if (id != null) ServerConnections.broadcastUpdate(id, it)
@@ -86,10 +87,10 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     override fun saveOrThrow(tag: CompoundTag) {
         // Saving listeners
         if (direction != PortDirection.In) {
-            val blocksPositions = listeners.mapNotNull { (it as? ConnectionOwnerId.BlockId)?.blockPos }
+            val blocksPositions = listeners.mapNotNull { (it as? OwnerId.BlockId)?.blockPos }
             tag.putLongArray("listener_blocks", blocksPositions.map { it.asLong() })
 
-            val entityUuids = listeners.mapNotNull { (it as? ConnectionOwnerId.EntityId)?.entityUuid }
+            val entityUuids = listeners.mapNotNull { (it as? OwnerId.EntityId)?.entityUuid }
             tag.put("listener_entities", CompoundTag().also {
                 it.putInt("count", entityUuids.size)
                 entityUuids.forEachIndexed { i, uuid -> it.putUUID(i.toString(), uuid) }
@@ -105,13 +106,13 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
         // Loading listeners
         if (direction != PortDirection.In) {
-            tag.getLongArrayOrNull("listeners")?.let { listeners.addAll(it.map { pos -> ConnectionOwnerId.of(BlockPos.of(pos)) }) }
-            tag.getLongArrayOrNull("listener_blocks")?.let { listeners.addAll(it.map { pos -> ConnectionOwnerId.of(BlockPos.of(pos)) }) }
+            tag.getLongArrayOrNull("listeners")?.let { listeners.addAll(it.map { pos -> OwnerId.of(BlockPos.of(pos)) }) }
+            tag.getLongArrayOrNull("listener_blocks")?.let { listeners.addAll(it.map { pos -> OwnerId.of(BlockPos.of(pos)) }) }
             tag.getCompoundOrNull("listener_entities")?.let { tag ->
                 val size = tag.getInt("count")
                 for (i in 0 until size) {
                     val uuid = tag.getUUIDOrNull(i.toString()) ?: continue
-                    listeners.add(ConnectionOwnerId.of(uuid))
+                    listeners.add(OwnerId.of(uuid))
                 }
             }
         }

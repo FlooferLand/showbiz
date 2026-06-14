@@ -9,6 +9,7 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.copy
 import com.google.common.math.IntMath.pow
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
@@ -22,7 +23,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 /** Server-only object for handling entity connections/links (See the client-side object -> ClientConnections) */
 object ServerConnections {
     val loaded = mutableListOf<IConnectable>()
-    val points = mutableMapOf<ConnectionOwnerId, MutableList<Point>>()
+    val points = mutableMapOf<OwnerId, MutableList<Point>>()
 
     const val CLIENT_UPDATE_INTERVAL = 10L // ticks
     final val MAX_VIEW_DISTANCE_SQR = pow(32, 2)
@@ -36,16 +37,13 @@ object ServerConnections {
         if (level.dimension() != Level.OVERWORLD) return
         if (connectable !is IConnectable) return
         loaded.remove(connectable)
-        for ((_, points) in points) {
-            points.forEach { point -> point.connections.removeIf { it.id.matches(connectable) } }
-        }
 
-        val id = ConnectionOwnerId.of(connectable) ?: return
+        val id = OwnerId.of(connectable) ?: return
         points.remove(id)
         val packet = UpdateConnectionsPacket(id, emptyList())
         level.server?.playerList?.players?.forEach { ServerPlayNetworking.send(it, packet) }
     }
-    fun broadcastUpdate(id: ConnectionOwnerId, level: ServerLevel) {
+    fun broadcastUpdate(id: OwnerId, level: ServerLevel) {
         val points = points[id] ?: return
         val server = level.server
         val connectable = id.grabConnectable(level)
@@ -70,7 +68,7 @@ object ServerConnections {
             val queued = mutableListOf<IConnectable>()
             for (connectable in loaded.copy()) {
                 val manager = connectable.connectionManager
-                val id = ConnectionOwnerId.of(connectable) ?: continue
+                val id = OwnerId.of(connectable) ?: continue
 
                 val points = mutableListOf<Point>()
                 var index = 0
@@ -116,13 +114,13 @@ object ServerConnections {
     fun updateConnections(connectable: IConnectable) {
         val manager = connectable.connectionManager
 
-        val id = ConnectionOwnerId.of(connectable)
+        val id = OwnerId.of(connectable)
         val level = connectable.grabLevel()
 
         // Clearing invalid listeners
-        if (level != null && level is ServerLevel) {
+        if (level != null && level is ServerLevel && level.gameTime > 100L) {
             for ((_, port) in manager.outputs) {
-                port.removeListeners { connectable.grabRemoved() }
+                port.removeListeners { listener -> listener.isRemoved(level) }
             }
         }
 
@@ -153,14 +151,14 @@ object ServerConnections {
         player.isHolding(ModItems.Wand.item)
 
     enum class PointType { Input, Output }
-    data class Connection(val id: ConnectionOwnerId, val point: Point) {
+    data class Connection(val id: OwnerId, val point: Point) {
         companion object {
             fun encode(buf: FriendlyByteBuf, connection: Connection) {
                 connection.id.encode(buf)
                 Point.encode(buf, connection.point, shallow = true)
             }
             fun decode(buf: FriendlyByteBuf): Connection = Connection(
-                id = ConnectionOwnerId.decode(buf),
+                id = OwnerId.decode(buf),
                 point = Point.decode(buf, shallow = true)
             )
         }

@@ -8,32 +8,31 @@ import net.minecraft.world.damagesource.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.BitChartStore
+import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
-import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: CollidePartId = CollidePartId.None, val owner: ICollidePartInteractable? = null) : Entity(ModClientEntities.CollidePart.type, level) {
+class CollidePartEntity(level: Level, val ownerId: OwnerId? = null, val partId: CollidePartId = CollidePartId.None, initialPos: Vec3? = null) : Entity(ModClientEntities.CollidePart.type, level) {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
-    override fun shouldRender(x: Double, y: Double, z: Double) = true
+    override fun shouldRender(x: Double, y: Double, z: Double) = setupFinished
     override fun defineSynchedData(builder: SynchedEntityData.Builder) = Unit
     override fun readAdditionalSaveData(compound: CompoundTag) = Unit
     override fun addAdditionalSaveData(compound: CompoundTag) = Unit
 
     override fun isPushable() = false
-    override fun isPickable() = true
-    override fun isAttackable() = true
+    override fun isPickable() = setupFinished
+    override fun isAttackable() = setupFinished
     override fun canBeCollidedWith() = false
-    override fun canCollideWith(entity: Entity) = (entity is CollidePartEntity) || (entity is Player)
+    override fun canCollideWith(entity: Entity) = setupFinished && ((entity is CollidePartEntity) || (entity is Player))
     override fun canBeHitByProjectile() = true
     override fun getDimensions(pose: Pose): EntityDimensions =
         targetSize.let { EntityDimensions.fixed(
@@ -43,6 +42,7 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
 
     val colliding = mutableSetOf<Entity>()
     val used = mutableSetOf<Entity>()
+    var setupFinished = false
     var targetPos = Vec3.ZERO!!
     var targetSize = Vec3(0.1, 0.1, 0.1)
     var lastHitTime: Int = 0
@@ -54,17 +54,21 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
         if (partId == CollidePartId.None) remove(RemovalReason.DISCARDED)
         initialPos?.let {
             setPos(it)
+            setOldPosAndRot()
             targetPos = it
         }
+        refreshDimensions()
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
+        if (!setupFinished) return InteractionResult.PASS
         colliding += player
         punched = true
         return InteractionResult.SUCCESS
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
+        if (!setupFinished) return false
         val attacker = source.entity ?: return false
         if (attacker is Player) {
             punched = true
@@ -75,19 +79,23 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
 
     override fun tick() {
         val level = level() ?: return
-        if ((owner is BlockEntity && owner.isRemoved) || owner == null) {
+        if (ownerId?.isRemoved(level) != false) {
             remove(RemovalReason.DISCARDED)
+            return
         }
 
         refreshDimensions()
         setPos(targetPos)
+        if (!setupFinished && tickCount > 5 && position() != Vec3.ZERO) {
+            setupFinished = true
+        }
 
         val boxCollisions = level.getEntities(this, boundingBox).filter { it != this }
         colliding += boxCollisions.filter { it.position() != position() }  // Filter prevents a weird bug triggering all of them at once upon join
         used.removeIf { it !in colliding }
 
         val newCollisions = colliding.filter { it !in used }
-        if (newCollisions.isNotEmpty() && Showbiz.config.audio.playBotEffects) run {
+        if (newCollisions.isNotEmpty() && Showbiz.config.audio.playBotEffects && setupFinished) run {
             val hitter = newCollisions.first()
             val hitDir = calculateHitDirection(hitter)
             val (downHitVolume, downHitPitch) = run {
@@ -115,9 +123,10 @@ class CollidePartEntity(level: Level, initialPos: Vec3? = null, val partId: Coll
                     used += newCollisions
                 }
                 CollidePartId.HiHat -> {
-                    val closed = owner is StagedBotBlockEntity
-                            && owner.show.data.mapping == BitChartStore.RAE_ID
-                            && owner.show.data.signal.frameHas(32) // Dook High Hat Close
+                    val show = (ownerId as? IBot)?.show
+                    val closed = show != null
+                            && show.data.mapping == BitChartStore.RAE_ID
+                            && show.data.signal.frameHas(32) // Dook High Hat Close
                     val sound = if (closed) ModSounds.HihatClosed else ModSounds.HihatOpen
                     level.playLocalSound(x, y, z, sound.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
                     used += newCollisions

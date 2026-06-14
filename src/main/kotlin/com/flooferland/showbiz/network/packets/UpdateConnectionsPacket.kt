@@ -3,13 +3,13 @@ package com.flooferland.showbiz.network.packets
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.connection.ServerConnections.Point
 import com.flooferland.showbiz.utils.rl
 
 /** Updated connection per-block */
-data class UpdateConnectionsPacket(val id: ConnectionOwnerId, val points: List<ServerConnections.Point>) : CustomPacketPayload {
+data class UpdateConnectionsPacket(val id: OwnerId, val points: List<ServerConnections.Point>) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -20,7 +20,7 @@ data class UpdateConnectionsPacket(val id: ConnectionOwnerId, val points: List<S
                 buf.writeCollection(packet.points, Point::encode)
             },
             { buf ->
-                val id = ConnectionOwnerId.decode(buf)
+                val id = OwnerId.decode(buf)
                 val points = buf.readList { Point.decode(buf) }
                 UpdateConnectionsPacket(id, points)
             }

@@ -5,7 +5,7 @@ import net.minecraft.network.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.connection.ServerConnections.CLIENT_UPDATE_INTERVAL
 import com.flooferland.showbiz.types.connection.ServerConnections.MAX_VIEW_DISTANCE_SQR
@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 
 object ClientConnections {
-    val entries = mutableMapOf<ConnectionOwnerId, MutableList<Point>>()
+    val entries = mutableMapOf<OwnerId, MutableList<Point>>()
     var ticksSincePing = 0
 
     init {

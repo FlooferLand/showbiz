@@ -1,12 +1,12 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.client.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.sounds.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.*
+import net.minecraft.world.level.block.entity.*
 import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
@@ -32,6 +32,7 @@ import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.animation.RawAnimation
 import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
 import software.bernie.geckolib.cache.`object`.GeoBone
+import software.bernie.geckolib.constant.DataTickets
 import software.bernie.geckolib.util.ClientUtil
 import kotlin.math.PI
 import kotlin.math.sin
@@ -49,8 +50,8 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
 
     // Spring properties -- methods so I can hot reload code to modify them >:)
     fun getSpringStiff() = 0.6f
-    fun getSpringDamp() = 0.2f
-    fun getSpringImpulse() = 0.15f
+    fun getSpringDamp() = 0.15f
+    fun getSpringImpulse() = 0.13f
     fun getSpringScale(data: BitMappingData) = 1.4f * data.wiggleMul.toFloat()
 
     var triggeredBadAnimationError = false
@@ -112,13 +113,12 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             // Making the Create mod is easy. Making Aeronautics is easy.. Compared to getting the delta time *thunder sound effect*
             val currentFrameTime = when (animatable) {
                 is Entity -> animatable.tickCount + state.partialTick
-                else -> {
-                    (Minecraft.getInstance()?.timer?.gameTimeDeltaTicks ?: 0f) + state.partialTick
-                }
+                is BlockEntity -> (state.getData(DataTickets.TICK) ?: 0.0) + state.partialTick
+                else -> ShowbizClient.getDeltaTime()
             }.toDouble()
             val lastFrameTime = if (storage.lastFrameTime > 0f) storage.lastFrameTime else currentFrameTime
-            val deltaTicks = (currentFrameTime - lastFrameTime).coerceIn(0.0..1.25)
             storage.lastFrameTime = currentFrameTime
+            val deltaTicks = (currentFrameTime - lastFrameTime).coerceIn(0.0..1.25)
             deltaTicks.toFloat()
         }
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)

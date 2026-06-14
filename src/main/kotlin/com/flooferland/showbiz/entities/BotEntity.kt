@@ -4,8 +4,11 @@ import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
 import net.minecraft.network.syncher.*
 import net.minecraft.server.level.*
+import net.minecraft.sounds.*
 import net.minecraft.world.*
+import net.minecraft.world.damagesource.*
 import net.minecraft.world.entity.*
+import net.minecraft.world.entity.item.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
@@ -17,9 +20,12 @@ import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModEntities
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.CollidePartManager
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
@@ -32,7 +38,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: Figure out if calls to connectionChanged and entity accessors are even needed
 
-class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bot.type, level), GeoEntity, IConnectable, IBot {
+class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
     constructor(level: Level) : this(level, null)
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
@@ -52,10 +58,26 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
             if (level() is ServerLevel) updatePersistentData { it.putString("bot_id", value?.toString() ?: "") }
         }
 
+    override val collidePartInstance = CollidePartManager.create(this) {
+        val botId = this@BotEntity.botId ?: return@create
+        when {
+            botId.matches("showbiz:rolfe_dewolfe") -> {
+                map("cymbal", CollidePartId.Cymbal)
+                map("stick", CollidePartId.Stick)
+            }
+
+            botId.matches("showbiz-wp5:mini_mozzarella") -> {
+                map("Booper", CollidePartId.Boop)
+            }
+        }
+    }
+
+    private var prevBotId: ResourceId? = null
+    private var killDelayTicks = 0
     private val pendingShow = PackedShowData()
 
     override fun getDimensions(pose: Pose): EntityDimensions {
-        return EntityDimensions.fixed(1.0f, 2.0f)
+        return EntityDimensions.fixed(0.6f, 2.0f)
     }
 
     init {
@@ -63,7 +85,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         refreshDimensions()
     }
 
-    override fun isInvulnerable() = true
+    override fun isInvulnerable() = false
     override fun isPushable() = false
     override fun isPickable() = true
     override fun isAttackable() = true
@@ -73,10 +95,26 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
 
     override fun tick() {
         super.tick()
-        if (!level().isClientSide) {
+        val level = level() ?: return
+        if (!level.isClientSide) {
             show.data.tempReset()
             show.data.merge(pendingShow)
             pendingShow.tempReset()
+        }
+        if (killDelayTicks > 0) {
+            killDelayTicks -= 1
+            if (killDelayTicks == 0) {
+                drop()
+                kill()
+                return
+            }
+        }
+
+        val id = OwnerId.of(this)
+        if (id != null) collidePartInstance.tick(level, id)
+        if (botId != prevBotId) {
+            if (id != null) collidePartInstance.refresh(level, id)
+            prevBotId = botId
         }
     }
 
@@ -84,10 +122,32 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         it.set(ModComponents.BotId.type, botId)
     }
 
+    fun drop() {
+        val pos = position() ?: return
+        val level = level() ?: return
+        val item = ItemEntity(level, pos.x, pos.y + 0.5, pos.z, makeItem())
+        level.addFreshEntity(item)
+    }
     fun grab(player: Player): InteractionResult {
         player.handItem(makeItem())
         remove(RemovalReason.DISCARDED)
         return InteractionResult.SUCCESS
+    }
+
+    override fun hurt(source: DamageSource, amount: Float): Boolean {
+        val attacker = source.entity
+        fun playSound(sound: SoundEvent) {
+            level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
+        }
+        if (attacker !is Player) return false
+
+        val isClient = attacker.level().isClientSide
+        val critAttack = attacker.fallDistance > 0.2f && !attacker.onGround() && !attacker.isSprinting
+        if (!isClient && amount > 0f && critAttack) {
+            playSound(SoundEvents.ARMOR_STAND_BREAK)
+            killDelayTicks = 2
+        }
+        return true
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
@@ -95,7 +155,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         if (player.isCrouching) return grab(player)
 
         // Opening up the selection screen
-        val id = ConnectionOwnerId.of(this)
+        val id = OwnerId.of(this)
         if (id != null) {
             player.openMenu(object : ExtendedScreenHandlerFactory<BotListSelectPacket> {
                 override fun getDisplayName() = Component.empty()

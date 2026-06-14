@@ -4,10 +4,10 @@ import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.rl
 
-class BotListSelectPacket(val bot: ConnectionOwnerId, val id: ResourceId?) : CustomPacketPayload {
+class BotListSelectPacket(val bot: OwnerId, val id: ResourceId?) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -19,7 +19,7 @@ class BotListSelectPacket(val bot: ConnectionOwnerId, val id: ResourceId?) : Cus
             },
             { buf ->
                 BotListSelectPacket(
-                    bot = ConnectionOwnerId.decode(buf),
+                    bot = OwnerId.decode(buf),
                     id = buf.readNullable { ResourceId.decode(it) }
                 )
             }

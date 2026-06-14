@@ -31,5 +31,6 @@ open class GeoFixedBlockEntityRenderer<T>(model: GeoModel<T>) : GeoBlockRenderer
 
     override fun postRender(poseStack: PoseStack, animatable: T, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         hook.postRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
+        super.postRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour)
     }
 }

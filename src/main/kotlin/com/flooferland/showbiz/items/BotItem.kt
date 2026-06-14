@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.items
 
+import net.minecraft.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.level.*
 import net.minecraft.world.*
@@ -37,6 +38,14 @@ class BotItem(properties: Properties) : Item(properties) {
             player.setItemInHand(context.hand, ItemStack.EMPTY)
         }
         return InteractionResult.PASS
+    }
+
+    override fun getName(stack: ItemStack): Component {
+        val comp = Component.empty().append(super.getName(stack))
+        stack.get(ModComponents.BotId.type)?.let { botId ->
+            comp.append(Component.literal(" (${botId.path})").withStyle(ChatFormatting.GRAY))
+        }
+        return comp
     }
 
     override fun appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: MutableList<Component>, tooltipFlag: TooltipFlag) {

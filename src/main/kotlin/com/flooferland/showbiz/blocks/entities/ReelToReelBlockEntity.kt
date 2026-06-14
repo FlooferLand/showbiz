@@ -84,7 +84,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private val recordQueue = mutableListOf<SignalFrame>()
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
-        addPart("record", Vec3(-0.3, 0.3, -0.2), Vec3(0.2, 0.2, 0.2))
+        addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.1, 0.1, 0.15))
     }
 
     private var audioBytesWritten = 0

@@ -1,8 +1,7 @@
 package com.flooferland.showbiz.types.collidepart
 
-import net.minecraft.core.BlockPos
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.*
+import com.flooferland.showbiz.types.OwnerId
 
 /** Responsible for initializing parts */
 object CollidePartManager {
@@ -17,7 +16,7 @@ object CollidePartManager {
         )
 
     interface IInstance {
-        fun tick(level: Level, pos: BlockPos, state: BlockState) {}
-        fun refresh(level: Level, pos: BlockPos) {}
+        fun tick(level: Level, ownerId: OwnerId) {}
+        fun refresh(level: Level, ownerId: OwnerId) {}
     }
 }

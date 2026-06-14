@@ -21,13 +21,12 @@ import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.connection.ConnectionOwnerId
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
-import org.checkerframework.checker.units.qual.g
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -82,9 +81,11 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
         decor?.tick(this, level, pos, state)
         soundHandler?.tick(this, level, pos, state)
-        collidePartInstance.tick(level, pos, state)
+
+        val id = OwnerId.of(this)
+        if (id != null) collidePartInstance.tick(level, id)
         if (botId != prevBotId) {
-            collidePartInstance.refresh(level, pos)
+            if (id != null) collidePartInstance.refresh(level, id)
             prevBotId = botId
         }
     }
@@ -95,7 +96,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return getScreenOpeningData(player)?.let { BotSelectMenu(i, it) }
     }
     override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket? =
-        ConnectionOwnerId.of(this)?.let { BotListSelectPacket(it, botId) }
+        OwnerId.of(this)?.let { BotListSelectPacket(it, botId) }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)

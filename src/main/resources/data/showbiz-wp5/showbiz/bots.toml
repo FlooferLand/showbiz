@@ -29,7 +29,7 @@ accepts.rockafire = true
 accepts.fnaf1 = false
 
 [wolfman]
-name = "Wolfman (W.I.P)"
+name = "Wolfman"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
 accepts.rockafire = true
 accepts.fnaf1 = false
