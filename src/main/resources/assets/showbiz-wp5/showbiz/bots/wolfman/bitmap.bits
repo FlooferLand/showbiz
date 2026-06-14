@@ -4,7 +4,7 @@ set wp5 wolfman
 wp5 14, rae 16 {
     flow 0.25
     rotate "Waist" x:-5
-    rotate "Right Elbow" x:5
+    # rotate "Right Elbow" x:5
     wigglemul 3.0
 }
 
@@ -17,9 +17,7 @@ wp5 16 {
 wp5 13, rae 14 {
     flow 0.35
     rotate "Waist" y:25
-    rotate "Right Elbow" x:20
-    rotate "Right Arm" y:-17.5
-    rotate "Right Arm" x:-17.5
+    rotate "Right Arm Turn Illusion" y:10 z:4
     wigglemul 3.0
 }
 
@@ -43,29 +41,24 @@ wp5 9, rae 6 {
 
 # arms
 wp5 15, rae 18 {  # mic swing
-    flow 0.35
-    rotate "Mic Stand" z:12.5
-    rotate "Right Arm" y:12.5
-    rotate "Right Arm" x:7.5
-    rotate "Right Elbow" x:-10
-    rotate "Right Elbow" z:-10
-    rotate "Right Elbow" y:10
+    flow 0.3
+    anim "mic_swing"
     wigglemul 1.5
 }
 
 wp5 10, rae 11 {
-    flow 0.3
+    flow 0.25
     rotate "Left Arm" z:-60
     wigglemul 1.5
 }
 
 wp5 11, rae 12 {
-    flow 0.4
+    flow 0.3
     rotate "Left Arm" y:60
     wigglemul 2.0
 }
 wp5 12, rae 13 {
-    flow 0.4
+    flow 0.3
     rotate "Left Elbow" x:55
     wigglemul 2.5
 }
@@ -77,12 +70,12 @@ wp5 1, rae 1 {
     rotate "Snout" x:5
 }
 wp5 2, rae 4 {
-    flow 0.5
-    move "Eyes" x:0.5
+    flow 0.6
+    move "Eyes" x:0.55
 }
 rae 5 {
-    flow 0.5
-    move "Eyes" x:-0.5
+    flow 0.6
+    move "Eyes" x:-0.55
 }
 wp5 3, rae 2 {
     flow 0.8

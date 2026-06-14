@@ -1,0 +1,149 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.wolfman.mic_swing.on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1,
+			"bones": {
+				"Right Arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [-0.6957, -29.554, -6.645]
+						},
+						"0.6667": {
+							"vector": [-2.2316, -29.1627, -0.5146]
+						},
+						"1.0": {
+							"vector": [-0.6957, -29.554, -6.645]
+						}
+					}
+				},
+				"Right Elbow": {
+					"rotation": {
+						"0.0": {
+							"post": {
+								"vector": [0, 0, 0]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.2917": {
+							"post": {
+								"vector": [-8.0231, -6.8851, 12.2618]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.5": {
+							"post": {
+								"vector": [-9.4681, -11.8031, 21.0202]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.6667": {
+							"post": {
+								"vector": [-13.8251, -12.1674, 21.669]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": {
+								"vector": [-9.4681, -11.8031, 21.0202]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"Mic Stand": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [-11.0179, 4.2454, 19.5621]
+						},
+						"0.6667": {
+							"vector": [-11.157, 3.8607, 17.5945]
+						},
+						"1.0": {
+							"vector": [-11.0179, 4.2454, 19.5621]
+						}
+					}
+				}
+			}
+		},
+		"animation.wolfman.mic_swing.off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1,
+			"bones": {
+				"Right Arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [-0.6957, -29.554, -6.645]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						},
+						"0.5833": {
+							"vector": [0, 0, 4.25]
+						},
+						"1.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"Right Elbow": {
+					"rotation": {
+						"0.0": {
+							"post": {
+								"vector": [-9.4681, -11.8031, 21.0202]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.2083": {
+							"post": {
+								"vector": [-8.0231, -6.8851, 12.2618]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.5": {
+							"post": {
+								"vector": [0, 0, 0]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.5833": {
+							"post": {
+								"vector": [-0.4682, 2.0586, -1.2574]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.8333": {
+							"post": {
+								"vector": [0, 0, 0]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"Mic Stand": {
+					"rotation": {
+						"0.0": {
+							"vector": [-11.0179, 4.2454, 19.5621]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						},
+						"0.5833": {
+							"vector": [0, 0, -1.75]
+						},
+						"0.9583": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}
