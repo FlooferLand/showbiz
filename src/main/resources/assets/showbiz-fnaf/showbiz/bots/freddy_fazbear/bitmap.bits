@@ -1,0 +1,139 @@
+set faz freddy
+
+# Head Movements
+
+faz 1 {
+    flow 1
+    rotate "jaw" x:-15
+}
+
+faz 2 {
+    flow 1
+    rotate "head" x:15
+}
+
+faz 19 {
+    flow 0.5
+    rotate "head" y:-45
+}
+
+faz 20 {
+    flow 0.5
+    rotate "head" y:45
+}
+
+# Eye Movements
+
+faz 3 {
+    flow 0.5
+    move "leftpupil" x:-0.5
+    move "rightpupil" x:-0.5
+}
+
+faz 4 {
+    flow 0.5
+    move "leftpupil" x:0.5
+    move "rightpupil" x:0.5
+}
+
+faz 5 {
+    flow 1.2
+    rotate "rightuppereyelid" x:-20
+    rotate "rightlowereyelid" x:30
+}
+
+faz 6 {
+    flow 1.2
+    rotate "leftuppereyelid" x:-20
+    rotate "leftlowereyelid" x:30
+}
+
+
+
+# Body Movements
+faz 23 {
+    flow 0.35
+    rotate "spine" x:-15
+}
+
+faz 21 {
+    flow 0.35
+    rotate "spine" y:-15
+}
+
+faz 22 {
+    flow 0.35
+    rotate "spine" y:15
+}
+
+# Left Arm Movements
+
+faz 10 {
+    flow 0.25
+    rotate "leftarm1" z:-70
+}
+
+faz 14 {
+    flow 0.5
+    rotate "leftforearm1" z:50
+}
+
+faz 12 {
+    flow 0.35
+    rotate "leftforearm2" x:80
+}
+
+faz 18 {
+    flow 1.0
+    rotate "lefthand1" z:-35
+}
+
+faz 16 {
+    flow 1.0
+    rotate "lefthand" x:-90
+}
+
+faz 8 {
+    flow 0.5
+    rotate "leftarm" y:-30
+}
+
+# Right Arm Movements
+
+faz 7 {
+    flow 0.5
+    rotate "rightarm" y:20
+}
+
+faz 13 {
+    flow 1.0
+    rotate "rightforearm1" z:-70
+}
+
+faz 15 {
+    flow 1.0
+    rotate "righthand" x:-90
+}
+
+faz 17 {
+    flow 1.0
+    rotate "righthand1" z:35
+}
+
+faz 9 {
+    flow 0.35
+    rotate "rightarm2" x:-30
+    rotate "rightarm" z:80
+}
+
+faz 11 {
+    flow 0.35
+    rotate "rightforearm" x:80
+}
+
+# Right Foot Movement
+
+faz 24 {
+    flow 1.5
+    rotate "rightfoot" x:10
+}

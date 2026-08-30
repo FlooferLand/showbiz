@@ -1,0 +1,11 @@
+[variants.default]
+texture = "freddy_fazbear"
+
+[variants.golden]
+texture = "golden_freddy"
+
+[variants.purple]
+texture = "purple_freddy"
+
+[variants.yellow]
+texture = "yellow_bear"
