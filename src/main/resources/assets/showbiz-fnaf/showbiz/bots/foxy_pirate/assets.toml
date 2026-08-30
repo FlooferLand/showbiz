@@ -1,0 +1,5 @@
+[variants.default]
+texture = "foxy_pirate"
+
+[variants.fixed]
+texture = "foxy_pirate_fixed"
