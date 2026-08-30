@@ -106,7 +106,7 @@ faz 7 {
 }
 
 faz 13 {
-    flow 1.0
+    flow 0.5
     rotate "rightforearm1" z:-70
 }
 
@@ -121,7 +121,7 @@ faz 17 {
 }
 
 faz 9 {
-    flow 0.35
+    flow 0.25
     rotate "rightarm2" x:-30
     rotate "rightarm" z:80
 }

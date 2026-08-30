@@ -1,0 +1,123 @@
+set faz bonnie
+
+# Head Movements
+
+faz 33 {
+    flow 1
+    rotate "jaw" x:-15
+}
+
+faz 34 {
+    flow 1
+    rotate "head" x:15
+}
+
+faz 51 {
+    flow 0.5
+    rotate "head" y:-45
+}
+
+faz 52 {
+    flow 0.5
+    rotate "head" y:45
+}
+
+faz 42 {
+    flow 1.0
+    rotate "rightear" x:-15
+}
+
+faz 45 {
+    flow 1.0
+    rotate "leftear" x:-15
+}
+
+# Eye Movements
+
+faz 35 {
+    flow 0.5
+    move "leftpupil" x:-0.5
+    move "rightpupil" x:-0.5
+}
+
+faz 36 {
+    flow 0.5
+    move "leftpupil" x:0.5
+    move "rightpupil" x:0.5
+}
+
+faz 37 {
+    flow 1.2
+    rotate "rightuppereyelid" x:-15
+    rotate "rightlowereyelid" x:25
+}
+
+faz 38 {
+    flow 1.2
+    rotate "leftuppereyelid" x:-15
+    rotate "leftlowereyelid" x:25
+}
+
+
+
+# Body Movements
+faz 55 { 
+    flow 0.35
+    rotate "spine" x:-15
+}
+
+faz 54 {  
+    flow 0.35
+    rotate "spine" y:-15
+}
+
+faz 53 {
+    flow 0.35
+    rotate "spine" y:15
+}
+
+# Left Arm Movements
+faz 46 {
+    flow 0.5
+    rotate "leftforearm1" x:-25
+}
+
+faz 44 {
+    flow 0.5
+    rotate "leftforearm" y:-77.5
+}
+
+faz 48 {
+    flow 1.0
+    rotate "lefthand1" x:-70
+}
+
+faz 40 {
+    flow 0.5
+    rotate "leftarm1" y:20
+}
+
+faz 39 {
+    flow 0.5
+    rotate "rightarm1" y:30
+}
+
+faz 41 {
+    flow 0.35
+    rotate "rightarm" z:65
+}
+
+faz 43 {
+    flow 0.5
+    rotate "rightforearm1" x:90
+}
+
+faz 49 {
+    flow 1.0
+    rotate "righthand" z:-45
+}
+
+faz 47 {
+    flow 1.0
+    rotate "righthand1" x:-72.5
+}
