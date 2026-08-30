@@ -1,4 +1,5 @@
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun vers(name: String): String = property("vers.${name}") as String
@@ -221,7 +222,9 @@ tasks.remapSourcesJar {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 kotlin {
-    jvmToolchain(java.ordinal + 1)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(java.toString()))
+    }
     sourceSets.all {
         languageSettings.optIn("kotlin.ExperimentalUnsignedTypes")
     }
