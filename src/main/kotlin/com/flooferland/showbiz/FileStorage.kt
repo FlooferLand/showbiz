@@ -14,7 +14,7 @@ object FileStorage {
     val SHOWS_DIR = SHOWBIZ_DIR / "shows"
 
     init {
-        SHOWS_DIR.toFile().mkdirs()
+        Files.createDirectories(SHOWS_DIR)
         ServerLifecycleEvents.SERVER_STARTED.register { _ ->
             cachedShowPaths.clear()
             cachedShowInfo.clear()

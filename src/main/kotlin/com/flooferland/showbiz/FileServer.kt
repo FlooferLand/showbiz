@@ -27,14 +27,17 @@ import kotlin.io.path.extension
 
 object FileServer {
     var serverPlayerUploads = mutableMapOf<Int, ServerPlayerFileUpload>()
-    var showWatchService: WatchService =
+    val showWatchService: WatchService by lazy {
         FileSystems.getDefault().newWatchService().also {
-            FileStorage.SHOWS_DIR.register(it,
+            Files.createDirectories(FileStorage.SHOWS_DIR)
+            FileStorage.SHOWS_DIR.register(
+                it,
                 StandardWatchEventKinds.ENTRY_CREATE,
                 StandardWatchEventKinds.ENTRY_DELETE,
                 StandardWatchEventKinds.ENTRY_MODIFY
             )
         }
+    }
 
     init {
         // Show files
