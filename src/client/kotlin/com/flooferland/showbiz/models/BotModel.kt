@@ -113,7 +113,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             // Making the Create mod is easy. Making Aeronautics is easy.. Compared to getting the delta time *thunder sound effect*
             val currentFrameTime = when (animatable) {
                 is Entity -> animatable.tickCount + state.partialTick
-                is BlockEntity -> (state.getData(DataTickets.TICK) ?: 0.0) + state.partialTick
+                is BlockEntity -> (state.getData(DataTickets.TICK) ?: 0.0)
                 else -> ShowbizClient.getDeltaTime()
             }.toDouble()
             val lastFrameTime = if (storage.lastFrameTime > 0f) storage.lastFrameTime else currentFrameTime
@@ -189,11 +189,12 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
 
             // Manual smoothing
             val oldSmooth = storage.bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
-            val bitSmooth = clamp(
+            val rawSmooth = clamp(
                 lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.0f, 10.0f)),
                 0.0f, 1.0f
             )
-            storage.bitSmooths[bit] = bitSmooth.let { if (it.isNaN()) 0f else it }
+            val bitSmooth = if (rawSmooth.isFinite()) rawSmooth else 0f
+            storage.bitSmooths[bit] = bitSmooth
 
             // Spring
             val diff = (bitSmooth - oldSmooth)
@@ -203,8 +204,10 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             springVel += acceleration * delta
             springVel += diff * getSpringImpulse()
             springOffset += springVel * delta
-            storage.bitSpringOffset[bit] = springOffset.let { if (it.isNaN()) 0f else it }
-            storage.bitSpringVelocity[bit] = springVel.let { if (it.isNaN()) 0f else it }
+            springOffset = if (springOffset.isFinite()) springOffset else 0f
+            springVel = if (springVel.isFinite()) springVel else 0f
+            storage.bitSpringOffset[bit] = springOffset
+            storage.bitSpringVelocity[bit] = springVel
 
             // Easing: https://easings.net/#easeOutSine
             val eased = when (flowEase) {
