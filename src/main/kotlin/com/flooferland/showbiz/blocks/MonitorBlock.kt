@@ -35,6 +35,15 @@ class MonitorBlock(props: Properties) : FacingEntityBlock(props) {
             .setValue(HANGED, !above.isAir)
     }
 
+    override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, neighborBlock: Block, neighborPos: BlockPos, movedByPiston: Boolean) {
+        val hanging = state.getValue(HANGED)
+        val above = level.getBlockState(pos.above())
+        if (hanging != !above.isAir) {
+            level.setBlockAndUpdate(pos, state.setValue(HANGED, !above.isAir))
+        }
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
+    }
+
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
         if (!FFmpeg.serverAvailable) {
             val comp = Component.literal("You need to install FFmpeg on your server to use the TV")
