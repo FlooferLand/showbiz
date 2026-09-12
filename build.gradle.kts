@@ -1,4 +1,7 @@
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
+import org.gradle.internal.impldep.kotlinx.serialization.json.JsonNull.content
+import org.gradle.internal.impldep.org.bouncycastle.oer.OERDefinition.optional
+import org.gradle.internal.impldep.org.yaml.snakeyaml.scanner.Constant.ALPHA
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -55,7 +58,43 @@ repositories {
     }
 }
 
+// Mappings
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        register(modId) {
+            sourceSet("main")
+            sourceSet("client")
+        }
+    }
+    runs {
+        create("client_offline") {
+            client()
+            name("Minecraft Client (Offline)")
+            runDir = "../../run"
+            vmArgs += "-Ddevauth.enabled=false"
+            programArgs.addAll(arrayOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
+            environmentVariable("DEVAUTH_ENABLED", "false")
+        }
+        create("client_alt") {
+            client()
+            name("Minecraft Client (ALT)")
+            runDir = "../../run-alt"
+            vmArgs += "-Ddevauth.enabled=false"
+            programArgs.addAll(arrayOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
+            environmentVariable("DEVAUTH_ENABLED", "false")
+        }
+    }
+    runConfigs.all {
+        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
+        runDir = "../../run" // Shared run folder between versions
+        vmArgs.addAll((properties["net.minecraft.jvmargs"] as String).split(" "))
+    }
+    log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
+}
+
 val fabricLanguageKotlin = dep("fabric_language_kotlin")
+val irlights = "${dep("irlights")}+mc$minecraft"
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${dep("kotlin_json")}")
@@ -92,11 +131,8 @@ dependencies {
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
-    // Veil
-    modCompileOnly("foundry.veil:veil-$loader-$minecraft:${dep("veil")}") {
-        exclude(group="maven.modrinth")
-        exclude(group="me.fallenbreath")
-    }
+    // IRLights
+    compileOnly("com.github.quaIett:irl-core:${dep("irlights_core")}")
 
     // CC Tweaked
     modCompileOnly("cc.tweaked:cc-tweaked-$minecraft-$loader-api:${dep("cctweaked")}")
@@ -118,47 +154,12 @@ tasks.shadowJar {
     minimize()
 }
 
-// Mappings
-loom {
-    splitEnvironmentSourceSets()
-    mods {
-        register(modId) {
-            sourceSet("main")
-            sourceSet("client")
-        }
-    }
-    runs {
-        create("client_offline") {
-            client()
-            name("Minecraft Client (Offline)")
-            runDir = "../../run"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
-            environmentVariable("DEVAUTH_ENABLED", "false")
-        }
-        create("client_alt") {
-            client()
-            name("Minecraft Client (ALT)")
-            runDir = "../../run-alt"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
-            environmentVariable("DEVAUTH_ENABLED", "false")
-        }
-    }
-    runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "../../run" // Shared run folder between versions
-        vmArgs.addAll((properties["net.minecraft.jvmargs"] as String).split(" "))
-    }
-    log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
-}
-
 // License
 tasks.jar {
-    inputs.property("archivesName", base.archivesName.get())
+    inputs.property("archivesName", project.base.archivesName.get())
     excludedFromJar.forEach { exclude(it) }
     from("LICENSE") {
-        rename { "${it}_${base.archivesName}" }
+        rename { "${it}_${project.base.archivesName}" }
     }
 }
 tasks.remapJar {
@@ -184,7 +185,7 @@ tasks.withType<ProcessResources>().configureEach {
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),
         "geckolib" to dep("geckolib"),
-        "veil" to dep("veil"),
+        "irlights" to irlights,
         "cctweaked" to dep("cctweaked"),
         "archivesName" to modId,
         "archivesBaseName" to modId
@@ -200,6 +201,7 @@ tasks.withType<ProcessResources>().configureEach {
 // Datagen
 tasks.register<JavaExec>("runDatagen") {
     group = "flooferland"
+    description = "Generates a bunch of JSON files, similar to Fabric's data generation but better"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.flooferland.showbiz.datagen.DataGenerator")
     systemProperty("$modId.datagen", "true")

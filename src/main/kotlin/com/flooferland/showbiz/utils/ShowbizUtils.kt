@@ -18,10 +18,6 @@ object ShowbizUtils {
         "flooferland", "monsterwaill" -> true
         else -> false
     }
-
-    fun clientHasVeil() =
-        FabricLoader.getInstance()?.getModContainer("veil")?.isPresent == true
-
     fun hasComputerCraft() =
         FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
 

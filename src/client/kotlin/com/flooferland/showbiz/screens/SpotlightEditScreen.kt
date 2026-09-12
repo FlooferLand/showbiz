@@ -12,26 +12,20 @@ import com.flooferland.showbiz.utils.rl
 class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/spotlight.png")
 
-    var turnX: EditBox? = null
-    var turnY: EditBox? = null
+    var turn: EditBox? = null
     var angle: EditBox? = null
     var color: ColorPicker? = null
+    var shadows: Checkbox? = null
 
     override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
         // Turn X
         run {
-            turnX = EditBox(font, 40, 20, Component.literal("Turn X"))
-            turnX!!.value = editMenu.data.turn.x.toString().replace(".0", "")
-            turnX!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
-            widgets.add(WidgetInfo("Turn X", turnX!!))
-        }
-
-        // Turn Y
-        run {
-            turnY = EditBox(font, 40, 20, Component.literal("Turn Y"))
-            turnY!!.value = editMenu.data.turn.y.toString().replace(".0", "")
-            turnY!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
-            widgets.add(WidgetInfo("Turn Y", turnY!!))
+            turn = EditBox(font, 80, 20, Component.literal("Turn"))
+            turn!!.value =
+                editMenu.data.turn.x.toString().replace(".0", "") + ", " + editMenu.data.turn.y.toString().replace(".0", "")
+            turn!!.setFilter { turn -> turn.split(',').map { it.trim() }.all { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
+            turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separared by a comma"))
+            widgets.add(WidgetInfo("Turn X/Y", turn!!))
         }
 
         // Angle (radius)
@@ -44,18 +38,30 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
         }
 
         // Color
-        /*run {
+        run {
             color = ColorPicker(0, 0, 80, 40, editMenu.data.color)
             widgets.add(WidgetInfo("Color", color!!))
-        }*/
+        }
+
+        // Shadows
+        run {
+            shadows = Checkbox.builder(Component.literal("Shadows"), font)
+                .selected(editMenu.data.shadows)
+                .build()
+            widgets.add(WidgetInfo(null, shadows!!))
+        }
     }
 
     override fun saveCustom(data: SpotlightEditPacket) {
-        turnX?.value?.toFloatOrNull()?.let { data.turn.x = it }
-        turnY?.value?.toFloatOrNull()?.let { data.turn.y = it }
-        angle?.value?.toFloatOrNull()?.let { data.angle = it }
-        color?.value?.let {
-            data.color = it
+        turn?.value?.split(',')?.let { values ->
+            val values = values.map { it.trim() }.mapNotNull { it.toFloatOrNull() }
+            if (values.size >= 2) {
+                data.turn.x = values[0]
+                data.turn.y = values[1]
+            }
         }
+        angle?.value?.toFloatOrNull()?.let { data.angle = it }
+        color?.value?.let { data.color = it }
+        shadows?.selected()?.let { data.shadows = it }
     }
 }

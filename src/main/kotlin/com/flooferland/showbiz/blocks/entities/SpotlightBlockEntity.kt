@@ -24,7 +24,7 @@ import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
-import com.flooferland.showbiz.utils.ShowbizUtils
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -36,13 +36,14 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
         isOn = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
-
     var isOn: Boolean = false
+    var value: Float = 0f  // Used for smoothing on the client
 
     override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
     var turn = Vec2f.ZERO
     var angle = 45f
     var color: Int = 0xffffff
+    var shadows: Boolean = true
 
     var startPos = Vec3.ZERO!!
     var endPos = Vec3.ZERO!!
@@ -53,10 +54,9 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = geckoCache
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        if (!level.isClientSide) return
-        if (ShowbizUtils.clientHasVeil()) return // Using Veil lighting instead
-        // TODO: Figure out how to render vanilla lights
-        //       Might be able to hook into WorldRenderer and intercept it getting the light coordinates
+        if (show.data.playing || isOn) {
+            markDirtyNotifyAll()
+        }
     }
 
     override fun getDisplayName() = Component.literal("Spotlight")!!
@@ -65,12 +65,21 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, color)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, color, shadows)
+
+    fun applyPacket(packet: SpotlightEditPacket) {
+        menuData = packet.base
+        turn = packet.turn
+        angle = packet.angle
+        color = packet.color
+        shadows = packet.shadows
+    }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
         menuData.loadAdditional(tag)
         tag.getBooleanOrNull("is_on")?.let { isOn = it }
+        tag.getBooleanOrNull("shadows")?.let { shadows = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
         tag.getFloatOrNull("turn_y")?.let { turn.y = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
@@ -81,6 +90,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         connectionManager.save(tag)
         menuData.saveAdditional(tag)
         tag.putBoolean("is_on", isOn)
+        tag.putBoolean("shadows", shadows)
         tag.putFloat("turn_x", turn.x)
         tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)

@@ -121,7 +121,7 @@ object FFmpeg {
         val parts = output.split(",")
         if (parts.size < 3) return@withContext null
 
-        val (num, den) = parts[2].split("/").map { it.toDouble() }
+        val (num, den) = parts[2].split("/").map { it.trim().toDouble() }
         VideoInfo(path, parts[0].toInt(), parts[1].toInt(), num / den)
     }
 

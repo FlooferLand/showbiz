@@ -7,7 +7,7 @@ import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.rl
 
-class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Vec2f, var angle: Float, var color: Int) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
+class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Vec2f, var angle: Float, var color: Int, var shadows: Boolean) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
     override fun type() = type
 
     companion object {
@@ -19,6 +19,7 @@ class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Ve
                 buf.writeFloat(conf.turn.y)
                 buf.writeFloat(conf.angle)
                 buf.writeInt(conf.color)
+                buf.writeBoolean(conf.shadows)
             },
             { buf ->
                 val editScreen = EditScreenMenu.EditScreenBuf.decode(buf)
@@ -26,7 +27,8 @@ class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Ve
                 val turnY = buf.readFloat()
                 val angle = buf.readFloat()
                 val color = buf.readInt()
-                SpotlightEditPacket(editScreen, turn = Vec2f(turnX, turnY), angle = angle, color = color)
+                val shadows = buf.readBoolean()
+                SpotlightEditPacket(editScreen, turn = Vec2f(turnX, turnY), angle = angle, color = color, shadows = shadows)
             }
         )!!
     }

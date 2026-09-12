@@ -40,10 +40,10 @@
         "minecraft": "$minecraft",
         "java": ">=$java",
         "fabric-language-kotlin": "~$fabric_language_kotlin",
-        "geckolib": "^$geckolib"
+        "geckolib": "^$geckolib",
+        "irl-redactor": "^$irlights"
     },
     "suggests": {
-        "veil": ">=$veil",
         "computercraft": ">=$cctweaked"
     }
 }

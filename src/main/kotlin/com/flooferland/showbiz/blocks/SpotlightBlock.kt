@@ -8,20 +8,34 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
-import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import kotlin.jvm.optionals.getOrNull
 
 class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::SpotlightBlock)!!
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.INVISIBLE
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.Spotlight.entityType!!.create(pos, state)!!
+
+    override fun hasDynamicShape() = true
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape? {
+        val facing = state.getOptionalValue(FACING).getOrNull() ?: return Shapes.block()
+
+        var shape = Shapes.empty()
+        shape = if (facing == Direction.NORTH || facing == Direction.SOUTH) {
+            Shapes.join(shape, Shapes.box(0.375, 0.9375, 0.265625, 0.625, 1.0, 0.765625), BooleanOp.OR)
+        } else {
+            Shapes.join(shape, Shapes.box(0.25, 0.9375, 0.390625, 0.75, 1.0, 0.640625), BooleanOp.OR);
+        }
+        return shape
+    }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? SpotlightBlockEntity)?.tick(level, pos, blockState) }
@@ -39,9 +53,7 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
                 val player = context.player() ?: return@listen
                 val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? SpotlightBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
-                    blockEntity.menuData = packet.base
-                    blockEntity.turn = packet.turn
-                    blockEntity.angle = packet.angle
+                    blockEntity.applyPacket(packet)
                 }
             }
         }

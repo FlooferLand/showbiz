@@ -6,57 +6,54 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
+import net.minecraft.world.level.levelgen.SurfaceRules.state
 import java.awt.Color
 
-class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
+class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0xffffff) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
     val pad get() = 2
     val sliderHeight get() = height / 3
 
     data class SliderData(val string: StringWidget, val slider: SliderWidget)
 
-    val sliders = mutableListOf<SliderData>()
+    var hslider: SliderData
+    var sslider: SliderData
+    var vslider: SliderData
     val children = mutableListOf<AbstractWidget>()
 
-    private data class HSV(var h: Float, var s: Float, var v: Float)
-    private val state = HSV(0f, 1f, 1f)
-
     var value: Int
-        get() = FastColor.ARGB32.color(255, Color.HSBtoRGB(state.h, state.s, state.v))
+        get() = FastColor.ARGB32.color(255, Color.HSBtoRGB(hslider.slider.value.toFloat(), sslider.slider.value.toFloat(), vslider.slider.value.toFloat()))
         set(rgb) {
             val hsb = Color.RGBtoHSB(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb), null)
-            if (hsb[2] > 0f) { state.h = hsb[0]; state.s = hsb[1] }
-            state.v = hsb[2]
-            sliders.forEachIndexed { i, data -> data.slider.value = if(i == 0) state.h else if(i == 1) state.s else state.v }
+            println("${hsb[0]}, ${hsb[1]}, ${hsb[2]}")
+            hslider.slider.value = hsb[0].toDouble()
+            sslider.slider.value = hsb[1].toDouble()
+            vslider.slider.value = hsb[2].toDouble()
         }
+
+    fun addSlider(text: String, default: Double): SliderData {
+        val textComp = Component.literal(text)
+        val textWidth = Minecraft.getInstance().font.width(textComp)
+        val title = StringWidget(0, 0, textWidth, sliderHeight - pad, textComp, Minecraft.getInstance().font)
+        val slider = SliderWidget(0, 0, width - (textWidth * 2) - pad, sliderHeight - pad, default) {}
+        children += title
+        children += slider
+        return SliderData(title, slider)
+    }
 
     init {
-        fun addSlider(text: String, default: Float) {
-            val textComp = Component.literal(text)
-            val textWidth = Minecraft.getInstance().font.width(textComp)
-            val title = StringWidget(0, 0, textWidth, sliderHeight - pad, textComp, Minecraft.getInstance().font)
-            val slider = SliderWidget(0, 0, width - (textWidth * 2) - pad, sliderHeight - pad, default) {
-                state.h = sliders[0].slider.value
-                state.s = sliders[1].slider.value
-                state.v = sliders[2].slider.value
-            }
-            children += title
-            children += slider
-            sliders += SliderData(title, slider)
-        }
-
-        addSlider("H", 0f)
-        addSlider("S", 1f)
-        addSlider("V", 1f)
+        hslider = addSlider("H", 0.0)
+        sslider = addSlider("S", 1.0)
+        vslider = addSlider("V", 1.0)
         updatePositions()
         value = defaultColor
     }
 
     fun updatePositions() {
         var yPos = y + pad
-        for (data in sliders) {
-            data.string.setPosition(x + pad, yPos)
-            data.slider.setPosition(x + pad + data.string.width, yPos)
-            yPos += data.slider.height + 2
+        for ((string, slider) in arrayOf(hslider, sslider, vslider)) {
+            string.setPosition(x + pad, yPos)
+            slider.setPosition(x + pad + string.width, yPos)
+            yPos += slider.height + 2
         }
     }
 

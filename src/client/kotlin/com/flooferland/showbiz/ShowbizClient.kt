@@ -63,10 +63,7 @@ object ShowbizClient : ClientModInitializer {
             ModPackets
             ModClientEntities
             ModClientCommands
-            if (ShowbizUtils.clientHasVeil()) {
-                @Suppress("RedundantLambdaOrAnonymousFunction")
-                { ModClientVeil.load() }()
-            }
+            ModClientLights.load()
             ClientConnections
             ClientPackets.init()
         }

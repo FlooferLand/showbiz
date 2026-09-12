@@ -107,7 +107,7 @@ where M: EditScreenMenu<P> {
             }
 
             widget.x = x
-            widget.y = y + nameHeight
+            widget.y = y + nameHeight + (if (widget is Checkbox) 20 else 0)
             addRenderableWidget(widget)
         }
     }
