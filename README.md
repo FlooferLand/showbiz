@@ -35,7 +35,7 @@ Note that this project is split into several different components:
 
 This is an open-source project, so I'm glad if you can help!
 
-If you'd like to add anything to the project, please open an issue or send a message on the [Discord server](https://discord.gg/4MVEKKfuaY) to talk about it with us.
+If you'd like to add anything to the project, please open an issue or send a message on our Discord server to talk about it with us _(linked on the [Modrinth](https://modrinth.com/mod/showbiz) page)_.
 
 Make sure you're at least somewhat familliar with the project's internals before doing so if trying to submit a technical change.
 
