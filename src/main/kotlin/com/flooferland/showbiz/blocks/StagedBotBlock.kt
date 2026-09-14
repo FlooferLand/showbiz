@@ -19,10 +19,8 @@ import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
 import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
-import foundry.veil.api.network.VeilPacketManager.level
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
