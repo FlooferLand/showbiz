@@ -60,7 +60,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
                 data.turn.y = values[1]
             }
         }
-        angle?.value?.toFloatOrNull()?.let { data.angle = it }
+        angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
         color?.value?.let { data.color = it }
         shadows?.selected()?.let { data.shadows = it }
     }
