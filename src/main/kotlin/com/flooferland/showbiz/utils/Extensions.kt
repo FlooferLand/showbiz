@@ -126,4 +126,7 @@ object Extensions {
     fun Int.secsToTicks(): Int = this * 20
     fun Float.secsToTicks(): Int = (this * 20).roundToInt()
     fun Double.secsToTicks(): Int = (this * 20).roundToInt()
+
+    fun Number.formatDecimal(precision: Int = 3) =
+        runCatching { "%.${precision}f".format(this) }.getOrDefault(toString())
 }

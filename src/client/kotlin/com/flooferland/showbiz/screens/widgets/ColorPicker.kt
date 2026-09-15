@@ -7,6 +7,7 @@ import net.minecraft.client.gui.narration.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
 import net.minecraft.world.level.levelgen.SurfaceRules.state
+import com.flooferland.showbiz.utils.Extensions.formatDecimal
 import java.awt.Color
 
 class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0xffffff) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
@@ -68,7 +69,13 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
 
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         guiGraphics.fill(x, y, x + width, y + height, value)
-        children.forEach { it.render(guiGraphics, mouseX, mouseY, partialTick) }
+        children.forEach { child ->
+            child.render(guiGraphics, mouseX, mouseY, partialTick)
+            if (child is SliderWidget && child.isHovered) {
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal(child.value.formatDecimal()), mouseX, mouseY)
+                child.value
+            }
+        }
     }
 
     override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) {
