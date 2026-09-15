@@ -69,7 +69,7 @@ object ModClientLights {
             val r = (entity.color shr 16 and 0xFF) / 255f
             val g = (entity.color shr 8 and 0xFF) / 255f
             val b = (entity.color and 0xFF) / 255f
-            entity.value = lerp(entity.value, if (entity.isOn) 1f else 0f, 0.1f * delta)
+            entity.value = lerp(entity.value, if (entity.isOn) 1f else 0f, 0.3f * delta)
             entity.value = entity.value.coerceIn(0f, 1f)
 
             LightRegistry.registerSpot(
