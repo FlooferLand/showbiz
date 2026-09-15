@@ -32,11 +32,12 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Spotlight.entityType!!, pos, blockState), IConnectable, GeoBlockEntity, EditScreenOwner<SpotlightEditPacket> {
     override val connectionManager = ConnectionManager(this)
-
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
-        isOn = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
+        lit = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
-    var isOn: Boolean = false
+
+    val isLit: Boolean get() = lit || redstoneSignal > 0
+    var redstoneSignal: Int = 0
     var value: Float = 0f  // Used for smoothing on the client
 
     override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
@@ -45,6 +46,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var color: Int = 0xffffff
     var shadows: Boolean = true
 
+    private var lit: Boolean = false
     var startPos = Vec3.ZERO!!
     var endPos = Vec3.ZERO!!
 
@@ -54,7 +56,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = geckoCache
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        if (show.data.playing || isOn) {
+        if (show.data.playing || isLit) {
             markDirtyNotifyAll()
         }
     }
@@ -78,23 +80,27 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
         menuData.loadAdditional(tag)
-        tag.getBooleanOrNull("is_on")?.let { isOn = it }
+        tag.getBooleanOrNull("lit")?.let { lit = it }
         tag.getBooleanOrNull("shadows")?.let { shadows = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
         tag.getFloatOrNull("turn_y")?.let { turn.y = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
         tag.getIntOrNull("color")?.let { color = it }
+
+        tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
         menuData.saveAdditional(tag)
-        tag.putBoolean("is_on", isOn)
+        tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
         tag.putFloat("turn_x", turn.x)
         tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)
         tag.putInt("color", color)
+        
+        tag.putInt("redstone_signal", redstoneSignal)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {

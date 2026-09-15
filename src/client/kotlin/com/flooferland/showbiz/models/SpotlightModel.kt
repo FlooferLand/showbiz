@@ -9,7 +9,7 @@ import software.bernie.geckolib.model.DefaultedBlockGeoModel
 
 class SpotlightModel : DefaultedBlockGeoModel<SpotlightBlockEntity>(rl("spotlight")) {
     override fun getTextureResource(animatable: SpotlightBlockEntity): ResourceLocation =
-        buildFormattedTexturePath(rl(if (animatable.isOn) "spotlight_on" else "spotlight"))
+        buildFormattedTexturePath(rl(if (animatable.isLit) "spotlight_on" else "spotlight"))
     override fun setCustomAnimations(animatable: SpotlightBlockEntity, instanceId: Long, state: AnimationState<SpotlightBlockEntity>) {
         val neck = animationProcessor.getBone("neck") ?: return
         neck.updateRotation(0f, 0f, 0f)

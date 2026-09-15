@@ -47,6 +47,16 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
         return InteractionResult.SUCCESS
     }
 
+    override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, neighborBlock: Block, neighborPos: BlockPos, movedByPiston: Boolean) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
+        if (level.isClientSide) return
+
+        val entity = level.getBlockEntity(pos) as? SpotlightBlockEntity ?: return
+        val signal = level.getSignal(pos.above(), Direction.UP)
+        if (signal != entity.redstoneSignal)
+            entity.applyChange(true) { redstoneSignal = signal }
+    }
+
     companion object {
         init {
             ServerPackets.listen(SpotlightEditPacket.type) { packet, context ->
