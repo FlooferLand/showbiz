@@ -53,13 +53,8 @@ object ModClientLights {
         for (entity in lights) {
             if (entity !is SpotlightBlockEntity || entity.isRemoved) continue
 
-            val facing = entity.blockState.getValue(FacingEntityBlock.FACING) ?: continue
-            val dir = Vec3fc(
-                facing.stepX.toFloat(),
-                facing.stepY.toFloat() + (entity.turn.y * 0.05f),
-                facing.stepZ.toFloat() + (entity.turn.x * -0.01f)
-            )
-            val pos = entity.blockPos.center.add(dir.x * 0.4, 0.1 + dir.y * 0.25, dir.z * 0.1)
+            val dir = entity.endPos.subtract(entity.startPos).normalize()
+            val pos = entity.endPos
 
             val cookie = getCookie()
             val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
@@ -75,7 +70,7 @@ object ModClientLights {
 
             LightRegistry.registerSpot(
                 pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
-                dir.x, dir.y, dir.z,
+                dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
                 r, g, b,
                 entity.value * 0.8f,
                 15f,
