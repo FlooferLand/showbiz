@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.models
 
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.*
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.utils.rl
@@ -7,6 +8,8 @@ import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedBlockGeoModel
 
 class SpotlightModel : DefaultedBlockGeoModel<SpotlightBlockEntity>(rl("spotlight")) {
+    override fun getTextureResource(animatable: SpotlightBlockEntity): ResourceLocation =
+        buildFormattedTexturePath(rl(if (animatable.isOn) "spotlight_on" else "spotlight"))
     override fun setCustomAnimations(animatable: SpotlightBlockEntity, instanceId: Long, state: AnimationState<SpotlightBlockEntity>) {
         val neck = animationProcessor.getBone("neck") ?: return
         neck.updateRotation(0f, 0f, 0f)

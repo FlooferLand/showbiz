@@ -5,7 +5,6 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.types.math.Vec3fc
-import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.lerp
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
