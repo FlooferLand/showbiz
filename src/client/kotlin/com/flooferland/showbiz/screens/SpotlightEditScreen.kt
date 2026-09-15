@@ -39,7 +39,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
 
         // Color
         run {
-            color = ColorPicker(0, 0, 80, 40, editMenu.data.color)
+            color = ColorPicker(0, 0, 160, 40, editMenu.data.color)
             widgets.add(WidgetInfo("Color", color!!))
         }
 
