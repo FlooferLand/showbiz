@@ -33,7 +33,15 @@ class BotItem(properties: Properties) : Item(properties) {
             }
             val entity = BotEntity(level, botId)
             entity.setPos(context.clickLocation)
-            entity.yRot = 180f + context.rotation
+            (180f + context.rotation).let { yaw ->
+                entity.xRot = 0f
+                entity.yRot = yaw
+                entity.yRotO = yaw
+                entity.yHeadRot = yaw
+                entity.yHeadRotO = yaw
+                entity.yBodyRot = yaw
+                entity.yBodyRotO = yaw
+            }
             level.addFreshEntity(entity)
             player.setItemInHand(context.hand, ItemStack.EMPTY)
         }

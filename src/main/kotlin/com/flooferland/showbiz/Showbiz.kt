@@ -63,6 +63,7 @@ object Showbiz : ModInitializer {
             ModComponents.register()
             ModPackets.register()
             ModEntities.register()
+            ModLivingEntities.register()
             ModBlocks.entries
             ModItems.entries
             ModMusicDiscs.entries

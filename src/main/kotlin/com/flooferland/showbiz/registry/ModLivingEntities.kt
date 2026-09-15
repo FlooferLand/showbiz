@@ -4,13 +4,16 @@ import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.world.entity.*
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.level.*
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.utils.rl
+import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 
 @Suppress("unused")
-sealed class ModEntities<T : Entity> {
-    data object Plush : ModEntities<PlushEntity>("plush", ::PlushEntity);
+sealed class ModLivingEntities<T : LivingEntity> {
+    data object Bot : ModLivingEntities<BotEntity>("bot", ::BotEntity);
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>
@@ -21,6 +24,7 @@ sealed class ModEntities<T : Entity> {
         this.type = EntityType.Builder.of({ type, level -> factory.factory(level) }, MobCategory.MISC)
             .build(id)
         Registry.register(BuiltInRegistries.ENTITY_TYPE, this.id, this.type)
+        FabricDefaultAttributeRegistry.register(type, LivingEntity.createLivingAttributes())
     }
     fun interface EntityFactory<T : Entity> {
         fun factory(level: Level): T;
@@ -28,7 +32,7 @@ sealed class ModEntities<T : Entity> {
 
     companion object {
         fun register() {
-            ModEntities::class.sealedSubclasses.forEach { it.objectInstance }
+            ModLivingEntities::class.sealedSubclasses.forEach { it.objectInstance }
         }
     }
 }

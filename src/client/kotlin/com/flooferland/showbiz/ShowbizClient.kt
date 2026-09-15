@@ -111,7 +111,7 @@ object ShowbizClient : ClientModInitializer {
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
-            EntityRendererRegistry.register(ModEntities.Bot.type, ::BotEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Bot.type, ::BotEntityRenderer)
         }
 
         // GeckoLib renderers

@@ -7,6 +7,7 @@ import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.*
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.item.*
 import net.minecraft.world.entity.player.*
@@ -17,8 +18,8 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModEntities
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.registry.ModLivingEntities
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
@@ -38,8 +39,14 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: Figure out if calls to connectionChanged and entity accessors are even needed
 
-class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
-    constructor(level: Level) : this(level, null)
+/**
+ * The main class of the mod.
+ * Has to be a LivingEntity unfortunately to cast shadows when using shaders
+ */
+class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
+    constructor(level: Level) : this(level, null) {
+        // EntityDimensions.fixed(0.6f, 2.0f)
+    }
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -76,21 +83,19 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     private var killDelayTicks = 0
     private val pendingShow = PackedShowData()
 
-    override fun getDimensions(pose: Pose): EntityDimensions {
-        return EntityDimensions.fixed(0.6f, 2.0f)
-    }
-
     init {
         this.botId = botId
         refreshDimensions()
     }
 
-    override fun isInvulnerable() = false
     override fun isPushable() = false
     override fun isPickable() = true
     override fun isAttackable() = true
+    override fun fireImmune() = true
     override fun canBeCollidedWith() = true
     override fun canBeHitByProjectile() = true
+    override fun canBeAffected(effect: MobEffectInstance) = false
+    override fun canBeSeenAsEnemy() = false
     override fun getPickResult() = makeItem()
 
     override fun tick() {
@@ -105,7 +110,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
             killDelayTicks -= 1
             if (killDelayTicks == 0) {
                 drop()
-                kill()
+                remove(RemovalReason.DISCARDED)
                 return
             }
         }
@@ -134,7 +139,9 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         return InteractionResult.SUCCESS
     }
 
+    override fun isInvulnerableTo(source: DamageSource) = source.entity !is Player
     override fun hurt(source: DamageSource, amount: Float): Boolean {
+        if (killDelayTicks > 0 || isRemoved) return false
         val attacker = source.entity
         fun playSound(sound: SoundEvent) {
             level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
@@ -142,13 +149,25 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         if (attacker !is Player) return false
 
         val isClient = attacker.level().isClientSide
-        val critAttack = attacker.fallDistance > 0.2f && !attacker.onGround() && !attacker.isSprinting
-        if (!isClient && amount > 0f && critAttack) {
+        if (!isClient && amount > 0f) {
             playSound(SoundEvents.ARMOR_STAND_BREAK)
             killDelayTicks = 2
         }
         return true
     }
+
+    // region | LivingEntity stuff
+    override fun getMainArm() = HumanoidArm.RIGHT
+    override fun getArmorSlots() = listOf<ItemStack>()
+    override fun getItemBySlot(slot: EquipmentSlot): ItemStack = ItemStack.EMPTY
+    override fun setItemSlot(slot: EquipmentSlot, stack: ItemStack) {}
+    override fun isNoGravity() = true
+    override fun isPushedByFluid() = false
+    override fun knockback(strength: Double, x: Double, z: Double) {}
+    override fun aiStep() {}
+    override fun getXRot() = 0f
+    override fun getMaxHeadRotationRelativeToBody() = 0f
+    // endregion
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
         // Grabbing the bot
@@ -176,6 +195,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     }
 
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
+        super.defineSynchedData(builder)
         builder.define(persistentDataAccessor, CompoundTag().also { it.putString("bot_id", botId?.toString() ?: "") })
     }
 
