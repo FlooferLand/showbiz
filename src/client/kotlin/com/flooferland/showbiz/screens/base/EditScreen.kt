@@ -125,12 +125,12 @@ where M: EditScreenMenu<P> {
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        RenderSystem.enableBlend()
+        RenderSystem.defaultBlendFunc()
         guiGraphics.setColor(1f, 1f, 1f, 1f)
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
 
         RenderSystem.enableBlend()
-        guiGraphics.setColor(0.5f, 0.5f, 0.5f, 0.8f)
+        guiGraphics.setColor(0.5f, 0.5f, 0.5f, 0.9f)
         guiGraphics.blit(background, textureX, textureY, 0f, 0f, size, size, size, size)
 
         RenderSystem.defaultBlendFunc()
