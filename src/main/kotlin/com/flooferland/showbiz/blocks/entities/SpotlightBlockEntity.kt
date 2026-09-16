@@ -37,8 +37,10 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     }
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
-    var redstoneSignal: Int = 0
     var value: Float = 0f  // Used for smoothing on the client
+    var redstoneSignal: Int = 0
+    var supportAbove = false
+    var supportBelow = false
 
     override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
     var turn = Vec2f.ZERO
@@ -87,7 +89,10 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         tag.getFloatOrNull("angle")?.let { angle = it }
         tag.getIntOrNull("color")?.let { color = it }
 
+        // Stuff that can be recalculated if its lost
         tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
+        tag.getBooleanOrNull("support_above")?.let { supportAbove = it }
+        tag.getBooleanOrNull("support_below")?.let { supportBelow = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -99,8 +104,11 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)
         tag.putInt("color", color)
-        
+
+        // Stuff that can be recalculated if its lost
         tag.putInt("redstone_signal", redstoneSignal)
+        tag.putBoolean("support_above", supportAbove)
+        tag.putBoolean("support_below", supportBelow)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {

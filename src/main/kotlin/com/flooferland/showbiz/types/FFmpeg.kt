@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
+import net.fabricmc.loader.api.FabricLoader
 import kotlin.io.path.absolutePathString
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -121,6 +122,7 @@ object FFmpeg {
         val parts = output.split(",")
         if (parts.size < 3) return@withContext null
 
+        println("Parts: ${parts}")
         val (num, den) = parts[2].split("/").map { it.trim().toDouble() }
         VideoInfo(path, parts[0].toInt(), parts[1].toInt(), num / den)
     }

@@ -26,14 +26,18 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
 
     override fun hasDynamicShape() = true
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape? {
-        val facing = state.getOptionalValue(FACING).getOrNull() ?: return Shapes.block()
-        return when (facing) {
+        var shape = when (state.getOptionalValue(FACING).getOrNull()) {
             Direction.NORTH -> Shapes.box(0.359375, 0.484375, 0.4375, 0.640625, 1.09375, 0.75)
             Direction.SOUTH -> Shapes.box(0.359375, 0.484375, 0.25, 0.640625, 1.09375, 0.5625)
             Direction.WEST -> Shapes.box(0.46875, 0.484375, 0.328125, 0.75, 1.09375, 0.640625)
             Direction.EAST -> Shapes.box(0.25, 0.484375, 0.34375, 0.53125, 1.09375, 0.65625)
-            else -> Shapes.block()
+            else -> super.getShape(state, level, pos, context)
         }
+        (level.getBlockEntity(pos) as? SpotlightBlockEntity)?.let { entity ->
+            if (entity.supportBelow && !entity.supportAbove)
+                shape = shape.move(0.0, -0.5, 0.0)
+        }
+        return shape
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
@@ -46,14 +50,30 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
         return InteractionResult.SUCCESS
     }
 
+    override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, movedByPiston: Boolean) {
+        super.onPlace(state, level, pos, oldState, movedByPiston)
+        if (level.isClientSide) return
+        updateState(level, pos)
+    }
+
     override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, neighborBlock: Block, neighborPos: BlockPos, movedByPiston: Boolean) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
         if (level.isClientSide) return
+        updateState(level, pos)
+    }
 
+    fun updateState(level: Level, pos: BlockPos) {
         val entity = level.getBlockEntity(pos) as? SpotlightBlockEntity ?: return
         val signal = level.getSignal(pos.above(), Direction.UP)
-        if (signal != entity.redstoneSignal)
-            entity.applyChange(true) { redstoneSignal = signal }
+        val supportAbove = Block.canSupportCenter(level, pos.above(), Direction.DOWN)
+        val supportBelow = Block.canSupportCenter(level, pos.below(), Direction.UP)
+        if (signal != entity.redstoneSignal || supportAbove != entity.supportAbove || supportBelow != entity.supportBelow) {
+            entity.applyChange(true) {
+                this.redstoneSignal = signal
+                this.supportAbove = supportAbove
+                this.supportBelow = supportBelow
+            }
+        }
     }
 
     companion object {

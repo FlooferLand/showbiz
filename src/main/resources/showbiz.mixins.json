@@ -6,7 +6,8 @@
         "GuiMixin",
         "KeyboardHandlerMixin",
         "SplashManagerMixin",
-        "GameRendererMixin"
+        "GameRendererMixin",
+        "BlockLightEngineMixin"
     ],
     "mixins": [
         "JukeboxBlockEntityMixin",
