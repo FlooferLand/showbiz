@@ -9,6 +9,8 @@ import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
 
+// TODO: Should turn this into a general light edit screen? Floodlights could use it
+
 class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/spotlight.png")
 
@@ -39,7 +41,8 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
 
         // Color
         run {
-            color = ColorPicker(0, 0, 160, 40, editMenu.data.color)
+            color = ColorPicker(0, 0, 160, 40, defaultKelvin = editMenu.data.kelvin)
+            color!!.allowedModes = mutableSetOf(ColorPicker.Mode.Kelvin)
             widgets.add(WidgetInfo("Color", color!!))
         }
 
@@ -61,7 +64,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
             }
         }
         angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
-        color?.value?.let { data.color = it }
+        color?.valueKelvin?.let { data.kelvin = it }
         shadows?.selected()?.let { data.shadows = it }
     }
 }

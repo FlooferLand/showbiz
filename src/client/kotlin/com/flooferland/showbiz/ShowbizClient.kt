@@ -23,6 +23,7 @@ import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.models.BaseBotModel
+import com.flooferland.showbiz.models.GenericBlockItemModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
@@ -32,7 +33,6 @@ import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.MainClientUtils
-import com.flooferland.showbiz.utils.ShowbizUtils
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
@@ -44,7 +44,6 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
-import software.bernie.geckolib.model.DefaultedBlockGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
 import kotlin.jvm.optionals.getOrNull
 
@@ -134,13 +133,8 @@ object ShowbizClient : ClientModInitializer {
             if (!block.isGeckoLib) continue
             val item = block.item as? GeoBlockItem ?: continue
             item.renderProviderHolder.value = object : GeoRenderProvider {
-                var renderer: GeoItemRenderer<*>? = null
-                override fun getGeoItemRenderer(): GeoItemRenderer<*> {
-                    if (renderer == null) renderer = when (block) {
-                        else -> object : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id)) {}
-                    }
-                    return renderer!!
-                }
+                var renderer = object : GeoItemRenderer<GeoBlockItem>(GenericBlockItemModel(block.id)) {}
+                override fun getGeoItemRenderer() = renderer
             }
         }
 

@@ -45,7 +45,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
     var turn = Vec2f.ZERO
     var angle = 45f
-    var color: Int = 0xffffff
+    var kelvin: Int = 5000
     var shadows: Boolean = true
 
     private var lit: Boolean = false
@@ -69,13 +69,13 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, color, shadows)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, kelvin, shadows)
 
     fun applyPacket(packet: SpotlightEditPacket) {
         menuData = packet.base
         turn = packet.turn
         angle = packet.angle
-        color = packet.color
+        kelvin = packet.kelvin
         shadows = packet.shadows
     }
 
@@ -87,7 +87,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
         tag.getFloatOrNull("turn_y")?.let { turn.y = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
-        tag.getIntOrNull("color")?.let { color = it }
+        tag.getIntOrNull("kelvin")?.let { kelvin = it }
 
         // Stuff that can be recalculated if its lost
         tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
@@ -103,7 +103,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         tag.putFloat("turn_x", turn.x)
         tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)
-        tag.putInt("color", color)
+        tag.putInt("kelvin", kelvin)
 
         // Stuff that can be recalculated if its lost
         tag.putInt("redstone_signal", redstoneSignal)

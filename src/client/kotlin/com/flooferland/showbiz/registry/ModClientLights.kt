@@ -1,14 +1,12 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.BlockPos
-import net.minecraft.world.level.BlockGetter
-import net.minecraft.world.level.ClipContext
+import net.minecraft.client.multiplayer.*
+import net.minecraft.core.*
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.lighting.LightEngine
-import net.minecraft.world.level.redstone.Redstone
-import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.level.lighting.*
+import net.minecraft.world.level.redstone.*
+import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.utils.lerp
@@ -19,7 +17,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.qualet.irl.light.LightMath
 import org.qualet.irl.light.LightRegistry
-import kotlin.collections.hashSetOf
+import org.qualet.irl.light.iris.IrisShadersState
 import kotlin.math.roundToInt
 
 // NOTE: IrisShadersState.shadersDisabled() can be used to detect iris shader stuff!!
@@ -69,6 +67,8 @@ object ModClientLights {
         }
     }
 
+    fun useVanillaLights() = IrisShadersState.shadersDisabled()
+
     fun emit(delta: Float) {
         for (entity in lights) {
             if (entity !is SpotlightBlockEntity || entity.isRemoved) continue
@@ -81,16 +81,16 @@ object ModClientLights {
             val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
             val id = entity.blockPos.asLong()
 
-            val r = (entity.color shr 16 and 0xFF) / 255f
-            val g = (entity.color shr 8 and 0xFF) / 255f
-            val b = (entity.color and 0xFF) / 255f
+            val r = (entity.kelvin shr 16 and 0xFF) / 255f
+            val g = (entity.kelvin shr 8 and 0xFF) / 255f
+            val b = (entity.kelvin and 0xFF) / 255f
             val power = if (entity.redstoneSignal > Redstone.SIGNAL_NONE) entity.redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
 
             entity.value = lerp(entity.value, if (entity.isLit) power else 0f, 0.3f * delta)
             entity.value = entity.value.coerceIn(0f, 1f)
 
             // Proper spotlights
-            LightRegistry.registerSpot(
+            if (!useVanillaLights()) LightRegistry.registerSpot(
                 pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
                 dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
                 r, g, b,
@@ -106,16 +106,15 @@ object ModClientLights {
             )
 
             // Block lights for compatibility
-            val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt()
-            val newLights = hashSetOf<Long>()
-            if (entity.value > 0f) {
+            val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
+            val newLights = hashSetOf<Long>().also { newLights ->
+                if (entity.value <= 0f || !useVanillaLights()) return@also
                 val start = pos.add(dir)
-                val range = pos.add(dir.scale(16.0))
-                val clip = level.clip(ClipContext(start, range, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty()))
-                val hit = if (clip.type == HitResult.Type.BLOCK) clip.location else range
-                BlockGetter.traverseBlocks(start, hit, null, { _, blockPos ->
+                val range = pos.add(dir.scale(10.0))
+                BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
                     newLights.add(blockPos.asLong())
-                    null
+                    val state = level.getBlockState(blockPos)
+                    if (!state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty) blockPos else null
                 }, { null })
             }
             val prevLights = lightBonusOwners.getOrPut(entity) { hashSetOf() }
@@ -124,9 +123,7 @@ object ModClientLights {
                 lightBonusMap.remove(pos)
                 level.lightEngine.checkBlock(BlockPos.of(pos))
             }
-            /*for (pos in newLights) {
-                paintLightLevel(level, pos, blockLight)
-            }*/
+            for (pos in newLights) paintLightLevel(level, pos, blockLight)
             lightBonusOwners[entity] = newLights
         }
     }

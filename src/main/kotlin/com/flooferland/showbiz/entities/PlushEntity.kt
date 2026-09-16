@@ -105,7 +105,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             grab(attacker)
         }
 
-        return false
+        return true
     }
 
     override fun tick() {

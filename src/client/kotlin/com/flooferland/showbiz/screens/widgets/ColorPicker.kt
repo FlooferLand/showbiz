@@ -12,7 +12,7 @@ import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0xffffff, defaultMode: ColorPickerMode = ColorPickerMode.HSV) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
+class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = null, defaultKelvin: Int? = null, defaultMode: Mode? = null) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
     val pad get() = 2
     val sliderHeight get() = height / 3
     val kelvinRange get() = 1500..15000
@@ -26,7 +26,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
             }
         operator fun component3() = visible
     }
-    enum class ColorPickerMode { HSV, Kelvin }
+    enum class Mode { HSV, Kelvin }
 
     var sliderHue: SliderData
     var sliderSat: SliderData
@@ -35,16 +35,26 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
     var modeHsv: Button
     var modeKel: Button
     val sliders = mutableListOf<SliderData>()
-    val modeButtons = mutableListOf<Button>()
+    val modeButtons = hashMapOf<Mode, Button>()
     val children = mutableListOf<AbstractWidget>()
 
-    var prevMode: ColorPickerMode? = null
-    var mode: ColorPickerMode = defaultMode
+    var allowedModes = Mode.entries.toMutableSet()
+        set(value) {
+            field = value
+            updateMode()
+        }
+    var prevMode: Mode? = null
+    var mode: Mode = defaultMode ?: allowedModes.first()
+    var valueKelvin: Int
+        get() = getKelvin(sliderKel.slider.value)
+        set(value) {
+            sliderKel.slider.value = value.toDouble() / (kelvinRange.last.toDouble() - kelvinRange.first.toDouble())
+        }
     var value: Int
         get() = when (mode) {
-            ColorPickerMode.HSV ->
+            Mode.HSV ->
                 FastColor.ARGB32.color(255, Color.HSBtoRGB(sliderHue.slider.value.toFloat(), sliderSat.slider.value.toFloat(), sliderVal.slider.value.toFloat()))
-            ColorPickerMode.Kelvin ->
+            Mode.Kelvin ->
                 kelvinToColor(getKelvin(sliderKel.slider.value))
         }
         set(rgb) {
@@ -65,7 +75,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
         children += slider
         return data
     }
-    fun addMode(text: String, pickerMode: ColorPickerMode): Button {
+    fun addMode(text: String, pickerMode: Mode): Button {
         val button = Button.builder(Component.literal(text.first().toString()))
             {
                 prevMode = mode
@@ -74,7 +84,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
             }
             .tooltip(Tooltip.create(Component.literal("Switch to $text")))
             .build()
-        modeButtons.add(button)
+        modeButtons[pickerMode] = button
         children += button
         return button
     }
@@ -84,10 +94,11 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
         sliderSat = addSlider("S", 1.0)
         sliderVal = addSlider("V", 1.0)
         sliderKel = addSlider("K", 0.5)
-        modeHsv = addMode("HSV", ColorPickerMode.HSV)
-        modeKel = addMode("Kelvin", ColorPickerMode.Kelvin)
+        modeHsv = addMode("HSV", Mode.HSV)
+        modeKel = addMode("Kelvin", Mode.Kelvin)
         update()
-        value = defaultColor
+        value = defaultColor ?: defaultKelvin?.let { kelvinToColor(it) } ?: 0xffffff
+        defaultKelvin?.let { valueKelvin = it }
     }
 
     fun update() {
@@ -105,7 +116,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
         }
 
         yPos = y + pad
-        for (button in modeButtons) {
+        for (button in modeButtons.values) {
             if (!visible) continue
             button.setPosition(x + (width - 10), yPos)
             button.setSize(10, sliderHeight - pad)
@@ -114,18 +125,21 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
     }
 
     fun updateMode() {
+        for ((mode, button) in modeButtons) {
+            button.visible = mode in allowedModes
+        }
         when (mode) {
-            ColorPickerMode.HSV -> {
+            Mode.HSV -> {
                 modeHsv.active = false
                 modeKel.active = true
                 sliderHue.visible = true
                 sliderSat.visible = true
                 sliderVal.visible = true
                 sliderKel.visible = false
-                if (prevMode == ColorPickerMode.Kelvin)
+                if (prevMode == Mode.Kelvin)
                     value = kelvinToColor(getKelvin(sliderKel.slider.value))
             }
-            ColorPickerMode.Kelvin -> {
+            Mode.Kelvin -> {
                 modeHsv.active = true
                 modeKel.active = false
                 sliderHue.visible = false
@@ -162,7 +176,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int = 0
                 guiGraphics.renderTooltip(font, Component.literal(value), mouseX, mouseY)
             }
         }
-        modeButtons.forEach { button ->
+        if (modeButtons.size > 1) modeButtons.values.forEach { button ->
             button.render(guiGraphics, mouseX, mouseY, partialTick)
         }
     }
