@@ -27,22 +27,21 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override fun hasDynamicShape() = true
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape? {
         val facing = state.getOptionalValue(FACING).getOrNull() ?: return Shapes.block()
-
-        var shape = Shapes.empty()
-        shape = if (facing == Direction.NORTH || facing == Direction.SOUTH) {
-            Shapes.join(shape, Shapes.box(0.375, 0.9375, 0.265625, 0.625, 1.0, 0.765625), BooleanOp.OR)
-        } else {
-            Shapes.join(shape, Shapes.box(0.25, 0.9375, 0.390625, 0.75, 1.0, 0.640625), BooleanOp.OR);
+        return when (facing) {
+            Direction.NORTH -> Shapes.box(0.359375, 0.484375, 0.4375, 0.640625, 1.09375, 0.75)
+            Direction.SOUTH -> Shapes.box(0.359375, 0.484375, 0.25, 0.640625, 1.09375, 0.5625)
+            Direction.WEST -> Shapes.box(0.46875, 0.484375, 0.328125, 0.75, 1.09375, 0.640625)
+            Direction.EAST -> Shapes.box(0.25, 0.484375, 0.34375, 0.53125, 1.09375, 0.65625)
+            else -> Shapes.block()
         }
-        return shape
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? SpotlightBlockEntity)?.tick(level, pos, blockState) }
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
-        if (level.isClientSide) return InteractionResult.PASS
         if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
+        if (level.isClientSide) return InteractionResult.SUCCESS
         player.openMenu(state.getMenuProvider(level, pos))
         return InteractionResult.SUCCESS
     }
