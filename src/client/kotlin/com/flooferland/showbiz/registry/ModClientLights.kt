@@ -2,6 +2,7 @@ package com.flooferland.showbiz.registry
 
 import net.minecraft.client.multiplayer.*
 import net.minecraft.core.*
+import net.minecraft.util.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.lighting.*
@@ -9,6 +10,8 @@ import net.minecraft.world.level.redstone.*
 import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.types.math.ColorMath.srgbToLinear
+import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.utils.lerp
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -19,8 +22,6 @@ import org.qualet.irl.light.LightMath
 import org.qualet.irl.light.LightRegistry
 import org.qualet.irl.light.iris.IrisShadersState
 import kotlin.math.roundToInt
-
-// NOTE: IrisShadersState.shadersDisabled() can be used to detect iris shader stuff!!
 
 object ModClientLights {
     const val COOKIE_TEXTURE = "/assets/${Showbiz.MOD_ID}/textures/spotlight_cookie.png"
@@ -81,12 +82,17 @@ object ModClientLights {
             val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
             val id = entity.blockPos.asLong()
 
-            val r = (entity.kelvin shr 16 and 0xFF) / 255f
-            val g = (entity.kelvin shr 8 and 0xFF) / 255f
-            val b = (entity.kelvin and 0xFF) / 255f
+            //val r = (entity.kelvin shr 16 and 0xFF) / 255f
+            //val g = (entity.kelvin shr 8 and 0xFF) / 255f
+            //val b = (entity.kelvin and 0xFF) / 255f
+            val kelvinColor = Kelvin.toColor(entity.kelvin)
+            val r = (srgbToLinear(FastColor.ARGB32.red(kelvinColor)) * entity.brightness).coerceIn(0f, 1f)
+            val g = (srgbToLinear(FastColor.ARGB32.green(kelvinColor)) * entity.brightness).coerceIn(0f, 1f)
+            val b = (srgbToLinear(FastColor.ARGB32.blue(kelvinColor)) * entity.brightness).coerceIn(0f, 1f)
             val power = if (entity.redstoneSignal > Redstone.SIGNAL_NONE) entity.redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
 
-            entity.value = lerp(entity.value, if (entity.isLit) power else 0f, 0.3f * delta)
+            val speed = if (useVanillaLights()) 0.2f else 0.3f
+            entity.value = lerp(entity.value, if (entity.isLit) power else 0f, speed * delta)
             entity.value = entity.value.coerceIn(0f, 1f)
 
             // Proper spotlights
@@ -94,7 +100,7 @@ object ModClientLights {
                 pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
                 dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
                 r, g, b,
-                entity.value * 0.8f,
+                entity.value * 0.5f,
                 15f,
                 cone.cosOuter, cone.cosInner,
                 false, false,

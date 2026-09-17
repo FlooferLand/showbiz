@@ -6,16 +6,15 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
+import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.utils.Extensions.formatDecimal
 import java.awt.Color
-import kotlin.math.ln
-import kotlin.math.pow
 import kotlin.math.roundToInt
 
 class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = null, defaultKelvin: Int? = null, defaultMode: Mode? = null) : AbstractContainerWidget(x, y, width, height, Component.empty()) {
     val pad get() = 2
     val sliderHeight get() = height / 3
-    val kelvinRange get() = 1500..15000
+    val kelvinRange get() = 3000..20000
 
     data class SliderData(val string: StringWidget, val slider: SliderWidget) {
         var visible: Boolean
@@ -30,8 +29,8 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
 
     var sliderHue: SliderData
     var sliderSat: SliderData
-    var sliderVal: SliderData
     var sliderKel: SliderData
+    var sliderVal: SliderData
     var modeHsv: Button
     var modeKel: Button
     val sliders = mutableListOf<SliderData>()
@@ -41,21 +40,26 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
     var allowedModes = Mode.entries.toMutableSet()
         set(value) {
             field = value
+            if (mode !in value) mode = value.firstOrNull() ?: mode
             updateMode()
         }
     var prevMode: Mode? = null
     var mode: Mode = defaultMode ?: allowedModes.first()
-    var valueKelvin: Int
-        get() = getKelvin(sliderKel.slider.value)
+    var kelvin: Int
+        get() = (kelvinRange.first + (sliderKel.slider.value * (kelvinRange.last - kelvinRange.first))).roundToInt()
         set(value) {
-            sliderKel.slider.value = value.toDouble() / (kelvinRange.last.toDouble() - kelvinRange.first.toDouble())
+            sliderKel.slider.value = (value - kelvinRange.first).toDouble() / (kelvinRange.last - kelvinRange.first)
+            color = Kelvin.toColor(value)
         }
-    var value: Int
+    var value: Float
+        get() = sliderVal.slider.value.toFloat()
+        set(value) { sliderVal.slider.value = value.toDouble() }
+    var color: Int
         get() = when (mode) {
             Mode.HSV ->
                 FastColor.ARGB32.color(255, Color.HSBtoRGB(sliderHue.slider.value.toFloat(), sliderSat.slider.value.toFloat(), sliderVal.slider.value.toFloat()))
             Mode.Kelvin ->
-                kelvinToColor(getKelvin(sliderKel.slider.value))
+                FastColor.ARGB32.lerp(value, CommonColors.BLACK, Kelvin.toColor(kelvin))
         }
         set(rgb) {
             val hsb = Color.RGBtoHSB(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb), null)
@@ -65,9 +69,10 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
         }
 
     fun addSlider(text: String, default: Double): SliderData {
-        val textComp = Component.literal(text)
+        val textComp = Component.literal(text.first().toString())
         val textWidth = Minecraft.getInstance().font.width(textComp)
         val title = StringWidget(0, 0, textWidth, sliderHeight - pad, textComp, Minecraft.getInstance().font)
+        title.tooltip = Tooltip.create(Component.literal(text))
         val slider = SliderWidget(0, 0, width - (textWidth * 2) - (pad * 5), sliderHeight - pad, default) {}
         val data = SliderData(title, slider)
         sliders += data
@@ -90,15 +95,15 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
     }
 
     init {
-        sliderHue = addSlider("H", 0.0)
-        sliderSat = addSlider("S", 1.0)
-        sliderVal = addSlider("V", 1.0)
-        sliderKel = addSlider("K", 0.5)
+        sliderHue = addSlider("Hue", 0.0)
+        sliderSat = addSlider("Saturation", 1.0)
+        sliderKel = addSlider("Kelvin", 0.5)
+        sliderVal = addSlider("Value", 1.0)
         modeHsv = addMode("HSV", Mode.HSV)
         modeKel = addMode("Kelvin", Mode.Kelvin)
+        color = defaultColor ?: defaultKelvin?.let { Kelvin.toColor(it) } ?: 0xffffff
+        defaultKelvin?.let { kelvin = it }
         update()
-        value = defaultColor ?: defaultKelvin?.let { kelvinToColor(it) } ?: 0xffffff
-        defaultKelvin?.let { valueKelvin = it }
     }
 
     fun update() {
@@ -128,23 +133,22 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
         for ((mode, button) in modeButtons) {
             button.visible = mode in allowedModes
         }
+        sliderVal.visible = true
         when (mode) {
             Mode.HSV -> {
                 modeHsv.active = false
                 modeKel.active = true
                 sliderHue.visible = true
                 sliderSat.visible = true
-                sliderVal.visible = true
                 sliderKel.visible = false
                 if (prevMode == Mode.Kelvin)
-                    value = kelvinToColor(getKelvin(sliderKel.slider.value))
+                    color = Kelvin.toColor(kelvin)
             }
             Mode.Kelvin -> {
                 modeHsv.active = true
                 modeKel.active = false
                 sliderHue.visible = false
                 sliderSat.visible = false
-                sliderVal.visible = false
                 sliderKel.visible = true
             }
         }
@@ -160,54 +164,23 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
     }
 
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        guiGraphics.fill(x, y, x + width, y + height, value)
+        guiGraphics.fill(x, y, x + width, y + height, color)
         sliders.forEach { (string, slider, visible) ->
             if (!visible) return@forEach
             val font = Minecraft.getInstance().font
             val isKelvin = slider == sliderKel.slider
-            if (isKelvin) {
-                guiGraphics.drawString(font, "Note that HSV can't be", slider.x, slider.y + slider.height + pad, 0xFFFFFF)
-                guiGraphics.drawString(font, "converted back to Kelvin", slider.x, slider.y + slider.height + pad + font.lineHeight, 0xFFFFFF)
-            }
+            if (isKelvin && allowedModes.size > 1)
+                guiGraphics.drawString(font, "* Can't convert back from HSV", slider.x - 5, slider.y + 3 + (slider.height * 2) + pad, 0xFFFFFF)
             string.render(guiGraphics, mouseX, mouseY, partialTick)
             slider.render(guiGraphics, mouseX, mouseY, partialTick)
             if (slider.isHovered) {
-                val value: String = if (isKelvin) "${getKelvin(slider.value)} K" else slider.value.formatDecimal()
+                val value: String = if (isKelvin) "$kelvin K" else slider.value.formatDecimal()
                 guiGraphics.renderTooltip(font, Component.literal(value), mouseX, mouseY)
             }
         }
-        if (modeButtons.size > 1) modeButtons.values.forEach { button ->
+        if (modeButtons.count { it.value.visible } > 1) modeButtons.values.forEach { button ->
             button.render(guiGraphics, mouseX, mouseY, partialTick)
         }
-    }
-
-    /** Kelvin value from a 0 to 1 input */
-    fun getKelvin(value: Double): Int =
-        (kelvinRange.first + (value * (kelvinRange.last - kelvinRange.first))).roundToInt()
-
-    /** Thanks to https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html */
-    fun kelvinToColor(kelvin: Int): Int {
-        val temperature = kelvin / 100.0
-
-        val red = if (temperature <= 66.0) {
-            255.0
-        } else {
-            329.698727446 * (temperature - 60.0).pow(-0.1332047592)
-        }.coerceIn(0.0, 255.0)
-
-        val green = if (temperature <= 66.0) {
-            99.4708025861 * ln(temperature) - 161.1195681661
-        } else {
-            288.1221695283 * (temperature - 60.0).pow(-0.0755148492)
-        }.coerceIn(0.0, 255.0)
-
-        val blue = when {
-            temperature >= 66.0 -> 255.0
-            temperature <= 19.0 -> 0.0
-            else -> 138.5177312231 * ln(temperature - 10.0) - 305.0447927307
-        }.coerceIn(0.0, 255.0)
-
-        return FastColor.ARGB32.color(red.roundToInt(), green.roundToInt(), blue.roundToInt())
     }
 
     override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) {

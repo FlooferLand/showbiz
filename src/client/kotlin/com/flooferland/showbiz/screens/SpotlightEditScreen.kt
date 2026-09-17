@@ -42,6 +42,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
         // Color
         run {
             color = ColorPicker(0, 0, 160, 40, defaultKelvin = editMenu.data.kelvin)
+            color!!.value = editMenu.data.brightness
             color!!.allowedModes = mutableSetOf(ColorPicker.Mode.Kelvin)
             widgets.add(WidgetInfo("Color", color!!))
         }
@@ -64,7 +65,8 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
             }
         }
         angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
-        color?.valueKelvin?.let { data.kelvin = it }
+        color?.kelvin?.let { data.kelvin = it }
+        color?.value?.let { data.brightness = it }
         shadows?.selected()?.let { data.shadows = it }
     }
 }

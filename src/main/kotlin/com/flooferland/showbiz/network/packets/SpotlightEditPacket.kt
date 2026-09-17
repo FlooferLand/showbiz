@@ -7,7 +7,7 @@ import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.rl
 
-class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Vec2f, var angle: Float, var kelvin: Int, var shadows: Boolean) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
+class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Vec2f, var angle: Float, var shadows: Boolean, var kelvin: Int, var brightness: Float) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
     override fun type() = type
 
     companion object {
@@ -18,17 +18,19 @@ class SpotlightEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var turn: Ve
                 buf.writeFloat(conf.turn.x)
                 buf.writeFloat(conf.turn.y)
                 buf.writeFloat(conf.angle)
-                buf.writeInt(conf.kelvin)
                 buf.writeBoolean(conf.shadows)
+                buf.writeInt(conf.kelvin)
+                buf.writeFloat(conf.brightness)
             },
             { buf ->
                 val editScreen = EditScreenMenu.EditScreenBuf.decode(buf)
                 val turnX = buf.readFloat()
                 val turnY = buf.readFloat()
                 val angle = buf.readFloat()
-                val kelvin = buf.readInt()
                 val shadows = buf.readBoolean()
-                SpotlightEditPacket(editScreen, turn = Vec2f(turnX, turnY), angle = angle, kelvin = kelvin, shadows = shadows)
+                val kelvin = buf.readInt()
+                val brightness = buf.readFloat()
+                SpotlightEditPacket(editScreen, turn = Vec2f(turnX, turnY), angle = angle, shadows = shadows, kelvin = kelvin, brightness = brightness)
             }
         )!!
     }
