@@ -7,7 +7,7 @@ import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.*
-import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.item.*
 import net.minecraft.world.entity.player.*
@@ -164,7 +164,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     override fun isNoGravity() = true
     override fun isPushedByFluid() = false
     override fun knockback(strength: Double, x: Double, z: Double) {}
-    override fun aiStep() {}
     override fun getXRot() = 0f
     override fun getMaxHeadRotationRelativeToBody() = 0f
     // endregion
