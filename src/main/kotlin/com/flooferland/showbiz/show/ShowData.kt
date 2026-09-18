@@ -70,8 +70,6 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         loading = true
         id = UUID.randomUUID()
 
-        Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
-
         val exceptionHandler = CoroutineExceptionHandler { context, throwable ->  }
         loadJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
             mapping = run {
@@ -82,6 +80,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                     error("Format '${ext}' was not among: [${Showbiz.charts.extensions.joinToString()}]")
                 }
             }
+            Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
             val path = getFilePath(filename)
             val loaded = run {
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }

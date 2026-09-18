@@ -9,6 +9,7 @@ import net.minecraft.resources.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.math.Color3
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.vertex.PoseStack
@@ -62,17 +63,23 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
         val width = entity.video.data.width
         val height = entity.video.data.height
         val channels = entity.video.data.channels
-        if (width == 0 || height == 0 || bytes.isEmpty()) return
+        if (width == 0 || height == 0 || bytes.isEmpty()) {
+            entity.colorAverage = Color3.ZERO
+            return
+        }
 
         val (texture, id) = getOrCreateTexture(entity, width, height)
         val image = texture.pixels ?: return
+        entity.colorAverage = Color3.ZERO
         for (i in 0 until width * height) {
-            val r = bytes[i * channels].toInt() and 0xFF
-            val g = bytes[i * channels + 1].toInt() and 0xFF
-            val b = bytes[i * channels + 2].toInt() and 0xFF
+            val r = (bytes[i * channels].toInt() and 0xFF).coerceIn(10, 255)
+            val g = (bytes[i * channels + 1].toInt() and 0xFF).coerceIn(10, 255)
+            val b = (bytes[i * channels + 2].toInt() and 0xFF).coerceIn(10, 255)
             val a = if (channels == 4) bytes[i * channels + 3].toInt() and 0xFF else 0xFF
             image.setPixelRGBA(i % width, i / width, (a shl 24) or (b shl 16) or (g shl 8) or r)
+            entity.colorAverage += Color3(r, g, b)
         }
+        entity.colorAverage /= width * height
         texture.upload()
 
         poseStack.pushPose()
@@ -90,8 +97,8 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
         poseStack.translate(-1f, 0f, 0f)
         run {
             // Manually positioning the quads to fit in the model of the monitor
-            poseStack.translate(0.2f, 0.16f, 0.099f)
-            poseStack.scale(0.62f, 0.62f, 1f)
+            poseStack.translate(0.192f, 0.2f, 0.122f)
+            poseStack.scale(0.61f, 0.53f, 1f)
         }
         vert(0f, 0f, 0f, 0f, 1f)  // 4
         vert(1f, 0f, 0f, 1f, 1f)  // 3

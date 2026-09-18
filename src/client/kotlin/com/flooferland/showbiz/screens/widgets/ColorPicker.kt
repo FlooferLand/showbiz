@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.narration.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
+import com.flooferland.showbiz.types.math.Color3
 import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.utils.Extensions.formatDecimal
 import java.awt.Color
@@ -61,11 +62,11 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
             Mode.Kelvin ->
                 FastColor.ARGB32.lerp(value, CommonColors.BLACK, Kelvin.toColor(kelvin))
         }
-        set(rgb) {
-            val hsb = Color.RGBtoHSB(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb), null)
-            sliderHue.slider.value = hsb[0].toDouble()
-            sliderSat.slider.value = hsb[1].toDouble()
-            sliderVal.slider.value = hsb[2].toDouble()
+        set(packed) {
+            val hsb = Color3.fromPacked(packed).toHSB()
+            sliderHue.slider.value = hsb.h.toDouble()
+            sliderSat.slider.value = hsb.s.toDouble()
+            sliderVal.slider.value = hsb.b.toDouble()
         }
 
     fun addSlider(text: String, default: Double): SliderData {

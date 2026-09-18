@@ -10,10 +10,12 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedVideoData
+import com.flooferland.showbiz.types.math.Color3
 
 class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Monitor.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
     val video = connectionManager.port("video", PackedVideoData(), PortDirection.In)
+    var colorAverage = Color3()
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)

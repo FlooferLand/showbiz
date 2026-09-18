@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
-import net.fabricmc.loader.api.FabricLoader
 import kotlin.io.path.absolutePathString
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -68,6 +67,45 @@ object FFmpeg {
         Showbiz.log.info("FFprobe: '${probeFile?.absolutePath}'")
     }
 
+    private fun findFile(name: String): File? = runCatching {
+        val isWindows = System.getProperty("os.name").contains("win", ignoreCase = true)
+        val binaryName = if (isWindows) "$name.exe" else name
+
+        val pathEnv = System.getenv("PATH") ?: return null
+        val pathSep = if (isWindows) ";" else ":"
+
+        var foundPath = pathEnv.split(pathSep)
+            .asSequence()
+            .filter { it.isNotEmpty() }
+            .map { File(it.replace("\"", ""), binaryName) }
+            .firstOrNull { it.isFile && it.canExecute() }
+        if (foundPath == null || !foundPath.exists()) {
+            Showbiz.log.warn("$name wasn't found in the path.. Searching elsewhere")
+            if (isWindows) {
+                val process = startProcess("powershell", "-c", "(Get-Command $name).Source")
+                val output = process.inputStream.bufferedReader().readText().trim()
+                process.waitFor(3, TimeUnit.SECONDS)
+                if (output.isNotEmpty()) {
+                    Showbiz.log.info("$name found through PowerShell (output='$output')")
+                    foundPath = Paths.get(output).toFile()
+                }
+            }
+        }
+        if (foundPath == null || !foundPath.exists()) {
+            Showbiz.log.info("$name wasn't found anywhere")
+            return null
+        }
+
+        val version = runCatching {
+            startProcess(name, "-version").inputStream.bufferedReader().readText()
+                .trim().split(' ').subList(0, 3).joinToString(" ")
+        }.getOrNull()
+        Showbiz.log.info("$name: $version")
+        foundPath
+    }.also {
+        it.onFailure { throwable -> Showbiz.log.error("Unknown exception triggered while trying to find '$name': ", throwable) }
+    }.getOrNull()
+
     fun getLastError() = error
 
     suspend fun encode(inputBytes: ByteArray, settings: Settings): ByteArray? = withContext(Dispatchers.IO) {
@@ -80,14 +118,14 @@ object FFmpeg {
         val tempOut = Files.createTempFile("showbiz_out_", ".wav").toFile()
         try {
             tempIn.writeBytes(inputBytes)
-            val process = ProcessBuilder(
+            val process = startProcess(
                 ffmpeg, "-y",
                 "-i", tempIn.absolutePath,
                 "-acodec", settings.audio.codec,
                 "-ac", settings.audio.channels.toString(),
                 "-ar", settings.audio.sampleRate.toString(),
                 tempOut.absolutePath
-            ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
+            )
 
             val exitCode = process.onExit().await().exitValue()
             if (exitCode != 0) {
@@ -105,31 +143,30 @@ object FFmpeg {
         }
     }
 
+    /** Gets the video size and other stuff */
     suspend fun probeVideo(path: Path): VideoInfo? = withContext(Dispatchers.IO) {
         val ffprobe = probeFile?.absolutePath ?: return@withContext null
-        val process = ProcessBuilder(
+        val process = startProcess(
             ffprobe,
             "-v", "quiet",
             "-select_streams", "v:0",
             "-show_entries", "stream=width,height,r_frame_rate",
             "-of", "csv=p=0",
             path.absolutePathString()
-        ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
-
-        val output = process.inputStream.bufferedReader().readText().trim()
+        )
+        val output = process.inputStream.bufferedReader().readText().trim().let { it.lines().firstOrNull() ?: it }
         process.waitFor()
 
         val parts = output.split(",")
         if (parts.size < 3) return@withContext null
 
-        println("Parts: ${parts}")
         val (num, den) = parts[2].split("/").map { it.trim().toDouble() }
         VideoInfo(path, parts[0].toInt(), parts[1].toInt(), num / den)
     }
 
     fun openVideoStream(input: VideoInfo, output: VideoInfo = input, seek: Duration): VideoStream? {
         val ffmpeg = mainFile?.absolutePath ?: run { setError("FFmpeg not found"); return null }
-        val process = ProcessBuilder(
+        val process = startProcess(
             ffmpeg,
             "-ss", seek.toDouble(DurationUnit.SECONDS).toString(),
             "-i", input.path.absolutePathString(),
@@ -139,7 +176,7 @@ object FFmpeg {
             "-vf", "scale=${output.width}:${output.height}",
             "-an",
             "pipe:1"
-        ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
+        )
         return VideoStream(process, input, output)
     }
 
@@ -148,39 +185,13 @@ object FFmpeg {
         Showbiz.log.error("FFmpeg error: $text")
     }
 
-    // TODO: Get path from '(Get-Command ffmpeg).Source' if PowerShell is installed as a backup in case FFmpeg isn't found in the path
-    private fun findFile(name: String): File? = runCatching {
-        val isWindows = System.getProperty("os.name").contains("win", ignoreCase = true)
-        val binaryName = if (isWindows) "$name.exe" else name
-
-        val pathEnv = System.getenv("PATH") ?: return null
-        val pathSep = if (isWindows) ";" else ":"
-
-        val foundPath = pathEnv.split(pathSep)
-            .asSequence()
-            .filter { it.isNotEmpty() }
-            .map { File(it.replace("\"", ""), binaryName) }
-            .firstOrNull { it.isFile && it.canExecute() }
-        if (foundPath != null && foundPath.exists()) {
-            Showbiz.log.info("$name found at path: '${foundPath}'")
-            return foundPath
+    private fun startProcess(vararg args: String): Process {
+        val process = ProcessBuilder(*args)
+            .redirectError(ProcessBuilder.Redirect.DISCARD)
+            .start()
+        if (Showbiz.log.isDebugEnabled) {
+            Showbiz.log.debug("FFmpeg ${process.pid()} - ${args.joinToString(" ")}")
         }
-        Showbiz.log.warn("$name wasn't found in the path.. Searching elsewhere")
-
-        if (isWindows) {
-            val process = ProcessBuilder("powershell", "-c", "(Get-Command $name).Source")
-                .redirectError(ProcessBuilder.Redirect.DISCARD)
-                .start()
-            val output = process.inputStream.bufferedReader().readText().trim()
-            process.waitFor(3, TimeUnit.SECONDS)
-            if (output.isNotEmpty()) {
-                Showbiz.log.info("$name found through PowerShell (output='$output')")
-                return Paths.get(output).toFile()
-            }
-            Showbiz.log.warn("$name wasn't found through PowerShell (output='$output')")
-        }
-        return null
-    }.also {
-        it.onFailure { throwable -> Showbiz.log.error("Unknown exception triggered while trying to find '$name': ", throwable) }
-    }.getOrNull()
+        return process
+    }
 }
