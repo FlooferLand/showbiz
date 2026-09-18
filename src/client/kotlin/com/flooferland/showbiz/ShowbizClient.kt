@@ -165,7 +165,7 @@ object ShowbizClient : ClientModInitializer {
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
             if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
-                for (err in BaseBotModel.errorsTriggered) {
+                for ((_, err) in BaseBotModel.errorsTriggered) {
                     val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
                     Showbiz.log.error(message)
                     Minecraft.getInstance()?.player?.displayClientMessage(

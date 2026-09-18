@@ -2,6 +2,7 @@ package com.flooferland.showbiz.models
 
 import net.minecraft.client.*
 import net.minecraft.resources.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.types.IBot
@@ -24,24 +25,30 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
         MissingTexture,
         MissingAnimation,
         RenderException;
+
         var context: String? = null
         var botId: String? = null
+        var botPos: Vec3? = null
         fun withContext(context: String): Error {
             this.context = context
             return this
         }
         fun withBot(animatable: IBot): Error {
             this.botId = animatable.botId.toString()
+            this.botPos = animatable.botPos
             return this
         }
+    }
+
+    fun addError(err: Error, animatable: T, context: String) {
+        errorsTriggered[animatable] = err.withBot(animatable).withContext(context)
     }
 
     override fun getModelResource(animatable: T): ResourceLocation {
         val botId = animatable.botId ?: return emptyModel
         val bot = ShowbizClient.bots[botId] ?: run {
-            errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
-                "Failed to get model. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
-            )
+            val context = "Failed to get model. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
+            addError(Error.MissingBot, animatable, context)
             return emptyModel
         }
         return bot.getDefaultModel()
@@ -50,7 +57,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     override fun getTextureResource(animatable: T): ResourceLocation {
         val botId = animatable.botId ?: return emptyTexture
         val bot = ShowbizClient.bots[botId] ?: run {
-            errorsTriggered += Error.MissingBot.withBot(animatable).withContext(
+            addError(Error.MissingBot, animatable,
                 "Failed to get texture. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]"
             )
             return emptyTexture
@@ -78,14 +85,8 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
 
     // For some reason GeckoLib seems to require setting the active model every single time?
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel {
-        if (location == null) {
-            errorsTriggered.add(Error.MissingModel.withContext("Bot model failed to bake"))
-            return super.getBakedModel(emptyModel)
-        }
-        val model = ShowbizClient.botModels[location] ?: run {
-            errorsTriggered.add(Error.MissingModel.withContext("Bot model failed to bake"))
-            return super.getBakedModel(emptyModel)
-        }
+        if (location == null) return super.getBakedModel(emptyModel)
+        val model = ShowbizClient.botModels[location] ?: return super.getBakedModel(emptyModel)
 
         if (model != currentModel) {
             currentModel = model
@@ -96,17 +97,17 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
 
     override fun getAnimation(animatable: T, name: String): Animation? {
         val res = getAnimationResource(animatable) ?: run {
-            errorsTriggered.add(Error.MissingAnimation.withContext("Couldn't find animation file for animation '$name'"))
+            addError(Error.MissingAnimation, animatable, "Couldn't find animation file for animation '$name'")
             null
         }
         return ShowbizClient.animations[res]?.getAnimation(name) ?: run {
-            errorsTriggered.add(Error.MissingAnimation.withContext("Couldn't find animation '$name' in '$res'"))
+            addError(Error.MissingAnimation, animatable, "Couldn't find animation '$name' in '$res'")
             null
         }
     }
 
     companion object {
-        val errorsTriggered = mutableSetOf<Error>()
+        val errorsTriggered = hashMapOf<IBot, Error>()
         val emptyModel = rl("geo/empty.geo.json")
         val emptyTexture = rl("textures/empty.png")
     }

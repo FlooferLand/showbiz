@@ -105,8 +105,8 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             MolangQueries.clearActor()
         } catch (throwable: Throwable) {
             val message = throwable.toString()
-            if (!BaseBotModel.errorsTriggered.any { it.context == message }) {
-                BaseBotModel.errorsTriggered.add(BaseBotModel.Error.RenderException.withBot(animatable).withContext(message))
+            if (!BaseBotModel.errorsTriggered.values.any { it.context == message }) {
+                BaseBotModel.errorsTriggered.values.add(BaseBotModel.Error.RenderException.withBot(animatable).withContext(message))
             }
         }
         poseStack.popPose()
