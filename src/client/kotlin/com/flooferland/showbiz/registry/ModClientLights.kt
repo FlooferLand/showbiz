@@ -141,8 +141,9 @@ object ModClientLights {
         val b = srgbToLinear(FastColor.ARGB32.blue(kelvinColor)).coerceIn(0f, 1f)
         val power = if (entity.redstoneSignal > Redstone.SIGNAL_NONE) entity.redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
 
-        val speed = if (useVanillaLights()) 0.2f else 0.3f
         val target = (if (entity.isLit) power else 0f) * entity.brightness
+        val fadingOut = target < entity.value
+        val speed = 0.14f - (if (fadingOut) 0.03f else 0.0f)
         entity.value = lerp(entity.value, target, speed * delta)
         entity.value = entity.value.coerceIn(0f, 1f)
 
