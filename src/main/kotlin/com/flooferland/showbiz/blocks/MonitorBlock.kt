@@ -1,16 +1,15 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
-import net.minecraft.network.chat.ClickEvent
-import net.minecraft.network.chat.Component
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.player.Player
+import net.minecraft.network.chat.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.context.*
-import net.minecraft.world.level.Level
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.FFmpeg
@@ -24,22 +23,26 @@ class MonitorBlock(props: Properties) : FacingEntityBlock(props) {
 
     init { registerDefaultState(stateDefinition.any().setValue(HANGED, false)) }
 
+    fun shouldHang(level: Level, pos: BlockPos): Boolean {
+        val above = level.getBlockState(pos.above())
+        return !above.isAir
+    }
+
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
         super.createBlockStateDefinition(builder)
         builder.add(HANGED)
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState {
-        val above = context.level.getBlockState(context.clickedPos.above())
         return super.getStateForPlacement(context)
-            .setValue(HANGED, !above.isAir)
+            .setValue(HANGED, shouldHang(context.level, context.clickedPos))
     }
 
     override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, neighborBlock: Block, neighborPos: BlockPos, movedByPiston: Boolean) {
         val hanging = state.getValue(HANGED)
-        val above = level.getBlockState(pos.above())
-        if (hanging != !above.isAir) {
-            level.setBlockAndUpdate(pos, state.setValue(HANGED, !above.isAir))
+        val shouldHang = shouldHang(level, pos)
+        if (hanging != shouldHang) {
+            level.setBlockAndUpdate(pos, state.setValue(HANGED, shouldHang))
         }
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
     }

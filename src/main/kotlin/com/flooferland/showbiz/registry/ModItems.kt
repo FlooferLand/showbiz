@@ -4,6 +4,7 @@ import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.Item.*
+import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
@@ -36,6 +37,11 @@ enum class ModItems {
     Bot(
         "bot", ::BotItem,
         { stacksTo(1) },
+        model = ItemModelId.Generated
+    ),
+    Floodlight(
+        "floodlight", ::FloodlightItem,
+        { stacksTo(1).component(ModComponents.Floodlight.type, FloodlightComponent()) },
         model = ItemModelId.Generated
     )
     ;

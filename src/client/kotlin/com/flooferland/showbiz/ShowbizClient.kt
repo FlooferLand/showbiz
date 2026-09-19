@@ -85,6 +85,7 @@ object ShowbizClient : ClientModInitializer {
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
+        MenuScreens.register(ModScreenHandlers.FloodlightEdit.type, ::FloodlightEditScreen)
         MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)
         MenuScreens.register(ModScreenHandlers.BotSelect.type, ::BotSelectScreen)
         MenuScreens.register(ModScreenHandlers.BitView.type, ::BitViewScreen)
@@ -111,6 +112,7 @@ object ShowbizClient : ClientModInitializer {
             EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
             EntityRendererRegistry.register(ModLivingEntities.Bot.type, ::BotEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Floodlight.type, ::FloodlightEntityRenderer)
         }
 
         // GeckoLib renderers

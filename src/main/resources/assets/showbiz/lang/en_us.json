@@ -15,6 +15,7 @@
     "block.showbiz.curtain_block": "Curtain Railing",
     "block.showbiz.curtain_controller": "Curtain Controller",
     "block.showbiz.spotlight": "Spotlight",
+    "block.showbiz.floodlight": "Floodlight (W.I.P)",
     "block.showbiz.bit_view": "Bit View",
     "block.showbiz.programmer": "Programmer (W.I.P)",
     "block.showbiz.monitor": "Monitor (W.I.P)",
@@ -30,6 +31,7 @@
     "item.showbiz.plush.gully_dook": "Gully Dook Plush",
     "item.showbiz.music_disc": "Music Disc",
     "item.showbiz.ender_earl": "Ender Earl",
+    "item.showbiz.floodlight": "Floodlight (W.I.P)",
 
     "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\n- Right-click to change models\n- Place a block on top to hide the block",
     "tooltip.showbiz.block.reel_to_reel": "Plays back reels\nSlot in a reel at the top\nStart/pause playback by right-clicking on the sides\nCan pull reels from a chest on its side",
@@ -40,6 +42,7 @@
     "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nConnect one of them to a Curtain Controller\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
     "tooltip.showbiz.block.spotlight": "Requires a shader patched with IRLights (J menu).\nRead the IRLights documentation",
+    "tooltip.showbiz.block.floodlight": "Requires a shader patched with IRLights (J menu).\nRead the IRLights documentation\nWORK IN PROGRESS",
     "tooltip.showbiz.block.bit_view": "Shows bits and their names live when plugged into a show",
     "tooltip.showbiz.block.programmer": "Allows you to record in bits",
     "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or not)",

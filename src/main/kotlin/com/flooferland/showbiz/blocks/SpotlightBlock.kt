@@ -15,6 +15,7 @@ import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import kotlin.jvm.optionals.getOrNull
 
@@ -80,7 +81,7 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
         init {
             ServerPackets.listen(SpotlightEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? SpotlightBlockEntity ?: return@listen
+                val blockEntity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? SpotlightBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.applyPacket(packet)
                 }

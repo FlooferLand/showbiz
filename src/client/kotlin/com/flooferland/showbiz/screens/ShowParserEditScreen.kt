@@ -9,6 +9,7 @@ import com.flooferland.showbiz.blocks.ShowParserBlock
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.rl
 
 class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory: Inventory, title: Component) : EditScreen<ShowParserEditMenu, ShowParserEditPacket>(editMenu, inventory, title) {
@@ -23,8 +24,10 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
 
-        val menuOwner = Minecraft.getInstance()?.level?.getBlockState(editMenu.data.base.blockPos)
+        val id = editMenu.data.base.id as OwnerId.BlockId
         fun drawPort(top: Boolean) {
+            val level = Minecraft.getInstance().level ?: return
+            val menuOwner = id.grabBlockState(level)
             val active = when (top) {
                 true -> menuOwner?.getValue(ShowParserBlock.PLAYING_POWERED)
                 false -> menuOwner?.getValue(ShowParserBlock.SIGNAL_POWERED)

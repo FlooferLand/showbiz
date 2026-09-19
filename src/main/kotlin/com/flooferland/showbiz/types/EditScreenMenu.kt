@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.*
 import net.minecraft.network.protocol.common.custom.*
@@ -14,10 +13,10 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 
 open class EditScreenMenu<P>(containerId: Int, menuType: MenuType<*>, val data: P) : AbstractContainerMenu(menuType, containerId)
 where P: EditScreenMenu.EditScreenPacketPayload {
-    val pos = data.base.blockPos
+    val id = data.base.id
 
     abstract class EditScreenPacketPayload(val base: EditScreenBuf) : CustomPacketPayload
-    data class EditScreenBuf(val blockPos: BlockPos, val bitFilter: MappedBits = MappedBits(), var mapping: String? = null) {
+    data class EditScreenBuf(val id: OwnerId, val bitFilter: MappedBits = MappedBits(), var mapping: String? = null) {
         fun loadAdditional(tag: CompoundTag) {
             bitFilter.clearCharts()
 
@@ -47,8 +46,7 @@ where P: EditScreenMenu.EditScreenPacketPayload {
         }
 
         fun encode(buf: FriendlyByteBuf) {
-            buf.writeBlockPos(blockPos)
-
+            id.encode(buf)
             buf.writeVarInt(bitFilter.charts.size)
             bitFilter.charts.forEach { chartId ->
                 buf.writeUtf(chartId)
@@ -60,7 +58,7 @@ where P: EditScreenMenu.EditScreenPacketPayload {
         }
         companion object {
             fun decode(buf: FriendlyByteBuf): EditScreenBuf {
-                val blockPos = buf.readBlockPos()
+                val id = OwnerId.decode(buf)
 
                 val bitFilter = MappedBits()
                 val size = buf.readVarInt()
@@ -70,14 +68,21 @@ where P: EditScreenMenu.EditScreenPacketPayload {
                 }
 
                 val mapping = buf.readUtf().takeIf { it.isNotEmpty() }
-                return EditScreenBuf(blockPos, bitFilter, mapping)
+                return EditScreenBuf(id, bitFilter, mapping)
             }
         }
     }
 
     override fun quickMoveStack(player: Player, index: Int) = ItemStack.EMPTY!!
-    override fun stillValid(player: Player) =
-        (player.level().getBlockEntity(this.pos) as? ExtendedScreenHandlerFactory<*> != null) && player.distanceToSqr(pos.center) < reachDistanceSqr
+    override fun stillValid(player: Player): Boolean {
+        val level = player.level()
+        val exists = when (id) {
+            is OwnerId.BlockId -> level.getBlockEntity(id.blockPos) as? ExtendedScreenHandlerFactory<*> != null
+            is OwnerId.EntityId -> id.grabEntity(level) as? ExtendedScreenHandlerFactory<*> != null
+        }
+        val pos = id.grabPos(level) ?: return false
+        return exists && player.distanceToSqr(pos) < reachDistanceSqr
+    }
 
     companion object {
         val reachDistanceSqr = 12.0f.let { it * it }

@@ -4,7 +4,6 @@ import net.minecraft.client.multiplayer.*
 import net.minecraft.core.*
 import net.minecraft.util.*
 import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.lighting.*
 import net.minecraft.world.level.redstone.*
 import net.minecraft.world.phys.shapes.*
@@ -12,6 +11,8 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
+import com.flooferland.showbiz.entities.FloodlightEntity
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.math.ColorMath.srgbToLinear
 import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.utils.lerp
@@ -19,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.concurrent.ConcurrentHashMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.qualet.irl.light.LightMath
 import org.qualet.irl.light.LightRegistry
@@ -27,28 +29,46 @@ import kotlin.math.roundToInt
 
 object ModClientLights {
     const val COOKIE_TEXTURE = "/assets/${Showbiz.MOD_ID}/textures/spotlight_cookie.png"
-    val lights = ConcurrentHashMap.newKeySet<BlockEntity>()!!
-    val lightBonusOwners = ConcurrentHashMap<BlockEntity, HashSet<Long>>()
+    val lights = ConcurrentHashMap.newKeySet<OwnerId>()!!
+    val lightBonusOwners = ConcurrentHashMap<OwnerId, HashSet<Long>>()
     val lightBonusMap = ConcurrentHashMap<Long, Int>()
     var frameBlockLights = ConcurrentHashMap<Long, Int>()
 
-    fun load() {
-        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level ->
-            if (entity is SpotlightBlockEntity || entity is MonitorBlockEntity) {
-                lights.add(entity)
-                lightBonusOwners[entity] = hashSetOf()
-            }
-        }
-        ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
-            if (lights.contains(entity)) {
-                lights.remove(entity)
-                lightBonusOwners.remove(entity)?.let {
-                    for (pos in it) {
-                        lightBonusMap.remove(pos)
-                        level.lightEngine.checkBlock(BlockPos.of(pos))
-                    }
+    private fun isLightEmitter(v: Any) =
+        v is SpotlightBlockEntity || v is FloodlightEntity || v is MonitorBlockEntity
+
+    fun loadEmitter(id: OwnerId, level: ClientLevel) {
+        lights.add(id)
+        lightBonusOwners[id] = hashSetOf()
+    }
+    fun unloadEmitter(id: OwnerId, level: ClientLevel) {
+        if (lights.contains(id)) {
+            lights.remove(id)
+            lightBonusOwners.remove(id)?.let {
+                for (pos in it) {
+                    lightBonusMap.remove(pos)
+                    level.lightEngine.checkBlock(BlockPos.of(pos))
                 }
             }
+        }
+    }
+
+    fun load() {
+        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level ->
+            if (!isLightEmitter(entity)) return@register
+            loadEmitter(OwnerId.of(entity.blockPos), level)
+        }
+        ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
+            if (!isLightEmitter(entity)) return@register
+            unloadEmitter(OwnerId.ofEntity(entity), level)
+        }
+        ClientEntityEvents.ENTITY_LOAD.register { entity, level ->
+            if (!isLightEmitter(entity)) return@register
+            loadEmitter(OwnerId.ofEntity(entity), level)
+        }
+        ClientEntityEvents.ENTITY_UNLOAD.register { entity, level ->
+            if (!isLightEmitter(entity)) return@register
+            unloadEmitter(OwnerId.ofEntity(entity), level)
         }
 
         try {
@@ -73,19 +93,28 @@ object ModClientLights {
 
     fun useVanillaLights() = IrisShadersState.shadersDisabled()
 
-    fun emit(delta: Float) {
-        for (entity in lights) {
-            if (entity.isRemoved) continue
-            val level = entity.level as? ClientLevel ?: continue
-
+    fun emit(level: ClientLevel, delta: Float) {
+        for (id in lights) {
+            if (id.isRemoved(level)) continue
             frameBlockLights = ConcurrentHashMap<Long, Int>()
-            when (entity) {
-                is SpotlightBlockEntity -> emitSpotlight(level, entity, delta)
-                is MonitorBlockEntity -> emitMonitor(level, entity, delta)
+            when (id) {
+                is OwnerId.BlockId -> {
+                    val blockEntity = id.grabBlockEntity(level)
+                    when (blockEntity) {
+                        is SpotlightBlockEntity -> emitSpotlight(level, blockEntity, delta)
+                        is MonitorBlockEntity -> emitMonitor(level, blockEntity, delta)
+                    }
+                }
+                is OwnerId.EntityId -> {
+                    val entity = id.grabEntity(level)
+                    when (entity) {
+                        is FloodlightEntity -> emitFloodlight(level, entity, delta)
+                    }
+                }
             }
 
             // Vanilla light
-            val prevLights = lightBonusOwners.getOrPut(entity) { hashSetOf() }
+            val prevLights = lightBonusOwners.getOrPut(id) { hashSetOf() }
             val removed = prevLights - frameBlockLights.keys
             for (pos in removed) {
                 lightBonusMap.remove(pos)
@@ -93,7 +122,7 @@ object ModClientLights {
             }
             for ((pos, light) in frameBlockLights)
                 paintLightLevel(level, pos, light)
-            lightBonusOwners[entity] = frameBlockLights.keys.toHashSet()
+            lightBonusOwners[id] = frameBlockLights.keys.toHashSet()
         }
     }
 
@@ -132,9 +161,6 @@ object ModClientLights {
         val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
         val id = entity.blockPos.asLong()
 
-        //val r = (entity.kelvin shr 16 and 0xFF) / 255f
-        //val g = (entity.kelvin shr 8 and 0xFF) / 255f
-        //val b = (entity.kelvin and 0xFF) / 255f
         val kelvinColor = Kelvin.toColor(entity.kelvin)
         val r = srgbToLinear(FastColor.ARGB32.red(kelvinColor)).coerceIn(0f, 1f)
         val g = srgbToLinear(FastColor.ARGB32.green(kelvinColor)).coerceIn(0f, 1f)
@@ -169,9 +195,58 @@ object ModClientLights {
         val start = pos.add(dir)
         val range = pos.add(dir.scale(10.0))
         BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
-            frameBlockLights[blockPos.asLong()] = blockLight
             val state = level.getBlockState(blockPos)
-            if (!state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty) blockPos else null
+            val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
+            if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
+            if (blocked) blockPos else null
+        }, { null })
+    }
+
+    fun emitFloodlight(level: ClientLevel, entity: FloodlightEntity, delta: Float) {
+        val dir = entity.endPos.subtract(entity.startPos).normalize()
+        val pos = entity.endPos
+
+        val cookie = getCookie()
+        val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
+        val id = entity.id.toLong()
+
+        val r = (entity.color shr 16 and 0xFF) / 255f
+        val g = (entity.color shr 8 and 0xFF) / 255f
+        val b = (entity.color and 0xFF) / 255f
+        val power = if (entity.redstoneSignal > Redstone.SIGNAL_NONE) entity.redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
+
+        val target = (if (entity.isLit) power else 0f) * entity.brightness
+        val fadingOut = target < entity.value
+        val speed = 0.25f - (if (fadingOut) 0.03f else 0.0f)
+        entity.value = lerp(entity.value, target, speed * delta)
+        entity.value = entity.value.coerceIn(0f, 1f)
+
+        // Proper Floodlights
+        if (!useVanillaLights()) LightRegistry.registerSpot(
+            pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
+            dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
+            r, g, b,
+            entity.value,
+            15f,
+            cone.cosOuter, cone.cosInner,
+            false, false,
+            0.5f, 0.8f,
+            0.5f, 0.0f,
+            entity.shadows,
+            cookie.toFloat(), 0f, 1f, 0f,
+            id
+        )
+
+        // Block lights for compatibility
+        val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
+        if (entity.value <= 0f || !useVanillaLights()) return
+        val start = pos.add(dir)
+        val range = pos.add(dir.scale(10.0))
+        BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
+            val state = level.getBlockState(blockPos)
+            val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
+            if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
+            if (blocked) blockPos else null
         }, { null })
     }
 

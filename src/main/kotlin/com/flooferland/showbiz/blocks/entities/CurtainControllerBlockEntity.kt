@@ -1,9 +1,9 @@
 package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
@@ -16,6 +16,7 @@ import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -37,7 +38,7 @@ class CurtainControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Bloc
         }
     }
 
-    override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(pos))
     var bitFilterOpen: MutableList<BitId> = mutableListOf()
     var bitFilterClose: MutableList<BitId> = mutableListOf()
 
@@ -47,7 +48,7 @@ class CurtainControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Bloc
         return CurtainControllerEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        CurtainControllerEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), bitFilterOpen, bitFilterClose)
+        CurtainControllerEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping), bitFilterOpen, bitFilterClose)
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)

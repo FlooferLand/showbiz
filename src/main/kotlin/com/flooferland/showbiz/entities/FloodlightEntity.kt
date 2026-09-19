@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.entities
 
+import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
 import net.minecraft.network.syncher.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
+import net.minecraft.util.*
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.*
 import net.minecraft.world.effect.*
@@ -14,80 +15,71 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
+import net.minecraft.world.level.block.*
 import net.minecraft.world.phys.*
-import com.flooferland.showbiz.menus.BotSelectMenu
-import com.flooferland.showbiz.network.packets.BotListSelectPacket
+import com.flooferland.showbiz.components.FloodlightComponent
+import com.flooferland.showbiz.menus.FloodlightEditMenu
+import com.flooferland.showbiz.network.packets.FloodlightEditPacket
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModLivingEntities
-import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.EditScreenMenu
+import com.flooferland.showbiz.types.EditScreenOwner
 import com.flooferland.showbiz.types.OwnerId
-import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.types.collidepart.CollidePartId
-import com.flooferland.showbiz.types.collidepart.CollidePartManager
-import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
-import com.flooferland.showbiz.utils.Extensions.getStringOrNull
+import com.flooferland.showbiz.types.math.Vec2f
+import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
+import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-// TODO: Figure out if calls to connectionChanged and entity accessors are even needed
 // TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
-/**
- * The main class of the mod.
- * Has to be a LivingEntity unfortunately to cast shadows when using shaders
- */
-class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
+class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : LivingEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
     constructor(level: Level) : this(level, null) {
-        // EntityDimensions.fixed(0.6f, 2.0f)
+        EntityDimensions.fixed(0.3f, 0.3f)
     }
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
 
     override val connectionManager = ConnectionManager(this)
-    override val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
-        pendingShow.merge(received)
+    val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { show ->
+        lit = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
 
-    override val botLevel: Level? get() = level()
-    override val botPos: Vec3 get() = position()
-    override val botRemoved get() = isRemoved
-    override var botId: ResourceId? = null
-        set(value) {
-            field = value
-            if (level() is ServerLevel) updatePersistentData { it.putString("bot_id", value?.toString() ?: "") }
-        }
+    val isLit: Boolean get() = lit || redstoneSignal > 0
+    var value: Float = 0f  // Used for smoothing on the client
+    var redstoneSignal: Int = 0
+    var supportAbove = false
+    var supportBelow = false
 
-    override val collidePartInstance = CollidePartManager.create(this) {
-        val botId = this@BotEntity.botId ?: return@create
-        when {
-            botId.matches("showbiz:rolfe_dewolfe") -> {
-                map("cymbal", CollidePartId.Cymbal)
-                map("stick", CollidePartId.Stick)
-            }
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPosition()))
+    var turn = Vec2f.ZERO
+    var angle = 45f
+    var shadows: Boolean = true
+    var color: Int = CommonColors.WHITE
+    var brightness: Float = 1.0f
 
-            botId.matches("showbiz-wp5:mini_mozzarella") -> {
-                map("Booper", CollidePartId.Boop)
-            }
-        }
-    }
-
-    private var prevBotId: ResourceId? = null
-    private var killDelayTicks = 0
-    private val pendingShow = PackedShowData()
+    private var lit: Boolean = false
+    var startPos = Vec3.ZERO!!
+    var endPos = Vec3.ZERO!!
 
     init {
-        this.botId = botId
         refreshDimensions()
         updatePersistentData { addAdditionalSaveData(it) }
+    }
+
+    override fun tick() {
+        super.tick()
+        supportAbove = Block.canSupportCenter(level(), blockPosition().above(), Direction.DOWN)
+        supportBelow = Block.canSupportCenter(level(), blockPosition().below(), Direction.UP)
     }
 
     override fun isPushable() = false
@@ -100,33 +92,8 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     override fun canBeSeenAsEnemy() = false
     override fun getPickResult() = makeItem()
 
-    override fun tick() {
-        super.tick()
-        val level = level() ?: return
-        if (!level.isClientSide) {
-            show.data.tempReset()
-            show.data.merge(pendingShow)
-            pendingShow.tempReset()
-        }
-        if (killDelayTicks > 0) {
-            killDelayTicks -= 1
-            if (killDelayTicks == 0) {
-                drop()
-                remove(RemovalReason.DISCARDED)
-                return
-            }
-        }
-
-        val id = OwnerId.of(this)
-        if (id != null) collidePartInstance.tick(level, id)
-        if (botId != prevBotId) {
-            if (id != null) collidePartInstance.refresh(level, id)
-            prevBotId = botId
-        }
-    }
-
-    fun makeItem() = ItemStack(ModItems.Bot.item).also {
-        it.set(ModComponents.BotId.type, botId)
+    fun makeItem() = ItemStack(ModItems.Floodlight.item).also {
+        it.set(ModComponents.Floodlight.type, FloodlightComponent(color))
     }
 
     fun drop() {
@@ -134,6 +101,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
         val level = level() ?: return
         val item = ItemEntity(level, pos.x, pos.y + 0.5, pos.z, makeItem())
         level.addFreshEntity(item)
+        remove(RemovalReason.DISCARDED)
     }
     fun grab(player: Player): InteractionResult {
         player.handItem(makeItem())
@@ -143,7 +111,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
 
     override fun isInvulnerableTo(source: DamageSource) = source.entity !is Player
     override fun hurt(source: DamageSource, amount: Float): Boolean {
-        if (killDelayTicks > 0 || isRemoved) return false
         val attacker = source.entity
         fun playSound(sound: SoundEvent) {
             level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
@@ -153,7 +120,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
         val isClient = attacker.level().isClientSide
         if (!isClient && amount > 0f) {
             playSound(SoundEvents.ARMOR_STAND_BREAK)
-            killDelayTicks = 2
+            drop()
         }
         return true
     }
@@ -171,23 +138,23 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     // endregion
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
-        // Grabbing the bot
+        // Grabbing the spotlight
         if (player.isCrouching) return grab(player)
 
-        // Opening up the selection screen
+        // Opening up the edit screen
         val id = OwnerId.of(this)
-        if (id != null) {
-            player.openMenu(object : ExtendedScreenHandlerFactory<BotListSelectPacket> {
-                override fun getDisplayName() = Component.empty()
-                override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
-                    val player = player as? ServerPlayer ?: return null
-                    return BotSelectMenu(containerId, getScreenOpeningData(player))
-                }
-                override fun getScreenOpeningData(player: ServerPlayer) = BotListSelectPacket(id, botId)
-            })
-        }
+        if (id != null) player.openMenu(this)
         return InteractionResult.SUCCESS
     }
+
+
+    override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
+        val player = player as? ServerPlayer ?: return null
+        return FloodlightEditMenu(containerId, getScreenOpeningData(player))
+    }
+    override fun getScreenOpeningData(player: ServerPlayer) =
+        FloodlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(blockPosition()), menuData.bitFilter, show.data.mapping), turn, angle, shadows, color, brightness)
+
 
     fun updatePersistentData(block: (CompoundTag) -> Unit) {
         val tag = entityData.get(persistentDataAccessor).copy()
@@ -213,16 +180,41 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     }
 
     override fun addAdditionalSaveData(tag: CompoundTag) {
-        tag.putString("bot_id", botId?.toString() ?: "")
         connectionManager.save(tag)
+        menuData.saveAdditional(tag)
+        tag.putBoolean("lit", lit)
+        tag.putBoolean("shadows", shadows)
+        tag.putFloat("turn_x", turn.x)
+        tag.putFloat("turn_y", turn.y)
+        tag.putFloat("angle", angle)
+        tag.putFloat("brightness", brightness)
+        tag.putInt("color", color)
+
+        // Stuff that can be recalculated if its lost
+        tag.putInt("redstone_signal", redstoneSignal)
+        tag.putBoolean("support_above", supportAbove)
+        tag.putBoolean("support_below", supportBelow)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
-        botId = tag.getStringOrNull("bot_id")?.let { if (it.isNotBlank()) ResourceId.of(it) else null }
+        menuData.loadAdditional(tag)
+        tag.getBooleanOrNull("lit")?.let { lit = it }
+        tag.getBooleanOrNull("shadows")?.let { shadows = it }
+        tag.getFloatOrNull("turn_x")?.let { turn.x = it }
+        tag.getFloatOrNull("turn_y")?.let { turn.y = it }
+        tag.getFloatOrNull("angle")?.let { angle = it }
+        tag.getFloatOrNull("brightness")?.let { brightness = it }
+        tag.getIntOrNull("color")?.let { color = it }
+
+        // Stuff that can be recalculated if its lost
+        tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
+        tag.getBooleanOrNull("support_above")?.let { supportAbove = it }
+        tag.getBooleanOrNull("support_below")?.let { supportBelow = it }
+
         if (!level().isClientSide) entityData.set(persistentDataAccessor, tag)
         connectionManager.load(tag)
     }
 
     companion object {
-        val persistentDataAccessor = SynchedEntityData.defineId(BotEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
+        val persistentDataAccessor = SynchedEntityData.defineId(FloodlightEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
     }
 }

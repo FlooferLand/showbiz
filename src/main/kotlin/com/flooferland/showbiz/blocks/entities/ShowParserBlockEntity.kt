@@ -21,6 +21,7 @@ import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -33,7 +34,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         level.updateNeighborsAt(blockPos, blockState.block)
     }
 
-    override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
 
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
@@ -41,7 +42,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         return ShowParserEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        ShowParserEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping))
+        ShowParserEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping))
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         val level = level as? ServerLevel ?: return

@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.entities.DecorEntity
+import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
@@ -48,6 +49,14 @@ class GeoWorkaroundRenderHook() {
         }
         when (animatable) {
             is SpotlightBlockEntity -> {
+                val startBone = model.getBone("start").getOrNull() ?: return
+                val startPos = bonePosFromCapture(startBone) ?: return
+                animatable.startPos = startPos
+                val endBone = model.getBone("end").getOrNull() ?: return
+                val endPos = bonePosFromCapture(endBone) ?: return
+                animatable.endPos = endPos
+            }
+            is FloodlightEntity -> {
                 val startBone = model.getBone("start").getOrNull() ?: return
                 val startPos = bonePosFromCapture(startBone) ?: return
                 animatable.startPos = startPos

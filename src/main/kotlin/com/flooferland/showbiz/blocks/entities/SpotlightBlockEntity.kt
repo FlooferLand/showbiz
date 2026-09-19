@@ -16,6 +16,7 @@ import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -42,7 +43,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var supportAbove = false
     var supportBelow = false
 
-    override var menuData = EditScreenMenu.EditScreenBuf(blockPos)
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
     var turn = Vec2f.ZERO
     var angle = 45f
     var shadows: Boolean = true
@@ -70,7 +71,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(worldPosition, menuData.bitFilter, show.data.mapping), turn, angle, shadows, kelvin, brightness)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping), turn, angle, shadows, kelvin, brightness)
 
     fun applyPacket(packet: SpotlightEditPacket) {
         menuData = packet.base

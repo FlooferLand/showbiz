@@ -13,8 +13,8 @@ import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.types.connection.AutoConnection
 import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.types.connection.AutoConnection
 import com.flooferland.showbiz.types.connection.IConnectable
 import java.util.function.Consumer
 import org.apache.commons.lang3.mutable.MutableObject

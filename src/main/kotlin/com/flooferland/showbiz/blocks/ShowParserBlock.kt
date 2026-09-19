@@ -18,6 +18,7 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.IRedstoneExtras
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
 class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock(properties), IRedstoneExtras {
@@ -63,7 +64,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
     override fun getRenderShape(state: BlockState) = RenderShape.MODEL
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
-        if (level.isClientSide) return InteractionResult.PASS
+        if (level.isClientSide) return InteractionResult.SUCCESS
         if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
         player.openMenu(state.getMenuProvider(level, pos))
         return InteractionResult.SUCCESS
@@ -106,7 +107,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : FacingEntityBlock
         init {
             ServerPackets.listen(ShowParserEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? ShowParserBlockEntity ?: return@listen
+                val blockEntity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? ShowParserBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                 }

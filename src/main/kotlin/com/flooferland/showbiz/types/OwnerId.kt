@@ -27,6 +27,8 @@ sealed class OwnerId() {
         override fun grabPos(level: Level) = blockPos.center!!
         override fun isLoaded(level: Level): Boolean = grabBlockPos(level).let { level.isLoaded(it) }
         override fun isRemoved(level: Level): Boolean = level.getBlockEntity(blockPos)?.isRemoved ?: true
+        fun grabBlockState(level: Level) = level.getBlockState(blockPos)
+        fun grabBlockEntity(level: Level) = level.getBlockEntity(blockPos)
     }
 
     class EntityId(val entityUuid: UUID, var entityLocalId: Int? = null) : OwnerId() {
@@ -77,6 +79,8 @@ sealed class OwnerId() {
             is Entity -> OwnerId.of(connectable.uuid, connectable.id)
             else -> null
         }
+        fun ofEntity(entity: Entity) = of(entity.uuid, if (entity.level().isClientSide) entity.id else null)
+        fun ofEntity(entity: BlockEntity) = of(entity.blockPos)
         fun of(pos: BlockPos) = BlockId(pos)
         fun of(uuid: UUID, id: Int? = null) = EntityId(uuid, id)
 
