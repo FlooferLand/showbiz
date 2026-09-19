@@ -46,6 +46,10 @@ Now, if you want to assemble it into a jar file, run `gradle assemble`, then loo
 
 If you want to run the project inside Intellij itself, you can select the `Minecraft Client` profile in the top right and press the play button.
 
+Just note that this is the latest in-development version of Showbiz, which is not stable whatsoever.
+By using it, your worlds ***WILL*** be at risk of breaking.
+Regularly back up worlds using Minecraft's `Edit > Make Backup` button.
+
 
 ## Contributing
 
