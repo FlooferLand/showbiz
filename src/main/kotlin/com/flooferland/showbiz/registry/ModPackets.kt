@@ -12,6 +12,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackState : ModPackets<PlaybackStatePacket>(ServerToClient, PlaybackStatePacket.type, PlaybackStatePacket.codec)
     data object ShowParserData : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
     data object SpotlightEdit : ModPackets<SpotlightEditPacket>(Bidirectional, SpotlightEditPacket.type, SpotlightEditPacket.codec)
+    data object FloodlightEdit : ModPackets<FloodlightEditPacket>(Bidirectional, FloodlightEditPacket.type, FloodlightEditPacket.codec)
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
     data object ModelPartNames : ModPackets<ModelPartNamesPacket>(ServerToClient, ModelPartNamesPacket.type, ModelPartNamesPacket.codec)
     data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)

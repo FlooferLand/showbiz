@@ -23,11 +23,10 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
         // Turn X
         run {
             turn = EditBox(font, 80, 20, Component.literal("Turn"))
-            turn!!.value =
-                editMenu.data.turn.x.toString().replace(".0", "") + ", " + editMenu.data.turn.y.toString().replace(".0", "")
-            turn!!.setFilter { turn -> turn.split(',').map { it.trim() }.all { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
-            turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separared by a comma"))
-            widgets.add(WidgetInfo("Turn X/Y", turn!!))
+            turn!!.value = editMenu.data.turn.toString().replace(".0", "")
+            turn!!.setFilter { turn -> turn.trim().let { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
+            turn!!.tooltip = Tooltip.create(Component.literal("Turn up/down"))
+            widgets.add(WidgetInfo("Turn up/down", turn!!))
         }
 
         // Angle (radius)
@@ -57,13 +56,7 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
     }
 
     override fun saveCustom(data: FloodlightEditPacket) {
-        turn?.value?.split(',')?.let { values ->
-            val values = values.map { it.trim() }.mapNotNull { it.toFloatOrNull() }
-            if (values.size >= 2) {
-                data.turn.x = values[0]
-                data.turn.y = values[1]
-            }
-        }
+        turn?.value?.toFloatOrNull()?.let { data.turn = it }
         angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
         color?.color?.let { data.color = it }
         color?.value?.let { data.brightness = it }

@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.items
 
+import net.minecraft.core.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.level.*
 import net.minecraft.world.*
@@ -11,18 +12,21 @@ import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.ShowbizUtils
 
 class FloodlightItem(properties: Properties) : Item(properties) {
-    override fun useOn(context: UseOnContext): InteractionResult {
-        val level = context.level as? ServerLevel ?: return InteractionResult.SUCCESS
-        val player = context.player ?: return InteractionResult.PASS
+    override fun useOn(ctx: UseOnContext): InteractionResult {
+        val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
+        val player = ctx.player ?: return InteractionResult.PASS
 
-        val placeState = level.getBlockState(context.clickedPos.above())
-        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, context.clickedPos.above())
-        if (canPlaceOnBlock && context.hand == InteractionHand.MAIN_HAND) {
-            val stack = context.itemInHand
+        val placeState = level.getBlockState(ctx.clickedPos.above())
+        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, ctx.clickedPos.above())
+        if (canPlaceOnBlock && ctx.hand == InteractionHand.MAIN_HAND) {
+            val stack = ctx.itemInHand
             val floodlight = stack.get(ModComponents.Floodlight.type) ?: return InteractionResult.PASS
             val entity = FloodlightEntity(level, floodlight)
-            entity.setPos(context.clickLocation)
-            context.rotation.let { yaw ->
+
+            val pos = if (ctx.clickedFace == Direction.DOWN) ctx.clickLocation.subtract(0.0, entity.bbHeight.toDouble(), 0.0) else ctx.clickLocation
+            entity.setPos(pos)
+            entity.supportBlock = ctx.clickedPos
+            ctx.rotation.let { yaw ->
                 entity.xRot = 0f
                 entity.yRot = yaw
                 entity.yRotO = yaw
@@ -32,7 +36,7 @@ class FloodlightItem(properties: Properties) : Item(properties) {
                 entity.yBodyRotO = yaw
             }
             level.addFreshEntity(entity)
-            player.setItemInHand(context.hand, ItemStack.EMPTY)
+            player.setItemInHand(ctx.hand, ItemStack.EMPTY)
         }
         return InteractionResult.PASS
     }

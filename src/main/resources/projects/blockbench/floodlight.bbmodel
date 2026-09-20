@@ -31,12 +31,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-0.5, 12.5, 1],
-			"to": [0.5, 15.5, 2],
+			"from": [-0.5, 11.5, 1],
+			"to": [0.5, 14.5, 2],
 			"autouv": 0,
 			"color": 3,
 			"visibility": false,
-			"origin": [0, 13, 1.5],
+			"origin": [0, 12, 1.5],
 			"faces": {
 				"north": {
 					"uv": [18, 25, 19, 28],
@@ -74,12 +74,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-1.825, 13.5, 1],
-			"to": [1.8, 13.525, 2],
+			"from": [-1.825, 12.5, 1],
+			"to": [1.8, 12.525, 2],
 			"autouv": 1,
 			"color": 8,
 			"visibility": false,
-			"origin": [0, 13.5, 1.5],
+			"origin": [0, 12.5, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.025, 3.625, 0.05],
@@ -117,11 +117,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2, 6, -3.525],
-			"to": [2, 10, 4.475],
+			"from": [-2, 5, -3.525],
+			"to": [2, 9, 4.475],
 			"autouv": 1,
 			"color": 6,
-			"origin": [0, 10, 1.725],
+			"origin": [0, 9, 1.725],
 			"faces": {
 				"north": {
 					"uv": [0, 22, 4, 26],
@@ -159,13 +159,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [1.525, 11.25, 1],
-			"to": [6.025, 11.275, 2],
+			"from": [1.525, 10.25, 1],
+			"to": [6.025, 10.275, 2],
 			"autouv": 1,
 			"color": 8,
 			"visibility": false,
 			"rotation": [0, 0, -90],
-			"origin": [2.275, 11.25, 1.5],
+			"origin": [2.275, 10.25, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.075, 4.5, 0.1],
@@ -203,11 +203,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2.25, 5.75, -1],
-			"to": [2.25, 10.25, 4],
+			"from": [-2.25, 4.75, -1],
+			"to": [2.25, 9.25, 4],
 			"autouv": 1,
 			"color": 6,
-			"origin": [0, 10, 2.25],
+			"origin": [0, 9, 2.25],
 			"faces": {
 				"north": {
 					"uv": [0, 0, 0, 0],
@@ -245,13 +245,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0.7, 12, 1],
-			"to": [2.275, 12.025, 2],
+			"from": [0.7, 11, 1],
+			"to": [2.275, 11.025, 2],
 			"autouv": 1,
 			"color": 8,
 			"visibility": false,
 			"rotation": [0, 0, -72.5],
-			"origin": [2.275, 12, 1.5],
+			"origin": [2.275, 11, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.05, 1.575, 0.075],
@@ -289,11 +289,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2, 6, -2.5],
-			"to": [2, 10, -2.5],
+			"from": [-2, 5, -2.5],
+			"to": [2, 9, -2.5],
 			"autouv": 1,
 			"color": 6,
-			"origin": [0, 10, 2.75],
+			"origin": [0, 9, 2.75],
 			"faces": {
 				"north": {
 					"uv": [22, 6, 26, 10],
@@ -331,11 +331,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [2.275, 6.475, 0],
-			"to": [2.275, 9.475, 3],
+			"from": [2.275, 5.475, 0],
+			"to": [2.275, 8.475, 3],
 			"autouv": 1,
 			"color": 8,
-			"origin": [2.525, 7.25, 1.5],
+			"origin": [2.525, 6.25, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0, 0, 0],
@@ -373,11 +373,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2.3, 6.475, 0],
-			"to": [-2.3, 9.475, 3],
+			"from": [-2.3, 5.475, 0],
+			"to": [-2.3, 8.475, 3],
 			"autouv": 1,
 			"color": 8,
-			"origin": [-2.55, 7.25, 1.5],
+			"origin": [-2.55, 6.25, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0, 0, 0],
@@ -415,13 +415,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-6.05, 11.25, 1],
-			"to": [-1.55, 11.275, 2],
+			"from": [-6.05, 10.25, 1],
+			"to": [-1.55, 10.275, 2],
 			"autouv": 1,
 			"color": 8,
 			"visibility": false,
 			"rotation": [0, 0, 90],
-			"origin": [-2.3, 11.25, 1.5],
+			"origin": [-2.3, 10.25, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.025, 4.5, 0.05],
@@ -459,13 +459,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2.3, 12, 1],
-			"to": [-0.725, 12.025, 2],
+			"from": [-2.3, 11, 1],
+			"to": [-0.725, 11.025, 2],
 			"autouv": 1,
 			"color": 8,
 			"visibility": false,
 			"rotation": [0, 0, 72.5],
-			"origin": [-2.3, 12, 1.5],
+			"origin": [-2.3, 11, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.025, 1.575, 0.05],
@@ -503,11 +503,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2.5, 5.5, -1.5],
-			"to": [2.5, 10.5, -0.5],
+			"from": [-2.5, 4.5, -1.5],
+			"to": [2.5, 9.5, -0.5],
 			"autouv": 1,
 			"color": 6,
-			"origin": [0, 10, -2.25],
+			"origin": [0, 9, -2.25],
 			"faces": {
 				"north": {
 					"uv": [18, 0, 23, 5],
@@ -545,11 +545,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-0.25, 7.75, 5.75],
-			"to": [0.25, 8.25, 6.25],
+			"from": [-0.25, 6.75, 5.75],
+			"to": [0.25, 7.25, 6.25],
 			"autouv": 1,
 			"color": 0,
-			"origin": [0, 8, 6],
+			"origin": [0, 7, 6],
 			"faces": {
 				"north": {
 					"uv": [0.75, 0.75, 1.25, 1.25],
@@ -587,11 +587,11 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-0.25, 7.75, -4.5],
-			"to": [0.25, 8.25, -4],
+			"from": [-0.25, 6.75, -4.5],
+			"to": [0.25, 7.25, -4],
 			"autouv": 1,
 			"color": 0,
-			"origin": [0, 8, -4.25],
+			"origin": [0, 7, -4.25],
 			"faces": {
 				"north": {
 					"uv": [0.75, 0.75, 1.25, 1.25],
@@ -629,11 +629,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-0.5, 12.5, 1],
-			"to": [0.5, 16.5, 2],
+			"from": [-0.5, 10.45343, 1],
+			"to": [0.5, 14.45343, 2],
 			"autouv": 0,
 			"color": 3,
-			"origin": [0, 13, 1.5],
+			"visibility": false,
+			"origin": [0, 10.95343, 1.5],
 			"faces": {
 				"north": {
 					"uv": [18, 24, 19, 28],
@@ -671,11 +672,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-1.825, 13.5, 1],
-			"to": [1.8, 13.525, 2],
+			"from": [-1.825, 11.45343, 1],
+			"to": [1.8, 11.47843, 2],
 			"autouv": 1,
 			"color": 8,
-			"origin": [0, 13.5, 1.5],
+			"visibility": false,
+			"origin": [0, 11.45343, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.025, 3.625, 0.05],
@@ -713,35 +715,36 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [1.525, 11.25, 1],
-			"to": [6.025, 11.275, 2],
+			"from": [1.525, 9.20343, 1],
+			"to": [4.775, 9.22843, 2],
 			"autouv": 1,
 			"color": 8,
+			"visibility": false,
 			"rotation": [0, 0, -90],
-			"origin": [2.275, 11.25, 1.5],
+			"origin": [2.275, 9.20343, 1.5],
 			"faces": {
 				"north": {
-					"uv": [0, 0.075, 4.5, 0.1],
+					"uv": [1.25, 0.075, 4.5, 0.105],
 					"texture": null
 				},
 				"east": {
-					"uv": [0, 0.075, 1, 0.1],
+					"uv": [0, 0.075, 1, 0.105],
 					"texture": null
 				},
 				"south": {
-					"uv": [0, 0.075, 4.5, 0.1],
+					"uv": [0, 0.075, 3.25, 0.105],
 					"texture": null
 				},
 				"west": {
-					"uv": [0, 0.075, 1, 0.1],
+					"uv": [0, 0.075, 1, 0.105],
 					"texture": null
 				},
 				"up": {
-					"uv": [27, 12, 22.5, 11],
+					"uv": [27, 12, 23.75, 11],
 					"texture": 0
 				},
 				"down": {
-					"uv": [0, 0, 4.5, 1],
+					"uv": [0, 0, 3.25, 1],
 					"texture": 0
 				}
 			},
@@ -756,12 +759,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0.7, 12, 1],
-			"to": [2.275, 12.025, 2],
+			"from": [0.7, 9.95343, 1],
+			"to": [2.275, 9.97843, 2],
 			"autouv": 1,
 			"color": 8,
+			"visibility": false,
 			"rotation": [0, 0, -72.5],
-			"origin": [2.275, 12, 1.5],
+			"origin": [2.275, 9.95343, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.05, 1.575, 0.075],
@@ -799,35 +803,36 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-6.05, 11.25, 1],
-			"to": [-1.55, 11.275, 2],
+			"from": [-4.8, 9.20343, 1],
+			"to": [-1.55, 9.22843, 2],
 			"autouv": 1,
 			"color": 8,
+			"visibility": false,
 			"rotation": [0, 0, 90],
-			"origin": [-2.3, 11.25, 1.5],
+			"origin": [-2.3, 9.20343, 1.5],
 			"faces": {
 				"north": {
-					"uv": [0, 0.025, 4.5, 0.05],
+					"uv": [0, 0.025, 3.25, 0.055],
 					"texture": null
 				},
 				"east": {
-					"uv": [0, 0.025, 1, 0.05],
+					"uv": [0, 0.025, 1, 0.055],
 					"texture": null
 				},
 				"south": {
-					"uv": [0, 0.025, 4.5, 0.05],
+					"uv": [1.25, 0.025, 4.5, 0.055],
 					"texture": null
 				},
 				"west": {
-					"uv": [0, 0.025, 1, 0.05],
+					"uv": [0, 0.025, 1, 0.055],
 					"texture": null
 				},
 				"up": {
-					"uv": [27, 14, 22.5, 13],
+					"uv": [25.75, 14, 22.5, 13],
 					"texture": 0
 				},
 				"down": {
-					"uv": [0, 0, 4.5, 1],
+					"uv": [1.25, 0, 4.5, 1],
 					"texture": 0
 				}
 			},
@@ -842,12 +847,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2.3, 12, 1],
-			"to": [-0.725, 12.025, 2],
+			"from": [-2.3, 9.95343, 1],
+			"to": [-0.725, 9.97843, 2],
 			"autouv": 1,
 			"color": 8,
+			"visibility": false,
 			"rotation": [0, 0, 72.5],
-			"origin": [-2.3, 12, 1.5],
+			"origin": [-2.3, 9.95343, 1.5],
 			"faces": {
 				"north": {
 					"uv": [0, 0.025, 1.575, 0.05],
@@ -885,11 +891,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-2, 15.25, 0.5],
-			"to": [2, 16.25, 2.5],
+			"from": [-2, 13.20343, 0.5],
+			"to": [2, 14.20343, 2.5],
 			"autouv": 0,
 			"color": 3,
-			"origin": [0, 14.75, 2],
+			"visibility": false,
+			"origin": [0, 12.70343, 2],
 			"faces": {
 				"north": {
 					"uv": [5, 22, 9, 23],
@@ -933,7 +940,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 8, 1.5],
+			"origin": [0, 7, 1.5],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -941,30 +948,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
-			"primary_selected": false
-		},
-		{
-			"name": "ring",
-			"uuid": "8e9e89e5-efd0-338e-0784-2ac7fe72c4d0",
-			"export": true,
-			"locked": false,
-			"scope": 0,
-			"selected": false,
-			"visibility": true,
-			"_static": {
-				"properties": {},
-				"temp_data": {}
-			},
-			"origin": [0, 9, -5],
-			"rotation": [0, 0, 0],
-			"color": 0,
-			"children": [],
-			"reset": false,
-			"shade": true,
-			"mirror_uv": false,
-			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -979,7 +963,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 8, 1.5],
+			"origin": [0, 7, 1.5],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -1002,7 +986,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 8, 6],
+			"origin": [0, 7, 6],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -1025,7 +1009,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 8, -4.25],
+			"origin": [0, 7, -4.25],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -1048,7 +1032,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [-0.01042, 8.08702, 1.5],
+			"origin": [-0.01042, 7.08702, 1.5],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -1066,12 +1050,12 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
-			"visibility": true,
+			"visibility": false,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [-0.01042, 8.08702, 1.5],
+			"origin": [-0.00893, 7.06374, 1.5],
 			"rotation": [-180, 0, 0],
 			"color": 0,
 			"children": [],
@@ -1079,7 +1063,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		}
 	],
@@ -1102,7 +1086,7 @@
 				},
 				{
 					"uuid": "0a1af7ce-a07c-e93d-ef17-6a9701eec3d5",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						"85a4dd03-542a-ad02-ca47-1352ee3152c6",
 						"94a552bc-fdfa-515f-3eff-e5cbef696bea",
@@ -1117,7 +1101,7 @@
 				"49e5dee7-59ab-47c3-3322-97c8604e071b",
 				{
 					"uuid": "9ff51971-bf3f-17d2-7d02-c661d97962bf",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						{
 							"uuid": "bb6a4d1d-c295-a8ee-4159-89c481c280ba",
@@ -1136,11 +1120,6 @@
 					]
 				}
 			]
-		},
-		{
-			"uuid": "8e9e89e5-efd0-338e-0784-2ac7fe72c4d0",
-			"isOpen": true,
-			"children": []
 		}
 	],
 	"textures": [

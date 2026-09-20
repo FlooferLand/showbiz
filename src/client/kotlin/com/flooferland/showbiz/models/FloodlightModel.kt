@@ -19,8 +19,8 @@ class FloodlightModel : DefaultedEntityGeoModel<FloodlightEntity>(rl("floodlight
         topSupport.isHidden = !entity.supportAbove
         bottomSupport.isHidden = !entity.supportBelow || entity.supportAbove
 
-        neck.rotY = (entity.turn.x * -1f) * Mth.DEG_TO_RAD
-        head.rotX = entity.turn.y * Mth.DEG_TO_RAD
+        //neck.rotY = (entity.turn * -1f) * Mth.DEG_TO_RAD
+        head.rotX = entity.turn * Mth.DEG_TO_RAD
     }
 
     fun fetchBone(boneName: String) =

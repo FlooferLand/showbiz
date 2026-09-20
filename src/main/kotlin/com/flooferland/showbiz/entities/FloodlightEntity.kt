@@ -17,6 +17,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.menus.FloodlightEditMenu
 import com.flooferland.showbiz.network.packets.FloodlightEditPacket
@@ -30,10 +31,10 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
-import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import com.flooferland.showbiz.utils.Extensions.getLongOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
@@ -42,9 +43,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
 // TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
 class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : LivingEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
-    constructor(level: Level) : this(level, null) {
-        EntityDimensions.fixed(0.3f, 0.3f)
-    }
+    constructor(level: Level) : this(level, null) {}
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -57,11 +56,12 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     val isLit: Boolean get() = lit || redstoneSignal > 0
     var value: Float = 0f  // Used for smoothing on the client
     var redstoneSignal: Int = 0
+    var supportBlock: BlockPos? = null
     var supportAbove = false
     var supportBelow = false
 
-    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPosition()))
-    var turn = Vec2f.ZERO
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this))
+    var turn = 0f
     var angle = 45f
     var shadows: Boolean = true
     var color: Int = CommonColors.WHITE
@@ -75,7 +75,6 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         refreshDimensions()
         updatePersistentData { addAdditionalSaveData(it) }
     }
-
     override fun tick() {
         super.tick()
         supportAbove = Block.canSupportCenter(level(), blockPosition().above(), Direction.DOWN)
@@ -91,6 +90,8 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     override fun canBeAffected(effect: MobEffectInstance) = false
     override fun canBeSeenAsEnemy() = false
     override fun getPickResult() = makeItem()
+    override fun getDefaultDimensions(pose: Pose): EntityDimensions =
+        EntityDimensions.fixed(0.4f, 0.9f)
 
     fun makeItem() = ItemStack(ModItems.Floodlight.item).also {
         it.set(ModComponents.Floodlight.type, FloodlightComponent(color))
@@ -138,7 +139,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     // endregion
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
-        // Grabbing the spotlight
+        // Grabbing the floodlight
         if (player.isCrouching) return grab(player)
 
         // Opening up the edit screen
@@ -147,14 +148,21 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         return InteractionResult.SUCCESS
     }
 
-
     override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
         return FloodlightEditMenu(containerId, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        FloodlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(blockPosition()), menuData.bitFilter, show.data.mapping), turn, angle, shadows, color, brightness)
+        FloodlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this), menuData.bitFilter, show.data.mapping), turn, angle, shadows, color, brightness)
 
+    fun applyPacket(packet: FloodlightEditPacket) {
+        menuData = packet.base
+        turn = packet.turn
+        angle = packet.angle
+        color = packet.color
+        brightness = packet.brightness
+        shadows = packet.shadows
+    }
 
     fun updatePersistentData(block: (CompoundTag) -> Unit) {
         val tag = entityData.get(persistentDataAccessor).copy()
@@ -184,11 +192,12 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         menuData.saveAdditional(tag)
         tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
-        tag.putFloat("turn_x", turn.x)
-        tag.putFloat("turn_y", turn.y)
+        tag.putFloat("turn_y", turn)
         tag.putFloat("angle", angle)
         tag.putFloat("brightness", brightness)
         tag.putInt("color", color)
+
+        supportBlock?.let { tag.putLong("support_block", it.asLong()) }
 
         // Stuff that can be recalculated if its lost
         tag.putInt("redstone_signal", redstoneSignal)
@@ -199,11 +208,12 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         menuData.loadAdditional(tag)
         tag.getBooleanOrNull("lit")?.let { lit = it }
         tag.getBooleanOrNull("shadows")?.let { shadows = it }
-        tag.getFloatOrNull("turn_x")?.let { turn.x = it }
-        tag.getFloatOrNull("turn_y")?.let { turn.y = it }
+        tag.getFloatOrNull("turn_y")?.let { turn = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
         tag.getFloatOrNull("brightness")?.let { brightness = it }
         tag.getIntOrNull("color")?.let { color = it }
+
+        tag.getLongOrNull("support_block")?.let { supportBlock = BlockPos.of(it) }
 
         // Stuff that can be recalculated if its lost
         tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
@@ -216,5 +226,12 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
 
     companion object {
         val persistentDataAccessor = SynchedEntityData.defineId(FloodlightEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
+        init {
+            ServerPackets.listen(FloodlightEditPacket.type) { packet, context ->
+                val player = context.player() ?: return@listen
+                val entity = (packet.base.id as? OwnerId.EntityId)?.grabEntity(player.serverLevel()) as? FloodlightEntity ?: return@listen
+                entity.applyPacket(packet)
+            }
+        }
     }
 }
