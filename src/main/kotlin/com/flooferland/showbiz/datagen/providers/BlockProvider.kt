@@ -16,7 +16,8 @@ object BlockProvider {
     enum class BlockModelId {
         CubeAll,
         BlockEntity,
-        Custom;
+        Custom,
+        None;
         var transparent = false
         fun transparent(): BlockModelId { transparent = true; return this }
     }
@@ -35,6 +36,7 @@ object BlockProvider {
             }
             BlockModelId.BlockEntity -> null
             BlockModelId.Custom -> null
+            BlockModelId.None -> null
         }
     }
 

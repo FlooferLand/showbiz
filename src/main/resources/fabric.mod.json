@@ -14,6 +14,12 @@
     "icon": "assets/showbiz/icon.png",
     "environment": "*",
     "entrypoints": {
+        "preLaunch": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizPrelaunch",
+                "adapter": "kotlin"
+            }
+        ],
         "main": [
             {
                 "value": "com.flooferland.showbiz.Showbiz",
@@ -23,6 +29,12 @@
         "client": [
             {
                 "value": "com.flooferland.showbiz.ShowbizClient",
+                "adapter": "kotlin"
+            }
+        ],
+        "fabric-datagen": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizDataGenerator",
                 "adapter": "kotlin"
             }
         ],
@@ -40,10 +52,10 @@
         "minecraft": "$minecraft",
         "java": ">=$java",
         "fabric-language-kotlin": "~$fabric_language_kotlin",
-        "geckolib": "^$geckolib",
-        "irl-redactor": "^$irlights"
+        "geckolib": "^$geckolib"
     },
     "suggests": {
-        "computercraft": ">=$cctweaked"
+        "computercraft": ">=$cctweaked",
+        "irl-redactor": "^$irlights"
     }
 }

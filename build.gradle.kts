@@ -1,7 +1,5 @@
+
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
-import org.gradle.internal.impldep.kotlinx.serialization.json.JsonNull.content
-import org.gradle.internal.impldep.org.bouncycastle.oer.OERDefinition.optional
-import org.gradle.internal.impldep.org.yaml.snakeyaml.scanner.Constant.ALPHA
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -199,12 +197,8 @@ tasks.withType<ProcessResources>().configureEach {
 }
 
 // Datagen
-tasks.register<JavaExec>("runDatagen") {
-    group = "flooferland"
-    description = "Generates a bunch of JSON files, similar to Fabric's data generation but better"
-    classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.flooferland.showbiz.datagen.DataGenerator")
-    systemProperty("$modId.datagen", "true")
+fabricApi {
+    configureDataGeneration()
 }
 sourceSets {
     main {
