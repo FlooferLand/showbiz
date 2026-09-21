@@ -205,6 +205,17 @@ enum class ModRecipes {
         outputItem = {
             ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("gully_dook"))) }
         }
+    ),
+
+    // DECORATIVE BLOCKS
+    // TODO: Should automatically generate these by just specifying a material or something for each
+    RedDoor(
+        "DD",
+        "DD",
+        "CC",
+        mapOf("D" to Ingredient(tag="red_concrete"), "C" to Ingredient("gray_concrete")),
+        id = "red_door",
+        outputItem = { ModDecoBlocks.RedDoor.item.defaultInstance }
     )
     ;
 

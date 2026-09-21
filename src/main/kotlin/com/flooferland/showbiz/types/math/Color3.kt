@@ -2,9 +2,17 @@ package com.flooferland.showbiz.types.math
 
 import net.minecraft.util.*
 import java.awt.Color
+import kotlin.math.roundToInt
 
 /** RGB color */
 data class Color3(var r: Int = 0, var g: Int = 0, var b: Int = 0) {
+    init {
+        r = r.coerceIn(0, 255)
+        g = g.coerceIn(0, 255)
+        b = b.coerceIn(0, 255)
+    }
+
+    /// Could be renamed to "srgb"
     fun pack(): Int = FastColor.ARGB32.color(r, g, b)
     fun safe() = Color3(
         r.coerceIn(0, 255),
@@ -26,6 +34,16 @@ data class Color3(var r: Int = 0, var g: Int = 0, var b: Int = 0) {
         color.s *= value
         color.s = color.s.coerceIn(0f, 1f)
         return color.toRGB()
+    }
+
+    fun darken(value: Float): Color3 {
+        val factor = (value * 255f).roundToInt().coerceIn(0, 255);
+        return Color3(r - factor, g - factor, b - factor)
+    }
+
+    fun withOpacity(value: Float): Color3 {
+        val packed = FastColor.ARGB32.color((value * 255f).roundToInt().coerceIn(0, 255), r, g, b)
+        return Color3.fromPacked(packed)
     }
 
     operator fun plusAssign(o: Color3) { r += o.r; g += o.g; b += o.b }

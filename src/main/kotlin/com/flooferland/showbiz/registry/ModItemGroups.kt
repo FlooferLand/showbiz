@@ -7,28 +7,49 @@ import net.minecraft.world.item.*
 import com.flooferland.showbiz.utils.rl
 
 enum class ModItemGroups {
-    Main("main", { params, out ->
+    Main("main", ModRecipes.MitziPlush, { main, deco ->
         for (block in ModBlocks.entries) {
-            if (!block.hideFromPlayer) out.accept(block.item)
+            if (!block.hideFromPlayer) main.add(block.item.defaultInstance)
         }
         for (item in ModItems.entries) {
-            if (!item.hideFromPlayer) out.accept(item.item)
+            if (!item.hideFromPlayer) main.add(item.item.defaultInstance)
         }
         for (disc in ModMusicDiscs.entries) {
-            out.accept(disc.item)
+            main.add(disc.item.defaultInstance)
         }
-        out.accept(ModRecipes.MitziPlush.outputProvider())
-        out.accept(ModRecipes.MiniPlush.outputProvider())
-        out.accept(ModRecipes.DookPlush.outputProvider())
-        out.accept(ModRecipes.GullyDookPlush.outputProvider())
+        main.add(ModRecipes.MitziPlush.outputProvider())
+        main.add(ModRecipes.MiniPlush.outputProvider())
+        main.add(ModRecipes.DookPlush.outputProvider())
+        main.add(ModRecipes.GullyDookPlush.outputProvider())
+
+        for (block in ModDecoBlocks.entries) {
+            deco.add(block.item.defaultInstance)
+        }
     });
 
-    constructor(name: String, generator: CreativeModeTab.DisplayItemsGenerator) {
-        val group = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
+    enum class Section {
+        Main,
+        Deco
+    }
+
+    val tab: CreativeModeTab
+    val items: List<ItemStack>
+    val sections: Map<ItemStack, Section>
+    constructor(name: String, icon: ModRecipes, generator: (MutableList<ItemStack>, MutableList<ItemStack>) -> Unit) {
+        val mainSection = mutableListOf<ItemStack>()
+        val decoSection = mutableListOf<ItemStack>()
+        generator(mainSection, decoSection)
+
+        sections = mutableMapOf<ItemStack, Section>().also { map ->
+            mainSection.forEach { map[it] = Section.Main }
+            decoSection.forEach { map[it] = Section.Deco }
+        }
+        items = mainSection + decoSection
+        tab = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
             .title(Component.translatable("itemGroup.showbiz.$name"))
-            .icon { ModRecipes.MitziPlush.outputProvider() }
-            .displayItems(generator)
+            .icon { icon.outputProvider() }
+            .displayItems { _, output -> items.forEach { output.accept(it) } }
             .build()
-        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, rl(name), group)
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, rl(name), tab)
     }
 }

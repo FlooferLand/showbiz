@@ -3,11 +3,16 @@
     "package": "com.flooferland.showbiz.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "BlockLightEngineMixin",
+        "CreativeModeInventoryScreenMixin",
+        "CreativeModeTabMixin",
+        "GameRendererMixin",
         "GuiMixin",
+        "ItemPickerMenuMixin",
         "KeyboardHandlerMixin",
         "SplashManagerMixin",
-        "GameRendererMixin",
-        "BlockLightEngineMixin"
+        "accessor.CreativeModeInventoryScreenAccessor",
+        "accessor.CreativeModeInventoryScreenSelectedTabAccessor"
     ],
     "mixins": [
         "JukeboxBlockEntityMixin",
