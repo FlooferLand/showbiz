@@ -51,6 +51,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { show ->
         lit = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
+        if (!level().isClientSide) updatePersistentData { it.putBoolean("lit", lit) }
     }
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
@@ -162,6 +163,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         color = packet.color
         brightness = packet.brightness
         shadows = packet.shadows
+        updatePersistentData { addAdditionalSaveData(it) }
     }
 
     fun updatePersistentData(block: (CompoundTag) -> Unit) {
@@ -188,7 +190,6 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     }
 
     override fun addAdditionalSaveData(tag: CompoundTag) {
-        connectionManager.save(tag)
         menuData.saveAdditional(tag)
         tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
@@ -203,6 +204,8 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         tag.putInt("redstone_signal", redstoneSignal)
         tag.putBoolean("support_above", supportAbove)
         tag.putBoolean("support_below", supportBelow)
+
+        connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
         menuData.loadAdditional(tag)
