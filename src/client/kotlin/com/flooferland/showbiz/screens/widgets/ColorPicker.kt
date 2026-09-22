@@ -175,7 +175,7 @@ class ColorPicker(x: Int, y: Int, width: Int, height: Int, defaultColor: Int? = 
             string.render(guiGraphics, mouseX, mouseY, partialTick)
             slider.render(guiGraphics, mouseX, mouseY, partialTick)
             if (slider.isHovered) {
-                val value: String = if (isKelvin) "$kelvin K" else slider.value.formatDecimal()
+                val value: String = if (isKelvin) "$kelvin K" else "${(slider.value * 255).roundToInt().coerceIn(0, 255)} (${slider.value.formatDecimal()})"
                 guiGraphics.renderTooltip(font, Component.literal(value), mouseX, mouseY)
             }
         }

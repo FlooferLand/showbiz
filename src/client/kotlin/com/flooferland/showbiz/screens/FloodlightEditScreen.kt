@@ -40,9 +40,8 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
 
         // Color
         run {
-            color = ColorPicker(0, 0, 160, 40)
+            color = ColorPicker(0, 0, 160, 40, defaultColor = editMenu.data.color)
             color!!.value = editMenu.data.brightness
-            color!!.allowedModes = mutableSetOf(ColorPicker.Mode.Kelvin)
             widgets.add(WidgetInfo("Color", color!!))
         }
 

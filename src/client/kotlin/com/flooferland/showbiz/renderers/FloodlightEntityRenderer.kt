@@ -13,5 +13,6 @@ class FloodlightEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEn
 
     // Prevents the light from teleporting to 0 0 0 since the light position is gotten from the GeckoLib model
     override fun shouldRender(entity: FloodlightEntity, camera: Frustum, camX: Double, camY: Double, camZ: Double) =
-        entity.isLit || entity.value > 0f
+        super.shouldRender(entity, camera, camX, camY, camZ)
+                || entity.isLit || entity.value > 0f
 }
