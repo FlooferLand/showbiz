@@ -3,8 +3,8 @@ import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-fun vers(name: String): String = property("vers.${name}") as String
-fun dep(name: String): String = property("deps.${name}") as String
+fun vers(name: String): String = project.property("vers.${name}") as String
+fun dep(name: String): String = project.property("deps.${name}") as String
 
 val kotlin = dep("kotlin")
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
@@ -12,8 +12,8 @@ val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
 val loader = "fabric"
 
 val minecraft = stonecutter.current.version
-val modId = property("mod.id") as String
-val modVersion = property("mod.version") as String
+val modId = project.property("mod.id") as String
+val modVersion = project.property("mod.version") as String
 group = "com.flooferland"
 version = "${modVersion}+$minecraft"
 base {
@@ -68,25 +68,25 @@ loom {
     runs {
         create("client_offline") {
             client()
-            name("Minecraft Client (Offline)")
-            runDir = "../../run"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
-            environmentVariable("DEVAUTH_ENABLED", "false")
+            displayName = "Minecraft Client (Offline)"
+            runDirectory.set(File("../../run"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            programArguments.addAll(listOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
+            environmentVars.put("DEVAUTH_ENABLED", "false")
         }
         create("client_alt") {
             client()
-            name("Minecraft Client (ALT)")
-            runDir = "../../run-alt"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
-            environmentVariable("DEVAUTH_ENABLED", "false")
+            displayName = "Minecraft Client (Offline)"
+            runDirectory.set(File("../../run"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            programArguments.addAll(listOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
+            environmentVars.put("DEVAUTH_ENABLED", "false")
         }
-    }
-    runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "../../run" // Shared run folder between versions
-        vmArgs.addAll((properties["net.minecraft.jvmargs"] as String).split(" "))
+        configureEach {
+            generateRunConfig.set(true) // Run configurations are not created for subprojects by default
+            runDirectory.set(File("../../run")) // Shared run folder between versions
+            jvmArguments.addAll((project.property("net.minecraft.jvmargs") as String).split(" "))
+        }
     }
     log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
 }
