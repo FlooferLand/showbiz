@@ -21,6 +21,7 @@ import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModLivingEntities
 import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.IBotSoundHandler
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
@@ -103,6 +104,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     override fun tick() {
         super.tick()
         val level = level() ?: return
+        soundHandler?.tick(this)
         if (!level.isClientSide) {
             show.data.tempReset()
             show.data.merge(pendingShow)
@@ -223,6 +225,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     }
 
     companion object {
+        var soundHandler: IBotSoundHandler? = null
         val persistentDataAccessor = SynchedEntityData.defineId(BotEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
     }
 }

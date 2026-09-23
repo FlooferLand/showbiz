@@ -17,6 +17,7 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
@@ -68,6 +69,7 @@ object ShowbizClient : ClientModInitializer {
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
+        BotEntity.soundHandler = BotSoundHandler()
         for (block in ModBlocks.entries) {
             val container = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull() ?: break
             val paths = listOf(

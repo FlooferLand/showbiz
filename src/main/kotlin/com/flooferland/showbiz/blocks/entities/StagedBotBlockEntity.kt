@@ -16,12 +16,12 @@ import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.IBotSoundHandler
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
-import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
@@ -80,7 +80,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         }
 
         decor?.tick(this, level, pos, state)
-        soundHandler?.tick(this, level, pos, state)
+        soundHandler?.tick(this)
 
         val id = OwnerId.of(this)
         if (id != null) collidePartInstance.tick(level, id)
