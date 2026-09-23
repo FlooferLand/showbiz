@@ -16,9 +16,8 @@ class FloodlightItem(properties: Properties) : Item(properties) {
         val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = ctx.player ?: return InteractionResult.PASS
 
-        val placeState = level.getBlockState(ctx.clickedPos.above())
-        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, ctx.clickedPos.above())
-        if (canPlaceOnBlock && ctx.hand == InteractionHand.MAIN_HAND) {
+        val canPlaceOnBlock = (ctx.clickedFace == Direction.DOWN || ctx.clickedFace == Direction.UP)
+        if (ctx.hand == InteractionHand.MAIN_HAND && canPlaceOnBlock) {
             val stack = ctx.itemInHand
             val floodlight = stack.get(ModComponents.Floodlight.type) ?: return InteractionResult.PASS
             val entity = FloodlightEntity(level, floodlight)
