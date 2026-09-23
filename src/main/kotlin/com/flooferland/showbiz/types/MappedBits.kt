@@ -2,6 +2,8 @@ package com.flooferland.showbiz.types
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.show.BitId
+import com.flooferland.showbiz.show.toBitId
+import com.mojang.serialization.Codec
 
 /**
  * Bits that are mapped to a bit chart.
@@ -53,6 +55,13 @@ data class MappedBits(val inner: HashMap<String, MutableSet<BitId>> = HashMap<St
     fun set(received: MappedBits) {
         inner.clear()
         inner.putAll(received)
+    }
+
+    companion object {
+        val CODEC: Codec<MappedBits> = Codec.unboundedMap(Codec.STRING, Codec.SHORT.listOf()).xmap(
+            { map -> MappedBits().apply { map.forEach { (chart, bits) -> bits.forEach { addBit(chart, it.toBitId()) } } } },
+            { bits -> bits.charts.associateWith { chart -> bits.getOrPutDefault(chart).map { it.toShort() } } }
+        )
     }
 }
 

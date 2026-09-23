@@ -43,7 +43,7 @@ object Extensions {
     }
 
     @DslMarker annotation class BlockEntityApplyDsl;
-    @BlockEntityApplyDsl
+
     fun <T: BlockEntity> T.applyChange(rerender: Boolean, change: T.() -> Unit) {
         change(this)
         markDirtyNotifyAll()

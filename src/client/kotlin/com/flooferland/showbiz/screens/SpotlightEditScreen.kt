@@ -20,7 +20,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
     var shadows: Checkbox? = null
 
     override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
-        // Turn X
+        // Turn
         run {
             turn = EditBox(font, 80, 20, Component.literal("Turn"))
             turn!!.value =

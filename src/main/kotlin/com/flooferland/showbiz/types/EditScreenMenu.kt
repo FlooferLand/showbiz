@@ -2,14 +2,15 @@ package com.flooferland.showbiz.types
 
 import net.minecraft.nbt.*
 import net.minecraft.network.*
+import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.show.toBitId
-import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import kotlin.jvm.optionals.getOrNull
 
 open class EditScreenMenu<P>(containerId: Int, menuType: MenuType<*>, val data: P) : AbstractContainerMenu(menuType, containerId)
 where P: EditScreenMenu.EditScreenPacketPayload {
@@ -28,45 +29,29 @@ where P: EditScreenMenu.EditScreenPacketPayload {
                 return
             }
 
-            tag.getCompoundOrNull("bit_filter")?.let { filterTag ->
-                filterTag.allKeys.forEach { chartId ->
-                    filterTag.getIntArrayOrNull(chartId)?.forEach { bitId ->
-                        bitFilter.addBit(chartId, bitId.toBitId())
+            tag.get("bit_filter")?.let { filterTag ->
+                MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->
+                    loaded.charts.forEach { chartId ->
+                        loaded.getOrPutDefault(chartId).forEach { bitFilter.addBit(chartId, it) }
                     }
                 }
             }
         }
         fun saveAdditional(tag: CompoundTag) {
-            tag.put("bit_filter", CompoundTag().also { tag ->
-                bitFilter.charts.forEach { chartId ->
-                    val bitsArray = bitFilter.getOrPutDefault(chartId).map { it.toInt() }.toIntArray()
-                    tag.putIntArray(chartId, bitsArray)
-                }
-            })
+            MappedBits.CODEC.encodeStart(NbtOps.INSTANCE, bitFilter).result().getOrNull()?.let {
+                tag.put("bit_filter", it)
+            }
         }
 
         fun encode(buf: FriendlyByteBuf) {
             id.encode(buf)
-            buf.writeVarInt(bitFilter.charts.size)
-            bitFilter.charts.forEach { chartId ->
-                buf.writeUtf(chartId)
-                val bits = bitFilter.getOrPutDefault(chartId).map { it.toInt() }.toIntArray()
-                buf.writeVarIntArray(bits)
-            }
-
+            ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, bitFilter)
             buf.writeUtf(mapping ?: "")
         }
         companion object {
             fun decode(buf: FriendlyByteBuf): EditScreenBuf {
                 val id = OwnerId.decode(buf)
-
-                val bitFilter = MappedBits()
-                val size = buf.readVarInt()
-                repeat(size) {
-                    val chartId = buf.readUtf()
-                    buf.readVarIntArray().forEach { bitFilter.addBit(chartId, it.toBitId()) }
-                }
-
+                val bitFilter = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
                 val mapping = buf.readUtf().takeIf { it.isNotEmpty() }
                 return EditScreenBuf(id, bitFilter, mapping)
             }

@@ -5,7 +5,6 @@ import net.minecraft.nbt.*
 import net.minecraft.network.syncher.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
-import net.minecraft.util.*
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.*
 import net.minecraft.world.effect.*
@@ -32,6 +31,8 @@ import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongOrNull
@@ -42,8 +43,8 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
-class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : LivingEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
-    constructor(level: Level) : this(level, null) {}
+class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
+    constructor(level: Level) : this(level, FloodlightComponent()) {}
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -57,22 +58,27 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
     val isLit: Boolean get() = lit || redstoneSignal > 0
     var value: Float = 0f  // Used for smoothing on the client
     var redstoneSignal: Int = 0
-    var supportBlock: BlockPos? = null
     var supportAbove = false
     var supportBelow = false
 
-    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this))
-    var turn = 0f
-    var angle = 45f
-    var shadows: Boolean = true
-    var color: Int = CommonColors.WHITE
+    // Useful for keeping the same position even if the entity dimensions/model are adjusted later in mod dev
+    // This helds exactly where the user originally placed the light via its item
+    var supportBlock: BlockPos? = null
+    var supportBlockLoc: Vec3? = null
+
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this), comp.bitFilter)
+    var angle = comp.angle
+    var shadows: Boolean = comp.shadows
+    var color: Int = comp.color
     var brightness: Float = 1.0f
+    var turn = comp.turn
 
     private var lit: Boolean = false
     var startPos = Vec3.ZERO!!
     var endPos = Vec3.ZERO!!
 
     init {
+        updateYaw(turn.x)
         refreshDimensions()
         updatePersistentData { addAdditionalSaveData(it) }
     }
@@ -80,6 +86,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         super.tick()
         supportAbove = Block.canSupportCenter(level(), blockPosition().above(), Direction.DOWN)
         supportBelow = Block.canSupportCenter(level(), blockPosition().below(), Direction.UP)
+        if (yRot != turn.x) updateYaw(turn.x)
     }
 
     override fun isPushable() = false
@@ -95,7 +102,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         EntityDimensions.fixed(0.4f, 0.9f)
 
     fun makeItem() = ItemStack(ModItems.Floodlight.item).also {
-        it.set(ModComponents.Floodlight.type, FloodlightComponent(color))
+        it.set(ModComponents.Floodlight.type, FloodlightComponent.from(this))
     }
 
     fun drop() {
@@ -113,17 +120,15 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
 
     override fun isInvulnerableTo(source: DamageSource) = source.entity !is Player
     override fun hurt(source: DamageSource, amount: Float): Boolean {
-        val attacker = source.entity
-        fun playSound(sound: SoundEvent) {
-            level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
-        }
-        if (attacker !is Player) return false
+        if (isRemoved || isInvulnerableTo(source)) return false
+        val level = level() as? ServerLevel ?: return false
+        val player = source.entity as? Player ?: return false
+        if (!player.mayBuild()) return false
 
-        val isClient = attacker.level().isClientSide
-        if (!isClient && amount > 0f) {
-            playSound(SoundEvents.ARMOR_STAND_BREAK)
-            drop()
-        }
+        if (!source.isCreativePlayer)
+            Block.popResource(level, blockPosition(), makeItem())
+        level.playSound(null, x, y, z, SoundEvents.ARMOR_STAND_BREAK, soundSource, 1.0f, 1.0f)
+        remove(RemovalReason.KILLED)
         return true
     }
 
@@ -163,6 +168,7 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         color = packet.color
         brightness = packet.brightness
         shadows = packet.shadows
+        updateYaw(turn.x)
         updatePersistentData { addAdditionalSaveData(it) }
     }
 
@@ -193,12 +199,20 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         menuData.saveAdditional(tag)
         tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
-        tag.putFloat("turn_y", turn)
+        tag.putFloat("turn_x", turn.x)
+        tag.putFloat("turn_y", turn.y)
         tag.putFloat("angle", angle)
         tag.putFloat("brightness", brightness)
         tag.putInt("color", color)
 
         supportBlock?.let { tag.putLong("support_block", it.asLong()) }
+        supportBlockLoc?.let {
+            tag.put("support_location", CompoundTag().also { tag ->
+                tag.putDouble("x", it.x)
+                tag.putDouble("y", it.y)
+                tag.putDouble("z", it.z)
+            })
+        }
 
         // Stuff that can be recalculated if its lost
         tag.putInt("redstone_signal", redstoneSignal)
@@ -211,12 +225,21 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
         menuData.loadAdditional(tag)
         tag.getBooleanOrNull("lit")?.let { lit = it }
         tag.getBooleanOrNull("shadows")?.let { shadows = it }
-        tag.getFloatOrNull("turn_y")?.let { turn = it }
+        tag.getFloatOrNull("turn_x")?.let { turn.x = it }
+        tag.getFloatOrNull("turn_y")?.let { turn.y = it }
         tag.getFloatOrNull("angle")?.let { angle = it }
         tag.getFloatOrNull("brightness")?.let { brightness = it }
         tag.getIntOrNull("color")?.let { color = it }
 
         tag.getLongOrNull("support_block")?.let { supportBlock = BlockPos.of(it) }
+        tag.getCompoundOrNull("support_location")?.let { tag ->
+            val x = tag.getDoubleOrNull("x")
+            val y = tag.getDoubleOrNull("y")
+            val z = tag.getDoubleOrNull("z")
+            if (x != null && y != null && z != null) {
+                supportBlockLoc = Vec3(x, y, z)
+            }
+        }
 
         // Stuff that can be recalculated if its lost
         tag.getIntOrNull("redstone_signal")?.let { redstoneSignal = it }
@@ -225,6 +248,15 @@ class FloodlightEntity(level: Level, item: FloodlightComponent? = null) : Living
 
         if (!level().isClientSide) entityData.set(persistentDataAccessor, tag)
         connectionManager.load(tag)
+    }
+
+    fun updateYaw(yaw: Float) {
+        yRot = turn.x
+        yRotO = turn.x
+        yHeadRot = turn.x
+        yHeadRotO = turn.x
+        yBodyRot = turn.x
+        yBodyRotO = turn.x
     }
 
     companion object {
