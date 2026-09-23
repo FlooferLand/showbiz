@@ -104,20 +104,15 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     }.also { centerCurtain = it }
 
     fun findLength(): Int {
-        var isLast = false
-        var length = 0
-        for (y in 0..MAX_LENGTH) {
-            length = y
-            for (y2 in 1..2) {
-                val below = blockPos.below(y + y2)
-                if ((level?.getBlockState(below)?.isSolidRender(level!!, below) ?: true)) {
-                    isLast = true
-                    break
-                }
+        val level = level ?: return 0
+        for (y in 1..MAX_LENGTH) {
+            val below = blockPos.below(y)
+            val state = level.getBlockState(below)
+            if (!state.getCollisionShape(level, below).isEmpty) {
+                return y - 1
             }
-            if (isLast) break
         }
-        return length
+        return MAX_LENGTH
     }
 
     fun tick() {

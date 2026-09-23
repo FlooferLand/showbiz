@@ -1,11 +1,11 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.*
+import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.core.BlockPos
-import net.minecraft.util.FastColor
+import net.minecraft.core.*
+import net.minecraft.util.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
@@ -14,8 +14,8 @@ import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.voxelSnap
 import com.mojang.blaze3d.vertex.PoseStack
 import kotlin.math.abs
+import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<CurtainBlockEntity> {
     val curtainRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block.png"))!!
@@ -23,35 +23,38 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
     val endRenderType = RenderType.entityTranslucent(rl("textures/block/curtain_block_end.png"))!!
     val endRenderTypeCull = RenderType.entityTranslucentCull(rl("textures/block/curtain_block_end.png"))!!
 
-    fun isVisuallyOpen(pos: BlockPos, center: BlockPos, openAmount: Float, maxDist: Float): Boolean {
+    fun isVisuallyOpen(pos: BlockPos, center: BlockPos, openAmount: Float, maxDist: Double): Boolean {
         val dist = maxOf(
             abs(pos.x - center.x),
             maxOf(abs(pos.y - center.y), abs(pos.z - center.z))
         ).toFloat()
-        val movingWaveMax = maxOf(0f, maxDist - 2f) + 0.1f
-        val wavePos = openAmount * movingWaveMax
-        return wavePos > dist && dist < (maxDist - 1.5f)
+        val wavePos = openAmount * (maxDist + 0.1f)
+        return wavePos > dist
     }
 
-    fun canDrawColumn(level: ClientLevel, blockEntity: CurtainBlockEntity, pos: BlockPos, center: BlockPos?, maxDist: Float) = level.getBlockState(pos)?.let { state ->
-        if (state.block !is CurtainBlock) return@let !state.isSolidRender(level, pos)
+    fun canDrawColumn(level: ClientLevel, blockEntity: CurtainBlockEntity, neighborPos: BlockPos, center: BlockPos?, maxDist: Double) = level.getBlockState(neighborPos)?.let { state ->
+        if (state.block !is CurtainBlock) return@let true
         if (center == null) return@let false
 
         val isOpen = isVisuallyOpen(blockEntity.blockPos, center, blockEntity.openAmount, maxDist)
-        val neighbourOpen = isVisuallyOpen(pos, center, blockEntity.openAmount, maxDist)
+        val neighbourOpen = isVisuallyOpen(neighborPos, center, blockEntity.openAmount, maxDist)
         return@let isOpen != neighbourOpen
     } ?: true
 
     override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val level = blockEntity.level as? ClientLevel ?: return
+        val fastGraphics = Minecraft.getInstance()?.options?.graphicsMode()?.get() == GraphicsStatus.FAST
         var color = blockEntity.color
 
         val rails = blockEntity.connectedCurtains
         val center = blockEntity.centerCurtain
         var isOpen = false
-        var maxDist = 1f
+        var maxDist = 1.0
+        var dist = 0.0
         if (center != null) {
-            maxDist = rails.maxOfOrNull { maxOf(abs(it.x - center.x), maxOf(abs(it.y - center.y), abs(it.z - center.z))) }?.toFloat() ?: 1f
+            val pos = blockEntity.blockPos
+            dist = maxOf(abs(pos.x - center.x), abs(pos.y - center.y), abs(pos.z - center.z)).toDouble()
+            maxDist = rails.maxOfOrNull { maxOf(abs(it.x - center.x), abs(it.y - center.y), abs(it.z - center.z)) }?.toDouble() ?: 1.0
             isOpen = isVisuallyOpen(blockEntity.blockPos, center, blockEntity.openAmount, maxDist)
         }
 
@@ -68,20 +71,26 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         if (isOpen) {
             poseStack.pushPose()
             poseStack.translate(0f, 0.0f, 0f)
+
+            var lower = 0.1
+            if (!fastGraphics) {
+                lower += (dist / maxDist).pow(3.0) * 0.4
+                lower = lower.coerceIn(0.1, 0.4)
+            }
             DrawUtils.drawBox(
                 poseStack, bufferSource.getBuffer(curtainRenderType),
-                AABB(0.0, 0.5, 0.0, 1.0, 1.0, 1.0),
+                AABB(0.0, 0.5, 0.0, 1.0, 1.0, 1.0).expandTowards(0.0, -lower, 0.0),
                 packedLight = packedLight,
                 packedOverlay = packedOverlay,
                 color = color,
-                drawSouth = drawSouth,
-                drawNorth = drawNorth,
-                drawWest = drawWest,
-                drawEast = drawEast
+                drawSouth = drawSouth || !fastGraphics,
+                drawNorth = drawNorth || !fastGraphics,
+                drawWest = drawWest || !fastGraphics,
+                drawEast = drawEast || !fastGraphics
             )
             DrawUtils.drawBox(
                 poseStack, bufferSource.getBuffer(endRenderType),
-                AABB(0.0, 0.0, 0.0, 1.0, 0.5, 1.0),
+                AABB(0.0, 0.0, 0.0, 1.0, 0.5, 1.0).deflate(0.01, 0.0, 0.01).move(0.0, -lower, 0.0),
                 packedLight = packedLight,
                 packedOverlay = packedOverlay,
                 sidesOnly = true,
