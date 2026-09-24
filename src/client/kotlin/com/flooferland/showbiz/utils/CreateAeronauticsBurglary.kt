@@ -8,23 +8,26 @@ import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.mixin.accessor.CreativeModeInventoryScreenAccessor
 import com.flooferland.showbiz.registry.ModItemGroups
-import com.flooferland.showbiz.types.math.Color3
+import com.flooferland.showbiz.types.math.Color4
 import com.mojang.blaze3d.systems.RenderSystem
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.util.function.Consumer
 import org.joml.Vector3f
 
+
 object CreateAeronauticsBurglary {
     private const val ITEMS_PER_ROW = 9
 
-    data class SectionData(val name: String, val sprite: ResourceLocation, val color: Color3, val secondaryColor: Color3? = null)
+    data class SectionData(val name: String, val info: Component, val sprite: ResourceLocation, val color: Color4, val secondaryColor: Color4? = null)
     val sections = mapOf(
         ModItemGroups.Section.Main to SectionData(
-            name = "Main", sprite = rl("main_banner"), color = Color3(201, 151, 42),
+            name = "Main", info = Component.literal("Functional, etc"),
+            sprite = rl("main_banner"), color = Color4(201, 151, 42),
         ),
         ModItemGroups.Section.Deco to SectionData(
-            name = "Deco", sprite = rl("deco_banner"), color = Color3(201, 151, 42),
+            name = "Deco", info = Component.literal("Building blocks"),
+            sprite = rl("deco_banner"), color = Color4(201, 151, 42),
         )
     )
 
@@ -58,11 +61,14 @@ object CreateAeronauticsBurglary {
             val bannerTexture = section.sprite
             graphics.blitSprite(bannerTexture, x, y, w, h)
 
+            val isHovering = mouseX in (left + x..left + x + w) && mouseY in (top + y..top + y + h)
+
             val text = Component.literal(section.name)
+            if (isHovering) text.append(" - ").append(section.info)
             val textWidth = font.width(text)
 
-            //val background = section.color.withOpacity(0.5f).pack()
-            //graphics.fill(x + 2, y + 2, x + textWidth + 8, y + h - 2, background)
+            val background = section.color.withOpacity(0.6f).pack()
+            graphics.fill(x + 2, y + 2, x + textWidth + 8, y + h - 2, background)
 
             val light = section.color
             val dark = section.secondaryColor ?: light.darken(0.2f)
