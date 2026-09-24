@@ -10,6 +10,12 @@ authors = ["Creative Engineering", "LBN"]
 accepts.rockafire = true
 accepts.fnaf1 = true
 
+[old_billy_bob]
+name = "Old Billy Bob (TEMP)"
+authors = ["Creative Engineering", "LBN"]
+accepts.rockafire = true
+accepts.fnaf1 = true
+
 [looney_bird]
 name = "Looney Bird"
 authors = ["Creative Engineering", "FlooferLand", "FizzGoose"]

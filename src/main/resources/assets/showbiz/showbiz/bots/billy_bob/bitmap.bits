@@ -1,112 +1,115 @@
 set rae billy_bob
 
 rae 213 {
-    flow 0.2
-    rotate "torso" x:10
+    flow 0.3
+    rotate "Torso" x:10
     wigglemul 2.0
 }
 
 rae 211 {
-    flow 0.2
-    rotate "torso" y:25
+    flow 0.3
+    rotate "Torso" y:25
 }
 
 rae 212 {
-    flow 0.2
-    rotate "torso" y:-25
+    flow 0.3
+    rotate "Torso" y:-25
 }
 
 rae 205 {
-    flow 0.5
-    rotate "head" x:13
+    flow 0.8
+    rotate "Head" x:8
     wigglemul 3.0
 }
 
 rae 201 {
-    flow 0.15
-    rotate "head" y:45
+    flow 0.2
+    rotate "Head" y:45
     wigglemul 3.0
 }
 
 rae 202 {
-    flow 0.15
-    rotate "head" y:-45
+    flow 0.2
+    rotate "Head" y:-45
     wigglemul 3.0
 }
 
 rae 203 {
-    flow 0.3
-    rotate "head" z:10
+    flow 0.4
+    rotate "Head" z:10
 }
 
 rae 204 {
-    flow 0.3
-    rotate "head" z:-10
+    flow 0.4
+    rotate "Head" z:-10
 }
 
 # arms
 
 rae 206 {
-    flow 0.15
-    rotate "arm_r" z:110
+    flow 0.2
+    rotate "ArmR" z:90
     wigglemul 1.5
 }
 
 rae 207 {
-    flow 0.13
-    rotate "arm_r" x:90
+    flow 0.25
+    rotate "ArmR" x:90
     wigglemul 1.5
 }
 
 rae 208 {  # guitar strum
-    flow 1.2
-    rotate "hand_r" y:-35
-    wigglemul 2.0
+    flow 2.5
+    rotate "Arm2R" x:-30
+    wigglemul 1.5
 }
 
 rae 189 {
-    flow 0.4
-    rotate "arm_l" x:-15
+    flow 0.6
+    rotate "ArmL" x:-15
 }
 
 rae 209 {
-    flow 0.4
-    rotate "hand_r" z:40
+    flow 0.6
+    rotate "HandR" z:40
     wigglemul 2.0
 }
 
 rae 190 {
-    flow 0.4
-    rotate "banjo" z:-15
-    rotate "arm_l" y:-20
+    flow 0.6
+    rotate "Banjo" z:-15
+    rotate "ArmL" y:-20
 }
 
 # legs
 
 rae 194 {
-    flow 0.4
-    rotate "toes_r" x:20
+    flow 0.5
+    rotate "ToesL" x:20
 }
 
 # face
 
 rae 196 {
-    flow 1.2
-    rotate "jaw" x:-15
-    rotate "snout" x:5
+    flow 1.4
+    rotate "Jaw" x:-30
+    rotate "Snout" x:5
 }
 
 rae 199 {
     flow 0.5
-    move "eyes" x:1
+    move "Eyes" x:1
 }
-
 rae 200 {
     flow 0.5
-    move "eyes" x:-1
+    move "Eyes" x:-1
 }
 
-rae 197, rae 198 {
+rae 197 {
     flow 0.8
-    anim "eyelids"
+    move "EyeLidL" y:0.5
+}
+rae 198 {
+    flow 0.8
+    move "EyeLidR" y:0.5
 }

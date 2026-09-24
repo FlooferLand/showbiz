@@ -1,4 +1,6 @@
-*.blend1
+**/.cache
+versions/**/bin
+versions/**/build
 
 # Working dirs
 run-*/
@@ -126,3 +128,4 @@ gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+/versions/1.21.1/bin/main/.cache/054d44c305df7d1f4c7456acabea40ab827e40a5
