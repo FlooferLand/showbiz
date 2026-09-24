@@ -15,7 +15,7 @@ import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.types.IBotSoundHandler
+import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
@@ -40,9 +40,9 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override var botId: ResourceId? = null
+    override val botOwnerId get() = OwnerId.ofEntity(this)
     override val botLevel get() = level
-    override val botPos get() = blockPos.center!!
-    override val botRemoved get() = isRemoved
+    override val botPos get() = blockPos.above().bottomCenter!!
 
     override val collidePartInstance = CollidePartManager.create(this) {
         val botId = botId ?: return@create
@@ -79,7 +79,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
             pendingShow.tempReset()
         }
 
-        decor?.tick(this, level, pos, state)
+        decor?.tick(this)
         soundHandler?.tick(this)
 
         val id = OwnerId.of(this)
@@ -131,11 +131,8 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun getUpdatePacket() = ClientboundBlockEntityDataPacket.create(this)!!
 
-    interface IDecor {
-        fun tick(owner: StagedBotBlockEntity, level: Level, pos: BlockPos, state: BlockState)
-    }
     companion object {
-        var soundHandler: IBotSoundHandler? = null
-        var decor: IDecor? = null
+        var soundHandler: IBotAttachment? = null
+        var decor: IBotAttachment? = null
     }
 }

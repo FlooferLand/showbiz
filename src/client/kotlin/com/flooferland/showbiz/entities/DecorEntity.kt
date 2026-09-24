@@ -1,15 +1,14 @@
 package com.flooferland.showbiz.entities
 
 import net.minecraft.client.multiplayer.*
-import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.syncher.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
-import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
-import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.registry.ModClientEntities
+import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.math.Vec2f
 import java.util.WeakHashMap
@@ -19,7 +18,7 @@ import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = Id.PomPom, val owner: StagedBotBlockEntity? = null) : Entity(ModClientEntities.Decor.type, level), GeoEntity {
+class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = Id.PomPom, val owner: IBot? = null) : Entity(ModClientEntities.Decor.type, level), GeoEntity {
     override fun isInvulnerable() = true
     override fun shouldBeSaved() = false
     override fun shouldRender(x: Double, y: Double, z: Double) = true
@@ -63,7 +62,7 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
         super.tick()
         val level = level() ?: return
         val entities = decorEntities[owner]
-        if (owner?.isRemoved != false || entities?.contains(this) != true || botId != owner.botId) {
+        if (owner?.botOwnerId?.isRemoved(level) != false || entities?.contains(this) != true || botId != owner.botId) {
             entities?.remove(this)
             remove(RemovalReason.DISCARDED)
             return
@@ -71,16 +70,16 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
     }
 
     companion object {
-        val decorEntities = WeakHashMap<StagedBotBlockEntity, MutableSet<DecorEntity>>()
-        val decorTick = object : StagedBotBlockEntity.IDecor {
-            override fun tick(owner: StagedBotBlockEntity, level: Level, pos: BlockPos, state: BlockState) {
-                val level = level as? ClientLevel ?: return
-                val botId = owner.botId ?: return
-                val entities = decorEntities[owner] ?: mutableSetOf()
+        val decorEntities = WeakHashMap<IBot, MutableSet<DecorEntity>>()
+        val decorTick = object : IBotAttachment {
+            override fun tick(bot: IBot) {
+                val level = bot.botLevel as? ClientLevel ?: return
+                val botId = bot.botId ?: return
+                val entities = decorEntities[bot] ?: mutableSetOf()
 
                 if (botId.matches("showbiz:mitzi_mozzarella") && entities.count { it.decorId == Id.PomPom && it.boneName!!.startsWith("Pom") } != 2) {
-                    spawn(owner, level, "PomL", Id.PomPom)
-                    spawn(owner, level, "PomR", Id.PomPom)
+                    spawn(bot, "PomL", Id.PomPom)
+                    spawn(bot, "PomR", Id.PomPom)
                 }
             }
         }
@@ -95,9 +94,11 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
             }
         }
 
-        fun spawn(owner: StagedBotBlockEntity, level: ClientLevel, attachedTo: String, decorId: Id) {
+        fun spawn(owner: IBot, attachedTo: String, decorId: Id) {
+            val level = owner.botLevel as? ClientLevel ?: return
+            val pos = owner.botPos ?: return
             val entity = DecorEntity(level, attachedTo, decorId, owner)
-            entity.moveTo(owner.blockPos.above().center)
+            entity.moveTo(pos)
             level.addEntity(entity)
 
             val entities = decorEntities[owner] ?: mutableSetOf()

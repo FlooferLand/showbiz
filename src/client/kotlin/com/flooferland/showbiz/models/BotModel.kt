@@ -261,8 +261,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     }
 
     fun soundKeyframeHandler(animatable: T, state: SoundKeyframeEvent<GeoAnimatable>) {
+        val level = animatable.botLevel as? ClientLevel ?: return
         if (!Showbiz.config.audio.playBotEffects) return
-        if (animatable.botRemoved) return
+        if (animatable.botOwnerId?.isRemoved(level) ?: true) return
         val sound = ResourceLocation.parse(state.keyframeData.sound)
         if (!BuiltInRegistries.SOUND_EVENT.containsKey(sound)) {
             Showbiz.log.warn("Sound event '$sound' was not found for bot '${animatable.botId}'")
@@ -270,7 +271,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
         val pos = animatable.botPos ?: return
         val soundEvent = SoundEvent.createVariableRangeEvent(sound)
-        val level = animatable.botLevel as? ClientLevel ?: return
         level.playSound(ClientUtil.getClientPlayer(), pos.x, pos.y, pos.z, soundEvent, SoundSource.BLOCKS, 0.5f, 1.0f)
     }
 

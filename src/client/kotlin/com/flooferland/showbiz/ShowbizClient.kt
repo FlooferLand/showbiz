@@ -221,6 +221,7 @@ object ShowbizClient : ClientModInitializer {
         ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
         StagedBotBlockEntity.decor = DecorEntity.decorTick
+        BotEntity.decor = DecorEntity.decorTick
     }
 
     fun getDeltaTime() =

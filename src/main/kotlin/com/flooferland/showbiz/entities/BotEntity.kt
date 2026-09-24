@@ -21,7 +21,7 @@ import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModLivingEntities
 import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.types.IBotSoundHandler
+import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
@@ -60,7 +60,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
 
     override val botLevel: Level? get() = level()
     override val botPos: Vec3 get() = position()
-    override val botRemoved get() = isRemoved
+    override val botOwnerId get() = OwnerId.ofEntity(this)
     override var botId: ResourceId? = null
         set(value) {
             field = value
@@ -77,6 +77,15 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
 
             botId.matches("showbiz-wp5:mini_mozzarella") -> {
                 map("Booper", CollidePartId.Boop)
+            }
+            botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
+                map("LeftStickCollision", CollidePartId.LeftStick)
+                map("RightStickCollision", CollidePartId.RightStick)
+                map("HiHatCollision", CollidePartId.HiHat)
+                map("CymbalCollision", CollidePartId.Cymbal)
+                map("KickFootCollision", CollidePartId.KickFoot)
+                map("Kick", CollidePartId.Kick)
+                map("Snare", CollidePartId.Snare)
             }
         }
     }
@@ -104,6 +113,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     override fun tick() {
         super.tick()
         val level = level() ?: return
+        decor?.tick(this)
         soundHandler?.tick(this)
         if (!level.isClientSide) {
             show.data.tempReset()
@@ -225,7 +235,8 @@ class BotEntity(level: Level, botId: ResourceId? = null) : LivingEntity(ModLivin
     }
 
     companion object {
-        var soundHandler: IBotSoundHandler? = null
         val persistentDataAccessor = SynchedEntityData.defineId(BotEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
+        var soundHandler: IBotAttachment? = null
+        var decor: IBotAttachment? = null
     }
 }

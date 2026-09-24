@@ -6,6 +6,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.utils.Extensions.getEntity
@@ -21,13 +22,17 @@ sealed class OwnerId() {
     abstract fun isLoaded(level: Level): Boolean
     abstract fun isRemoved(level: Level): Boolean
 
+    // TODO: Bot entities when being loaded in for some reason lose connection
+    abstract fun isRemovedEntityWorkaround(level: Level): Boolean
+
     data class BlockId(val blockPos: BlockPos) : OwnerId() {
         override fun grabConnectable(level: Level) = level.getBlockEntity(blockPos) as? IConnectable
         override fun grabBlockPos(level: Level) = blockPos
         override fun grabPos(level: Level) = blockPos.center!!
         override fun isLoaded(level: Level): Boolean = grabBlockPos(level).let { level.isLoaded(it) }
         override fun isRemoved(level: Level): Boolean = level.getBlockEntity(blockPos)?.isRemoved ?: true
-        fun grabBlockState(level: Level) = level.getBlockState(blockPos)
+        override fun isRemovedEntityWorkaround(level: Level) = isRemoved(level)
+        fun grabBlockState(level: Level): BlockState = level.getBlockState(blockPos)
         fun grabBlockEntity(level: Level) = level.getBlockEntity(blockPos)
     }
 
@@ -36,7 +41,8 @@ sealed class OwnerId() {
         override fun grabBlockPos(level: Level) = grabEntity(level)?.blockPosition()
         override fun grabPos(level: Level) = grabEntity(level)?.position()
         override fun isLoaded(level: Level) = true  // TODO: Should figure out if the entity is loaded or not
-        override fun isRemoved(level: Level): Boolean = grabEntity(level)?.isRemoved ?: false
+        override fun isRemoved(level: Level): Boolean = grabEntity(level)?.isRemoved ?: true
+        override fun isRemovedEntityWorkaround(level: Level) = grabEntity(level)?.isRemoved ?: false
         fun grabEntity(level: Level): Entity? {
             val id = entityLocalId
             val localEntity = if (id != null && level.isClientSide) level.getEntity(id) else null

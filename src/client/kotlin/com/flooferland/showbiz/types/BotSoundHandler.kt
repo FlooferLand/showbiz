@@ -11,7 +11,7 @@ import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.BitId
 import java.util.WeakHashMap
 
-class BotSoundHandler : IBotSoundHandler {
+class BotSoundHandler : IBotAttachment {
     private val lastBits = WeakHashMap<IBot, MutableMap<BitId, Boolean>>()
 
     override fun tick(entity: IBot) {

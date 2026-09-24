@@ -120,7 +120,7 @@ object ServerConnections {
         // Clearing invalid listeners
         if (level != null && level is ServerLevel && level.gameTime > 100L) {
             for ((_, port) in manager.outputs) {
-                port.removeListeners { listener -> listener.isRemoved(level) }
+                port.removeListeners { listener -> listener.isRemovedEntityWorkaround(level) }
             }
         }
 
