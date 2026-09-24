@@ -3,12 +3,11 @@ package com.flooferland.showbiz.network.packets
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
-import com.flooferland.showbiz.show.BitId
-import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.EditScreenMenu
+import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.utils.rl
 
-class CurtainControllerEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var bitFilterOpen: MutableList<BitId>, var bitFilterClose: MutableList<BitId>) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
+class CurtainControllerEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var bitFilterOpen: MappedBits, var bitFilterClose: MappedBits) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
     override fun type() = type
 
     companion object {
@@ -16,13 +15,13 @@ class CurtainControllerEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var 
         val codec = StreamCodec.of<FriendlyByteBuf, CurtainControllerEditPacket>(
             { buf, conf ->
                 conf.base.encode(buf)
-                buf.writeVarIntArray(conf.bitFilterOpen.map { it.toInt() }.toIntArray())
-                buf.writeVarIntArray(conf.bitFilterClose.map { it.toInt() }.toIntArray())
+                ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, conf.bitFilterOpen)
+                ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, conf.bitFilterClose)
             },
             { buf ->
                 val editScreen = EditScreenMenu.EditScreenBuf.decode(buf)
-                val bitFilterOpen = buf.readVarIntArray().map { it.toBitId() }.toMutableList()
-                val bitFilterClose = buf.readVarIntArray().map { it.toBitId() }.toMutableList()
+                val bitFilterOpen = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
+                val bitFilterClose = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
                 CurtainControllerEditPacket(editScreen, bitFilterOpen = bitFilterOpen, bitFilterClose = bitFilterClose)
             }
         )!!

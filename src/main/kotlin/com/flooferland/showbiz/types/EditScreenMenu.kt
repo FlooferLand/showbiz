@@ -26,13 +26,13 @@ where P: EditScreenMenu.EditScreenPacketPayload {
                 tag.getIntArrayOrNull("bit_filter")?.forEach {
                     bitFilter.addBit(BitChartStore.DEFAULT, it.toBitId())
                 }
-                return
-            }
-
-            tag.get("bit_filter")?.let { filterTag ->
-                MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->
-                    loaded.charts.forEach { chartId ->
-                        loaded.getOrPutDefault(chartId).forEach { bitFilter.addBit(chartId, it) }
+            } else {
+                // Reading post-0.4.0
+                tag.get("bit_filter")?.let { filterTag ->
+                    MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->
+                        loaded.charts.forEach { chartId ->
+                            loaded.getOrPutDefault(chartId).forEach { bitFilter.addBit(chartId, it) }
+                        }
                     }
                 }
             }
