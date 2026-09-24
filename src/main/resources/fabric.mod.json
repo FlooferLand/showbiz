@@ -7,8 +7,8 @@
     "authors": ["FlooferLand"],
     "contact": {
         "homepage": "https://modrinth.com/mod/showbiz",
-        "sources": "https://github.com/FlooferLand/Showbiz-Mod",
-        "issues": "https://github.com/FlooferLand/Showbiz-Mod/issues"
+        "sources": "https://github.com/FlooferLand/showbiz",
+        "issues": "https://github.com/FlooferLand/showbiz/issues"
     },
     "license": "LGPL3",
     "icon": "assets/showbiz/icon.png",
@@ -45,7 +45,13 @@
             }
         ]
     },
-    "mixins": ["showbiz.mixins.json"],
+    "mixins": [
+        "showbiz.mixins.json",
+        {
+            "config": "showbiz.client.mixins.json",
+            "environment": "client"
+        }
+    ],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "fabric-api": ">=$fabric_api",

@@ -67,7 +67,7 @@ object CreateAeronauticsBurglary {
             if (isHovering) text.append(" - ").append(section.info)
             val textWidth = font.width(text)
 
-            val background = section.color.withOpacity(0.6f).pack()
+            val background = section.color.darken(0.8f).withOpacity(0.4f).pack()
             graphics.fill(x + 2, y + 2, x + textWidth + 8, y + h - 2, background)
 
             val light = section.color

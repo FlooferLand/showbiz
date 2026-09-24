@@ -1,0 +1,21 @@
+{
+    "required": true,
+    "package": "com.flooferland.showbiz.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        "BlockLightEngineMixin",
+        "CreativeModeInventoryScreenMixin",
+        "CreativeModeTabMixin",
+        "GameRendererMixin",
+        "GuiMixin",
+        "ItemPickerMenuMixin",
+        "KeyboardHandlerMixin",
+        "SplashManagerMixin",
+        "accessor.CreativeModeInventoryScreenAccessor",
+        "accessor.CreativeModeInventoryScreenSelectedTabAccessor"
+    ],
+    "mixins": [],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

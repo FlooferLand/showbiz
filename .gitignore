@@ -3,9 +3,8 @@ versions/**/bin
 versions/**/build
 
 # Working dirs
-run-*/
-runs/
 run/
+run-*/
 
 # Stonecutter
 versions/**/logs/

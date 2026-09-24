@@ -1,4 +1,5 @@
 
+import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -66,9 +67,21 @@ loom {
         }
     }
     runs {
+        named("server") {
+            server()
+            runDirectory.set(File("../../run-server"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            environmentVars.put("DEVAUTH_ENABLED", "false")
+        }
+        named("client") {
+            client()
+            runDirectory.set(File("../../run"))
+            jvmArguments.add("-Ddevauth.enabled=true")
+            environmentVars.put("DEVAUTH_ENABLED", "true")
+        }
         create("client_offline") {
             client()
-            displayName = "Minecraft Client (Offline)"
+            displayName.set("Minecraft Client (Offline)")
             runDirectory.set(File("../../run"))
             jvmArguments.add("-Ddevauth.enabled=false")
             programArguments.addAll(listOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
@@ -76,15 +89,14 @@ loom {
         }
         create("client_alt") {
             client()
-            displayName = "Minecraft Client (Offline)"
-            runDirectory.set(File("../../run"))
+            displayName.set("Minecraft Client (Offline)")
+            runDirectory.set(File("../../run-alt"))
             jvmArguments.add("-Ddevauth.enabled=false")
             programArguments.addAll(listOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
             environmentVars.put("DEVAUTH_ENABLED", "false")
         }
         configureEach {
-            generateRunConfig.set(true) // Run configurations are not created for subprojects by default
-            runDirectory.set(File("../../run")) // Shared run folder between versions
+            generateRunConfig.set(true)
             jvmArguments.addAll((project.property("net.minecraft.jvmargs") as String).split(" "))
         }
     }
@@ -193,6 +205,7 @@ tasks.withType<ProcessResources>().configureEach {
     }
     filesMatching("fabric.mod.json") { expand(properties) }
     filesMatching("$modId.client.mixins.json") { expand(properties) }
+    filesMatching("$modId.mixins.json") { expand(properties) }
     filesMatching("data/showbiz/showbiz.addon.toml")  { expand(properties) }
 }
 
@@ -244,9 +257,9 @@ publishMods {
             ?: "No changelog provided."
     )
     type.set(when {
-        isAlpha -> ALPHA
-        isBeta -> BETA
-        else -> STABLE
+        isAlpha -> ReleaseType.ALPHA
+        isBeta -> ReleaseType.BETA
+        else -> ReleaseType.STABLE
     })
     dryRun = System.getenv("dryrun") == "1"
 
