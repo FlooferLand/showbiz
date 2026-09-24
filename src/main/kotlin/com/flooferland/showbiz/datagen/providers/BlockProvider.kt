@@ -13,30 +13,47 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 
 object BlockProvider {
-    enum class BlockModelId {
+    // TODO: This entire thing should return to the same firey pits that birthed it
+    enum class BlockModelType {
         CubeAll,
         BlockEntity,
         Custom,
         None;
         var transparent = false
-        fun transparent(): BlockModelId { transparent = true; return this }
+        var noBlockState = false
+        fun transparent(): BlockModelType { transparent = true; return this }
+        fun noBlockState(): BlockModelType { noBlockState = true; return this }
+    }
+    data class BlockModelId(
+        val type: BlockModelType,
+        val transparent: Boolean = false,
+        val noBlockState: Boolean = false
+    ) {
+        companion object {
+            val CubeAll = BlockModelId(BlockModelType.CubeAll)
+            val BlockEntity = BlockModelId(BlockModelType.BlockEntity)
+            val Custom = BlockModelId(BlockModelType.Custom)
+            val None = BlockModelId(BlockModelType.None)
+        }
+        fun transparent() = copy(transparent = true)
+        fun noBlockState() = copy(noBlockState = true)
     }
 
     fun generateBlockModel(block: ModBlocks, model: CustomBlockModel.Model): JsonObject? {
         val customModel = (block.block as? CustomBlockModel)?.modelData()
         customModel?.let { return@generateBlockModel customModel }
 
-        return when (block.model!!) {
-            BlockModelId.CubeAll -> buildJsonObject {
+        return when (block.model!!.type) {
+            BlockModelType.CubeAll -> buildJsonObject {
                 put("parent", rlVanilla("cube_all").blockPath().toString())
                 putJsonObject("textures") {
                     val texName = if (model.textures.isEmpty()) block.id.blockPath() else model.textures.first()
                     put("all", texName.toString())
                 }
             }
-            BlockModelId.BlockEntity -> null
-            BlockModelId.Custom -> null
-            BlockModelId.None -> null
+            BlockModelType.BlockEntity -> null
+            BlockModelType.Custom -> null
+            BlockModelType.None -> null
         }
     }
 

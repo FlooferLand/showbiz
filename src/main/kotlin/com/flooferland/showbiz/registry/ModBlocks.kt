@@ -142,7 +142,7 @@ enum class ModBlocks {
             .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
-        modelPreset = BlockModelId.Custom,
+        modelPreset = BlockModelId.Custom.noBlockState(),
         entity = Entity(::MonitorBlockEntity, isGeckolib = false),
     ),
     Cymbal(

@@ -81,7 +81,7 @@ object DataGenerator {
 
         // Generation
         for (modBlock in ModBlocks.entries) {
-            if (modBlock.model != BlockProvider.BlockModelId.None) {
+            if (modBlock.model?.type != BlockProvider.BlockModelType.None && modBlock.model?.let { !it.noBlockState } ?: true) {
                 // States and models
                 val builder = CustomBlockModel.BlockStateBuilder(modBlock)
                 val block = (modBlock.block as? CustomBlockModel)
