@@ -81,12 +81,21 @@ object DataGenerator {
 
         // Generation
         for (modBlock in ModBlocks.entries) {
-            if (modBlock.model?.type != BlockProvider.BlockModelType.None && modBlock.model?.let { !it.noBlockState } ?: true) {
+            val builder = CustomBlockModel.BlockStateBuilder(modBlock)
+            val block = (modBlock.block as? CustomBlockModel)
+            block?.modelBlockStates(builder, modBlock.id)
+            block?.modelBlockStates(builder)
+            val defaultState = builder.defaultStateId
+
+            // Item ('items/' entry)
+            val itemJson = ItemProvider.generateItem(defaultState.itemPath())
+            val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
+            writeAsset(itemPath, itemJson)
+
+            // Models
+            if (modBlock.model?.type == BlockProvider.BlockModelType.None) continue
+            if (modBlock.model?.let { !it.noBlockState } ?: true) {
                 // States and models
-                val builder = CustomBlockModel.BlockStateBuilder(modBlock)
-                val block = (modBlock.block as? CustomBlockModel)
-                block?.modelBlockStates(builder, modBlock.id)
-                block?.modelBlockStates(builder)
                 if (builder.states.isNotEmpty()) {
                     val stateJson = BlockProvider.generateStates(modBlock, builder.states)
                     if (stateJson != null) {
@@ -115,15 +124,9 @@ object DataGenerator {
                 }
 
                 // Item model
-                val defaultState = builder.defaultStateId
                 val itemModelJson = BlockProvider.generateBlockItemModel(modBlock, defaultState.blockPath())
                 val itemModelPath = assetsRoot / "models" / "item" / "${modBlock.id.path}.json"
                 writeAsset(itemModelPath, itemModelJson)
-
-                // Item ('items/' entry)
-                val itemJson = ItemProvider.generateItem(defaultState.itemPath())
-                val itemPath = assetsRoot / "items" / "${modBlock.id.path}.json"
-                writeAsset(itemPath, itemJson)
             }
 
             // Loot table (block drops)

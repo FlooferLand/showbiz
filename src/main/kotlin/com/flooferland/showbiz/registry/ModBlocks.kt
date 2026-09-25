@@ -60,7 +60,7 @@ enum class ModBlocks {
             .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
-        modelPreset = BlockModelId.Custom,
+        modelPreset = BlockModelId.None,
         entity = Entity(::ShowParserBlockEntity, isGeckolib = false),
     ),
     ShowSelector(

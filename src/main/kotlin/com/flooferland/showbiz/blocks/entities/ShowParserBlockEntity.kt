@@ -1,21 +1,14 @@
 package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
-import net.minecraft.core.particles.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
-import net.minecraft.sounds.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
-import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
-import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.PLAYING_POWERED
-import com.flooferland.showbiz.blocks.ShowParserBlock.Companion.SIGNAL_POWERED
-import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -43,35 +36,6 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
         ShowParserEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping))
-
-    fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        val level = level as? ServerLevel ?: return
-        if (menuData.bitFilter.isEmpty()) {
-            if (level.gameTime % 25 == 0L) {
-                val facing = state.getValue(FacingEntityBlock.FACING)
-                val forward = Vec3(facing.normal.x.toDouble(), facing.normal.y.toDouble(), facing.normal.z.toDouble())
-                val center = pos.center.add(forward.scale(0.5)).subtract(0.0, 0.1, 0.0)
-                level.sendParticles(ParticleTypes.SMOKE, center.x, center.y, center.z, 5, 0.15, 0.15, 0.15, 0.02)
-                level.playSound(null, pos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.2f, 1.0f)
-            }
-            return
-        }
-        when (show.data.playing) {
-             true -> {
-                 val newState = state
-                     .setValue(PLAYING_POWERED, true)
-                     .setValue(SIGNAL_POWERED, menuData.bitFilter.chartHasBit(show.data.mapping) { show.data.signal.frameHas(it) })
-                 level.setBlockAndUpdate(blockPos, newState)
-             }
-            false if (state.getValue(PLAYING_POWERED) || state.getValue(SIGNAL_POWERED)) -> {
-                val newState = state
-                    .setValue(PLAYING_POWERED, false)
-                    .setValue(SIGNAL_POWERED, false)
-                level.setBlockAndUpdate(blockPos, newState)
-            }
-            else -> {}
-        }
-    }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
