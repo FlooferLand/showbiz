@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.core.registries.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
@@ -19,6 +20,8 @@ import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.DecorEntity
+import com.flooferland.showbiz.handbook.Handbook
+import com.flooferland.showbiz.handbook.HandbookReloadListener
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
@@ -38,6 +41,7 @@ import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -47,6 +51,7 @@ import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 import software.bernie.geckolib.renderer.GeoItemRenderer
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.max
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = emptyList()
@@ -58,11 +63,13 @@ object ShowbizClient : ClientModInitializer {
         // Loading the mod
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(HandbookReloadListener)
         @Suppress("UnusedExpression")
         run {
             ModPackets
             ModClientEntities
             ModClientCommands
+            ModClientInput.entries
             ModClientLights.load()
             ClientConnections
             ClientPackets.init()
@@ -213,6 +220,15 @@ object ShowbizClient : ClientModInitializer {
             // Version check
             if (UpdateChecker.newerVersion != null)
                 minecraft.player?.displayClientMessage(UpdateChecker.getMessage(), false)
+        }
+
+        // Handbook ponder
+        ItemTooltipCallback.EVENT.register { stack, context, flag, components ->
+            val key = ModClientInput.Ponder.mapping.translatedKeyMessage
+            val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
+            val entry = Handbook.cache.items.get(itemId) ?: return@register
+            val comp = Component.literal("Press ").append(key).append(" to open the handbook")
+            components.add(max(0, components.size - 2), comp)
         }
 
         // DARN YOU SPLIT SOURCESETS

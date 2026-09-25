@@ -3,6 +3,7 @@
     "package": "com.flooferland.showbiz.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "AbstractContainerScreenMixin",
         "BlockLightEngineMixin",
         "CreativeModeInventoryScreenMixin",
         "CreativeModeTabMixin",
@@ -14,7 +15,6 @@
         "accessor.CreativeModeInventoryScreenAccessor",
         "accessor.CreativeModeInventoryScreenSelectedTabAccessor"
     ],
-    "mixins": [],
     "injectors": {
         "defaultRequire": 1
     }

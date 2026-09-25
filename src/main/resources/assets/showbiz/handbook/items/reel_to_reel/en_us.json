@@ -1,0 +1,9 @@
+{
+    "summary": "Plays back reels",
+    "facts": [
+        "Slot in a reel at the top",
+        "Start/pause playback by right-clicking on the sides",
+        "Can pull reels from a chest on its side",
+        "Emits a redstone signal while a show is playing"
+    ]
+}

@@ -4,6 +4,7 @@
     "config.prop.audio.playBotEffects": "Play custom bot effects",
     "config.prop.permissions.restrict": "Restrict permissions (server-only)",
 
+    "category.showbiz": "Showbiz",
     "itemGroup.showbiz.main": "Showbiz",
 
     "block.showbiz.staged_bot": "Staged Bot",
@@ -36,7 +37,7 @@
     "item.showbiz.floodlight": "Floodlight (W.I.P)",
 
     "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\n- Right-click to change models\n- Place a block on top to hide the block",
-    "tooltip.showbiz.block.reel_to_reel": "Plays back reels\nSlot in a reel at the top\nStart/pause playback by right-clicking on the sides\nCan pull reels from a chest on its side",
+    "tooltip.showbiz.block.reel_to_reel": "Plays back shows from reels",
     "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
@@ -51,5 +52,7 @@
     "tooltip.showbiz.item.bot": "Shift right-click to pick it back up\nRight click to customize\nWork in progress!",
 
     "message.showbiz.show_load_fail": "Failed to load show",
-    "message.showbiz.empty_reel_warning": "This reel has no show on it!"
+    "message.showbiz.empty_reel_warning": "This reel has no show on it!",
+
+    "key.showbiz.ponder": "Open in Handbook"
 }
