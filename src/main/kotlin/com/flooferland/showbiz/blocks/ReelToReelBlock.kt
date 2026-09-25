@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
+import net.minecraft.world.level.redstone.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
@@ -138,6 +139,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             }
         }
         return ItemInteractionResult.SUCCESS
+    }
+
+    override fun isSignalSource(state: BlockState) = true
+    override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
+        val entity = level.getBlockEntity(pos) as? ReelToReelBlockEntity ?: return Redstone.SIGNAL_NONE
+        return if (entity.playing) Redstone.SIGNAL_MAX else Redstone.SIGNAL_NONE
     }
 
     override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {

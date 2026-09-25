@@ -195,22 +195,21 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = playing
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
-        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
-        setChanged()
-
-        // TODO: Find only near players
-        val serverLevel = level as? ServerLevel ?: return
-        for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = this.paused, seek = seek)
-            ServerPlayNetworking.send(player, state)
-        }
+        updateState()
     }
 
     fun setPaused(paused: Boolean) {
         this.playing = !paused
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
-        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
+        updateState()
+    }
+
+    fun updateState() {
+        // Visual and redstone
+        val state = blockState.setValue(PLAYING, playing && !paused)
+        level?.setBlockAndUpdate(blockPos, state)
+        level?.updateNeighborsAt(blockPos, state.block)
         setChanged()
 
         // TODO: Find only near players
