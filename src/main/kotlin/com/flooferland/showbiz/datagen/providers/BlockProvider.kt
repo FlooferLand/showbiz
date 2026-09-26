@@ -84,10 +84,8 @@ object BlockProvider {
                         ?.second
                         ?: combination.first()
                     putJsonObject(key) {
-                        if (primary.name.name == null) {
-                            error("Name is null for $primary (${block.id})")
-                        }
-                        put("model", rl(primary.name.name!!).blockPath().toString())
+                        val path = primary.name.name?.let { rl(it).blockPath() } ?: block.id.blockPath()
+                        put("model", path.toString())
                         combination.sumOf { it.state.x }.let { if (it != 0) put("x", it) }
                         combination.sumOf { it.state.y }.let { if (it != 0) put("y", it) }
                     }

@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
+import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.click
@@ -56,14 +57,13 @@ class MonitorBlock(props: Properties) : FacingEntityBlock(props) {
         return super.useWithoutItem(state, level, pos, player, hitResult)
     }
 
-    // Generator is bugged
-    /*override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
+    override fun modelBlockStates(builder: CustomBlockModel.BlockStateBuilder) {
         super.modelBlockStates(builder)
         builder.bool(HANGED) {
             trueState(suffix = "hanged") {}
             falseState() {}
         }
-    }*/
+    }
 
     companion object {
         val HANGED = BooleanProperty.create("hanged")!!
