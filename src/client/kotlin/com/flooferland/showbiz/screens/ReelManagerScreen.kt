@@ -14,7 +14,7 @@ import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
 import com.flooferland.showbiz.types.ShowFileInfo
-import com.flooferland.showbiz.utils.PlatformUtils
+import com.flooferland.showbiz.utils.ShowbizEnv
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
@@ -87,7 +87,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         if (isLocalServer()) {
             val openDirButton =
                 Button.builder(Component.literal("Open file manager")) {
-                    PlatformUtils.openFileManager(FileStorage.SHOWS_DIR)
+                    ShowbizEnv.openFileManager(FileStorage.SHOWS_DIR)
                 }.pos(x, y).size(100, 20).build()
             bottomBarButtons.add(openDirButton)
             addRenderableWidget(openDirButton)

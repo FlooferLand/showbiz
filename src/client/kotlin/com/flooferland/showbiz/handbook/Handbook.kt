@@ -14,6 +14,9 @@ object Handbook {
         val size get() = entries.size
 
         fun clear() { entries.clear() }
+        fun has(key: ResourceLocation?): Boolean {
+            return get(key) != null
+        }
         fun get(key: ResourceLocation?): HandbookEntry? {
             if (key == null) return null
             val lang = Minecraft.getInstance().languageManager.selected

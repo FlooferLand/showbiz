@@ -28,7 +28,7 @@ public abstract class AbstractContainerScreenMixin {
 		var entry = Handbook.INSTANCE.getCache().getItems().get(id);
 		if (entry == null) return;
 
-		var pressed = ModClientInput.Ponder.getMapping().matches(keyCode, scanCode);
+		var pressed = ModClientInput.OpenInHandbook.getMapping().matches(keyCode, scanCode);
 		if (pressed && !(instance.screen instanceof HandbookPageScreen)) {
 			instance.setScreen(new HandbookPageScreen(instance.screen, id));
 		}

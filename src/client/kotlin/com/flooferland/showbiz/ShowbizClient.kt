@@ -37,6 +37,7 @@ import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.MainClientUtils
+import com.flooferland.showbiz.utils.tc
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
@@ -224,10 +225,10 @@ object ShowbizClient : ClientModInitializer {
 
         // Handbook ponder
         ItemTooltipCallback.EVENT.register { stack, context, flag, components ->
-            val key = ModClientInput.Ponder.mapping.translatedKeyMessage
+            val key = ModClientInput.OpenInHandbook.mapping.translatedKeyMessage
             val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
-            val entry = Handbook.cache.items.get(itemId) ?: return@register
-            val comp = Component.literal("Press ").append(key).append(" to open the handbook")
+            if (!Handbook.cache.items.has(itemId)) return@register
+            val comp = tc("other", "open_in_handbook", key)
             components.add(max(0, components.size - 2), comp)
         }
 

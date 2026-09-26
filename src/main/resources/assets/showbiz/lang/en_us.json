@@ -54,5 +54,7 @@
     "message.showbiz.show_load_fail": "Failed to load show",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!",
 
-    "key.showbiz.ponder": "Open in Handbook"
+    "key.showbiz.open_in_handbook": "Open in Handbook",
+
+    "other.showbiz.open_in_handbook": "Press %1$s to open the handbook"
 }
