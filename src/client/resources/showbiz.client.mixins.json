@@ -11,6 +11,7 @@
         "GuiMixin",
         "ItemPickerMenuMixin",
         "KeyboardHandlerMixin",
+        "SimpleTextureMixin",
         "SplashManagerMixin",
         "accessor.CreativeModeInventoryScreenAccessor",
         "accessor.CreativeModeInventoryScreenSelectedTabAccessor"

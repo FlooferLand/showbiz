@@ -1,14 +1,18 @@
 package com.flooferland.showbiz.screens
 
 import net.minecraft.*
+import net.minecraft.client.*
 import net.minecraft.client.gui.*
+import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.layouts.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.client.gui.screens.inventory.*
+import net.minecraft.client.renderer.texture.*
 import net.minecraft.core.registries.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.util.*
+import com.flooferland.showbiz.accessor.TextureSizeAccessor
 import com.flooferland.showbiz.handbook.Handbook
 import com.flooferland.showbiz.handbook.HandbookEntry
 import com.flooferland.showbiz.handbook.HandbookXml
@@ -50,7 +54,7 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
         }
 
         val layout = LinearLayout.vertical().spacing(6)
-        layout.defaultCellSetting().alignHorizontallyCenter()
+        layout.defaultCellSetting().alignHorizontallyLeft()
 
         runCatching { loadPages(layout) }
             .onFailure {
@@ -88,13 +92,49 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
     }
 
     // Probably not a good idea to use recursion..
-    fun addElement(layout: LinearLayout, entry: HandbookXml.Types.PageElement) {
+    fun addElement(layout: LinearLayout, entry: HandbookXml.Element) {
+        val settings = LayoutSettings.defaults().alignHorizontallyLeft()
+        fun add(widget: AbstractWidget, options: (LayoutSettings) -> LayoutSettings = { it }) {
+            layout.addChild(widget, options.invoke(settings))
+        }
+        fun addText(comp: Component) {
+            add(TextWidget(font, comp, contentWidth))
+        }
         when (entry) {
-            is HandbookXml.Types.TextContent ->
-                layout.addChild(TextWidget(font, entry.toComponent(), contentWidth))
-            is HandbookXml.Types.Image ->
-                layout.addChild(TextWidget(font, Component.literal("Image[${entry.src}]"), contentWidth))
-            is HandbookXml.Types.VBoxContainer ->
+            is HandbookXml.Element.Line ->
+                addText(Component.literal("- ").append(entry.toComponent()))
+            is HandbookXml.Element.TextContent ->
+                addText(entry.toComponent())
+            is HandbookXml.Element.Image -> {
+                val instance = Minecraft.getInstance()
+                val id = ResourceLocation.tryParse(entry.src)?.let { id ->
+                    var id = id
+                    if (!id.path.startsWith("textures/"))
+                        id = id.withPrefix("textures/")
+                    if (!id.path.endsWith(".png"))
+                        id = id.withSuffix(".png")
+                    id
+                }
+                val texture = id?.let { runCatching { instance.textureManager.getTexture(id) }.getOrNull() }
+                if (texture is SimpleTexture) {
+                    runCatching { texture.load(instance.resourceManager) }
+                }
+                val accessor = texture as? TextureSizeAccessor
+                val width = accessor?.showbiz_getWidth() ?: 0
+                val height = accessor?.showbiz_getHeight() ?: 0
+
+                @Suppress("KotlinConstantConditions")
+                if (width > 0 && height > 0 && id != null) {
+                    val widget = ImageWidget.texture(width, height, id, width, height)
+                    widget.tooltip = Component.literal(entry.alt.ifEmpty { "image" }).let { Tooltip.create(it, it) }
+                    add(widget)
+                } else {
+                    addText(Component.literal("[${entry.alt}]"))
+                }
+            }
+            is HandbookXml.Element.ListElement ->
+                for (entry in entry.lines) { addElement(layout, entry) }
+            is HandbookXml.Element.Container ->
                 for (entry in entry.entries) { addElement(layout, entry) }
         }
     }

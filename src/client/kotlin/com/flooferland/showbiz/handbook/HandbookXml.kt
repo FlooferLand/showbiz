@@ -10,42 +10,68 @@ object HandbookXml {
     @XmlSerialName("root", "showbiz:handbook")
     data class Root(
         @XmlElement(true)
-        val summary: Types.Summary,
+        val head: Head,
 
-        @XmlSerialName("fact")
-        val facts: List<Types.Fact> = emptyList(),
+        @XmlElement(true)
+        val pages: Transient.Pages = Transient.Pages(),
+    )
 
-        @XmlSerialName("page")
-        val page: List<Page> = emptyList(),
+    @Serializable
+    @XmlSerialName("head")
+    data class Head(
+        @XmlElement(true)
+        val summary: Element.Summary,
+
+        @XmlElement(true)
+        val facts: Transient.Facts = Transient.Facts()
     )
 
     @Serializable
     @XmlSerialName("page")
     data class Page(
         val title: String? = null,
-        val entries: List<Types.PageElement> = emptyList(),
+        val entries: List<Element> = emptyList(),
     )
 
-    object Types {
+    /// Wrappers since XML parsing won't work another way
+    object Transient {
         @Serializable
-        sealed class PageElement()
+        @XmlSerialName("facts")
+        data class Facts(
+            val lines: List<Element.Line> = emptyList(),
+        )
+        @Serializable
+        @XmlSerialName("pages")
+        data class Pages(
+            val entries: List<Page> = emptyList(),
+        )
+    }
+
+    @Serializable
+    sealed class Element(val style: String = "") {
+        @Serializable
+        @XmlSerialName("container")
+        data class Container(
+            val type: String,
+            val entries: List<Element> = emptyList()
+        ) : Element()
+
+        @Serializable
+        @XmlSerialName("list")
+        data class ListElement(
+            val type: String,
+            val lines: List<Line> = emptyList()
+        ) : Element()
 
         @Serializable
         sealed class TextContent(
-            @XmlValue val text: String = "",
-            val key: String = ""
-        ) : PageElement() {
+            val key: String = "",
+            @XmlValue val text: String = ""
+        ) : Element() {
+            // TODO: Read the style property
             fun toComponent(): MutableComponent =
                 Component.translatableWithFallback(key, text)
         }
-
-        @Serializable
-        @XmlSerialName("vbox")
-        data class VBoxContainer(val entries: List<Types.PageElement> = emptyList()) : PageElement()
-
-        @Serializable
-        @XmlSerialName("fact")
-        class Fact : TextContent()
 
         @Serializable
         @XmlSerialName("summary")
@@ -56,7 +82,11 @@ object HandbookXml {
         class Paragraph : TextContent()
 
         @Serializable
+        @XmlSerialName("l")
+        class Line : TextContent()
+
+        @Serializable
         @XmlSerialName("image")
-        data class Image(val src: String, val alt: String = "") : PageElement()
+        data class Image(val src: String, val alt: String = "") : Element()
     }
 }

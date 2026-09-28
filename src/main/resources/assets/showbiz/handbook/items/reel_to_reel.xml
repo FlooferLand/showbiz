@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<root xmlns="showbiz:handbook"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="showbiz:handbook https://flooferland.github.io/showbiz/schemas/handbook.xsd"
->
-    <summary>Plays back reels</summary>
-
-    <fact>Slot in a reel at the top</fact>
-    <fact>Start/pause playback by right-clicking on the sides</fact>
-    <fact>Can pull reels from a chest on its side</fact>
-    <fact>Emits a redstone signal while a show is playing</fact>
-
-    <page title="Page 1">
-        <vbox>
-            <p>Some text</p>
-            <image src="showbiz:textures/gui/curtain_controller.png" />
-        </vbox>
-    </page>
+<root xmlns="showbiz:handbook">
+    <head>
+        <summary>Plays back reels</summary>
+        <facts>
+            <l>Slot in a reel at the top</l>
+            <l>Start/pause playback by right-clicking on the sides</l>
+            <l>Can pull reels from a chest on its side</l>
+            <l>Emits a redstone signal while a show is playing</l>
+        </facts>
+    </head>
+    <pages>
+        <page title="Page 1">
+            <container type="vbox">
+                <p style="color:red">Some text</p>
+                <list type="ordered">
+                    <l>Some list of sorts</l>
+                    <l>Yippe</l>
+                </list>
+                <image src="showbiz:textures/item/bot.png" alt="test image" />
+            </container>
+        </page>
+    </pages>
 </root>

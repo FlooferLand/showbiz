@@ -3,38 +3,105 @@
     <xs:element name="root">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="head" />
+                <xs:element ref="pages" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="head">
+        <xs:complexType>
+            <xs:sequence>
                 <xs:element ref="summary" />
-                <xs:element ref="fact" maxOccurs="unbounded" />
-                <xs:element ref="page" maxOccurs="unbounded"  />
+                <xs:element ref="facts" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="pages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="page" maxOccurs="unbounded" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <!-- Base element type -->
     <xs:element name="element" abstract="true" />
+    <xs:complexType name="element_base" abstract="true">
+        <xs:attribute name="style" type="xs:string" />
+    </xs:complexType>
     <xs:complexType name="element_container">
-        <xs:sequence>
-            <xs:element ref="element" minOccurs="0" maxOccurs="unbounded" />
-        </xs:sequence>
+        <xs:complexContent>
+            <xs:extension base="element_base">
+                <xs:sequence>
+                    <xs:element ref="element" minOccurs="0" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
     </xs:complexType>
 
     <!-- Base text type -->
-    <xs:complexType name="text_content">
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
+    <xs:complexType name="text_content" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="element_base">
                 <xs:attribute name="key" type="xs:string" />
             </xs:extension>
-        </xs:simpleContent>
+        </xs:complexContent>
     </xs:complexType>
 
     <!-- Containers -->
-    <xs:element name="vbox" type="element_container" substitutionGroup="element" />
+    <xs:simpleType name="container_types">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="vbox" />
+            <xs:enumeration value="hbox" />
+            <xs:enumeration value="grid" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="container" substitutionGroup="element">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="element_container">
+                    <xs:attribute name="type" type="container_types" use="required" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Lists -->
+    <xs:simpleType name="list_types">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ordered" />
+            <xs:enumeration value="point" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="list" substitutionGroup="element">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="l" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="type" type="list_types" use="required" />
+        </xs:complexType>
+    </xs:element>
 
     <!-- Paragraph -->
-    <xs:element name="p" type="text_content" substitutionGroup="element" />
+    <xs:element name="p" type="text_content" substitutionGroup="element">
+        <xs:annotation>
+            <xs:documentation>A text paragraph/component</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="l" type="text_content">
+        <xs:annotation>
+            <xs:documentation>A line. Similar to &lt;p&gt;, but it's simpler and used for storage rather than rendering</xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
     <!-- Fact -->
-    <xs:element name="fact" type="text_content" />
+    <xs:element name="facts">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="l" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
     <!-- Summary -->
     <xs:element name="summary" type="text_content" />

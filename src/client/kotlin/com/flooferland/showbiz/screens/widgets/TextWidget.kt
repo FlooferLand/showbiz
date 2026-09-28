@@ -11,9 +11,12 @@ class TextWidget(
     message: Component,
     maxWidth: Int,
     private val color: Int = CommonColors.BLACK,
-    private val shadow: Boolean = false
+    private val shadow: Boolean = false,
+    private val alignment: Alignment = Alignment.Left
 ) : AbstractWidget(0, 0, maxWidth, 0, message) {
     private val lines = font.split(message, maxWidth)
+
+    enum class Alignment { Left, Center }
 
     init {
         height = lines.size * font.lineHeight
@@ -22,7 +25,7 @@ class TextWidget(
     override fun renderWidget(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         var y = y
         for (line in lines) {
-            val x = x + (width - font.width(line)) / 2
+            val x = if (alignment == Alignment.Center) x + (width - font.width(line)) / 2 else x
             graphics.drawString(font, line, x, y, color, shadow)
             y += font.lineHeight
         }

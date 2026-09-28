@@ -47,7 +47,7 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
     override fun apply(obj: MutableMap<ResourceLocation, HandbookXml.Root>, resourceManager: ResourceManager, profiler: ProfilerFiller) {
         cache.items.clear()
         cache.bots.clear()
-        for ((location, element) in obj) {
+        for ((location, root) in obj) {
             val path = location.path.split('/')
             if (path.size < 2) continue
             val dir = path.getOrNull(0) ?: continue
@@ -55,9 +55,9 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
 
             try {
                 val entry = HandbookEntry(
-                    element.summary.toComponent(),
-                    element.facts.map { it.toComponent() },
-                    element.page
+                    root.head.summary.toComponent(),
+                    root.head.facts.lines.map { it.toComponent() },
+                    root.pages.entries
                 )
                 when (dir) {
                     "items" -> cache.items.put(name, entry)
