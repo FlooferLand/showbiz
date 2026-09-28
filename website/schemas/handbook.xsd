@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="showbiz:handbook" elementFormDefault="qualified">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="summary" />
+                <xs:element ref="fact" maxOccurs="unbounded" />
+                <xs:element ref="page" maxOccurs="unbounded"  />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Base element type -->
+    <xs:element name="element" abstract="true" />
+    <xs:complexType name="element_container">
+        <xs:sequence>
+            <xs:element ref="element" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Base text type -->
+    <xs:complexType name="text_content">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="key" type="xs:string" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Containers -->
+    <xs:element name="vbox" type="element_container" substitutionGroup="element" />
+
+    <!-- Paragraph -->
+    <xs:element name="p" type="text_content" substitutionGroup="element" />
+
+    <!-- Fact -->
+    <xs:element name="fact" type="text_content" />
+
+    <!-- Summary -->
+    <xs:element name="summary" type="text_content" />
+
+    <!-- Page -->
+    <xs:element name="page">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="element_container">
+                    <xs:attribute name="title" type="xs:string" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Other types -->
+    <xs:element name="image" substitutionGroup="element">
+        <xs:complexType>
+            <xs:attribute name="src" type="xs:anyURI" use="required" />
+            <xs:attribute name="alt" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
