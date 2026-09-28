@@ -138,6 +138,16 @@ dependencies {
     include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
     shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
+    // XMLUtil
+    // TODO: Relocate xmlutil to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
+    val xmlutil = dep("xmlutil")
+    implementation("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    include("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    shadow("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    implementation("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+    include("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+    shadow("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 

@@ -4,12 +4,14 @@ import net.minecraft.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.layouts.*
 import net.minecraft.client.gui.screens.*
+import net.minecraft.client.gui.screens.inventory.*
 import net.minecraft.core.registries.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.util.*
 import com.flooferland.showbiz.handbook.Handbook
 import com.flooferland.showbiz.handbook.HandbookEntry
+import com.flooferland.showbiz.handbook.HandbookXml
 import com.flooferland.showbiz.screens.widgets.ItemWidget
 import com.flooferland.showbiz.screens.widgets.TextWidget
 import com.flooferland.showbiz.utils.rl
@@ -23,34 +25,78 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
     val size get() = (texSize * 1.5).roundToInt()
     val textureX get() = (width / 2) - (size / 2)
     val textureY get() = (height / 2) - (size / 2)
+    val contentWidth get() = size - 220
 
     val entry: HandbookEntry? = Handbook.cache.items.get(key)
+    var pageBack: PageButton? = null
+    var pageForward: PageButton? = null
+    var page = -1
 
     override fun init() {
-        val contentWidth = size - 220
+        updateLayout()
+    }
+
+    fun updateLayout() {
+        clearWidgets()
+        run {
+            val x = textureX + 90
+            val y = textureY + (size * 0.77f).toInt()
+            pageBack = PageButton(x, y, false, { page -= 1; updateLayout() }, true)
+            pageBack?.visible = entry?.let { page > -1 } ?: false
+            pageForward = PageButton(x + (size * 0.45).toInt(), y, true, { page += 1; updateLayout() }, true)
+            pageForward?.visible = entry?.let { page + 1 < it.pages.size } ?: false
+            addRenderableWidget(pageBack!!)
+            addRenderableWidget(pageForward!!)
+        }
+
         val layout = LinearLayout.vertical().spacing(6)
         layout.defaultCellSetting().alignHorizontallyCenter()
 
-        if (entry == null) {
-            layout.addChild(TextWidget(font, Component.literal("No page was found"), contentWidth))
-        } else {
-            BuiltInRegistries.ITEM.getOptional(key).ifPresent {
-                layout.addChild(ItemWidget(it.defaultInstance, size = 32))
-                layout.addChild(TextWidget(font, it.getName(it.defaultInstance).copy().withStyle(ChatFormatting.BOLD), contentWidth))
+        runCatching { loadPages(layout) }
+            .onFailure {
+                layout.addChild(TextWidget(font, Component.literal("Failed to create page layout.\n").append(it.toString()), contentWidth))
             }
-            layout.addChild(TextWidget(font, Component.literal(entry.summary).withStyle(ChatFormatting.ITALIC), contentWidth))
-            layout.addChild(SpacerElement.height(font.lineHeight))
-
-            for (fact in entry.facts) {
-                layout.addChild(TextWidget(font, Component.literal(fact), contentWidth))
-            }
-        }
 
         layout.arrangeElements()
         val x = textureX + (size / 2)
         val y = textureY + (size * 0.2f).toInt() + font.lineHeight * 2
         layout.setPosition(x - (layout.width / 2), y)
         layout.visitWidgets(this::addRenderableWidget)
+    }
+
+    fun loadPages(layout: LinearLayout) {
+        if (entry == null) {
+            layout.addChild(TextWidget(font, Component.literal("No page was found"), contentWidth))
+        } else if (page < 0) {
+            BuiltInRegistries.ITEM.getOptional(key).ifPresent {
+                layout.addChild(ItemWidget(it.defaultInstance, size = 32))
+                layout.addChild(TextWidget(font, it.getName(it.defaultInstance).copy().withStyle(ChatFormatting.BOLD), contentWidth))
+            }
+            layout.addChild(TextWidget(font, entry.summary.copy().withStyle(ChatFormatting.ITALIC), contentWidth))
+            layout.addChild(SpacerElement.height(font.lineHeight))
+
+            for (fact in entry.facts) {
+                layout.addChild(TextWidget(font, fact, contentWidth))
+            }
+        } else if (page < entry.pages.size) {
+            val page = entry.pages[page]
+            layout.addChild(TextWidget(font, Component.literal("Title: ${page.title}"), contentWidth))
+            for (entry in page.entries) {
+                addElement(layout, entry)
+            }
+        }
+    }
+
+    // Probably not a good idea to use recursion..
+    fun addElement(layout: LinearLayout, entry: HandbookXml.Types.PageElement) {
+        when (entry) {
+            is HandbookXml.Types.TextContent ->
+                layout.addChild(TextWidget(font, entry.toComponent(), contentWidth))
+            is HandbookXml.Types.Image ->
+                layout.addChild(TextWidget(font, Component.literal("Image[${entry.src}]"), contentWidth))
+            is HandbookXml.Types.VBoxContainer ->
+                for (entry in entry.entries) { addElement(layout, entry) }
+        }
     }
 
     override fun onClose() {
