@@ -2,12 +2,10 @@ package com.flooferland.showbiz.entities
 
 import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.network.syncher.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.*
-import net.minecraft.world.effect.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.entity.item.*
 import net.minecraft.world.entity.player.*
@@ -18,6 +16,7 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.components.FloodlightComponent
+import com.flooferland.showbiz.entities.base.BasePropEntity
 import com.flooferland.showbiz.menus.FloodlightEditMenu
 import com.flooferland.showbiz.network.packets.FloodlightEditPacket
 import com.flooferland.showbiz.registry.ModComponents
@@ -43,7 +42,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
-class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
+class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
     constructor(level: Level) : this(level, FloodlightComponent()) {}
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
@@ -89,14 +88,6 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
         if (yRot != turn.x) updateYaw(turn.x)
     }
 
-    override fun isPushable() = false
-    override fun isPickable() = true
-    override fun isAttackable() = true
-    override fun fireImmune() = true
-    override fun canBeCollidedWith() = true
-    override fun canBeHitByProjectile() = true
-    override fun canBeAffected(effect: MobEffectInstance) = false
-    override fun canBeSeenAsEnemy() = false
     override fun getPickResult() = makeItem()
     override fun getDefaultDimensions(pose: Pose): EntityDimensions =
         EntityDimensions.fixed(0.4f, 0.9f)
@@ -133,13 +124,6 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
     }
 
     // region | LivingEntity stuff
-    override fun getMainArm() = HumanoidArm.RIGHT
-    override fun getArmorSlots() = listOf<ItemStack>()
-    override fun getItemBySlot(slot: EquipmentSlot): ItemStack = ItemStack.EMPTY
-    override fun setItemSlot(slot: EquipmentSlot, stack: ItemStack) {}
-    override fun isNoGravity() = true
-    override fun isPushedByFluid() = false
-    override fun knockback(strength: Double, x: Double, z: Double) {}
     override fun getXRot() = 0f
     override fun getMaxHeadRotationRelativeToBody() = 0f
     // endregion
@@ -172,25 +156,6 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
         updatePersistentData { addAdditionalSaveData(it) }
     }
 
-    fun updatePersistentData(block: (CompoundTag) -> Unit) {
-        val tag = entityData.get(persistentDataAccessor).copy()
-        block(tag)
-        entityData.set(persistentDataAccessor, tag)
-    }
-
-    override fun defineSynchedData(builder: SynchedEntityData.Builder) {
-        super.defineSynchedData(builder)
-        builder.define(persistentDataAccessor, CompoundTag())
-    }
-
-    override fun onSyncedDataUpdated(dataAccessor: EntityDataAccessor<*>) {
-        super.onSyncedDataUpdated(dataAccessor)
-        if (dataAccessor == persistentDataAccessor && level().isClientSide) {
-            val tag = entityData.get(persistentDataAccessor)
-            readAdditionalSaveData(tag)
-        }
-    }
-
     override fun connectionChanged() {
         if (!level().isClientSide) updatePersistentData { connectionManager.save(it) }
     }
@@ -219,6 +184,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
         tag.putBoolean("support_above", supportAbove)
         tag.putBoolean("support_below", supportBelow)
 
+        super.addAdditionalSaveData(tag)
         connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
@@ -246,7 +212,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
         tag.getBooleanOrNull("support_above")?.let { supportAbove = it }
         tag.getBooleanOrNull("support_below")?.let { supportBelow = it }
 
-        if (!level().isClientSide) entityData.set(persistentDataAccessor, tag)
+        super.readAdditionalSaveData(tag)
         connectionManager.load(tag)
     }
 
@@ -260,7 +226,6 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : LivingEntity(M
     }
 
     companion object {
-        val persistentDataAccessor = SynchedEntityData.defineId(FloodlightEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
         init {
             ServerPackets.listen(FloodlightEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen

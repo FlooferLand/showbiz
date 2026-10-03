@@ -4,13 +4,16 @@ import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.data.loot.*
 import net.minecraft.data.models.*
+import net.minecraft.data.models.blockstates.*
 import net.minecraft.resources.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
+import com.flooferland.showbiz.blocks.ChairBlock
 import com.flooferland.showbiz.blocks.base.ShowbizDoorBlock
 import com.flooferland.showbiz.items.base.FancyBlockItem
+import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 
@@ -30,7 +33,8 @@ data class DecoEntry<B: Block>(
 sealed class ModDecoBlocks {
     object RedDoor : BaseDoor("red_door")
     object VoronoiStripeCarpet : BaseCarpet("voronoi_stripe")
-    ;
+    object Chair : BaseChair("chair")
+
 
     // region | Base types
     sealed class BaseDoor(id: String) : ModDecoBlocks() {
@@ -44,6 +48,22 @@ sealed class ModDecoBlocks {
         }
         override fun addBlockModels(g: BlockModelGenerators) {
             g.createDoor(entry.block)
+        }
+    }
+    sealed class BaseChair(id: String) : ModDecoBlocks() {
+        val entry = make<ChairBlock>(
+            id,
+            transparent = true,
+            constructor = ::ChairBlock
+        )
+        override fun addLoot(p: BlockLootSubProvider) {
+            p.add(entry.block, p.createSingleItemTable(entry.item))
+        }
+        override fun addBlockModels(g: BlockModelGenerators) {
+            g.blockStateOutput.accept(
+				MultiVariantGenerator.multiVariant(entry.block, Variant.variant().with(VariantProperties.MODEL, entry.id.blockPath()))
+					.with(BlockModelGenerators.createHorizontalFacingDispatch())
+			);
         }
     }
     sealed class BaseCarpet(name: String) : ModDecoBlocks() {
@@ -98,6 +118,7 @@ sealed class ModDecoBlocks {
         }
     }
     // endregion
+
 
     companion object {
         val children = mutableSetOf<DecoEntry<*>>()

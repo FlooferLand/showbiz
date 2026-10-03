@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.utils
 
+import net.minecraft.core.*
 import net.minecraft.core.component.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
@@ -14,11 +15,13 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.*
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
+
 
 @Suppress("unused")
 object Extensions {
@@ -70,6 +73,22 @@ object Extensions {
         return bones
     }
     //endregion
+
+    // region VoxelShapes (thank you Skillet!!)
+    /** Rotates a north shape to any direction */
+    fun VoxelShape.rotateShape(to: Direction): VoxelShape {
+        val buffer = arrayOf<VoxelShape>(this, Shapes.empty())
+        val times: Int = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4
+        for (i in 0..<times) {
+            buffer[0].forAllBoxes { minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double ->
+                buffer[1] = Shapes.or(buffer[1], Shapes.box(1.0f - maxZ, minY, minX, 1.0f - minZ, maxY, maxX))
+            }
+            buffer[0] = buffer[1]
+            buffer[1] = Shapes.empty()
+        }
+        return buffer[0]
+    }
+    // endregion
 
     //region Compound functions, since these change for 1.21.5+
     fun CompoundTag.removeIfPresent(key: String)    = if (contains(key)) remove(key) else Unit

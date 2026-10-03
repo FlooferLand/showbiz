@@ -123,6 +123,7 @@ object ShowbizClient : ClientModInitializer {
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
             EntityRendererRegistry.register(ModLivingEntities.Bot.type, ::BotEntityRenderer)
             EntityRendererRegistry.register(ModLivingEntities.Floodlight.type, ::FloodlightEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Seat.type, ::SeatEntityRenderer)
         }
 
         // GeckoLib renderers

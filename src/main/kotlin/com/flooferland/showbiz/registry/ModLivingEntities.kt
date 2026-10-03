@@ -7,6 +7,7 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
 import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.FloodlightEntity
+import com.flooferland.showbiz.entities.SeatEntity
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttribute
 sealed class ModLivingEntities<T : LivingEntity> {
     data object Bot : ModLivingEntities<BotEntity>("bot", ::BotEntity);
     data object Floodlight : ModLivingEntities<FloodlightEntity>("floodlight", ::FloodlightEntity);
+    data object Seat : ModLivingEntities<SeatEntity>("seat", ::SeatEntity);
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>
