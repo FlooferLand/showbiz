@@ -18,6 +18,7 @@ import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.roundToInt
+import kotlin.reflect.KClass
 
 @Suppress("unused")
 object Extensions {
@@ -115,6 +116,10 @@ object Extensions {
     }!!
     fun MutableComponent.asLink() = asLink(string)
     //endregion
+
+    fun KClass<*>.forceLoad() {
+        sealedSubclasses.forEach { it.objectInstance ?: it.forceLoad() }
+    }
 
     fun String.count(substring: String) = windowed(substring.length) { if (it == substring) 1 else 0 }.sum()
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this

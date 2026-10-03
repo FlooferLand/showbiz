@@ -7,6 +7,7 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
 import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.FloodlightEntity
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 
@@ -32,7 +33,7 @@ sealed class ModLivingEntities<T : LivingEntity> {
 
     companion object {
         fun register() {
-            ModLivingEntities::class.sealedSubclasses.forEach { it.objectInstance }
+            ModLivingEntities::class.forceLoad()
         }
     }
 }

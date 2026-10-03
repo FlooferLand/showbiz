@@ -8,6 +8,7 @@ import net.minecraft.resources.*
 import net.minecraft.world.inventory.*
 import com.flooferland.showbiz.menus.*
 import com.flooferland.showbiz.network.packets.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
 
@@ -28,6 +29,6 @@ sealed class ModScreenHandlers<T: AbstractContainerMenu, D: Any> {
     }
 
     companion object {
-        init { ModScreenHandlers::class.sealedSubclasses.forEach { it.objectInstance } }
+        init { ModScreenHandlers::class.forceLoad() }
     }
 }

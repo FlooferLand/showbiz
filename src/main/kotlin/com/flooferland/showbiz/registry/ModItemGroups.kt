@@ -22,8 +22,8 @@ enum class ModItemGroups {
         main.add(ModRecipes.DookPlush.outputProvider())
         main.add(ModRecipes.GullyDookPlush.outputProvider())
 
-        for (block in ModDecoBlocks.entries) {
-            deco.add(block.item.defaultInstance)
+        for (entry in ModDecoBlocks.children) {
+            deco.add(entry.item.defaultInstance)
         }
     });
 

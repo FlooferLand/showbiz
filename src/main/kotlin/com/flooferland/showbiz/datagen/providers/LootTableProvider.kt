@@ -13,13 +13,8 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider
 
 class LootTableProvider(output: FabricDataOutput, registryLookup: CompletableFuture<HolderLookup.Provider>) : FabricBlockLootTableProvider(output, registryLookup) {
     override fun generate() {
-        for (deco in ModDecoBlocks.entries) {
-            val drop = when (deco.type) {
-                ModDecoBlocks.Type.Other -> null
-                ModDecoBlocks.Type.Door -> createDoorTable(deco.block)
-            }
-            if (drop != null)
-                add(deco.block) { drop }
+        for (group in ModDecoBlocks.entries) {
+            group.addLoot(this)
         }
     }
 

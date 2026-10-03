@@ -5,6 +5,7 @@ import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 
 sealed class ModPackets<T: CustomPacketPayload> {
@@ -46,7 +47,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
 
     companion object {
         fun register() {
-            ModPackets::class.sealedSubclasses.forEach { it.objectInstance }
+            ModPackets::class.forceLoad()
         }
     }
 }

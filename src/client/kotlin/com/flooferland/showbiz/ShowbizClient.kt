@@ -155,7 +155,7 @@ object ShowbizClient : ClientModInitializer {
             if (block.model?.transparent != true) continue
             BlockRenderLayerMap.INSTANCE.putBlock(block.block, RenderType.cutout())
         }
-        for (deco in ModDecoBlocks.entries) {
+        for (deco in ModDecoBlocks.children) {
             if (deco.transparent) BlockRenderLayerMap.INSTANCE.putBlock(deco.block, RenderType.cutout())
         }
 

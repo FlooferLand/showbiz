@@ -16,16 +16,18 @@ class ModelProvider(output: FabricDataOutput) : FabricModelProvider(output) {
         makeDiode(generator, ModBlocks.ShowParser.block)
 
         // Decoration blocks
-        for (deco in ModDecoBlocks.entries) {
-            when (deco.type) {
-                ModDecoBlocks.Type.Other -> {}
-                ModDecoBlocks.Type.Door -> generator.createDoor(deco.block)
-            }
+        for (entry in ModDecoBlocks.entries) {
+            entry.addBlockModels(generator)
         }
     }
 
     override fun generateItemModels(generator: ItemModelGenerators) {
         generator.generateFlatItem(ModBlocks.ShowParser.item, ModelTemplates.FLAT_ITEM)
+
+        // Decoration blocks
+        for (entry in ModDecoBlocks.entries) {
+            entry.addItemModels(generator)
+        }
     }
 
     fun makeDiode(generator: BlockModelGenerators, block: Block) {

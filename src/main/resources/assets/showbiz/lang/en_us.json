@@ -24,6 +24,8 @@
     "block.showbiz.reel_holder": "Reel Holder (W.I.P)",
 
     "block.showbiz.red_door": "Red Door",
+    "block.showbiz.voronoi_stripe_block": "Voronoi Stripe Block (W.I.P)",
+    "block.showbiz.voronoi_stripe_carpet": "Voronoi Stripe Carpet (W.I.P)",
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
@@ -50,6 +52,9 @@
     "tooltip.showbiz.block.programmer": "Allows you to record in bits",
     "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or not)",
     "tooltip.showbiz.item.bot": "Shift right-click to pick it back up\nRight click to customize\nWork in progress!",
+
+    "tooltip.showbiz.block.voronoi_stripe_block": "Might vanish in future updates\nThe Block ID might change",
+    "tooltip.showbiz.block.voronoi_stripe_carpet": "Might vanish in future updates\nThe Block ID might change",
 
     "message.showbiz.show_load_fail": "Failed to load show",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!",
