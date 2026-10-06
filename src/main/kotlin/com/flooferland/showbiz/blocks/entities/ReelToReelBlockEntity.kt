@@ -32,8 +32,10 @@ import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
@@ -68,9 +70,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     public var recording: Boolean = false
     public var showData: ShowData = ShowData(this)
-    public var seek = 0.0
     public val signal = SignalFrame()
 
+    var seek = 0.0
+        public get private set
     var playing = false
         public get private set
     var paused = false
@@ -90,14 +93,29 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var audioBytesWritten = 0
 
     fun tick() {
-        modelPartInstance.tick(level ?: return, blockPos, blockState)
+        val level = level ?: return
+        modelPartInstance.tick(level, blockPos, blockState)
+
+        // Loading the show
+        val filename = showData.name
+        if (showData.isLoaded && filename != null && showData.isEmpty() && !getItem(0).isEmpty && playing && !level.isClientSide) {
+            val seek = seek
+            loadShow(filename) { data ->
+                if (data != null) applyChange(true) {
+                    setPlaying(true)
+                    seekTo(seek)
+                }
+            }
+        }
+
+        // Playback stuff
         if (playing && !paused) {
             seek += tickDelta
             seekInt = (seek * fps).roundToInt()
         }
-        if (level?.isClientSide ?: true) return
+        if (level.isClientSide) return
 
-        val runningShow = (playing || recording) && !showData.isEmpty()
+        val runningShow = (playing || recording) && !showData.isNotLoaded()
         val passthrough = recordQueue.isNotEmpty()
         if (!runningShow && !passthrough) return
 
@@ -179,6 +197,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 hasFinished = true
             }
         }
+
+        // Saving the seek every once in a while
+        if (runningShow && level.gameTime % 2.secsToTicks() == 0L) {
+            level.blockEntityChanged(blockPos)
+        }
     }
 
     override fun setRemoved() {
@@ -191,37 +214,27 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         audio.send()
     }
 
+    // region | Playback
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
         updateState()
     }
-
     fun setPaused(paused: Boolean) {
         this.playing = !paused
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
         updateState()
     }
+    fun seekTo(seconds: Double) {
+        this.seek = seconds
 
-    fun updateState() {
-        // Visual and redstone
-        val state = blockState.setValue(PLAYING, playing && !paused)
-        level?.setBlockAndUpdate(blockPos, state)
-        level?.updateNeighborsAt(blockPos, state.block)
-        setChanged()
-
-        // TODO: Find only near players
-        val serverLevel = level as? ServerLevel ?: return
-        for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
-            ServerPlayNetworking.send(player, state)
-        }
+        val format = getFormat()
+        val alignedBytes = (seconds * format.sampleRate).toLong() * format.frameSize
+        audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+        updateState()
     }
-
-    fun getFormat() = showData.format ?: showData.targetFormat
-
     fun resetPlayback() {
         seek = 0.0
         seekInt = 0
@@ -239,13 +252,30 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
         setChanged()
     }
-
     /** Client-side only !! */
     fun clientApplyPlaybackState(packet: PlaybackStatePacket) {
         this.playing = packet.playing
         this.paused = packet.paused
         this.seek = packet.seek
     }
+    // endregion
+
+    fun updateState() {
+        // Visual and redstone
+        val state = blockState.setValue(PLAYING, playing && !paused)
+        level?.setBlockAndUpdate(blockPos, state)
+        level?.updateNeighborsAt(blockPos, state.block)
+        setChanged()
+
+        // TODO: Find only near players
+        val serverLevel = level as? ServerLevel ?: return
+        for (player in serverLevel.players()) {
+            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
+            ServerPlayNetworking.send(player, state)
+        }
+    }
+
+    fun getFormat() = showData.format ?: showData.targetFormat
 
     override fun getInteractionMapping() = mapOf("record" to 0)
 
@@ -276,13 +306,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Removing legacy tags
         tag.removeIfPresent("signal_frame")
-        tag.removeIfPresent("seek")
 
         // Save other
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
+        tag.putDouble("seek", seek)
         connectionManager.save(tag)
         showData.saveNBT(tag)  // TODO: Should probably remove this?
     }
@@ -295,6 +325,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         paused = tag.getBooleanOrNull("paused") ?: false
         recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
+        seek = tag.getDoubleOrNull("seek") ?: 0.0
         connectionManager.load(tag)
         showData.loadNBT(tag)
     }
@@ -308,16 +339,26 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
 
+    fun loadShow(filename: String, block: (ShowData?) -> Unit) {
+        showData.load(filename) { data, err ->
+            val level = level as? ServerLevel ?: return@load
+            if (err != null) {
+                val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
+                nearby.forEach { it.displayClientMessage(err, true) }
+            }
+            block(data)
+        }
+    }
+
+    // region | Container
     fun getNearbyContainer() =
         arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south())
             .mapNotNull { level?.getBlockEntity(it) as? Container }
             .firstOrNull { it !is ReelToReelBlockEntity }
-
-    // region | Container
     override fun getContainerSize() = 1
     override fun getMaxStackSize() = 1
     override fun canPlaceItem(slot: Int, stack: ItemStack) = (slot < containerSize) && stack.item is ReelItem
-    override fun isEmpty() = showData.isEmpty()
+    override fun isEmpty() = showData.isNotLoaded()
     override fun getItem(slot: Int): ItemStack {
         return showData.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
     }
@@ -341,12 +382,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val filename = ReelItem.getFilename(stack) ?: return
             resetPlayback()
             showData.isLoaded = true
-            showData.load(filename) { data, err ->
-                val level = level as? ServerLevel ?: return@load
-                if (err != null) {
-                    val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
-                    nearby.forEach { it.displayClientMessage(err, true) }
-                }
+            loadShow(filename) { data ->
                 if (data != null) applyChange(true) {
                     setPlaying(true)
                 }

@@ -75,7 +75,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
-            if (heldStack.item is ReelItem && entity.showData.isEmpty()) {
+            if (heldStack.item is ReelItem && entity.showData.isNotLoaded()) {
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
                     val stackCopy = heldStack.copy()
@@ -101,7 +101,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.showData.isEmpty()) {  // Removing
+            } else if (heldStack.isEmpty && !entity.showData.isNotLoaded()) {  // Removing
                 if (player is ServerPlayer) {
                     val showName = entity.showData.name
                     showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
@@ -116,7 +116,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
         } else if (!level.isClientSide) {
             // Pausing
-            if (!entity.showData.isEmpty()) {
+            if (!entity.showData.isNotLoaded()) {
                 var paused = entity.paused
 
                 entity.applyChange(true) {
