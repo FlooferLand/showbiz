@@ -60,9 +60,11 @@ sealed class ModDecoBlocks {
             p.add(entry.block, p.createSingleItemTable(entry.item))
         }
         override fun addBlockModels(g: BlockModelGenerators) {
+            val blockModel = entry.id.blockPath()
             g.blockStateOutput.accept(
-				MultiVariantGenerator.multiVariant(entry.block, Variant.variant().with(VariantProperties.MODEL, entry.id.blockPath()))
-					.with(BlockModelGenerators.createHorizontalFacingDispatch())
+				MultiVariantGenerator.multiVariant(entry.block, Variant.variant().with(VariantProperties.MODEL, blockModel))
+                    .with(BlockModelGenerators.createHorizontalFacingDispatch())
+                    .with(BlockModelGenerators.createBooleanModelDispatch(ChairBlock.TUCKED, blockModel.withSuffix("_tucked"), blockModel))
 			);
         }
     }

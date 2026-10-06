@@ -118,7 +118,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             // Random honking
             if (level.gameTime > lastHonked + 2.secsToTicks() && level.random.nextIntBetweenInclusive(0, 300) == 7) {
                 val nearby = level.getNearbyPlayers(AABB.ofSize(position(), 2.0, 2.0, 2.0))
-                if (!nearby.isEmpty())
+                if (nearby.isNotEmpty())
                     level().playSound(null, blockPosition(), ModSounds.Honk.event, SoundSource.BLOCKS, 0.05f, 0.95f)
                 lastHonked = level.gameTime
             }

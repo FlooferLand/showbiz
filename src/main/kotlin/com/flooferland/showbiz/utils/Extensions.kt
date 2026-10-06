@@ -88,6 +88,15 @@ object Extensions {
         }
         return buffer[0]
     }
+    fun VoxelShape.generateHorizontal() = hashMapOf(
+        Direction.NORTH to rotateShape(Direction.NORTH).optimize(),
+        Direction.SOUTH to rotateShape(Direction.SOUTH).optimize(),
+        Direction.WEST to rotateShape(Direction.WEST).optimize(),
+        Direction.EAST to rotateShape(Direction.EAST).optimize()
+    )
+    fun MutableMap<Direction, VoxelShape>.getCachedOrRotate(to: Direction): VoxelShape {
+        return getOrPut(to) { (get(Direction.NORTH) ?: Shapes.block()).rotateShape(to).optimize() }
+    }
     // endregion
 
     //region Compound functions, since these change for 1.21.5+

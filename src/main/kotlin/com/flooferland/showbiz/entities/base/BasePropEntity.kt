@@ -19,6 +19,7 @@ open class BasePropEntity(entityType: EntityType<out LivingEntity>, level: Level
     override fun canBeSeenAsEnemy() = false
     override fun getDefaultDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.1f, 0.1f)
     override fun isInvulnerableTo(source: DamageSource) = true
+    override fun showVehicleHealth() = false
 
     // region | LivingEntity stuff
     override fun getMainArm() = HumanoidArm.RIGHT

@@ -1,6 +1,6 @@
 set rae dook
 
-rae 30 {
+rae 62 {
     flow 2.0
     rotate "jaw" x:-25
 }
