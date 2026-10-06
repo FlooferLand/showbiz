@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
-import com.flooferland.showbiz.network.packets.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
@@ -24,10 +24,7 @@ import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
-import com.flooferland.showbiz.types.connection.data.PackedAudioData
-import com.flooferland.showbiz.types.connection.data.PackedControlData
-import com.flooferland.showbiz.types.connection.data.PackedShowData
-import com.flooferland.showbiz.types.connection.data.PackedVideoData
+import com.flooferland.showbiz.types.connection.data.*
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -89,12 +86,16 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.1, 0.1, 0.15))
     }
-
     private var audioBytesWritten = 0
+    private var stateDirty = false
 
     fun tick() {
         val level = level ?: return
         modelPartInstance.tick(level, blockPos, blockState)
+        if (stateDirty) {
+            updateState()
+            stateDirty = false
+        }
 
         // Loading the show
         val filename = showData.name
@@ -211,6 +212,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
         audio.data.mono = chunk
+        audio.data.chunkId++
         audio.send()
     }
 
@@ -219,13 +221,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         this.playing = playing
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
-        updateState()
+        audio.sendTrigger(if (playing) PackedAudioData.Action.None else PackedAudioData.Action.Stop)
+        stateDirty = true
     }
     fun setPaused(paused: Boolean) {
         this.playing = !paused
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
-        updateState()
+        audio.sendTrigger(if (paused) PackedAudioData.Action.Pause else PackedAudioData.Action.Unpause)
+        stateDirty = true
     }
     fun seekTo(seconds: Double) {
         this.seek = seconds
@@ -233,13 +237,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val format = getFormat()
         val alignedBytes = (seconds * format.sampleRate).toLong() * format.frameSize
         audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
-        updateState()
+        stateDirty = true
     }
     fun resetPlayback() {
         seek = 0.0
         seekInt = 0
         audioBytesWritten = 0
-        audio.data.chunkId = 0
+        audio.data.clear()
         if (playing) setPlaying(false)
         recordQueue.clear()
         hasFinished = false
@@ -250,10 +254,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             video.send()
             it.close()
         }
+        stateDirty = true
         setChanged()
     }
     /** Client-side only !! */
-    fun clientApplyPlaybackState(packet: PlaybackStatePacket) {
+    fun clientApplyPlaybackState(packet: ShowPlaybackStatePacket) {
         this.playing = packet.playing
         this.paused = packet.paused
         this.seek = packet.seek
@@ -270,7 +275,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
         for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
+            val state = ShowPlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
             ServerPlayNetworking.send(player, state)
         }
     }
