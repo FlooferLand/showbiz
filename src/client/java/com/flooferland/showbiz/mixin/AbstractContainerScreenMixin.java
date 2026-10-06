@@ -20,16 +20,14 @@ public abstract class AbstractContainerScreenMixin {
 	@Inject(method = "keyPressed", at = @At("HEAD"))
 	private void showbiz_keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
 		var instance = Minecraft.getInstance();
-
 		if (hoveredSlot == null) return;
-		var stack = hoveredSlot.getItem();
-
-		var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-		var entry = Handbook.INSTANCE.getCache().getItems().get(id);
-		if (entry == null) return;
 
 		var pressed = ModClientInput.OpenInHandbook.getMapping().matches(keyCode, scanCode);
 		if (pressed && !(instance.screen instanceof HandbookPageScreen)) {
+			var stack = hoveredSlot.getItem();
+			var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+			var entry = Handbook.INSTANCE.getCache().getItems().get(id);
+			if (entry == null) return;
 			instance.setScreen(new HandbookPageScreen(instance.screen, id));
 		}
 	}
