@@ -44,6 +44,8 @@ You've done it, you built the mod!
 
 Now, if you want to assemble it into a jar file, run `gradle assemble`, then look inside `versions\<minecraft_version>\build\libs` when it's done. Grab the file that doesn't end in anything funny _(shouldn't have `-all` at the end of its name or anything)_
 
+You could also run `gradle giveMeTheJarFile` to assemble and open up the folder for you
+
 If you want to run the project inside Intellij itself, you can select the `Minecraft Client` profile in the top right and press the play button.
 
 Just note that this is the latest in-development version of Showbiz, which is not stable whatsoever.

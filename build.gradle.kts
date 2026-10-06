@@ -1,4 +1,5 @@
 
+import java.awt.Desktop
 import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -217,6 +218,19 @@ tasks.withType<ProcessResources>().configureEach {
     filesMatching("$modId.client.mixins.json") { expand(properties) }
     filesMatching("$modId.mixins.json") { expand(properties) }
     filesMatching("data/showbiz/showbiz.addon.toml")  { expand(properties) }
+}
+tasks.register("giveMeTheJarFile") {
+    description = "Builds the mod and opens up a file manager"
+    dependsOn("assemble")
+
+    doLast {
+        val dir = layout.buildDirectory.get().asFile.resolve("libs")
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().open(dir)
+        } else {
+            println("\nThe mod jar is in this folder:\n$dir\n")
+        }
+    }
 }
 
 // Datagen
