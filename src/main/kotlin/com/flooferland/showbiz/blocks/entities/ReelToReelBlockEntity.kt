@@ -13,6 +13,8 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.mayInteractWith
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
@@ -34,6 +36,7 @@ import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Sounds
+import com.flooferland.showbiz.utils.tc
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
@@ -289,22 +292,31 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
 
     override fun onInteract(key: Int, level: Level, player: Player) {
-        if (level !is ServerLevel) return
-        if (key == 0) applyChange(true) {
-            if (recording) {
-                recording = false
-                showData.saveToDisk(player)
-                Sounds.exit(player)
-            } else if (playing) {
-                if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
-                    player.displayClientMessage(Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW), true)
+        val player = player as? ServerPlayer ?: return
+        if (key != 0) return
+        if (player.mayInteractWith(this) && Permissions.canWriteReels(player)) {
+            applyChange(true) {
+                if (recording) {
+                    recording = false
+                    showData.saveToDisk(player)
+                    Sounds.exit(player)
+                } else if (playing) {
+                    if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
+                        player.displayClientMessage(
+                            Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW),
+                            true
+                        )
+                    }
+                    recording = true
+                    Sounds.enter(player)
+                } else {
+                    player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+                    Sounds.bad(player)
                 }
-                recording = true
-                Sounds.enter(player)
-            } else {
-                player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
-                Sounds.bad(player)
             }
+        } else {
+            player.displayClientMessage(tc("message", "permission_error"), true)
+            Sounds.bad(player)
         }
     }
 

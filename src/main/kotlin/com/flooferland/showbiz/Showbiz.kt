@@ -3,7 +3,6 @@ package com.flooferland.showbiz
 import net.minecraft.server.level.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.*
-import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
@@ -19,8 +18,6 @@ import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.ShowbizUtils
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -41,17 +38,7 @@ object Showbiz : ModInitializer {
 
     override fun onInitialize() {
         // Loading config
-        val configResult = runCatching {
-            val configFile = ModConfig.getCommonPath().toFile()
-            if (configFile.exists()) {
-                config = Toml.decodeFromString<ModConfig>(configFile.readText())
-            } else {
-                configFile.writeText(Toml.encodeToString<ModConfig>(config))
-            }
-        }
-        configResult.onFailure { throwable ->
-            Showbiz.log.error("Error loading config", throwable)
-        }
+        config = ModConfig.load()
 
         // Loading FFMPEG
         FFmpeg.init()

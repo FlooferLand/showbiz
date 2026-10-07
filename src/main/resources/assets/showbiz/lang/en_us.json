@@ -59,6 +59,7 @@
 
     "message.showbiz.show_load_fail": "Failed to load show",
     "message.showbiz.empty_reel_warning": "This reel has no show on it!",
+    "message.showbiz.permission_error": "Missing permissions",
 
     "key.showbiz.open_in_handbook": "Open in Handbook",
 

@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModConfig
+import com.flooferland.showbiz.registry.PermissionSelector
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberProperties
 
@@ -98,6 +99,12 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                         (prop as? KMutableProperty1<T, Boolean>)?.set(category, bool) ?: Showbiz.log.error("Failed to set '${propName.string}'")
                     }
                     .build()
+                is PermissionSelector -> CycleButton.builder<PermissionSelector> { Component.literal(it.name) }
+                    .withInitialValue(propValue)
+                    .withValues(PermissionSelector.entries)
+                    .create(Component.literal("Minimum")) { b, value ->
+                        (prop as? KMutableProperty1<T, PermissionSelector>)?.set(category, value) ?: Showbiz.log.error("Failed to set '${propName.string}'")
+                    }
                 else -> { Showbiz.log.error("Prop of this type does not exist for ${propName.string}"); return@forEach }
             }
 
@@ -108,6 +115,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
 
     override fun onClose() {
         Showbiz.config = config
+        Showbiz.config.save()
         super.onClose()
     }
 }
