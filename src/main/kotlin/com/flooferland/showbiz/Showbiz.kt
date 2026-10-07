@@ -72,7 +72,7 @@ object Showbiz : ModInitializer {
             ModItemGroups.entries
             ModSounds.entries
             ModPlayerSynchedData
-            ModCommands
+            ModCommands.register()
             ModScreenHandlers
             if (ShowbizUtils.hasComputerCraft()) run { ModPeripherals.register() }
             ServerConnections
