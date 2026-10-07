@@ -3,15 +3,21 @@ package com.flooferland.showbiz.types.commands
 import net.minecraft.*
 import net.minecraft.commands.*
 import net.minecraft.network.chat.*
+import com.flooferland.showbiz.types.permissions.PermissionContext
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 
 abstract class Command(val name: String) {
-    abstract val description: MutableComponent?
+    abstract fun description(): MutableComponent?
     abstract fun run(ctx: CommandContext): Response
 
+    open val showHelpOnRun: Boolean = false
     open val children: Subcommands = Subcommands()
     open fun requires(src: CommandSource): Boolean = true
+    open fun checkPermission(perms: PermissionContext): Boolean = true
+    open fun help(): MutableComponent? =
+        usage().copy()
+            .also { comp -> description()?.let { comp.append("\n  ").append(it.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)) } }
 
     var parent: Command? = null
     val args = CommandArgument.Registry(this)
@@ -43,27 +49,29 @@ abstract class Command(val name: String) {
     }
 
     fun build(): LiteralArgumentBuilder<CommandSourceStack> {
+        // Arguments
         var last: ArgumentBuilder<CommandSourceStack, *>? = null
         for (arg in args.list.reversed()) {
             val node = Commands.argument(arg.name, arg.type)
+            node.requires { this.checkRequires(it) }
+            node.executes { this.tryRun(CommandContext(it)) }
             arg.suggest?.let { block ->
                 node.suggests { ctx, builder -> block(CommandContext(ctx), builder) }
             }
-            node.executes { this.tryRun(CommandContext(it)) }
             last?.let { node.then(it) }
             last = node
         }
 
+        // Command
         val required = args.list.count { !it.isOptional }
         val base = Commands.literal(name)
-            .requires { this.requires(CommandSource(it)) }
+            .requires { this.checkRequires(it) }
             .executes { ctx ->
                 val ctx = CommandContext(ctx)
                 if (required == 0) {
                     this.tryRun(ctx)
                 } else {
-                    val info = (this.description?.append("\n") ?: Component.empty()).append("Usage: ").append(usage())
-                    ctx.inner.source.sendSuccess({ info }, false)
+                    ctx.inner.source.sendSuccess({ help() }, false)
                     Response.ExitCodes.SUCCESS
                 }
             }
@@ -72,7 +80,28 @@ abstract class Command(val name: String) {
         return base
     }
 
+    private fun checkRequires(ctx: CommandSourceStack): Boolean {
+        // parent-ception
+        var parentsAgree = true
+        var parent: Command? = this.parent
+        while (parent != null && parentsAgree) {
+            if (!parent.checkRequires(ctx)) {
+                parentsAgree = false
+            }
+            parent = parent.parent
+        }
+
+        val perms = ctx.player?.let { PermissionContext(ctx.server, it) }
+        val source = CommandSource(ctx)
+        return this.requires(source) && (perms?.let { this.checkPermission(it) } ?: true) && parentsAgree
+    }
+
     private fun tryRun(ctx: CommandContext): Int {
+        if (this.showHelpOnRun) {
+            ctx.inner.source.sendSuccess({ help() }, false)
+            return Response.ExitCodes.SUCCESS
+        }
+
         try {
             val response = this.run(ctx)
             when (response.type) {

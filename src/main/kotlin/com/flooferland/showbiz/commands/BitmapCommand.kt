@@ -11,7 +11,7 @@ import com.flooferland.showbiz.types.commands.CommandContext
 import com.flooferland.showbiz.utils.Extensions.hover
 
 object BitmapCommand : Command("bitmap") {
-    override val description = Component.literal("Please type in a bitmap name (ex: rae, faz)")!!
+    override fun description() = Component.literal("Please type in a bitmap name (ex: rae, faz)")!!
 
     val map = args.word("map")
         .suggests { _, builder ->

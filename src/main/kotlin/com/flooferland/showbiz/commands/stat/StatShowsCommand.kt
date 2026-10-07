@@ -11,7 +11,7 @@ import com.flooferland.showbiz.utils.Extensions.hover
 import com.flooferland.showbiz.utils.Extensions.withTeleport
 
 object StatShowsCommand : Command("shows") {
-    override val description = Component.literal("Gives you a list of running shows and whatnot")!!
+    override fun description() = Component.literal("Gives you a list of running shows and whatnot")!!
 
     val moreInfo = args.bool("more_info").optional()
 

@@ -6,7 +6,7 @@ import com.flooferland.showbiz.types.commands.CommandContext
 import com.flooferland.showbiz.utils.Extensions.asLink
 
 object WikiCommand : Command("wiki") {
-    override val description = Component.literal("Gives you a link to the wiki")!!
+    override fun description() = Component.literal("Gives you a link to the wiki")!!
     override fun run(ctx: CommandContext): Response {
         return Response.success(Component.literal("https://github.com/FlooferLand/showbiz/wiki").asLink())
     }
