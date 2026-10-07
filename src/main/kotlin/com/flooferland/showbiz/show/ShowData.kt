@@ -64,6 +64,11 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     fun getFilePath(filename: String) = FileStorage.cachedShowPaths[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isNotLoaded() = !isLoaded
     fun isEmpty() = audio.size == 0
+    fun approxByteSize(): Long {
+        val audioBytes = audio.size.toLong() * Byte.SIZE_BYTES
+        val signalBytes = signal.sumOf { Byte.SIZE_BYTES + (it.size.toLong() * BitId.SIZE_BYTES) }
+        return audioBytes + signalBytes
+    }
 
     fun load(filename: String, onLoadOrErr: (data: ShowData?, error: Component?) -> Unit = { _, _ -> }) {
         unload()

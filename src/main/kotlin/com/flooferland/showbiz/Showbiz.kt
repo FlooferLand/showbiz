@@ -80,6 +80,7 @@ object Showbiz : ModInitializer {
             FileServer
             UpdateChecker
             ServerPackets.init()
+            ServerStats.init()
         }
 
         // Services

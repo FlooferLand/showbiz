@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types.commands
 
 import com.mojang.brigadier.arguments.ArgumentType
+import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.suggestion.Suggestions
@@ -13,7 +14,9 @@ data class CommandArgument<T>(val name: String, val type: ArgumentType<T>, val c
     var suggest: SuggestBlock? = null
     fun suggests(block: SuggestBlock) = also { suggest = block }
 
-    data class Optional<T>(val arg: CommandArgument<T>)
+    data class Optional<T>(val arg: CommandArgument<T>) {
+        init { arg.isOptional = true }
+    }
     fun optional() = Optional(this)
 
     class Registry(val command: Command, val list: MutableList<CommandArgument<*>> = mutableListOf()) {
@@ -34,6 +37,10 @@ data class CommandArgument<T>(val name: String, val type: ArgumentType<T>, val c
 
         fun int(name: String, min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE) = add() {
             CommandArgument<Int>(name, IntegerArgumentType.integer(min, max), Int::class.java)
+        }
+
+        fun bool(name: String) = add() {
+            CommandArgument<Boolean>(name, BoolArgumentType.bool(), Boolean::class.java)
         }
     }
 }

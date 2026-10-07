@@ -193,9 +193,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
 
             // Setting playing to false when the show ends
+            // TODO: Unload the show data as well; currently makes the reel item vanish though
             if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
                 setPlaying(false)
                 hasFinished = true
+                // showData.unload()
             }
         }
 

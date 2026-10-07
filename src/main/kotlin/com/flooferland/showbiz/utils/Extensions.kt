@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import java.util.Locale
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
@@ -135,14 +136,25 @@ object Extensions {
         withStyle { it.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, comp)) }!!
     fun MutableComponent.click(action: ClickEvent.Action, value: String) =
         withStyle { it.withClickEvent(ClickEvent(action, value)) }!!
-    fun MutableComponent.asLink(url: String) = withStyle {
+
+    fun MutableComponent.withLink(url: String) = withStyle {
         it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, url))
             .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open this URL in your browser")))
             .withColor(FastColor.ARGB32.color(120, 200, 255))
             .withUnderlined(true)
             .withBold(true)
     }!!
-    fun MutableComponent.asLink() = asLink(string)
+    fun MutableComponent.withTeleport(pos: BlockPos) = withStyle {
+        val coords = "${pos.x} ${pos.y} ${pos.z}"
+        it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s $coords"))
+            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to teleport to $coords")))
+            .withColor(FastColor.ARGB32.color(120, 200, 255))
+            .withUnderlined(true)
+            .withBold(true)
+    }!!
+
+    fun MutableComponent.asLink() = withLink(string)
+    fun BlockPos.toComp() = Component.literal("$x $y $z").withTeleport(this)
     //endregion
 
     fun KClass<*>.forceLoad() {
@@ -157,9 +169,25 @@ object Extensions {
     }
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
+
+    // region Number conversion funkiness
     fun Int.secsToTicks(): Int = this * 20
     fun Float.secsToTicks(): Int = (this * 20).roundToInt()
     fun Double.secsToTicks(): Int = (this * 20).roundToInt()
+
+    fun Int.bytesToFriendlySize() = this.toLong().bytesToFriendlySize()
+    fun Long.bytesToFriendlySize(): String {
+        val kb = 1024.0
+        val mb = kb * 1024
+        val gb = mb * 1024
+        return when {
+            this >= gb -> String.format(Locale.US, "%.2f GB", this / gb)
+            this >= mb -> String.format(Locale.US, "%.2f MB", this / mb)
+            this >= kb -> String.format(Locale.US, "%.2f KB", this / kb)
+            else -> "$this bytes"
+        }
+    }
+    // endregion
 
     fun Number.formatDecimal(precision: Int = 3) =
         runCatching { "%.${precision}f".format(this) }.getOrDefault(toString())

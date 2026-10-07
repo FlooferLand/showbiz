@@ -5,7 +5,6 @@ import net.minecraft.commands.*
 import net.minecraft.network.chat.*
 import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.registry.ModCommands.bitmapCommandView
 import com.flooferland.showbiz.show.Drawer
 import com.flooferland.showbiz.types.commands.Command
 import com.flooferland.showbiz.types.commands.CommandContext
@@ -39,7 +38,7 @@ object BitmapCommand : Command("bitmap") {
                 built.append(Component.literal(fixture).withStyle(ChatFormatting.WHITE))
                 built.append("\n")
             }
-            built.append("Use ${bitmapCommandView(map)} to view the bitmap for a fixture")
+            built.append("Add '$map' to the end of the command to view the bitmap for a fixture")
             return Response.success(built)
         }
 

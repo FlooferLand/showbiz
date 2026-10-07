@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.screens.base
 
-import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
@@ -9,7 +8,6 @@ import net.minecraft.client.gui.screens.inventory.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.world.entity.player.*
-import com.flooferland.showbiz.registry.ModCommands
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.MappedBits
@@ -43,27 +41,6 @@ where M: EditScreenMenu<P> {
     override fun init() {
         super.init()
         autoUi()
-
-        // Bitmap help button
-        run {
-            val help = Button.builder(Component.literal("?")) {
-                val client = Minecraft.getInstance() ?: return@builder
-                val player = client.player ?: return@builder
-
-                val mapping = menu.data.base.mapping ?: ""
-                val command = when {
-                    mapping.isNotBlank() -> ModCommands.bitmapCommandView(map = mapping)
-                    else -> ModCommands.bitmapCommandView()
-                }.let { Component.literal(it).withStyle(ChatFormatting.GRAY) }
-                player.displayClientMessage(
-                    Component.literal("-- ").withStyle(ChatFormatting.DARK_RED)
-                        .append(title.copy().withStyle(ChatFormatting.DARK_GRAY)
-                        ), false)
-                player.displayClientMessage(Component.literal("Use ").append(command).append(" to view all the bits you can filter for"), false)
-                client.setScreen(null)
-            }.pos(textureX + (size * 0.77).toInt(), textureY + (size * 0.82).toInt()).size(20, 20).build()
-            addRenderableWidget(help)
-        }
     }
 
     override fun resize(minecraft: Minecraft, width: Int, height: Int) {
