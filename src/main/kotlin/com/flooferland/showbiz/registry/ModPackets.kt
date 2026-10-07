@@ -32,6 +32,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object JukeboxLyric: ModPackets<JukeboxLyricPacket>(ServerToClient, JukeboxLyricPacket.type, JukeboxLyricPacket.codec)
     data object ServerInfo: ModPackets<ServerCapabilitiesPacket>(ServerToClient, ServerCapabilitiesPacket.type, ServerCapabilitiesPacket.codec)
     data object ConnectionData: ModPackets<ConnectionDataPacket>(ServerToClient, ConnectionDataPacket.type, ConnectionDataPacket.codec)
+    data object OpenClientConfig: ModPackets<OpenClientConfigPacket>(ServerToClient, OpenClientConfigPacket.type, OpenClientConfigPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {

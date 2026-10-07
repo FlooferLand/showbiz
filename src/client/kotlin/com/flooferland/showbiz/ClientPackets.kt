@@ -3,8 +3,10 @@ package com.flooferland.showbiz
 import net.minecraft.client.multiplayer.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.network.packets.OpenClientConfigPacket
 import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
+import com.flooferland.showbiz.screens.ShowbizConfigScreen
 import com.flooferland.showbiz.types.FFmpeg
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 
@@ -39,6 +41,12 @@ object ClientPackets {
             val level = context.player().level() as? ClientLevel ?: return@listen
             val blockEntity = level.getBlockEntity(packet.blockPos) as? ReelToReelBlockEntity ?: return@listen
             blockEntity.clientApplyPlaybackState(packet)
+        }
+
+        // Opening the config screen
+        listen(OpenClientConfigPacket.type) { _, context ->
+            val client = context.client() ?: return@listen
+            client.setScreen(ShowbizConfigScreen(client.screen))
         }
     }
 }

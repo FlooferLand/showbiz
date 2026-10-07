@@ -1,6 +1,9 @@
 package com.flooferland.showbiz.registry
 
+import com.flooferland.showbiz.Showbiz
+import java.nio.file.Path
 import kotlinx.serialization.Serializable
+import net.fabricmc.loader.api.FabricLoader
 
 @Serializable
 data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions()) : Cloneable {
@@ -16,4 +19,8 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
     )
 
     public override fun clone() = super.clone() as ModConfig
+
+    companion object {
+        fun getCommonPath(): Path = FabricLoader.getInstance().configDir.resolve("${Showbiz.MOD_ID}.toml")
+    }
 }

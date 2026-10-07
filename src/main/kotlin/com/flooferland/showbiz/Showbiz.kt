@@ -27,7 +27,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
-import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -43,7 +42,7 @@ object Showbiz : ModInitializer {
     override fun onInitialize() {
         // Loading config
         val configResult = runCatching {
-            val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
+            val configFile = ModConfig.getCommonPath().toFile()
             if (configFile.exists()) {
                 config = Toml.decodeFromString<ModConfig>(configFile.readText())
             } else {

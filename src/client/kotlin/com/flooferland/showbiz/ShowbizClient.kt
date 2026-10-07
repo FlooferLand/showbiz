@@ -69,7 +69,6 @@ object ShowbizClient : ClientModInitializer {
         run {
             ModPackets
             ModClientEntities
-            ModClientCommands
             ModClientInput.entries
             ModClientLights.load()
             ClientConnections
