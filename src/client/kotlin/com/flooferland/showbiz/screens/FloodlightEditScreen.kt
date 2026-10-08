@@ -4,7 +4,7 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.FloodlightEditMenu
-import com.flooferland.showbiz.network.packets.FloodlightEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.FloodlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl

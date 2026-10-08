@@ -63,6 +63,15 @@ enum class ModBlocks {
         modelPreset = BlockModelId.None,
         entity = Entity(::ShowParserBlockEntity, isGeckolib = false),
     ),
+    ShowBridge(
+        "show_bridge", ::ShowBridgeBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = Entity(::ShowBridgeBlockEntity, isGeckolib = false),
+    ),
     ShowSelector(
         "show_selector", ::ShowSelectorBlock,
         Properties.of()

@@ -3,7 +3,7 @@ package com.flooferland.showbiz.screens
 import net.minecraft.network.chat.*
 import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.CurtainControllerEditMenu
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.CurtainControllerEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.MappedBits

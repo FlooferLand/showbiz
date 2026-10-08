@@ -93,6 +93,7 @@ object ShowbizClient : ClientModInitializer {
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
+        MenuScreens.register(ModScreenHandlers.ShowBridgeEdit.type, ::ShowBridgeEditScreen)
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
         MenuScreens.register(ModScreenHandlers.FloodlightEdit.type, ::FloodlightEditScreen)
         MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)

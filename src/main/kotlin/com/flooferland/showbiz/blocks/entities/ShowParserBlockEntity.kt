@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.menus.ShowParserEditMenu
-import com.flooferland.showbiz.network.packets.ShowParserEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner

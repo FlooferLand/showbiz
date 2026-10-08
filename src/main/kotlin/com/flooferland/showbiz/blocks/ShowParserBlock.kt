@@ -15,7 +15,7 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
-import com.flooferland.showbiz.network.packets.ShowParserEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.types.IRedstoneExtras
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange

@@ -9,18 +9,29 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import com.flooferland.showbiz.menus.BitViewMenu
-import com.flooferland.showbiz.network.packets.BitViewPacket
+import com.flooferland.showbiz.menus.ShowBridgeEditMenu
+import com.flooferland.showbiz.network.packets.editscreen.ShowBridgeEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.EditScreenMenu
+import com.flooferland.showbiz.types.EditScreenOwner
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 
-class BitViewBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.BitView.entityType!!, pos, blockState), IConnectable, ExtendedScreenHandlerFactory<BitViewPacket> {
+class ShowBridgeBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowBridge.entityType!!, pos, blockState), IConnectable, EditScreenOwner<ShowBridgeEditPacket> {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In)
+
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
+    override fun getDisplayName() = Component.literal("Show Bridge")!!
+    override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
+        val player = player as? ServerPlayer ?: return null
+        return ShowBridgeEditMenu(i, getScreenOpeningData(player))
+    }
+    override fun getScreenOpeningData(player: ServerPlayer) =
+        ShowBridgeEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition)))
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
@@ -38,11 +49,4 @@ class BitViewBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
 
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
-
-    override fun getDisplayName() = Component.literal("Bit View")!!
-    override fun getScreenOpeningData(player: ServerPlayer) = BitViewPacket(worldPosition)
-    override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
-        val player = player as? ServerPlayer ?: return null
-        return BitViewMenu(i, getScreenOpeningData(player))
-    }
 }

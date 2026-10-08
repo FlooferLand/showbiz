@@ -7,7 +7,7 @@ import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.block.*
 import com.flooferland.showbiz.menus.ShowParserEditMenu
-import com.flooferland.showbiz.network.packets.ShowParserEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.rl

@@ -10,7 +10,7 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange

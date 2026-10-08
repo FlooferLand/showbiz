@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.menus
 
-import com.flooferland.showbiz.network.packets.FloodlightEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.FloodlightEditPacket
 import com.flooferland.showbiz.registry.ModScreenHandlers
 import com.flooferland.showbiz.types.EditScreenMenu
 

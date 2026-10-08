@@ -40,7 +40,7 @@ where M: EditScreenMenu<P> {
 
     override fun init() {
         super.init()
-        autoUi()
+        buildUi()
     }
 
     override fun resize(minecraft: Minecraft, width: Int, height: Int) {
@@ -61,7 +61,7 @@ where M: EditScreenMenu<P> {
         }
     }
 
-    fun autoUi() {
+    open fun buildUi() {
         val widgets = mutableListOf<WidgetInfo>()
         addWidgets(widgets)
         addCustomWidgets(widgets)

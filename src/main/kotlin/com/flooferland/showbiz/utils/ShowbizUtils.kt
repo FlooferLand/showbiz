@@ -35,7 +35,7 @@ object ShowbizUtils {
         for (text in comp.string.split('\n')) {
             var comp = Component.literal(text).withStyle(ChatFormatting.GRAY)
             if (text.startsWith('(') && text.endsWith(')')) {
-                comp = comp.withStyle(ChatFormatting.DARK_GRAY)
+                comp = comp.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
             }
             tooltip.add(comp)
         }

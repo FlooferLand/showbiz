@@ -4,6 +4,7 @@ import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.network.packets.*
+import com.flooferland.showbiz.network.packets.editscreen.*
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -12,7 +13,8 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackAudioChunk : ModPackets<PlaybackAudioChunkPacket>(ServerToClient, PlaybackAudioChunkPacket.type, PlaybackAudioChunkPacket.codec)
     data object PlaybackAudioState : ModPackets<PlaybackAudioStatePacket>(ServerToClient, PlaybackAudioStatePacket.type, PlaybackAudioStatePacket.codec)
     data object ShowPlaybackState : ModPackets<ShowPlaybackStatePacket>(ServerToClient, ShowPlaybackStatePacket.type, ShowPlaybackStatePacket.codec)
-    data object ShowParserData : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
+    data object ShowParserEdit : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
+    data object ShowBridgeEdit : ModPackets<ShowBridgeEditPacket>(Bidirectional, ShowBridgeEditPacket.type, ShowBridgeEditPacket.codec)
     data object SpotlightEdit : ModPackets<SpotlightEditPacket>(Bidirectional, SpotlightEditPacket.type, SpotlightEditPacket.codec)
     data object FloodlightEdit : ModPackets<FloodlightEditPacket>(Bidirectional, FloodlightEditPacket.type, FloodlightEditPacket.codec)
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)

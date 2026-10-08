@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
-import com.flooferland.showbiz.network.packets.SpotlightEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner

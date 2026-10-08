@@ -7,7 +7,9 @@ import net.minecraft.network.codec.*
 import net.minecraft.resources.*
 import net.minecraft.world.inventory.*
 import com.flooferland.showbiz.menus.*
-import com.flooferland.showbiz.network.packets.*
+import com.flooferland.showbiz.network.packets.BitViewPacket
+import com.flooferland.showbiz.network.packets.BotListSelectPacket
+import com.flooferland.showbiz.network.packets.editscreen.*
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
@@ -15,6 +17,7 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
 // Don't forget to also register the screen in ShowbizClient !!
 sealed class ModScreenHandlers<T: AbstractContainerMenu, D: Any> {
     data object ShowParserEdit : ModScreenHandlers<ShowParserEditMenu, ShowParserEditPacket>("show_parser", ::ShowParserEditMenu, ShowParserEditPacket.codec)
+    data object ShowBridgeEdit : ModScreenHandlers<ShowBridgeEditMenu, ShowBridgeEditPacket>("show_bridge", ::ShowBridgeEditMenu, ShowBridgeEditPacket.codec)
     data object SpotlightEdit : ModScreenHandlers<SpotlightEditMenu, SpotlightEditPacket>("spotlight", ::SpotlightEditMenu, SpotlightEditPacket.codec)
     data object FloodlightEdit : ModScreenHandlers<FloodlightEditMenu, FloodlightEditPacket>("floodlight", ::FloodlightEditMenu, FloodlightEditPacket.codec)
     data object CurtainControllerEdit : ModScreenHandlers<CurtainControllerEditMenu, CurtainControllerEditPacket>("curtain_controller", ::CurtainControllerEditMenu, CurtainControllerEditPacket.codec)

@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.network.packets
+package com.flooferland.showbiz.network.packets.editscreen
 
 import net.minecraft.network.*
 import net.minecraft.network.codec.*

@@ -21,7 +21,7 @@ import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.entities.base.BasePropEntity
 import com.flooferland.showbiz.menus.FloodlightEditMenu
-import com.flooferland.showbiz.network.packets.FloodlightEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.FloodlightEditPacket
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModLivingEntities

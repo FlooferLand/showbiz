@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.menus.CurtainControllerEditMenu
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.*
