@@ -11,7 +11,8 @@ import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
-import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
+import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.OwnerId
@@ -103,7 +104,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
         val player = ctx.player ?: return InteractionResult.PASS
         val pos = ctx.clickedPos
         val stack = ctx.itemInHand
-        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
+        if (!player.mayPlaceAt(level, pos, stack)) return InteractionResult.FAIL
         val target = level.getBlockEntity(pos) as? IConnectable
         return link(player, stack, level, target)
     }
@@ -111,6 +112,7 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
     // Connecting entities
     fun useOnEntity(player: Player, level: ServerLevel, stack: ItemStack, entity: Entity, result: EntityHitResult?): InteractionResult {
         val connectable = entity as? IConnectable ?: run { return link(player, stack, level, null) }
+        if (!player.mayInteractWith(entity)) return InteractionResult.FAIL
         return link(player, stack, level, connectable)
     }
 

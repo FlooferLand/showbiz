@@ -28,6 +28,7 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 import kotlin.jvm.optionals.getOrNull
 
+// Should probably port it to BasePropEntity
 class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plush.type, level), GeoEntity {
     constructor(level: Level) : this(level, ModItems.Plush.item.defaultInstance!!)
     val cache = GeckoLibUtil.createInstanceCache(this)!!

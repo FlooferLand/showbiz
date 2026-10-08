@@ -45,7 +45,7 @@ enum class Permissions(var selector: PermissionSelector) {
             val blockPlaceRestricted = (this as? ServerPlayer)?.let { it.blockActionRestricted(it.level(), pos, it.gameMode.gameModeForPlayer) } ?: false
             return mayBuild() && !blockPlaceRestricted
         }
-        fun Player.mayUseItemOn(level: Level, blockPos: BlockPos, stack: ItemStack): Boolean {
+        fun Player.mayPlaceAt(level: Level, blockPos: BlockPos, stack: ItemStack): Boolean {
             if (mayBuild()) return true
             val blockInWorld = BlockInWorld(this.level(), blockPos, false)
             return stack.canPlaceOnBlockInAdventureMode(blockInWorld)

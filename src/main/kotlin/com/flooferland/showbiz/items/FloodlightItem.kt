@@ -6,7 +6,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
-import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
+import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
@@ -19,7 +19,7 @@ class FloodlightItem(properties: Properties) : Item(properties) {
         val player = ctx.player ?: return InteractionResult.PASS
         val pos = ctx.clickedPos
         val stack = ctx.itemInHand
-        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
+        if (!player.mayPlaceAt(level, pos, stack)) return InteractionResult.FAIL
 
         val canPlaceOnBlock = (ctx.clickedFace == Direction.DOWN || ctx.clickedFace == Direction.UP)
         if (ctx.hand == InteractionHand.MAIN_HAND && canPlaceOnBlock) {

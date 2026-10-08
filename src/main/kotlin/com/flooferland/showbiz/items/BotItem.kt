@@ -6,7 +6,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
-import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
+import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.entities.BotEntity
@@ -20,7 +20,7 @@ class BotItem(properties: Properties) : Item(properties) {
         val player = context.player ?: return InteractionResult.PASS
         val pos = context.clickedPos.above()
         val stack = context.itemInHand
-        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
+        if (!player.mayPlaceAt(level, pos, stack)) return InteractionResult.FAIL
 
         val placeState = level.getBlockState(pos)
         val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, pos)
