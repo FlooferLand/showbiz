@@ -129,9 +129,9 @@ dependencies {
 
     // Showbiz data library (https://github.com/FlooferLand/bizlib)
     // TODO: Relocate Bizlib's dependencies to my own com.flooferland.showbiz.shadow package so other mods using ANTLR wont collide with Showbiz
-    implementation("com.flooferland:bizlib:${dep("bizlib")}")
-    include("com.flooferland:bizlib:${dep("bizlib")}")
-    shadow("com.flooferland:bizlib:${dep("bizlib")}")
+    implementation("com.github.flooferland:bizlib:${dep("bizlib")}")
+    include("com.github.flooferland:bizlib:${dep("bizlib")}")
+    shadow("com.github.flooferland:bizlib:${dep("bizlib")}")
 
     // ktoml
     // TODO: Relocate ktoml to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
