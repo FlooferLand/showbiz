@@ -11,6 +11,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.OwnerId
@@ -88,20 +89,23 @@ class WandItem(properties: Properties) : Item(properties), GeoItem {
     }
 
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
-        val item = player.getItemInHand(usedHand)
+        val stack = player.getItemInHand(usedHand)
         if (player.isCrouching && level is ServerLevel) {
-            reset(player, player.getItemInHand(usedHand), level, "Cleared!")
-            return InteractionResultHolder.success(item)
+            reset(player, stack, level, "Cleared!")
+            return InteractionResultHolder.success(stack)
         }
-        return InteractionResultHolder.pass(item)
+        return InteractionResultHolder.pass(stack)
     }
 
     // Connecting blocks
     override fun useOn(ctx: UseOnContext): InteractionResult {
         val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = ctx.player ?: return InteractionResult.PASS
-        val target = level.getBlockEntity(ctx.clickedPos) as? IConnectable
-        return link(player, ctx.itemInHand, level, target)
+        val pos = ctx.clickedPos
+        val stack = ctx.itemInHand
+        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
+        val target = level.getBlockEntity(pos) as? IConnectable
+        return link(player, stack, level, target)
     }
 
     // Connecting entities

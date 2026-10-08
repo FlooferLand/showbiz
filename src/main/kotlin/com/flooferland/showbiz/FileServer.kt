@@ -61,7 +61,7 @@ object FileServer {
             )
         }
         ServerPackets.listen(ShowFileEditPacket.type) { packet, ctx ->
-            if (!Permissions.canWriteReels(ctx.player())) {
+            if (!Permissions.WriteReels.test(ctx.player())) {
                 ctx.player().sendSystemMessage(Component.literal("You don't have the permission to write files"))
                 return@listen
             }
@@ -147,7 +147,7 @@ object FileServer {
         if (changed) {
             val shows = fetchShowInfos(recache = true).toCollection(LinkedHashSet())
             server.playerList.players.forEach {
-                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = shows, playerAuthorized = Permissions.canWriteReels(it)))
+                ServerPlayNetworking.send(it, ShowFileListPacket(toClient = true, files = shows, playerAuthorized = Permissions.WriteReels.test(it)))
             }
         }
     }
@@ -155,7 +155,7 @@ object FileServer {
     /** Responds to a client's request to send the file */
     fun sendShowsToClient(player: ServerPlayer) {
         val shows = fetchShowInfos(recache = true).toCollection(LinkedHashSet())
-        val authorized = Permissions.canWriteReels(player)
+        val authorized = Permissions.WriteReels.test(player)
         ServerPlayNetworking.send(player, ShowFileListPacket(toClient = true, files = shows, playerAuthorized = authorized))
     }
 

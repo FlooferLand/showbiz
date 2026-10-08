@@ -5,8 +5,10 @@ import net.minecraft.network.syncher.*
 import net.minecraft.world.damagesource.*
 import net.minecraft.world.effect.*
 import net.minecraft.world.entity.*
+import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
+import com.flooferland.showbiz.Permissions.Companion.mayHurt
 
 open class BasePropEntity(entityType: EntityType<out LivingEntity>, level: Level) : LivingEntity(entityType, level) {
     override fun isPushable() = false
@@ -18,8 +20,12 @@ open class BasePropEntity(entityType: EntityType<out LivingEntity>, level: Level
     override fun canBeAffected(effect: MobEffectInstance) = false
     override fun canBeSeenAsEnemy() = false
     override fun getDefaultDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.1f, 0.1f)
-    override fun isInvulnerableTo(source: DamageSource) = true
     override fun showVehicleHealth() = false
+
+    override fun isInvulnerableTo(source: DamageSource) =
+        source.entity?.let { skipAttackInteraction(it) } ?: true
+    override fun skipAttackInteraction(entity: Entity) =
+        (entity as? Player)?.let { !it.mayHurt(this) } ?: true
 
     // region | LivingEntity stuff
     override fun getMainArm() = HumanoidArm.RIGHT

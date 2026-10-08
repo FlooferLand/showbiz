@@ -7,6 +7,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
@@ -46,6 +47,7 @@ class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModB
     override fun onInteract(key: Int, level: Level, player: Player) {
         val slot = key
         if (slot !in 0 until containerSize) return
+        if (!player.mayInteractWith(this)) return
 
         val currentStack = getItem(slot)
         val hand = player.usedItemHand ?: InteractionHand.MAIN_HAND

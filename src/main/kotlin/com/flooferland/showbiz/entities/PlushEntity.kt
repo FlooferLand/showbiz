@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayHurt
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModEntities
@@ -68,13 +70,14 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     }
 
     override fun interactAt(player: Player, vec: Vec3, hand: InteractionHand): InteractionResult {
-        val level = level() as? ServerLevel ?: return InteractionResult.SUCCESS
+        val player = player as? ServerPlayer ?: return InteractionResult.SUCCESS
+        if (!player.mayInteractWith(this)) return InteractionResult.FAIL
 
         // Stacking plushies
         val stack = player.getItemInHand(hand).copyWithCount(1)
         val item = stack.item
         if (item is PlushItem && hand == InteractionHand.MAIN_HAND) {
-            item.place(level, player, stack, position().add(vec))
+            item.place(level(), player, stack, position().add(vec))
             return InteractionResult.SUCCESS
         }
 
@@ -97,6 +100,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             return false
         }
 
+        if (!attacker.mayHurt(this) || isInvulnerableTo(source)) return false
         if (attacker.isCreative && amount > 0f) {
             playSound(ModSounds.HonkBye.event)
             remove(RemovalReason.DISCARDED)

@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions
-import com.flooferland.showbiz.Permissions.mayInteractWith
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
@@ -33,10 +33,10 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
+import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Sounds
-import com.flooferland.showbiz.utils.tc
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
 
@@ -294,7 +294,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
         if (key != 0) return
-        if (player.mayInteractWith(this) && Permissions.canWriteReels(player)) {
+        if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
             applyChange(true) {
                 if (recording) {
                     recording = false
@@ -315,7 +315,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 }
             }
         } else {
-            player.displayClientMessage(tc("message", "permission_error"), true)
+            player.notifyPermissionError(Permissions.WriteReels)
             Sounds.bad(player)
         }
     }

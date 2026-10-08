@@ -41,6 +41,7 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
         var writeReels: PermissionSelector = PermissionSelector.Anyone,
         var switchReels: PermissionSelector = PermissionSelector.Anyone,
         var controlPlayback: PermissionSelector = PermissionSelector.Anyone,
+        var editScreenAccess: PermissionSelector = PermissionSelector.Anyone,
     )
 
     public override fun clone() = super.clone() as ModConfig

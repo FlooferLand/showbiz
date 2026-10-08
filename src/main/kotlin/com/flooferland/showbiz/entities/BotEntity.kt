@@ -13,6 +13,8 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.entities.base.BasePropEntity
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
@@ -145,7 +147,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
         return InteractionResult.SUCCESS
     }
 
-    override fun isInvulnerableTo(source: DamageSource) = source.entity !is Player
     override fun hurt(source: DamageSource, amount: Float): Boolean {
         if (killDelayTicks > 0 || isRemoved) return false
         val attacker = source.entity
@@ -153,6 +154,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
         }
         if (attacker !is Player) return false
+        if (isInvulnerableTo(source)) return false
 
         val isClient = attacker.level().isClientSide
         if (!isClient && amount > 0f) {
@@ -163,12 +165,14 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
+        if (!player.mayInteractWith(this)) return InteractionResult.FAIL
+
         // Grabbing the bot
         if (player.isCrouching) return grab(player)
 
         // Opening up the selection screen
         val id = OwnerId.of(this)
-        if (id != null) {
+        if (id != null && Permissions.EditScreenAccess.test(player)) {
             player.openMenu(object : ExtendedScreenHandlerFactory<BotListSelectPacket> {
                 override fun getDisplayName() = Component.empty()
                 override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {

@@ -1,27 +1,18 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.util.RandomSource
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.ItemInteractionResult
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.DyeItem
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.BlockGetter
-import net.minecraft.world.level.Level
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.item.*
+import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityTicker
-import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.shapes.CollisionContext
-import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.shapes.VoxelShape
+import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
@@ -34,10 +25,8 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.CurtainBlock.entityType!!.create(pos, state)!!
 
-    override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult) =
-        useItem(stack, state, level, pos)
-    fun useItem(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos): ItemInteractionResult {
-        if (stack.item is DyeItem) {
+    public override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
+        if (stack.item is DyeItem && player.mayInteractAt(pos)) {
             val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity
             val color = (stack.item as DyeItem).dyeColor
             blockEntity?.applyChange(true) {
@@ -48,10 +37,10 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
     }
 
-    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult) =
-        use(state, level, pos, player, hitResult)
-    fun use(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+    public override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: return InteractionResult.FAIL
+
+        if (!player.mayInteractWith(blockEntity)) return InteractionResult.FAIL
         if (player.isHolding { it.item is WandItem }) return InteractionResult.FAIL
         blockEntity.setCurtains(!blockEntity.isOpen)
         return InteractionResult.SUCCESS

@@ -14,6 +14,9 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayHurt
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.entities.base.BasePropEntity
@@ -109,12 +112,11 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         return InteractionResult.SUCCESS
     }
 
-    override fun isInvulnerableTo(source: DamageSource) = source.entity !is Player
     override fun hurt(source: DamageSource, amount: Float): Boolean {
         if (isRemoved || isInvulnerableTo(source)) return false
         val level = level() as? ServerLevel ?: return false
         val player = source.entity as? Player ?: return false
-        if (!player.mayBuild()) return false
+        if (!player.mayHurt(this)) return false
 
         if (!source.isCreativePlayer)
             Block.popResource(level, blockPosition(), makeItem())
@@ -129,13 +131,18 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     // endregion
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
+        if (!player.mayInteractWith(this)) return InteractionResult.FAIL
+
         // Grabbing the floodlight
         if (player.isCrouching) return grab(player)
 
         // Opening up the edit screen
-        val id = OwnerId.of(this)
-        if (id != null) player.openMenu(this)
-        return InteractionResult.SUCCESS
+        if (Permissions.EditScreenAccess.test(player)) {
+            val id = OwnerId.of(this)
+            if (id != null) player.openMenu(this)
+            return InteractionResult.SUCCESS
+        }
+        return InteractionResult.FAIL
     }
 
     override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {

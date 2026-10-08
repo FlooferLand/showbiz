@@ -16,6 +16,7 @@ import net.minecraft.world.level.redstone.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
@@ -64,9 +65,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
     }
 
     override fun useItemOn(heldStack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        if (heldStack.item is WandItem) {
-            return ItemInteractionResult.FAIL
-        }
+        if (heldStack.item is WandItem) return ItemInteractionResult.FAIL
 
         // Hand stack
         if (player.getItemInHand(hand) != heldStack) return ItemInteractionResult.FAIL
@@ -74,6 +73,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         // Finding the BE
         val entity = level.getBlockEntity(pos)
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
+        if (!player.mayInteractWith(entity)) return ItemInteractionResult.FAIL
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
@@ -84,7 +84,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     Sounds.play(player, ModSounds.ReelEnter)
 
                     // Playback
-                    if (player is ServerPlayer && Permissions.canSwitchReels(player)) {
+                    if (player is ServerPlayer && Permissions.SwitchReels.testAndNotify(player)) {
                         val stackCopy = heldStack.copy()
                         player.setItemInHand(hand, Items.AIR.defaultInstance)
 
@@ -98,8 +98,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                             Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
                             player.setInventoryChanged()
                         }
-                    } else {
-                        player.displayClientMessage(tc("message", "permission_error"), true)
                     }
                 } else {
                     player.displayClientMessage(
@@ -107,7 +105,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     )
                 }
             } else if (heldStack.isEmpty && !entity.showData.isNotLoaded() && player is ServerPlayer) {  // Removing
-                if (Permissions.canSwitchReels(player)) {
+                if (Permissions.SwitchReels.testAndNotify(player)) {
                     val showName = entity.showData.name
                     showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
                     Sounds.play(player, ModSounds.ReelExit)
@@ -116,14 +114,10 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         entity.showData.unload(player)
                         player.setInventoryChanged()
                     }
-                } else {
-                    player.displayClientMessage(
-                        tc("message", "permission_error"), true
-                    )
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
-        } else if (player is ServerPlayer && Permissions.canControlPlayback(player)) {
+        } else if (player is ServerPlayer && Permissions.ControlPlayback.testAndNotify(player)) {
             // Pausing / unpausing
             if (!entity.showData.isNotLoaded()) {
                 var paused = entity.paused
@@ -146,10 +140,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             } else {
                 Sounds.play(player, ModSounds.ReelPlay, volume = 0.4f, pitch = 0.4f)
             }
-        } else if (player is ServerPlayer && !Permissions.canControlPlayback(player)) {
-            player.displayClientMessage(
-                tc("message", "permission_error"), true
-            )
         }
         return ItemInteractionResult.SUCCESS
     }

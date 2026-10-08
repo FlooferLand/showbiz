@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
@@ -47,6 +48,7 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
         val data = PlayerProgrammingData.getFromPlayer(player)
         val blockEntity = level.getBlockEntity(pos) as? ProgrammerBlockEntity ?: return InteractionResult.FAIL
+        if (!player.mayInteractWith(blockEntity)) return InteractionResult.PASS
         if (data.active && data.blockPos != pos) {
             player.displayClientMessage(Component.literal("You're already programming another terminal!"), true)
             return InteractionResult.FAIL

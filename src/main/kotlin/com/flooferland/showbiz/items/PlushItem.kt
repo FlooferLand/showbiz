@@ -7,6 +7,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.registry.ModComponents
@@ -39,11 +40,14 @@ class PlushItem(properties: Properties) : Item(properties), GeoItem {
         val level = context.level ?: return InteractionResult.SUCCESS
         val player = context.player ?: return InteractionResult.PASS
         if (level.isClientSide) return InteractionResult.SUCCESS
+        val pos = context.clickedPos.above()
+        val stack = context.itemInHand
+        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
 
-        val placeState = level.getBlockState(context.clickedPos.above())
-        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, context.clickedPos.above())
+        val placeState = level.getBlockState(pos)
+        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, pos)
         if (canPlaceOnBlock) {
-            place(level, player, context.itemInHand, context.clickLocation)
+            place(level, player, stack, context.clickLocation)
         }
         return InteractionResult.SUCCESS
     }

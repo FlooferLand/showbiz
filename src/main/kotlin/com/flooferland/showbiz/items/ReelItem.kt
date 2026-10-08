@@ -1,16 +1,14 @@
 package com.flooferland.showbiz.items
 
-import com.flooferland.showbiz.Showbiz
+import net.minecraft.*
+import net.minecraft.network.chat.*
+import net.minecraft.world.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.item.*
+import net.minecraft.world.level.*
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.Extensions.applyComponent
-import net.minecraft.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResultHolder
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.*
-import net.minecraft.world.level.Level
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 

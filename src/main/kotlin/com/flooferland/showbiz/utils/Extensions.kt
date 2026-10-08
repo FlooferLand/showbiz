@@ -14,8 +14,11 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
 import java.util.Locale
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -41,10 +44,24 @@ object Extensions {
         setChanged()
         level?.sendBlockUpdated(this.blockPos, blockState, blockState, Block.UPDATE_ALL)
     }
+    fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+        val player = player as? ServerPlayer ?: return InteractionResult.PASS
+        if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return InteractionResult.FAIL
+        player.openMenu(state.getMenuProvider(level, pos))
+        return InteractionResult.SUCCESS
+    }
 
     fun Player.setInventoryChanged() {
         inventoryMenu.broadcastChanges()
         inventory.setChanged()
+    }
+    fun Player.notifyPermissionError(ctx: Permissions? = null) {
+        val comp = tc("message", "permission_error")
+        ctx?.let { comp.append(": ").append(Component.literal(ctx.name)) }
+        displayClientMessage(comp, true)
+    }
+    fun Player.onServerOrFalse(block: (ServerPlayer) -> Boolean): Boolean {
+        return (this as? ServerPlayer)?.let(block) ?: false
     }
 
     @DslMarker annotation class BlockEntityApplyDsl;

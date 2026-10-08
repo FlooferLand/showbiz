@@ -15,11 +15,11 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
-import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.ShowParserEditPacket
 import com.flooferland.showbiz.types.IRedstoneExtras
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 
 class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(properties), EntityBlock, IRedstoneExtras, CustomBlockModel {
     val codec = simpleCodec(::ShowParserBlock)!!
@@ -44,11 +44,8 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
         }
     }
 
-    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
-        if (level.isClientSide) return InteractionResult.SUCCESS
-        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
-        player.openMenu(state.getMenuProvider(level, pos))
-        return InteractionResult.SUCCESS
+    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+        return handleEditScreen(state, level, pos, player, hitResult)
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState {

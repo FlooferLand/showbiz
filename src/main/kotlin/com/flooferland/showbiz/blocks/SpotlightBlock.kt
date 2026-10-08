@@ -12,11 +12,11 @@ import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
-import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 import kotlin.jvm.optionals.getOrNull
 
 class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
@@ -44,11 +44,8 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? SpotlightBlockEntity)?.tick(level, pos, blockState) }
 
-    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
-        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
-        if (level.isClientSide) return InteractionResult.SUCCESS
-        player.openMenu(state.getMenuProvider(level, pos))
-        return InteractionResult.SUCCESS
+    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+        return handleEditScreen(state, level, pos, player, hitResult)
     }
 
     override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, movedByPiston: Boolean) {

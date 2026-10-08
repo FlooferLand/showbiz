@@ -6,6 +6,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import com.flooferland.showbiz.Permissions.Companion.mayUseItemOn
 import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
@@ -16,17 +17,19 @@ class FloodlightItem(properties: Properties) : Item(properties) {
     override fun useOn(ctx: UseOnContext): InteractionResult {
         val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = ctx.player ?: return InteractionResult.PASS
+        val pos = ctx.clickedPos
+        val stack = ctx.itemInHand
+        if (!player.mayUseItemOn(level, pos, stack)) return InteractionResult.FAIL
 
         val canPlaceOnBlock = (ctx.clickedFace == Direction.DOWN || ctx.clickedFace == Direction.UP)
         if (ctx.hand == InteractionHand.MAIN_HAND && canPlaceOnBlock) {
-            val stack = ctx.itemInHand
             val floodlight = stack.get(ModComponents.Floodlight.type) ?: return InteractionResult.PASS
             floodlight.turn.x = round(ctx.rotation * 100f) / 100f
             val entity = FloodlightEntity(level, floodlight)
 
-            val pos = if (ctx.clickedFace == Direction.DOWN) ctx.clickLocation.subtract(0.0, entity.bbHeight.toDouble(), 0.0) else ctx.clickLocation
-            entity.setPos(pos)
-            entity.supportBlock = ctx.clickedPos
+            val clickedPos = if (ctx.clickedFace == Direction.DOWN) ctx.clickLocation.subtract(0.0, entity.bbHeight.toDouble(), 0.0) else ctx.clickLocation
+            entity.setPos(clickedPos)
+            entity.supportBlock = pos
             entity.supportBlockLoc = ctx.clickLocation
             level.addFreshEntity(entity)
             player.setItemInHand(ctx.hand, ItemStack.EMPTY)
