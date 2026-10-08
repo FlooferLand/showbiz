@@ -39,8 +39,8 @@ class GreyboxPeripheral(val blockEntity: GreyboxBlockEntity) : IPeripheral {
 
     @LuaFunction
     @Throws(LuaException::class)
-    public fun hasBit(bitId: Int): Boolean {
-        return blockEntity.show.data.signal.frameHas(bitId)
+    public fun hasBit(ctx: ILuaContext, bitId: Int): MethodResult {
+        return ctx.executeMainThreadTask { arrayOf(blockEntity.show.data.signal.frameHas(bitId)) }
     }
 
     @LuaFunction
