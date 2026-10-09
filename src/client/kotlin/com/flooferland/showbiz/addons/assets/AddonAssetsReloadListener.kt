@@ -10,6 +10,7 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
+import com.flooferland.showbiz.addons.data.PassivePlan
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.types.math.Vec3fc
@@ -19,15 +20,14 @@ import com.flooferland.showbiz.utils.Extensions.getAllBones
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
-import com.flooferland.showbiz.addons.data.PassivePlan
-import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
-import software.bernie.geckolib.loading.`object`.BakedAnimations
+import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.json.raw.Model
+import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 // TODO: Optimize this class loads.
 //       Currently loading and storing a ton of unnecessary models, and is not async
@@ -62,7 +62,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     if (botId in physicsData) return physicsData[botId]
                     val path = rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/$PHYSICS_TOML_NAME")
                     val physics = getResAsString(path)?.let { text ->
-                        runCatching { PhysicsData.read(text) }.onFailure { err("Failed to parse '$path'", it) }.getOrNull()
+                        runCatching { PhysicsData.readOrThrow(text) }.onFailure { err("Failed to parse '$path'", it) }.getOrNull()
                     }
                     physicsData[botId] = physics
                     return physics
@@ -201,6 +201,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     bone.posZ
                 )
             }
+
             // Ordered walk, so parentIndex[i] is always less than i
             val order = ArrayList<String>()
             val parents = ArrayList<Int>()

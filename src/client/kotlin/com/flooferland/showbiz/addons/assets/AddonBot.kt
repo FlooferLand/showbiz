@@ -1,10 +1,10 @@
 package com.flooferland.showbiz.addons.assets
 
+import net.minecraft.resources.*
 import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.utils.rlCustom
 import kotlinx.serialization.Serializable
-import net.minecraft.resources.*
 
 data class AddonBot(val assets: BotAssetsFile, val bitmap: BotBitmapFile, val resPath: ResourcePath, 
                     val model: ResourceLocation, val animations: ResourceLocation?, val physics: PhysicsData? = null) {
@@ -15,7 +15,6 @@ data class AddonBot(val assets: BotAssetsFile, val bitmap: BotBitmapFile, val re
     fun getTexture(name: String) = resPath.resolve("textures").resolve(name).toLocation()
     fun getModel(name: String) = resPath.resolve("models").resolve(name).toLocation()
 
-    // Both asked for every frame: built once
     private val defaultModelLocation by lazy { getModel("${getId()}.geo.json") }
     private val defaultTextureLocation by lazy { getTexture("${getId()}.png") }
     fun getDefaultModel() = defaultModelLocation

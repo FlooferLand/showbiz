@@ -1,17 +1,13 @@
 package com.flooferland.showbiz.types.physics
 
 import com.flooferland.showbiz.addons.data.ChainLayout
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.joml.Matrix3f
 import org.joml.Matrix4fc
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.sqrt
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlin.math.*
 
 class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<ChainState>, @JvmField val members: IntArray) {
     fun interface Lengths { fun of(chain: Int): Float }
@@ -121,7 +117,7 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
         } else {
             s.acc -= steps * h
         }
-        val dampStep = Math.pow(params.damp.coerceIn(0.3f, 0.999f).toDouble(), h.toDouble()).toFloat()
+        val dampStep = params.damp.coerceIn(0.3f, 0.999f).toDouble().pow(h.toDouble()).toFloat()
         val scale = h / REF
         for (step in 1..steps) {
             s.pos.copyInto(s.drawPrev)
@@ -137,55 +133,57 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
     }
 
     // First frame: hanging the chain straight down from the pin
-    private fun build(s: ChainState, total: Float) {
-        s.totalLen = total
-        s.seg = total / s.segs
+    private fun build(state: ChainState, total: Float) {
+        state.totalLen = total
+        state.seg = total / state.segs
         var y = rvy
-        for (k in 0 until s.n) {
-            val o = k * 3
-            s.pos[o] = rvx; s.pos[o + 1] = y; s.pos[o + 2] = rvz
-            s.prev[o] = rvx; s.prev[o + 1] = y; s.prev[o + 2] = rvz
-            if (k < s.segs) y -= s.seg
+        for (i in 0 until state.n) {
+            val o = i * 3
+            state.pos[o] = rvx; state.pos[o + 1] = y; state.pos[o + 2] = rvz
+            state.prev[o] = rvx; state.prev[o + 1] = y; state.prev[o + 2] = rvz
+            if (i < state.segs) y -= state.seg
         }
-        s.rootPrevX = rvx; s.rootPrevY = rvy; s.rootPrevZ = rvz
-        s.pinX = rvx; s.pinY = rvy; s.pinZ = rvz
-        s.ready = true
+        state.rootPrevX = rvx; state.rootPrevY = rvy; state.rootPrevZ = rvz
+        state.pinX = rvx; state.pinY = rvy; state.pinZ = rvz
+        state.ready = true
     }
-    private fun resume(s: ChainState) {
-        val dx = s.rootVelX; val dy = s.rootVelY; val dz = s.rootVelZ
-        for (o in 0 until s.n * 3 step 3) {
-            s.pos[o] = s.pos[o] + dx; s.pos[o + 1] = s.pos[o + 1] + dy; s.pos[o + 2] = s.pos[o + 2] + dz
+    private fun resume(state: ChainState) {
+        val dx = state.rootVelX; val dy = state.rootVelY; val dz = state.rootVelZ
+        for (o in 0 until state.n * 3 step 3) {
+            state.pos[o] = state.pos[o] + dx; state.pos[o + 1] = state.pos[o + 1] + dy; state.pos[o + 2] = state.pos[o + 2] + dz
         }
-        s.pos.copyInto(s.prev)
-        s.pinX = rvx; s.pinY = rvy; s.pinZ = rvz
-        s.rootPrevX = rvx; s.rootPrevY = rvy; s.rootPrevZ = rvz
-        s.rootVelX = 0f; s.rootVelY = 0f; s.rootVelZ = 0f
+        state.pos.copyInto(state.prev)
+        state.pinX = rvx; state.pinY = rvy; state.pinZ = rvz
+        state.rootPrevX = rvx; state.rootPrevY = rvy; state.rootPrevZ = rvz
+        state.rootVelX = 0f; state.rootVelY = 0f; state.rootVelZ = 0f
     }
-    private fun restart(s: ChainState) {
-        s.acc = 0f
-        s.pos.copyInto(s.drawPrev)
-        s.pos.copyInto(s.draw)
+    private fun restart(state: ChainState) {
+        state.acc = 0f
+        state.pos.copyInto(state.drawPrev)
+        state.pos.copyInto(state.draw)
     }
 
-    private fun followPin(s: ChainState, delta: Float) {
+    private fun followPin(state: ChainState, delta: Float) {
         val a = 1f - exp(-pinRate * delta)
-        s.pinX = s.pinX + (rvx - s.pinX) * a
-        s.pinY = s.pinY + (rvy - s.pinY) * a
-        s.pinZ = s.pinZ + (rvz - s.pinZ) * a
-        val ex = rvx - s.pinX; val ey = rvy - s.pinY; val ez = rvz - s.pinZ
+        state.pinX += (rvx - state.pinX) * a
+        state.pinY += (rvy - state.pinY) * a
+        state.pinZ += (rvz - state.pinZ) * a
+        val ex = rvx - state.pinX; val ey = rvy - state.pinY; val ez = rvz - state.pinZ
         val e = sqrt((ex * ex + ey * ey + ez * ez).toDouble()).toFloat()
         if (e > params.pinLagMax && e > 1e-6f) {
             val pull = (e - params.pinLagMax) / e
-            s.pinX = s.pinX + ex * pull; s.pinY = s.pinY + ey * pull; s.pinZ = s.pinZ + ez * pull
+            state.pinX += ex * pull; state.pinY += ey * pull; state.pinZ += ez * pull
         }
-        rvx = s.pinX; rvy = s.pinY; rvz = s.pinZ
+        rvx = state.pinX; rvy = state.pinY; rvz = state.pinZ
     }
 
     // The fastest joint: a step's displacement over one 60 fps frame
-    private fun stepSpeed(s: ChainState, floor: Float): Float {
+    private fun stepSpeed(state: ChainState, floor: Float): Float {
         var top = floor
-        for (o in 0 until s.n * 3 step 3) {
-            val vx = s.pos[o] - s.prev[o]; val vy = s.pos[o + 1] - s.prev[o + 1]; val vz = s.pos[o + 2] - s.prev[o + 2]
+        for (o in 0 until state.n * 3 step 3) {
+            val vx = state.pos[o] - state.prev[o]
+            val vy = state.pos[o + 1] - state.prev[o + 1]
+            val vz = state.pos[o + 2] - state.prev[o + 2]
             val sp = sqrt(vx * vx + vy * vy + vz * vz) / REF
             if (sp > top) top = sp
         }
@@ -193,112 +191,113 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
     }
 
     // Asleep once the hand AND the chain have held still for a tick (the hand alone froze chains mid-swing)
-    private fun sleep(s: ChainState, delta: Float): Boolean {
-        s.anchorSpeed = len(s.rootVelX, s.rootVelY, s.rootVelZ) / delta
-        if (s.anchorSpeed < params.wakeEps && stepSpeed(s, 0f) < params.sleepEps) {
-            s.stillTime += delta
-            if (s.stillTime >= 3f * REF) {
-                if (!s.asleep) {
-                    s.pos.copyInto(s.prev)
-                    s.asleep = true
+    private fun sleep(state: ChainState, delta: Float): Boolean {
+        state.anchorSpeed = len(state.rootVelX, state.rootVelY, state.rootVelZ) / delta
+        if (state.anchorSpeed < params.wakeEps && stepSpeed(state, 0f) < params.sleepEps) {
+            state.stillTime += delta
+            if (state.stillTime >= 3f * REF) {
+                if (!state.asleep) {
+                    state.pos.copyInto(state.prev)
+                    state.asleep = true
                 }
-                s.rootPrevX = rvx; s.rootPrevY = rvy; s.rootPrevZ = rvz
+                state.rootPrevX = rvx; state.rootPrevY = rvy; state.rootPrevZ = rvz
                 return true
             }
         } else {
-            s.stillTime = 0f
-            s.asleep = false
+            state.stillTime = 0f
+            state.asleep = false
         }
         return false
     }
 
     // Each chain trails the pin by 0..lag 60 fps frames of time, picked by its name, so the bundle is not one object
-    private fun delayPin(s: ChainState, delta: Float) {
+    private fun delayPin(state: ChainState, delta: Float) {
         if (params.lag <= 0) return
-        s.lagFrames = abs(s.lagHash / 7) % (params.lag + 1)
-        s.clock += delta
-        val slot = s.lagN % ChainState.LAG_SLOTS
-        s.lagT[slot] = s.clock
-        s.lagP[slot * 3] = rvx; s.lagP[slot * 3 + 1] = rvy; s.lagP[slot * 3 + 2] = rvz
-        s.lagN++
-        if (s.lagFrames <= 0) return
-        pinAt(s, s.clock - s.lagFrames * REF)
+        state.lagFrames = abs(state.lagHash / 7) % (params.lag + 1)
+        state.clock += delta
+        val slot = state.lagN % ChainState.LAG_SLOTS
+        state.lagT[slot] = state.clock
+        state.lagP[slot * 3] = rvx; state.lagP[slot * 3 + 1] = rvy; state.lagP[slot * 3 + 2] = rvz
+        state.lagN++
+        if (state.lagFrames <= 0) return
+        pinAt(state, state.clock - state.lagFrames * REF)
     }
-    private fun pinAt(s: ChainState, want: Float) {
-        val count = s.lagN.coerceAtMost(ChainState.LAG_SLOTS)
-        var newer = (s.lagN - 1) % ChainState.LAG_SLOTS
+    private fun pinAt(state: ChainState, want: Float) {
+        val count = state.lagN.coerceAtMost(ChainState.LAG_SLOTS)
+        var newer = (state.lagN - 1) % ChainState.LAG_SLOTS
         for (back in 1 until count) {
-            val older = (s.lagN - 1 - back) % ChainState.LAG_SLOTS
-            if (s.lagT[older] <= want) {
-                val span = s.lagT[newer] - s.lagT[older]
-                val f = if (span > 1e-9f) ((want - s.lagT[older]) / span).coerceIn(0f, 1f) else 1f
-                rvx = s.lagP[older * 3] + (s.lagP[newer * 3] - s.lagP[older * 3]) * f
-                rvy = s.lagP[older * 3 + 1] + (s.lagP[newer * 3 + 1] - s.lagP[older * 3 + 1]) * f
-                rvz = s.lagP[older * 3 + 2] + (s.lagP[newer * 3 + 2] - s.lagP[older * 3 + 2]) * f
+            val older = (state.lagN - 1 - back) % ChainState.LAG_SLOTS
+            if (state.lagT[older] <= want) {
+                val span = state.lagT[newer] - state.lagT[older]
+                val f = if (span > 1e-9f) ((want - state.lagT[older]) / span).coerceIn(0f, 1f) else 1f
+                rvx = state.lagP[older * 3] + (state.lagP[newer * 3] - state.lagP[older * 3]) * f
+                rvy = state.lagP[older * 3 + 1] + (state.lagP[newer * 3 + 1] - state.lagP[older * 3 + 1]) * f
+                rvz = state.lagP[older * 3 + 2] + (state.lagP[newer * 3 + 2] - state.lagP[older * 3 + 2]) * f
                 return
             }
             newer = older
         }
-        rvx = s.lagP[newer * 3]; rvy = s.lagP[newer * 3 + 1]; rvz = s.lagP[newer * 3 + 2]
+        rvx = state.lagP[newer * 3]; rvy = state.lagP[newer * 3 + 1]; rvz = state.lagP[newer * 3 + 2]
     }
 
     //one step
 
-    private fun fixedStep(s: ChainState, root: Matrix4fc, t: Float, h: Float, dampStep: Float, scale: Float) {
-        s.pos[0] = s.rootPrevX + (rvx - s.rootPrevX) * t
-        s.pos[1] = s.rootPrevY + (rvy - s.rootPrevY) * t
-        s.pos[2] = s.rootPrevZ + (rvz - s.rootPrevZ) * t
-        s.prev[0] = s.pos[0]; s.prev[1] = s.pos[1]; s.prev[2] = s.pos[2]
-        verlet(s, dampStep.coerceIn(0.05f, 0.9999f), s.seg * 0.8f * h, 1f / h, params.gravity * h * h)
-        constrain(s, scale)
+    private fun fixedStep(state: ChainState, root: Matrix4fc, t: Float, h: Float, dampStep: Float, scale: Float) {
+        state.pos[0] = state.rootPrevX + (rvx - state.rootPrevX) * t
+        state.pos[1] = state.rootPrevY + (rvy - state.rootPrevY) * t
+        state.pos[2] = state.rootPrevZ + (rvz - state.rootPrevZ) * t
+        state.prev[0] = state.pos[0]; state.prev[1] = state.pos[1]; state.prev[2] = state.pos[2]
+        verlet(state, dampStep.coerceIn(0.05f, 0.9999f), state.seg * 0.8f * h, 1f / h, params.gravity * h * h)
+        constrain(state, scale)
         if (params.bendStiff > 0f) {
-            bend(s, scale)
-            relength(s)
+            bend(state, scale)
+            relength(state)
         }
-        dampAfter(s, dampStep)
-        if (params.spring > 0f && s.restKnown) spring(s, root, h)
+        dampAfter(state, dampStep)
+        if (params.spring > 0f && state.restKnown) spring(state, root, h)
     }
 
     // one Verlet step. [cap] is the most a joint may move, [subRate] turns a step's displacement into blocks per tick
-    private fun verlet(s: ChainState, dK: Float, cap: Float, subRate: Float, gStep: Float) {
-        val p = s.pos; val q = s.prev
+    private fun verlet(state: ChainState, dK: Float, cap: Float, subRate: Float, gStep: Float) {
+        val pos = state.pos
+        val prev = state.prev
         val rest2 = params.sleepEps * params.sleepEps
-        for (o in 3 until s.n * 3 step 3) {
-            val px = p[o]; val py = p[o + 1]; val pz = p[o + 2]
-            var vx = (px - q[o]) * dK
-            var vy = (py - q[o + 1]) * dK
-            var vz = (pz - q[o + 2]) * dK
+        for (o in 3 until state.n * 3 step 3) {
+            val px = pos[o]; val py = pos[o + 1]; val pz = pos[o + 2]
+            var vx = (px - prev[o]) * dK
+            var vy = (py - prev[o + 1]) * dK
+            var vz = (pz - prev[o + 2]) * dK
             val sp = sqrt(vx * vx + vy * vy + vz * vz)
             if (sp > cap) { val f = cap / sp; vx *= f; vy *= f; vz *= f }
             if ((vx * vx + vy * vy + vz * vz) * subRate * subRate < rest2) { vx = 0f; vy = 0f; vz = 0f }
-            q[o] = px; q[o + 1] = py; q[o + 2] = pz
-            p[o] = px + vx; p[o + 1] = py + vy - gStep; p[o + 2] = pz + vz
+            prev[o] = px; prev[o + 1] = py; prev[o + 2] = pz
+            pos[o] = px + vx; pos[o + 1] = py + vy - gStep; pos[o + 2] = pz + vz
         }
     }
 
-    private fun constrain(s: ChainState, stepScale: Float) {
-        val sweeps = s.n.coerceAtMost(20)
+    private fun constrain(state: ChainState, stepScale: Float) {
+        val sweeps = state.n.coerceAtMost(20)
         for (sw in 1..sweeps) {
-            if (!sweep(s, stepScale) && params.earlyExit) return
+            if (!sweep(state, stepScale) && params.earlyExit) return
         }
     }
 
-    private fun sweep(s: ChainState, stepScale: Float): Boolean {
-        val p = s.pos
-        val seg = s.seg
+    private fun sweep(state: ChainState, stepScale: Float): Boolean {
+        val pos = state.pos
+        val seg = state.seg
         val lim = seg * params.projClamp * stepScale
-        val cosMax = s.cosMax
-        val cosSoft = s.cosSoft
+        val cosMax = state.cosMax
+        val cosSoft = state.cosSoft
         var active = false
-        for (k in 1 until s.n) {
+        for (k in 1 until state.n) {
             val a = (k - 1) * 3; val b = k * 3
-            var dx = p[b] - p[a]; var dy = p[b + 1] - p[a + 1]; var dz = p[b + 2] - p[a + 2]
+            var dx = pos[b] - pos[a]; var dy = pos[b + 1] - pos[a + 1]; var dz = pos[b + 2] - pos[a + 2]
             var len = sqrt(dx * dx + dy * dy + dz * dz)
             if (len < 1e-6f) continue
             var ux = 0f; var uy = -1f; var uz = 0f
             if (k >= 2) {
                 val c = (k - 2) * 3
-                ux = p[a] - p[c]; uy = p[a + 1] - p[c + 1]; uz = p[a + 2] - p[c + 2]
+                ux = pos[a] - pos[c]; uy = pos[a + 1] - pos[c + 1]; uz = pos[a + 2] - pos[c + 2]
                 val ul = sqrt(ux * ux + uy * uy + uz * uz)
                 if (ul < 1e-6f) { ux = 0f; uy = -1f; uz = 0f } else { ux /= ul; uy /= ul; uz /= ul }
             }
@@ -315,59 +314,61 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
                 if (bl > 1e-6f) { bx /= bl; by /= bl; bz /= bl; dx = bx; dy = by; dz = bz; len = 1f }
             }
             val f = seg / len
-            var tx = p[a] + dx * f; var ty = p[a + 1] + dy * f; var tz = p[a + 2] + dz * f
+            var tx = pos[a] + dx * f; var ty = pos[a + 1] + dy * f; var tz = pos[a + 2] + dz * f
+
             // Capping each correction and letting the rest land next sweep: no jump at the tip
-            val mx = tx - p[b]; val my = ty - p[b + 1]; val mz = tz - p[b + 2]
+            val mx = tx - pos[b]; val my = ty - pos[b + 1]; val mz = tz - pos[b + 2]
             val mv = sqrt(mx * mx + my * my + mz * mz)
             if (mv > lim && mv > 1e-9f) {
                 active = true
                 val sc = lim / mv
-                tx = p[b] + mx * sc; ty = p[b + 1] + my * sc; tz = p[b + 2] + mz * sc
+                tx = pos[b] + mx * sc; ty = pos[b + 1] + my * sc; tz = pos[b + 2] + mz * sc
             }
-            p[b] = tx; p[b + 1] = ty; p[b + 2] = tz
+            pos[b] = tx; pos[b + 1] = ty; pos[b + 2] = tz
         }
         return active
     }
 
-    private fun bend(s: ChainState, stepScale: Float) {
-        val p = s.pos
+    private fun bend(state: ChainState, stepScale: Float) {
+        val pos = state.pos
         val kb = (params.bendStiff * stepScale).coerceIn(0f, 0.5f)
-        for (k in 1 until s.n - 1) {
+        for (k in 1 until state.n - 1) {
             val a = (k - 1) * 3; val b = k * 3; val c = (k + 1) * 3
-            val mx = (p[a] + p[c]) * 0.5f - p[b]
-            val my = (p[a + 1] + p[c + 1]) * 0.5f - p[b + 1]
-            val mz = (p[a + 2] + p[c + 2]) * 0.5f - p[b + 2]
-            p[b] = p[b] + mx * kb; p[b + 1] = p[b + 1] + my * kb; p[b + 2] = p[b + 2] + mz * kb
+            val mx = (pos[a] + pos[c]) * 0.5f - pos[b]
+            val my = (pos[a + 1] + pos[c + 1]) * 0.5f - pos[b + 1]
+            val mz = (pos[a + 2] + pos[c + 2]) * 0.5f - pos[b + 2]
+            pos[b] = pos[b] + mx * kb; pos[b + 1] = pos[b + 1] + my * kb; pos[b + 2] = pos[b + 2] + mz * kb
         }
     }
 
-    private fun relength(s: ChainState) {
-        val p = s.pos
-        for (k in 1 until s.n) {
+    private fun relength(state: ChainState) {
+        val pos = state.pos
+        for (k in 1 until state.n) {
             val a = (k - 1) * 3; val b = k * 3
-            val dx = p[b] - p[a]; val dy = p[b + 1] - p[a + 1]; val dz = p[b + 2] - p[a + 2]
+            val dx = pos[b] - pos[a]; val dy = pos[b + 1] - pos[a + 1]; val dz = pos[b + 2] - pos[a + 2]
             val len = sqrt(dx * dx + dy * dy + dz * dz)
             if (len < 1e-6f) continue
-            val f = s.seg / len
-            p[b] = p[a] + dx * f; p[b + 1] = p[a + 1] + dy * f; p[b + 2] = p[a + 2] + dz * f
+            val f = state.seg / len
+            pos[b] = pos[a] + dx * f; pos[b + 1] = pos[a + 1] + dy * f; pos[b + 2] = pos[a + 2] + dz * f
         }
     }
 
-    private fun dampAfter(s: ChainState, d: Float) {
-        val p = s.pos; val q = s.prev
-        for (o in 3 until s.n * 3) q[o] = p[o] - (p[o] - q[o]) * d
+    private fun dampAfter(state: ChainState, d: Float) {
+        val pos = state.pos
+        val prev = state.prev
+        for (o in 3 until state.n * 3) prev[o] = pos[o] - (pos[o] - prev[o]) * d
     }
 
-    private fun spring(s: ChainState, root: Matrix4fc, dt: Float) {
+    private fun spring(state: ChainState, root: Matrix4fc, delta: Float) {
         m3.set(root)
-        val wr = m3.transform(v.set(s.restDir[0], s.restDir[1], s.restDir[2]))
+        val wr = m3.transform(v.set(state.restDir[0], state.restDir[1], state.restDir[2]))
         if (wr.lengthSquared() <= 1e-9f) return
         wr.normalize()
-        val kPull = (params.spring * dt).coerceIn(0f, 0.25f)
-        val p = s.pos
+        val kPull = (params.spring * delta).coerceIn(0f, 0.25f)
+        val p = state.pos
         var acc = 0f
-        for (k in 1 until s.n) {
-            acc += s.seg
+        for (k in 1 until state.n) {
+            acc += state.seg
             val w = kPull * exp(-(k - 1).toFloat() * params.springFalloff)
             val tx = p[0] + wr.x * acc; val ty = p[1] + wr.y * acc; val tz = p[2] + wr.z * acc
             val o = k * 3
@@ -377,73 +378,73 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
 
     // Joints to bone rotations
 
-    private fun pose(s: ChainState, root: Matrix4fc, linkPose: LinkPose, i: Int) {
+    private fun pose(state: ChainState, root: Matrix4fc, linkPose: LinkPose, i: Int) {
         val rb = m3.set(root)
         if (abs(rb.determinant()) < 1e-6f) return
         rb.invert()
-        val src = s.draw
+        val src = state.draw
         val ox = src[0]; val oy = src[1]; val oz = src[2]
-        for (o in 0 until s.n * 3 step 3) {
+        for (o in 0 until state.n * 3 step 3) {
             rb.transform(v.set(src[o] - ox, src[o + 1] - oy, src[o + 2] - oz))
-            s.lp[o] = v.x; s.lp[o + 1] = v.y; s.lp[o + 2] = v.z
+            state.lp[o] = v.x; state.lp[o + 1] = v.y; state.lp[o + 2] = v.z
         }
-        directions(s)
+        directions(state)
         prevQ.identity()
-        val calibrating = !s.restKnown
-        for (k in 0 until s.links) {
-            s.eulerOk[k] = false
+        val calibrating = !state.restKnown
+        for (k in 0 until state.links) {
+            state.eulerOk[k] = false
             val o = k * 3
-            val d = v.set(s.dirs[o], s.dirs[o + 1], s.dirs[o + 2])
+            val d = v.set(state.dirs[o], state.dirs[o + 1], state.dirs[o + 2])
             if (!d.isFinite || d.lengthSquared() < 1e-12f) continue
-            if (calibrating) calibrate(s, k, rb, d, linkPose, i) else aim(s, k, d)
+            if (calibrating) calibrate(state, k, rb, d, linkPose, i) else aim(state, k, d)
         }
-        s.restKnown = true
-        s.posed = true
+        state.restKnown = true
+        state.posed = true
     }
 
     //Each link's direction along the rope interpolated between neighbouring segments rather than snapped to one
-    private fun directions(s: ChainState) {
-        val nl = s.links
+    private fun directions(state: ChainState) {
+        val nl = state.links
         for (k in 0 until nl) {
-            val t = ((k + 0.5f) / nl) * s.segs
-            val si = t.toInt().coerceIn(0, s.segs - 1)
+            val t = ((k + 0.5f) / nl) * state.segs
+            val si = t.toInt().coerceIn(0, state.segs - 1)
             val fr = (t - si).coerceIn(0f, 1f)
-            val sj = (si + 1).coerceAtMost(s.segs - 1)
-            segDir(s, si, va)
-            segDir(s, sj, vb)
+            val sj = (si + 1).coerceAtMost(state.segs - 1)
+            segDir(state, si, va)
+            segDir(state, sj, vb)
             val o = k * 3
             v.set(va.x + (vb.x - va.x) * fr, va.y + (vb.y - va.y) * fr, va.z + (vb.z - va.z) * fr)
             if (v.lengthSquared() > 1e-12f) v.normalize()
-            s.dirs[o] = v.x; s.dirs[o + 1] = v.y; s.dirs[o + 2] = v.z
+            state.dirs[o] = v.x; state.dirs[o + 1] = v.y; state.dirs[o + 2] = v.z
         }
     }
-    private fun segDir(s: ChainState, si: Int, out: Vector3f) {
+    private fun segDir(state: ChainState, si: Int, out: Vector3f) {
         val a = si * 3; val b = (si + 1) * 3
-        out.set(s.lp[b], s.lp[b + 1], s.lp[b + 2]).sub(s.lp[a], s.lp[a + 1], s.lp[a + 2])
+        out.set(state.lp[b], state.lp[b + 1], state.lp[b + 2]).sub(state.lp[a], state.lp[a + 1], state.lp[a + 2])
         if (out.lengthSquared() > 1e-12f) out.normalize()
     }
 
     // First posed frame: recording the rest directions as simulated and as drawn
-    private fun calibrate(s: ChainState, k: Int, rb: Matrix3f, d: Vector3f, linkPose: LinkPose, i: Int) {
+    private fun calibrate(state: ChainState, k: Int, rb: Matrix3f, d: Vector3f, linkPose: LinkPose, i: Int) {
         val o = k * 3
-        s.restDir[o] = d.x; s.restDir[o + 1] = d.y; s.restDir[o + 2] = d.z
+        state.restDir[o] = d.x; state.restDir[o + 1] = d.y; state.restDir[o + 2] = d.z
         val a0 = linkPose.of(i, k)
-        val b0 = if (k + 1 < s.links) linkPose.of(i, k + 1) else null
+        val b0 = if (k + 1 < state.links) linkPose.of(i, k + 1) else null
         if (a0 != null && b0 != null) {
             val rr = rb.transform(va.set(b0.m30() - a0.m30(), b0.m31() - a0.m31(), b0.m32() - a0.m32()))
             if (rr.lengthSquared() > 1e-10f) {
                 rr.normalize()
-                s.renderRest[o] = rr.x; s.renderRest[o + 1] = rr.y; s.renderRest[o + 2] = rr.z
+                state.renderRest[o] = rr.x; state.renderRest[o + 1] = rr.y; state.renderRest[o + 2] = rr.z
             }
         }
-        if (va.set(s.renderRest[o], s.renderRest[o + 1], s.renderRest[o + 2]).lengthSquared() < 1e-10f) {
-            s.renderRest[o] = d.x; s.renderRest[o + 1] = d.y; s.renderRest[o + 2] = d.z
+        if (va.set(state.renderRest[o], state.renderRest[o + 1], state.renderRest[o + 2]).lengthSquared() < 1e-10f) {
+            state.renderRest[o] = d.x; state.renderRest[o + 1] = d.y; state.renderRest[o + 2] = d.z
         }
     }
 
-    private fun aim(s: ChainState, k: Int, d: Vector3f) {
+    private fun aim(state: ChainState, k: Int, d: Vector3f) {
         val o = k * 3
-        val r0x = s.restDir[o]; val r0y = s.restDir[o + 1]; val r0z = s.restDir[o + 2]
+        val r0x = state.restDir[o]; val r0y = state.restDir[o + 1]; val r0z = state.restDir[o + 2]
         val cone = renderConeCos
         val dotR = (r0x * d.x + r0y * d.y + r0z * d.z).coerceIn(-1f, 1f)
         if (dotR < cone) {
@@ -457,11 +458,11 @@ class ChainSolver(@JvmField val params: Params, @JvmField val chains: Array<Chai
                 d.set(r0x, r0y, r0z)
             }
         }
-        qTot.rotationTo(va.set(s.renderRest[o], s.renderRest[o + 1], s.renderRest[o + 2]), d)
+        qTot.rotationTo(va.set(state.renderRest[o], state.renderRest[o + 1], state.renderRest[o + 2]), d)
         qLocal.set(prevQ).conjugate().mul(qTot)
         qLocal.getEulerAnglesZYX(eul) // GeckoLib builds a bone as Rz * Ry * Rx (RenderUtil.rotateMatrixAroundBone), which is ZYX Euler order
-        s.euler[o] = eul.x; s.euler[o + 1] = eul.y; s.euler[o + 2] = eul.z
-        s.eulerOk[k] = eul.isFinite
+        state.euler[o] = eul.x; state.euler[o + 1] = eul.y; state.euler[o + 2] = eul.z
+        state.eulerOk[k] = eul.isFinite
         prevQ.set(qTot)
     }
 

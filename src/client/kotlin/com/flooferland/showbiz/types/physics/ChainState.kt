@@ -1,8 +1,9 @@
 package com.flooferland.showbiz.types.physics
 
-//One simulated chain: point masses joined by rigid segments, joint 0 pinned to the hand
+/** One simulated chain: point masses joined by rigid segments, joint 0 pinned to the hand **/
 class ChainState(@JvmField val segs: Int, @JvmField val links: Int, @JvmField val lagHash: Int) {
     @JvmField val n: Int = segs + 1
+
     // NOTE: Velocity is never stored, Verlet reads it as (pos - prev). Anything that moves a joint must move its prev too, or it invents velocity
     @JvmField val pos: FloatArray = FloatArray(n * 3)
     @JvmField val prev: FloatArray = FloatArray(n * 3)

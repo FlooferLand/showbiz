@@ -19,8 +19,7 @@ data class PhysicsData(
     val dynbones: Map<String, DynBone.Params> = emptyMap()
 ) {
     companion object {
-        // Strict: an unknown or misspelled key fails the load and names it
         private val toml: Toml = Toml
-        fun read(text: String): PhysicsData = toml.decodeFromString<PhysicsData>(text)
+        fun readOrThrow(text: String): PhysicsData = toml.decodeFromString<PhysicsData>(text)
     }
 }
