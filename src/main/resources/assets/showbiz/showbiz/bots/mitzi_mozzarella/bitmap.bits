@@ -39,7 +39,7 @@ rae 179 {
 
 rae 180 {
     flow 0.5
-    rotate "head" x:13
+    rotate "head" x:15
     wigglemul 2.0
 }
 
