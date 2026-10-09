@@ -34,15 +34,15 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private val q: Quaternionf = Quaternionf()
     private val r: Quaternionf = Quaternionf()
 
-    fun step(bones: (String) -> GeoBone?, dt: Float) {
-        if (params.links.isNotEmpty()) return stepLinked(bones, dt)
+    fun step(bones: (String) -> GeoBone?, delta: Float) {
+        if (params.links.isNotEmpty()) return stepLinked(bones, delta)
         val bone = bones(root) ?: return
         animated(bone)
         if (!ready) {
             pos.set(rest); prev.set(rest)
             ready = true
         }
-        val timeVar = dt * params.updateRate
+        val timeVar = delta * UPDATE_RATE
         val restLen = rest.distance(p0)
         val vx = pos.x - prev.x; val vy = pos.y - prev.y; val vz = pos.z - prev.z
         prev.set(pos)
@@ -97,7 +97,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private var turns: Array<Quaternionf> = emptyArray()
     private var lastTurns: Array<Quaternionf> = emptyArray()
 
-    private fun stepLinked(bones: (String) -> GeoBone?, dt: Float) {
+    private fun stepLinked(bones: (String) -> GeoBone?, delta: Float) {
         val chain = boneNames.map { bones(it) ?: return }
         val size = chain.size
         val last = chain.last()
@@ -112,7 +112,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
             for (i in 0..size) { parts[i].set(anims[i]); prevs[i].set(anims[i]) }
             ready = true
         }
-        val timeVar = dt * params.updateRate
+        val timeVar = delta * UPDATE_RATE
         prevs[0].set(parts[0]); parts[0].set(anims[0])
         for (i in 1..size) {
             val vx = parts[i].x - prevs[i].x; val vy = parts[i].y - prevs[i].y; val vz = parts[i].z - prevs[i].z
@@ -167,11 +167,23 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private fun measure(bone: GeoBone): Vector3f {
         val sum = Vector3f()
         var n = 0
-        for (cube in bone.cubes) for (quad in cube.quads()) for (v in quad.vertices()) { sum.add(v.position()); n++ }
+        for (cube in bone.cubes) {
+            for (quad in cube.quads().filterNotNull()) {
+                for (v in quad.vertices()) {
+                    sum.add(v.position())
+                    n++
+                }
+            }
+        }
         val pivot = Vector3f(bone.pivotX, bone.pivotY, bone.pivotZ).div(16f)
         val dir = sum.div(maxOf(n, 1).toFloat()).sub(pivot).let { if (params.freezeX) it.setComponent(0, 0f) else it }.normalize()
         var reach = 0f
-        for (cube in bone.cubes) for (quad in cube.quads()) for (v in quad.vertices()) reach = maxOf(reach, Vector3f(v.position()).sub(pivot).dot(dir))
+        for (cube in bone.cubes) {
+            for (quad in cube.quads().filterNotNull()) {
+                for (vertex in quad.vertices())
+                    reach = maxOf(reach, Vector3f(vertex.position()).sub(pivot).dot(dir))
+            }
+        }
         return dir.mul(if (params.length > 0f) params.length / 16f else reach)
     }
 
@@ -201,10 +213,13 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     data class Params(
         val damping: Float,                                 // speed lost each step
         val elasticity: Float,                              // pull back toward where the animation puts the end
-        val stiffness: Float,                               // how close to it the end is held, 0 is free
-        @SerialName("update_rate") val updateRate: Float,   // Faz-Anim's UpdateRate, which scales the pull
+        val stiffness: Float = 0f,                          // how close to it the end is held, 0 is free
         @SerialName("freeze_x") val freezeX: Boolean,       // swings only in the plane across the root's X axis
-        val length: Float,                                  // where the end sits, in pixels, 0 is as far as the bone's cubes reach
-        val links: List<String>                             // the bones below the root, for a chain of more than one
+        val length: Float = 0f,                             // where the end sits, in pixels, 0 is as far as the bone's cubes reach
+        val links: List<String> = listOf()                  // the bones below the root, for a chain of more than one
     )
+
+    companion object {
+        const val UPDATE_RATE = 60  // Faz-Anim's locked update rate
+    }
 }

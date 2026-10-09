@@ -83,9 +83,13 @@ class PneumaticValve {
 
     @Serializable
     data class Supply(
-        val psi: Float,     // the air supply, 80 in Faz-Anim
-        val rate: Float     // steps a second
-    )
+        val psi: Float = 80f,   // the air supply, 80 in Faz-Anim
+        val rate: Float = 60f   // 60 steps a second
+    ) {
+        companion object {
+            val DEFAULT = Supply()
+        }
+    }
 
     // One bit's cylinder, a line of a [bits.<mapping>] table. No defaults here, every value comes from the physics.toml
     @Serializable
@@ -94,14 +98,14 @@ class PneumaticValve {
         @SerialName("flow_out") val flowOut: Float,                       // air flow going out (bit on): how fast it spools up and travels
         @SerialName("gravity_in") val gravityIn: Float,                   // a scale on the speed going in: a heavy limb falls faster than it lifts
         @SerialName("gravity_out") val gravityOut: Float,                 // a scale on the speed going out
-        @SerialName("psi_scale") val psiScale: Float,                     // this cylinder's share of the supply's psi
+        @SerialName("psi_scale") val psiScale: Float = 1.0f,              // this cylinder's share of the supply's psi
         @SerialName("smash_in") val smashIn: Float,                       // the bounce off the in end, 0 is none
         @SerialName("smash_out") val smashOut: Float,                     // the bounce off the out end, 0 is none
         @SerialName("smash_speed_in") val smashSpeedIn: Float,            // how fast it recovers from a bounce off the in end
         @SerialName("smash_speed_out") val smashSpeedOut: Float,          // how fast it recovers from a bounce off the out end
         @SerialName("dual_pressure_bit") val dualPressureBit: Int,        // while this bit is on, psi x dual_pressure_scale. 0: none
         @SerialName("dual_pressure_scale") val dualPressureScale: Float,  // the psi scale while dual_pressure_bit is on
-        val curve: Curve                                                  // how the bones follow the cylinder, see Curve
+        val curve: Curve = Curve.Smooth                                   // how the bones follow the cylinder, see Curve
     )
 
     // One [hits.<mapping>] table: the thunk at either end of a stroke, louder the faster it hits. [bits] overrides it per bit
@@ -109,8 +113,8 @@ class PneumaticValve {
     data class Hit(
         @SerialName("sound_out") val soundOut: String,       // a sound id, when it hits the out end
         @SerialName("sound_in") val soundIn: String,         // when it hits the in end
-        val volume: Float,                                   // at full_speed or faster
-        val pitch: Float,                                    // 1 is the sound as recorded
+        val volume: Float = 1.0f,                            // at full_speed or faster
+        val pitch: Float = 1.0f,                             // 1 is the sound as recorded
         @SerialName("pitch_spread") val pitchSpread: Float,  // up to this much off the pitch, at random, so a row of hits doesn't sound copied
         @SerialName("min_speed") val minSpeed: Float,        // strokes a second, slower hits make no sound
         @SerialName("full_speed") val fullSpeed: Float,      // strokes a second, this fast or faster is full volume

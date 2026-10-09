@@ -27,29 +27,37 @@ render_cone = 110.0       #-most a link can turn from its modelled angle, in deg
 fixed_step = 0.16666667   #-physics step length in ticks, so it looks the same at any fps
 sweep_exit = false        #-skips extra work once chains settle (off until checked)
 
-[cylinders.rae]
-psi = 80.0           # the air supply
-rate = 60.0          # cylinder steps a second (Faz-Anim steps once a frame, only 60 matches it)
-
 # One cylinder per bit: Reel to Real's own values.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.rae]
-168  = { flow_in = 0.6,  flow_out = 0.37, gravity_in = 0.26, gravity_out = 0.42, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-169  = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-170  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-173  = { flow_in = 0.6,  flow_out = 0.37, gravity_in = 0.26, gravity_out = 0.42, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-174  = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-175  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-176  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-177  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-178  = { flow_in = 0.55, flow_out = 0.6,  gravity_in = 0.4,  gravity_out = 0.45, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-179  = { flow_in = 0.55, flow_out = 0.6,  gravity_in = 0.4,  gravity_out = 0.45, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-180  = { flow_in = 0.92, flow_out = 0.4,  gravity_in = 0.35, gravity_out = 0.73, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-181  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-182  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-183  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-184  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-185  = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.6,  gravity_out = 0.7,  psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-186  = { flow_in = 0.7,  flow_out = 0.65, gravity_in = 0.25, gravity_out = 0.25, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-187  = { flow_in = 0.75, flow_out = 0.7,  gravity_in = 0.25, gravity_out = 0.25, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
-188  = { flow_in = 0.4,  flow_out = 0.4,  gravity_in = 0.47, gravity_out = 0.47, psi_scale = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75, curve = "smooth" }
+168 = { flow_in = 0.6,  flow_out = 0.37, gravity_in = 0.26, gravity_out = 0.42, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+169 = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+170 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+173 = { flow_in = 0.6,  flow_out = 0.37, gravity_in = 0.26, gravity_out = 0.42, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+174 = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+175 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+176 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+177 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+178 = { flow_in = 0.55, flow_out = 0.6,  gravity_in = 0.4,  gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+179 = { flow_in = 0.55, flow_out = 0.6,  gravity_in = 0.4,  gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+180 = { flow_in = 0.92, flow_out = 0.4,  gravity_in = 0.35, gravity_out = 0.73, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+181 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+182 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+183 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+184 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.6,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+186 = { flow_in = 0.7,  flow_out = 0.65, gravity_in = 0.25, gravity_out = 0.25, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+187 = { flow_in = 0.75, flow_out = 0.7,  gravity_in = 0.25, gravity_out = 0.25, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+188 = { flow_in = 0.4,  flow_out = 0.4,  gravity_in = 0.47, gravity_out = 0.47, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+
+# Converted from the old wigglemul.
+[dynbones]
+"jaw"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
+"head"  = { damping = 0.075, elasticity = 0.1, freeze_x = false }
+"chest" = { damping = 0.075, elasticity = 0.1, freeze_x = false }
+"ArmL"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
+"ArmL2" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
+"ArmR"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
+"ArmR1" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
+"earL"  = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
+"earR"  = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

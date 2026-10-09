@@ -7,7 +7,10 @@ import net.minecraft.sounds.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.block.entity.*
-import com.flooferland.bizlib.bits.*
+import com.flooferland.bizlib.bits.AnimCommand
+import com.flooferland.bizlib.bits.BitMappingData
+import com.flooferland.bizlib.bits.BitUtils
+import com.flooferland.bizlib.bits.Movements
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
@@ -18,20 +21,14 @@ import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
 import com.flooferland.showbiz.models.CymbalModel.CymbalState
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.SignalFrame
-import com.flooferland.showbiz.types.ClientCollidePartInstance
-import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
-import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.types.PneumaticValve
-import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.physics.ChainRig
 import com.flooferland.showbiz.types.physics.ChainSolver
 import com.flooferland.showbiz.types.physics.DynBone
-import com.flooferland.showbiz.utils.lerp
 import com.mojang.blaze3d.Blaze3D
-import java.lang.Math.clamp
 import java.util.WeakHashMap
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
@@ -42,8 +39,6 @@ import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.constant.DataTickets
 import software.bernie.geckolib.util.ClientUtil
-import kotlin.math.PI
-import kotlin.math.sin
 
 /** Responsible for fancy animation */
 class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
@@ -121,24 +116,10 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
         driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, model, movements, showMapping)
         driveCollideParts(animatable, model, storage, state.partialTick)
-        drivePassiveMotion(model, storage, delta)
         driveChains(animatable, model, storage, bot)
     }
 
-    private fun drivePassiveMotion(model: BotModelData, storage: LocalBotStorage, delta: Float) {
-        val plan = model.passivePlan
-        if (plan.size == 0) return
-        if (plan.passiveIndices.isEmpty()) return
-
-        for (i in 0 until plan.size) {
-            val parent = plan.parentIndex[i]
-            if (parent < 0) continue
-            val bone = animationProcessor.getBone(plan.names[i]) ?: continue
-            val parentBone = animationProcessor.getBone(plan.names[parent]) ?: continue
-            // parentBone holds its final value for this frame
-        }
-    }
-        private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {
+    private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {
         val layout = model.chainLayout
         if (layout.size == 0) return
         val tables = bot.physics?.chains ?: return
@@ -195,8 +176,8 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
                             animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
                             model: BotModelData, movements: Movements?, showMapping: String?) {
-        val supply = showMapping?.let { bot.physics?.cylinders?.get(it) }
         val cylinders = showMapping?.let { bot.physics?.bits?.get(it) }
+        val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: cylinders?.let { PneumaticValve.Supply.DEFAULT }
         val hits = showMapping?.let { bot.physics?.hits?.get(it) }
         val dynBones = bot.physics?.dynbones
         if (dynBones != null && storage.dynBonesFor !== dynBones) {
@@ -293,27 +274,16 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
         }
         for ((bit, data) in bitmapBits) {
-            val flowEase = data.flow.easing
             val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
-
-            // Easing: https://easings.net/#easeOutSine
-            val eased = when (cylinders?.get(bit.toString())?.curve) {
-                PneumaticValve.Curve.Smooth -> bitSmooth * bitSmooth * (3f - 2f * bitSmooth)
-                PneumaticValve.Curve.Linear -> bitSmooth
-                else -> when (flowEase) {
-                    Easing.Default, Easing.Linear -> bitSmooth
-                    Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
-                }
-            }
 
             // Manual rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * bitSmooth
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * bitSmooth
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
             }
 
             // Manual position
@@ -321,12 +291,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying movement
-                bone.posX += move.target.x * eased
-                bone.posY += move.target.y * eased
-                bone.posZ += move.target.z * eased
-
-
-                // TODO: Add move wiggle
+                bone.posX += move.target.x * bitSmooth
+                bone.posY += move.target.y * bitSmooth
+                bone.posZ += move.target.z * bitSmooth
             }
         }
     }
