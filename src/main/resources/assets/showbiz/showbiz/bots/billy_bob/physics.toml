@@ -35,4 +35,3 @@ format = 1
 "Banjo" = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "ToesL" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "Jaw"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
-"Snout" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

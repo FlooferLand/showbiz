@@ -45,16 +45,16 @@ sweep_exit = false        #-skips extra work once chains settle (off until check
 182 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 183 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 184 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
-185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.6,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 186 = { flow_in = 0.7,  flow_out = 0.65, gravity_in = 0.25, gravity_out = 0.25, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 187 = { flow_in = 0.75, flow_out = 0.7,  gravity_in = 0.25, gravity_out = 0.25, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 188 = { flow_in = 0.4,  flow_out = 0.4,  gravity_in = 0.47, gravity_out = 0.47, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 
 # Converted from the old wigglemul.
 [dynbones]
-"jaw"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
-"head"  = { damping = 0.075, elasticity = 0.1, freeze_x = false }
-"chest" = { damping = 0.075, elasticity = 0.1, freeze_x = false }
+"jaw"   = { damping = 0.15,  elasticity = 0.2, freeze_x = true }
+"head"  = { damping = 0.075, elasticity = 0.08, freeze_x = false }
+"chest" = { damping = 0.075, elasticity = 0.08, freeze_x = false }
 "ArmL"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "ArmL2" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "ArmR"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }

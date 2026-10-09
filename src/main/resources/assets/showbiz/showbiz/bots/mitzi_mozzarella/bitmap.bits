@@ -2,7 +2,7 @@ set rae mitzi
 
 rae 185 {
     flow 1.8
-    rotate "jaw" x:-18
+    rotate "jaw" x:-25
 }
 
 rae 184 {

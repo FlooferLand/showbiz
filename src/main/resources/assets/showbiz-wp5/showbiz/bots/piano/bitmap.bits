@@ -2,5 +2,5 @@ set rae fatz
 set wp5 fats
 
 rae 1, wp5 1 {
-
+	wigglemul 0.0
 }

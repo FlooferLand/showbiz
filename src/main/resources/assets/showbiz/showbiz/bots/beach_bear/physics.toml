@@ -24,7 +24,6 @@ format = 1
 [dynbones]
 "Upper Body"      = { damping = 0.1,    elasticity = 0.15, freeze_x = true }
 "Jaw"             = { damping = 0.15,   elasticity = 0.1, freeze_x = true }
-"Snout"           = { damping = 0.15,   elasticity = 0.1, freeze_x = true }
 "Head"            = { damping = 0.075,  elasticity = 0.15, freeze_x = false }
 "Right Arm"       = { damping = 0.075,  elasticity = 0.1, freeze_x = false }
 "Right Hand"      = { damping = 0.05,   elasticity = 0.1, freeze_x = false }
@@ -33,9 +32,9 @@ format = 1
 "Left Arm"        = { damping = 0.15,   elasticity = 0.1, freeze_x = true }
 "Left Lower Arm"  = { damping = 0.15,   elasticity = 0.1, freeze_x = false }
 "Left Hand"       = { damping = 0.15,   elasticity = 0.1, freeze_x = true }
-"Right Leg"       = { damping = 0.05,   elasticity = 0.5, freeze_x = true }
-"Right Lower Leg" = { damping = 0.05,   elasticity = 0.5, freeze_x = true }
-"Right Foot"      = { damping = 0.05,   elasticity = 0.5, freeze_x = true }
-"Left Leg"        = { damping = 0.0375, elasticity = 0.5, freeze_x = true }
-"Left Lower Leg"  = { damping = 0.0375, elasticity = 0.5, freeze_x = true }
-"Left Foot"       = { damping = 0.0375, elasticity = 0.5, freeze_x = true }
+"Right Leg"       = { damping = 0.05,   elasticity = 0.05, freeze_x = true }
+"Right Lower Leg" = { damping = 0.05,   elasticity = 0.05, freeze_x = true }
+"Right Foot"      = { damping = 0.05,   elasticity = 0.05, freeze_x = true }
+"Left Leg"        = { damping = 0.0375, elasticity = 0.05, freeze_x = true }
+"Left Lower Leg"  = { damping = 0.0375, elasticity = 0.05, freeze_x = true }
+"Left Foot"       = { damping = 0.0375, elasticity = 0.05, freeze_x = true }
