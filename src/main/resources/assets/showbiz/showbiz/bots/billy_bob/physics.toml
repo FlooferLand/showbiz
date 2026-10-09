@@ -34,4 +34,3 @@ format = 1
 "HandR" = { damping = 0.075, elasticity = 0.1, freeze_x = false }
 "Banjo" = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "ToesL" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
-"Jaw"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

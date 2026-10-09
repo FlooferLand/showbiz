@@ -52,7 +52,6 @@ sweep_exit = false        #-skips extra work once chains settle (off until check
 
 # Converted from the old wigglemul.
 [dynbones]
-"jaw"   = { damping = 0.15,  elasticity = 0.2, freeze_x = true }
 "head"  = { damping = 0.075, elasticity = 0.08, freeze_x = false }
 "chest" = { damping = 0.075, elasticity = 0.08, freeze_x = false }
 "ArmL"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }

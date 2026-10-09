@@ -31,4 +31,3 @@ format = 1
 "upper_arm_l" = { damping = 0.15, elasticity = 0.1, freeze_x = false }
 "upper_arm_r" = { damping = 0.15, elasticity = 0.1, freeze_x = false }
 "head"        = { damping = 0.15, elasticity = 0.1, freeze_x = false }
-"jaw"         = { damping = 0.15, elasticity = 0.1, freeze_x = true }

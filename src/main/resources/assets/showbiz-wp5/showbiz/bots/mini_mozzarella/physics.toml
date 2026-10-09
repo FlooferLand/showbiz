@@ -3,9 +3,9 @@ format = 1
 # One cylinder per bit: today's motion, converted.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.wp5]
-50 = { flow_in = 0.64, flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
-51 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
-52 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+50 = { flow_in = 0.7,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+51 = { flow_in = 1.2,  flow_out = 1.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+52 = { flow_in = 1.2,  flow_out = 1.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 53 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 54 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 55 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
@@ -34,16 +34,15 @@ format = 1
 178 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 179 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 180 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.05, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
-181 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
-182 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
-185 = { flow_in = 0.64, flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+181 = { flow_in = 1.2,  flow_out = 1.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+182 = { flow_in = 1.2,  flow_out = 1.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+185 = { flow_in = 1.0,  flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.1,  smash_out = 0.1,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 186 = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.13, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 187 = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.13, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 188 = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.08, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 
 # Converted from the old wigglemul.
 [dynbones]
-"Jaw"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "EarL"  = { damping = 0.075, elasticity = 0.1, freeze_x = true }
 "EarR"  = { damping = 0.075, elasticity = 0.1, freeze_x = true }
 "Head"  = { damping = 0.075, elasticity = 0.1, freeze_x = false }
@@ -52,4 +51,5 @@ format = 1
 "ArmL2" = { damping = 0.08, elasticity = 0.08, freeze_x = true }
 "ArmR2" = { damping = 0.08, elasticity = 0.08, freeze_x = true }
 "Chest" = { damping = 0.05,  elasticity = 0.1, freeze_x = false }
-"Skirt" = { damping = 0.05,  elasticity = 0.1, freeze_x = false }
+"Skirt" = { damping = 0.05,  elasticity = 0.05, freeze_x = false }
+"Tail"  = { damping = 0.04,  elasticity = 0.04, freeze_x = false }

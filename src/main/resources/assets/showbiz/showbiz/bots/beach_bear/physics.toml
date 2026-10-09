@@ -18,12 +18,11 @@ format = 1
 163 = { flow_in = 1.95, flow_out = 1.2,  gravity_in = 0.45, gravity_out = 0.55, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 164 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.35, gravity_out = 0.3,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 165 = { flow_in = 0.65, flow_out = 0.35, gravity_in = 0.3,  gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
-166 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.75, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+166 = { flow_in = 0.7,  flow_out = 1.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0 }
 
 # Converted from the old wigglemul.
 [dynbones]
 "Upper Body"      = { damping = 0.1,    elasticity = 0.15, freeze_x = true }
-"Jaw"             = { damping = 0.15,   elasticity = 0.1, freeze_x = true }
 "Head"            = { damping = 0.075,  elasticity = 0.15, freeze_x = false }
 "Right Arm"       = { damping = 0.075,  elasticity = 0.1, freeze_x = false }
 "Right Hand"      = { damping = 0.05,   elasticity = 0.1, freeze_x = false }

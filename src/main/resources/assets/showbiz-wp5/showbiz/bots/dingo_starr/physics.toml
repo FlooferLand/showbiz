@@ -3,7 +3,7 @@ format = 1
 # One cylinder per bit: today's motion, converted.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.wp5]
-27 = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+27 = { flow_in = 0.7,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 28 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 29 = { flow_in = 1.6,  flow_out = 2.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 30 = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.68, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
@@ -32,7 +32,6 @@ format = 1
 
 # Converted from the old wigglemul.
 [dynbones]
-"Jaw"    = { damping = 0.15, elasticity = 0.1, freeze_x = true }
 "EarL"   = { damping = 0.05, elasticity = 0.1, freeze_x = false }
 "EarR"   = { damping = 0.05, elasticity = 0.1, freeze_x = false }
 "Head"   = { damping = 0.1,  elasticity = 0.1, freeze_x = false }

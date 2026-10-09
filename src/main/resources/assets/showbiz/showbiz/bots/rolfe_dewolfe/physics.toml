@@ -36,7 +36,6 @@ format = 1
 "arm_l_up_pivot" = { damping = 0.1,   elasticity = 0.1, freeze_x = false }
 "ArmL"           = { damping = 0.1,   elasticity = 0.1, freeze_x = false }
 "ArmL2"          = { damping = 0.1,   elasticity = 0.1, freeze_x = true }
-"jaw"            = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "earl_jaw"       = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "ear_l"          = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "ear_r"          = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

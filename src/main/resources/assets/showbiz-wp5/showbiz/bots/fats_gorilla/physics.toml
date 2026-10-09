@@ -3,7 +3,7 @@ format = 1
 # One cylinder per bit: today's motion, converted.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.wp5]
-17 = { flow_in = 0.48, flow_out = 0.6,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+17 = { flow_in = 0.7,  flow_out = 1.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 18 = { flow_in = 1.6,  flow_out = 2.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 19 = { flow_in = 1.6,  flow_out = 2.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
 20 = { flow_in = 0.5, flow_out = 0.35, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
@@ -35,5 +35,4 @@ format = 1
 "ElbowR3"   = { damping = 0.05,  elasticity = 0.2, freeze_x = false }
 "Waist"     = { damping = 0.075, elasticity = 0.1, freeze_x = true }
 "Head_Tilt" = { damping = 0.075, elasticity = 0.1, freeze_x = false }
-"jaw"       = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "Foot"      = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

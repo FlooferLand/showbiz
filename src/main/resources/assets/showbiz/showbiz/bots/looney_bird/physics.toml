@@ -13,4 +13,3 @@ format = 1
 # Converted from the old wigglemul.
 [dynbones]
 "head"  = { damping = 0.075, elasticity = 0.05, freeze_x = false }
-"mouth" = { damping = 0.15,  elasticity = 0.2, freeze_x = true }

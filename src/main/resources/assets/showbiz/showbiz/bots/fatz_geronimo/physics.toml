@@ -22,7 +22,6 @@ format = 1
 
 # Converted from the old wigglemul.
 [dynbones]
-"Jaw"         = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "Right Arm"   = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "Right Elbow" = { damping = 0.075, elasticity = 0.1, freeze_x = true }
 "Head"        = { damping = 0.06,  elasticity = 0.1, freeze_x = false }
