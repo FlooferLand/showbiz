@@ -12,17 +12,25 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
+import com.flooferland.showbiz.addons.data.ChainLayout
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateAnimation
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
 import com.flooferland.showbiz.models.CymbalModel.CymbalState
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.ClientCollidePartInstance
+import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
 import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.PneumaticValve
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.math.Vec3fc
+import com.flooferland.showbiz.types.physics.ChainRig
+import com.flooferland.showbiz.types.physics.ChainSolver
+import com.flooferland.showbiz.types.physics.DynBone
 import com.flooferland.showbiz.utils.lerp
+import com.mojang.blaze3d.Blaze3D
 import java.lang.Math.clamp
 import java.util.WeakHashMap
 import software.bernie.geckolib.animatable.GeoAnimatable
@@ -41,18 +49,18 @@ import kotlin.math.sin
 class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     val localStorage = WeakHashMap<T, LocalBotStorage>()
     class LocalBotStorage {
-        val bitSmooths = mutableMapOf<BitId, Float>()
-        val bitSpringOffset = mutableMapOf<BitId, Float>()
-        val bitSpringVelocity = mutableMapOf<BitId, Float>()
+        val valves = mutableMapOf<BitId, PneumaticValve>()
+        var cylinderClock: Double = 0.0
         val cymbalStates = mutableMapOf<String, CymbalState>()
+        var ownerBotId: ResourceId? = null
+        var generation: Int = -1
         var lastFrameTime = -1.0
+        var chains: List<ChainSolver> = emptyList()
+        var chainsFor: ChainLayout? = null
+        var chainClock: Double = -1.0
+        var dynBones: List<DynBone> = emptyList()
+        var dynBonesFor: Map<String, DynBone.Params>? = null
     }
-
-    // Spring properties -- methods so I can hot reload code to modify them >:)
-    fun getSpringStiff() = 0.6f
-    fun getSpringDamp() = 0.15f
-    fun getSpringImpulse() = 0.13f
-    fun getSpringScale(data: BitMappingData) = 1.4f * data.wiggleMul.toFloat()
 
     var triggeredBadAnimationError = false
 
@@ -71,16 +79,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
         for ((_, data) in bitmapBits) {
-            for (rotate in data.rotates) {
-                val bone = animationProcessor.getBone(rotate.bone) ?: continue
-                val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
-                bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
-            }
-            for (move in data.moves) {
-                val bone = animationProcessor.getBone(move.bone) ?: continue
-                val initMove = model.initBoneMoves[bone.name] ?: Vec3fc()
-                bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
-            }
             if (!showPlaying) {
                 for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
@@ -121,10 +119,62 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             val deltaTicks = (currentFrameTime - lastFrameTime).coerceIn(0.0..1.25)
             deltaTicks.toFloat()
         }
-        driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, movements)
+        driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, model, movements, showMapping)
         driveCollideParts(animatable, model, storage, state.partialTick)
+        drivePassiveMotion(model, storage, delta)
+        driveChains(animatable, model, storage, bot)
     }
 
+    private fun drivePassiveMotion(model: BotModelData, storage: LocalBotStorage, delta: Float) {
+        val plan = model.passivePlan
+        if (plan.size == 0) return
+        if (plan.passiveIndices.isEmpty()) return
+
+        for (i in 0 until plan.size) {
+            val parent = plan.parentIndex[i]
+            if (parent < 0) continue
+            val bone = animationProcessor.getBone(plan.names[i]) ?: continue
+            val parentBone = animationProcessor.getBone(plan.names[parent]) ?: continue
+            // parentBone holds its final value for this frame
+        }
+    }
+        private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {
+        val layout = model.chainLayout
+        if (layout.size == 0) return
+        val tables = bot.physics?.chains ?: return
+        val poses = GeoWorkaroundRenderHook.lastPoses[animatable] ?: return
+        if (storage.chainsFor !== layout) {
+            storage.chains = ChainSolver.forTables(layout, tables)
+            storage.chainsFor = layout
+        }
+        val now = Blaze3D.getTime()
+        val last = storage.chainClock
+        storage.chainClock = now
+        if (last < 0.0) return
+        val delta = if (ShowbizClient.getDeltaTime() <= 0.001f) 0.001f else ((now - last) * 20.0).toFloat().coerceIn(0.001f, 1.25f)
+
+        for (solver in storage.chains) {
+            val members = solver.members
+            for (i in members.indices) solver.roots[i] = poses[layout.roots[members[i]]]
+            solver.frame(delta, { i -> ChainRig.length(layout.links[members[i]], poses) }, { i, k -> poses[layout.links[members[i]][k]] })
+
+            // Writing the bones
+            for (i in members.indices) {
+                val chain = solver.chains[i]
+                if (!chain.posed) continue
+                val links = layout.links[members[i]]
+                for (k in 0 until chain.links) {
+                    if (!chain.eulerOk[k]) continue
+                    val bone = animationProcessor.getBone(links[k]) ?: continue
+                    val rest = model.initBoneRots[links[k]] ?: continue
+                    bone.rotX = rest.x + chain.euler[k * 3]
+                    bone.rotY = rest.y + chain.euler[k * 3 + 1]
+                    bone.rotZ = rest.z + chain.euler[k * 3 + 2]
+                    bone.markRotationAsChanged()
+                }
+            }
+        }
+    }
     private fun driveCollideParts(animatable: T, model: BotModelData, storage: LocalBotStorage, partialTick: Float) {
         if (animatable !is ICollidePartInteractable) return
 
@@ -142,12 +192,45 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     }
 
     // TODO: Make this function not a mess
-    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T, animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot, movements: Movements?) {
+    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
+                            animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
+                            model: BotModelData, movements: Movements?, showMapping: String?) {
+        val supply = showMapping?.let { bot.physics?.cylinders?.get(it) }
+        val cylinders = showMapping?.let { bot.physics?.bits?.get(it) }
+        val hits = showMapping?.let { bot.physics?.hits?.get(it) }
+        val dynBones = bot.physics?.dynbones
+        if (dynBones != null && storage.dynBonesFor !== dynBones) {
+            storage.dynBones = dynBones.map { (root, params) -> DynBone(root, params) }
+            storage.dynBonesFor = dynBones
+        }
+        val frame = animatable.show?.data?.signal ?: SignalFrame()
+        var steps = 0
+        if (supply != null) {
+            storage.cylinderClock += delta * 0.05   // ticks to seconds
+            while (storage.cylinderClock >= 1.0 / supply.rate) {
+                storage.cylinderClock -= 1.0 / supply.rate
+                steps++
+            }
+        }
+
+        val alpha = if (supply != null) (storage.cylinderClock * supply.rate).toFloat() else 1f
+
+        // Every cylinder a step at a time, then the floppy parts off the pose that step puts the bones in
+        if (supply != null && cylinders != null) repeat(steps) {
+            for (bit in bitmapBits.keys) {
+                val cylinder = cylinders[bit.toString()] ?: continue
+                val valve = storage.valves.getOrPut(bit) { PneumaticValve() }
+                val dualPressure = cylinder.dualPressureBit != 0 && frame.frameHas(cylinder.dualPressureBit)
+                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualPressure, cylinder)
+                if (hits != null && valve.hit > 0f) playHit(animatable, hits, bit, valve.hit, valve.pos >= 1f)
+            }
+            if (storage.dynBones.isNotEmpty()) {
+                poseBits(bitmapBits, storage, cylinders, model) { it.pos }
+                for (dynBone in storage.dynBones) dynBone.step(animationProcessor::getBone, 1f / supply.rate)
+            }
+        }
+
         for ((bit, data) in bitmapBits) {
-            // Getting things
-            val frame = animatable.show?.data?.signal ?: SignalFrame()
-            val flowSpeed = (data.flow.speed.toFloat() * 0.3f)
-            val flowEase = data.flow.easing
             val bitOn = frame.frameHas(bit)
 
             // Animation
@@ -168,7 +251,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val controller = animManager?.animationControllers[controllerKey] as? StatelessAnimationController
                 val animId = getAnimId(animatable, bitOn, anim)
                 if (controller != null && controller.currentAnimation?.animation?.name != animId) {
-                    // Checking if the animation exists
                     val playback = runCatching {
                         val animation = getAnimation(animatable, animId)
                         if (animation == null) {
@@ -186,33 +268,42 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                     }
                 }
             }
+        }
+        poseBits(bitmapBits, storage, cylinders, model) { it.drawn(alpha) }
+        for (dynBone in storage.dynBones) dynBone.draw(animationProcessor::getBone, alpha)
+    }
 
-            // Manual smoothing
-            val oldSmooth = storage.bitSmooths.putIfAbsent(bit, 0.0f) ?: 0.0f
-            val rawSmooth = clamp(
-                lerp(oldSmooth, if (bitOn) 1.0f else 0.0f, clamp(flowSpeed * delta, 0.0f, 10.0f)),
-                0.0f, 1.0f
-            )
-            val bitSmooth = if (rawSmooth.isFinite()) rawSmooth else 0f
-            storage.bitSmooths[bit] = bitSmooth
-
-            // Spring
-            val diff = (bitSmooth - oldSmooth)
-            var springOffset = storage.bitSpringOffset.getOrDefault(bit, 0f)
-            var springVel = storage.bitSpringVelocity.getOrDefault(bit, 0f)
-            val acceleration = (-getSpringStiff() * springOffset) - (getSpringDamp() * springVel)
-            springVel += acceleration * delta
-            springVel += diff * getSpringImpulse()
-            springOffset += springVel * delta
-            springOffset = if (springOffset.isFinite()) springOffset else 0f
-            springVel = if (springVel.isFinite()) springVel else 0f
-            storage.bitSpringOffset[bit] = springOffset
-            storage.bitSpringVelocity[bit] = springVel
+    // Laying the bitmap's rotates and moves over the rest pose, each valve at [at] of its travel, floppy parts back at rest
+    private fun poseBits(bitmapBits: MutableMap<UShort, BitMappingData>, storage: LocalBotStorage, cylinders: Map<String, PneumaticValve.Params>?, model: BotModelData, at: (PneumaticValve) -> Float) {
+        for ((_, data) in bitmapBits) {
+            for (rotate in data.rotates) {
+                val bone = animationProcessor.getBone(rotate.bone) ?: continue
+                val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
+                bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
+            }
+            for (move in data.moves) {
+                val bone = animationProcessor.getBone(move.bone) ?: continue
+                val initMove = model.initBoneMoves[bone.name] ?: Vec3fc()
+                bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
+            }
+        }
+        for (dynBone in storage.dynBones) for (name in dynBone.boneNames) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
+            bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
+        }
+        for ((bit, data) in bitmapBits) {
+            val flowEase = data.flow.easing
+            val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
 
             // Easing: https://easings.net/#easeOutSine
-            val eased = when (flowEase) {
-                Easing.Default, Easing.Linear -> bitSmooth
-                Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
+            val eased = when (cylinders?.get(bit.toString())?.curve) {
+                PneumaticValve.Curve.Smooth -> bitSmooth * bitSmooth * (3f - 2f * bitSmooth)
+                PneumaticValve.Curve.Linear -> bitSmooth
+                else -> when (flowEase) {
+                    Easing.Default, Easing.Linear -> bitSmooth
+                    Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
+                }
             }
 
             // Manual rotation
@@ -223,14 +314,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
                 bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
                 bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
-
-                // Applying wiggle
-                val affect = (springOffset * getSpringScale(data))
-                    .coerceIn(-2f, 2f)
-                    .let { if (it.isNaN()) 0f else it }
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * affect
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * affect
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * affect
             }
 
             // Manual position
@@ -242,22 +325,24 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 bone.posY += move.target.y * eased
                 bone.posZ += move.target.z * eased
 
-                // Manual overrides
-                when (bot.getId()) {
-                    // Looney wiggle
-                    "looney_bird" if movements?.get("raise") == bit -> {
-                        val affect = (springVel * getSpringScale(data)).coerceIn(-2f, 2f) * 2.0f
-                        val time = System.currentTimeMillis() * 0.01f
-                        val bone = animationProcessor.getBone("head") ?: bone
-                        bone.rotX += (((move.target.y * 3f) * (sin(time + 2.123f) * 2f)) * Mth.DEG_TO_RAD) * affect
-                        bone.rotY += (((move.target.y * 2f) * (sin(time + 9.124f) * 2f)) * Mth.DEG_TO_RAD) * affect
-                        bone.rotZ += (((move.target.y * 1.2f) * (sin(time) * 2f)) * Mth.DEG_TO_RAD) * affect
-                    }
-                }
 
                 // TODO: Add move wiggle
             }
         }
+    }
+
+    // Playing a cylinder's thunk at an end of its stroke, as its [PneumaticValve.Hit] says
+    private fun playHit(animatable: T, hits: PneumaticValve.Hit, bit: UShort, speed: Float, out: Boolean) {
+        if (!Showbiz.config.audio.playPneumaticSounds) return
+        val own = hits.bits[bit.toString()]
+        if (speed < (own?.minSpeed ?: hits.minSpeed)) return
+        val volume = (own?.volume ?: hits.volume) * (speed / (own?.fullSpeed ?: hits.fullSpeed)).coerceAtMost(1f)
+        if (volume <= 0f) return
+        val sound = if (out) own?.soundOut ?: hits.soundOut else own?.soundIn ?: hits.soundIn
+        val pos = animatable.botPos ?: return
+        val level = animatable.botLevel as? ClientLevel ?: return
+        val pitch = (own?.pitch ?: hits.pitch) + (level.random.nextFloat() * 2f - 1f) * (own?.pitchSpread ?: hits.pitchSpread)
+        level.playLocalSound(pos.x, pos.y, pos.z, SoundEvent.createVariableRangeEvent(ResourceLocation.parse(sound)), SoundSource.BLOCKS, volume, pitch, false)
     }
 
     fun soundKeyframeHandler(animatable: T, state: SoundKeyframeEvent<GeoAnimatable>) {
@@ -298,6 +383,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     fun getBoneSize(bone: GeoBone): Float {
         var size = 0f
         fun recurse(bone: GeoBone) {
+            if (bone.cubes.isEmpty()) return@recurse
             size += (bone.cubes.map { it.size.length() }.average() / bone.cubes.size).toFloat()
             bone.childBones.forEach { recurse(it) }
         }

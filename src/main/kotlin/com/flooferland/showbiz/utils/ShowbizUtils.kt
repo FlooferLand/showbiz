@@ -21,8 +21,9 @@ object ShowbizUtils {
     fun hasComputerCraft() =
         FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
 
-    fun loadBakedModel(location: ResourceLocation, json: String) = runCatching {
-        val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
+    fun loadBakedModel(location: ResourceLocation, json: String, transform: ((Model) -> Model)? = null) = runCatching {
+        val parsed = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
+        val model = transform?.invoke(parsed) ?: parsed
         val geo = GeometryTree.fromModel(model)
         BakedModelFactory.getForNamespace(location.namespace).constructGeoModel(geo)
     }.onFailure { Showbiz.log.error("Failed to load GeckoLib model '${location}'", it) }.getOrNull()
