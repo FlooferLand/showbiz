@@ -74,13 +74,23 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
         return null
     }
 
+    // Caching each texture's _glowmask lookup, cleared when a resource reload swaps the bot map
+    private val glowTextures = HashMap<ResourceLocation, Boolean>()
+    private var glowFor: Map<*, *>? = null
+
     public fun hasGlowTexture(animatable: T): Boolean {
+        if (glowFor !== ShowbizClient.bots) {
+            glowTextures.clear()
+            glowFor = ShowbizClient.bots
+        }
         val texture = getTextureResource(animatable)
-        val glowTexture = rlCustom(
-            texture.namespace,
-            texture.path.replace(".png", "_glowmask.png")
-        )
-        return Minecraft.getInstance().resourceManager.getResource(glowTexture).isPresent
+        return glowTextures.getOrPut(texture) {
+            val glowTexture = rlCustom(
+                texture.namespace,
+                texture.path.replace(".png", "_glowmask.png")
+            )
+            Minecraft.getInstance().resourceManager.getResource(glowTexture).isPresent
+        }
     }
 
     // For some reason GeckoLib seems to require setting the active model every single time?

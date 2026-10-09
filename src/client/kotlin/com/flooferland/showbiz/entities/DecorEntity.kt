@@ -77,10 +77,6 @@ class DecorEntity(level: Level, val boneName: String? = null, val decorId: Id = 
                 val botId = bot.botId ?: return
                 val entities = decorEntities[bot] ?: mutableSetOf()
 
-                if (botId.matches("showbiz:mitzi_mozzarella") && entities.count { it.decorId == Id.PomPom && it.boneName!!.startsWith("Pom") } != 2) {
-                    spawn(bot, "PomL", Id.PomPom)
-                    spawn(bot, "PomR", Id.PomPom)
-                }
             }
         }
 

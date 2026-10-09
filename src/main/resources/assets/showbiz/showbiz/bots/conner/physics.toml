@@ -1,0 +1,33 @@
+format = 1
+
+[cylinders.faz]
+psi = 80.0           # the air supply
+rate = 60.0          # cylinder steps a second (Faz-Anim steps once a frame, only 60 matches it)
+
+# One cylinder per bit: today's motion, converted.
+# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
+[bits.faz]
+33   = { flow_in = 1.2,  flow_out = 1.5, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+34   = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+35   = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+36   = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+43   = { flow_in = 0.16, flow_out = 0.2, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+46   = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+51   = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+52   = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+55   = { flow_in = 0.64, flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+
+[cylinders.rae]
+psi = 80.0           
+rate = 60.0          
+
+[bits.rae]
+151  = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+152  = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+155  = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+156  = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+157  = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+158  = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+161  = { flow_in = 0.16, flow_out = 0.2, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+165  = { flow_in = 0.64, flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }
+166  = { flow_in = 1.2,  flow_out = 1.5, gravity_in = 1.0, gravity_out = 1.0, psi_scale = 0.65625, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0, dual_pressure_scale = 1.0, curve = "bitmap" }

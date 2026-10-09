@@ -65,8 +65,70 @@
 				{
 					"name": "PomR",
 					"parent": "HandR",
-					"pivot": [-5, 13, -1],
+					"pivot": [-11.5, 6.25, -1],
 					"rotation": [0, 0, -45]
+				},
+				{
+					"name": "PomR1",
+					"parent": "PomR",
+					"pivot": [-6.5, 0.875, 0],
+					"cubes": [
+						{
+							"origin": [-9.75, -10.875, 0],
+							"size": [16, 17, 0],
+							"uv": {
+								"north": {"uv": [48, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomR2",
+					"parent": "PomR",
+					"pivot": [-6.5, -6.125, 0],
+					"cubes": [
+						{
+							"origin": [-14.5, -10.875, 4.75],
+							"size": [16, 17, 0],
+							"pivot": [-6.5, 0.875, 0],
+							"rotation": [0, 90, 0],
+							"uv": {
+								"north": {"uv": [64, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomR3",
+					"parent": "PomR",
+					"pivot": [-6.5, 0.875, 0],
+					"cubes": [
+						{
+							"origin": [-11.14124, -10.875, 3.35876],
+							"size": [16, 17, 0],
+							"pivot": [-6.5, 0.875, 0],
+							"rotation": [0, 45, 0],
+							"uv": {
+								"north": {"uv": [48, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomR4",
+					"parent": "PomR",
+					"pivot": [-6.5, 0.875, 0],
+					"cubes": [
+						{
+							"origin": [-17.85876, -10.875, 3.35876],
+							"size": [16, 17, 0],
+							"pivot": [-6.5, 0.875, 0],
+							"rotation": [-180, 45, 180],
+							"uv": {
+								"north": {"uv": [64, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
 				},
 				{
 					"name": "ArmL",
@@ -98,6 +160,68 @@
 					"parent": "HandL",
 					"pivot": [5, 13, -1],
 					"rotation": [0, 0, 45]
+				},
+				{
+					"name": "PomL1",
+					"parent": "PomL",
+					"pivot": [0, 0.825, 0],
+					"cubes": [
+						{
+							"origin": [-3.25, -3.925, 0],
+							"size": [16, 17, 0],
+							"uv": {
+								"north": {"uv": [48, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomL2",
+					"parent": "PomL",
+					"pivot": [0, 7.825, 0],
+					"cubes": [
+						{
+							"origin": [-8, -3.925, 4.75],
+							"size": [16, 17, 0],
+							"pivot": [0, 7.825, 0],
+							"rotation": [0, 90, 0],
+							"uv": {
+								"north": {"uv": [64, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomL3",
+					"parent": "PomL",
+					"pivot": [0, 7.825, 0],
+					"cubes": [
+						{
+							"origin": [-4.64124, -3.925, 3.35876],
+							"size": [16, 17, 0],
+							"pivot": [0, 7.825, 0],
+							"rotation": [0, 45, 0],
+							"uv": {
+								"north": {"uv": [48, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "PomL4",
+					"parent": "PomL",
+					"pivot": [0, 7.825, 0],
+					"cubes": [
+						{
+							"origin": [-11.35876, -3.925, 3.35876],
+							"size": [16, 17, 0],
+							"pivot": [0, 7.825, 0],
+							"rotation": [-180, 45, 180],
+							"uv": {
+								"north": {"uv": [64, 65], "uv_size": [16, 14]}
+							}
+						}
+					]
 				},
 				{
 					"name": "head",
