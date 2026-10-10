@@ -49,7 +49,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         when {
             botId.matches("showbiz:rolfe_dewolfe") -> {
                 map("cymbal", CollidePartId.Cymbal)
-                map("stick", CollidePartId.Stick)
+                map("stickInner", CollidePartId.Stick)
             }
             botId.matches("showbiz-wp5:mini_mozzarella") -> {
                 map("Booper", CollidePartId.Boop)

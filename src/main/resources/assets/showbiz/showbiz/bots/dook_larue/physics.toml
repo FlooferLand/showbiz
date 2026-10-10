@@ -4,32 +4,35 @@ format = 1
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.rae]
 21 = { flow_in = 0.55, flow_out = 0.55, gravity_in = 0.42, gravity_out = 0.45, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-22 = { flow_in = 0.82, flow_out = 0.43, gravity_in = 0.4,  gravity_out = 0.7,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-23 = { flow_in = 0.64, flow_out = 0.8,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.39, smash_out = 0.67, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
-24 = { flow_in = 0.64, flow_out = 0.8,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.39, smash_out = 0.67, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
+22 = { flow_in = 0.9, flow_out = 0.7, gravity_in = 0.5,  gravity_out = 0.8,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+23 = { flow_in = 1.5, flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.39, smash_out = 0.67, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
+24 = { flow_in = 1.5, flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.39, smash_out = 0.67, smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
 25 = { flow_in = 0.55, flow_out = 0.55, gravity_in = 0.42, gravity_out = 0.45, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 26 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 27 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 28 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 29 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-31 = { flow_in = 0.8,  flow_out = 0.9,  gravity_in = 0.8,  gravity_out = 0.75, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+30 = { flow_in = 2.5,  flow_out = 2.5,  gravity_in = 1.0, gravity_out = 1.0,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 32 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.8,  gravity_out = 1.0,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-33 = { flow_in = 3.0,  flow_out = 3.0,  gravity_in = 0.32, gravity_out = 0.27, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-34 = { flow_in = 3.0,  flow_out = 3.0,  gravity_in = 0.32, gravity_out = 0.27, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-35 = { flow_in = 0.8,  flow_out = 0.9,  gravity_in = 0.8,  gravity_out = 0.75, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+33 = { flow_in = 3.0,  flow_out = 3.0,  gravity_in = 0.9, gravity_out = 0.9, smash_in = 0.5,  smash_out = 0.0,  smash_speed_in = 0.5, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+34 = { flow_in = 3.0,  flow_out = 3.0,  gravity_in = 0.7, gravity_out = 0.7, smash_in = 0.5,  smash_out = 0.0,  smash_speed_in = 0.5, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 62 = { flow_in = 1.6,  flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
 63 = { flow_in = 1.36, flow_out = 1.7,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, dual_pressure_bit = 0,  dual_pressure_scale = 1.0,  curve = "bitmap" }
 64 = { flow_in = 0.47, flow_out = 0.43, gravity_in = 0.65, gravity_out = 0.6,  smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+
+# drum hits.. flows are backwards for some reason, same with gravity in/out
+31 = { flow_in = 0.6,  flow_out = 1.4,  gravity_in = 0.7,  gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+35 = { flow_in = 0.8,  flow_out = 1.8,  gravity_in = 0.8,  gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
 
 # Converted from the old wigglemul.
 [dynbones]
 "Right Arm"  = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "Left Arm"   = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
 "Right Foot" = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
-"RightElbow" = { damping = 0.075, elasticity = 0.1, freeze_x = true }
-"LeftElbow"  = { damping = 0.075, elasticity = 0.1, freeze_x = true }
+"RightElbow" = { damping = 0.3, elasticity = 0.4, stiffness = 0.3, freeze_x = true }
+"LeftElbow"  = { damping = 0.3, elasticity = 0.4, stiffness = 0.3, freeze_x = true }
 "Head"       = { damping = 0.075, elasticity = 0.1, freeze_x = false }
 "Left Foot"  = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "Waist"      = { damping = 0.075, elasticity = 0.1, freeze_x = true }
-"EarR"       = { damping = 0.1,  elasticity = 0.02, stiffness = 0.8, freeze_x = false }
-"EarL"       = { damping = 0.1,  elasticity = 0.02, stiffness = 0.8, freeze_x = false }
+"EarR"       = { damping = 0.08,  elasticity = 0.1, stiffness = 0.3, freeze_x = false }
+"EarL"       = { damping = 0.08,  elasticity = 0.1, stiffness = 0.3, freeze_x = false }

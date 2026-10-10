@@ -7,10 +7,7 @@ import net.minecraft.sounds.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.block.entity.*
-import com.flooferland.bizlib.bits.AnimCommand
-import com.flooferland.bizlib.bits.BitMappingData
-import com.flooferland.bizlib.bits.BitUtils
-import com.flooferland.bizlib.bits.Movements
+import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.assets.AddonBot
@@ -39,6 +36,8 @@ import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.constant.DataTickets
 import software.bernie.geckolib.util.ClientUtil
+import kotlin.math.PI
+import kotlin.math.sin
 
 /** Responsible for fancy animation */
 class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
@@ -274,16 +273,27 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
         }
         for ((bit, data) in bitmapBits) {
+            val flowEase = data.flow.easing
             val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
+
+            // Easing: https://easings.net/#easeOutSine
+            val eased = when (cylinders?.get(bit.toString())?.curve) {
+                PneumaticValve.Curve.Smooth -> bitSmooth * bitSmooth * (3f - 2f * bitSmooth)
+                PneumaticValve.Curve.Linear -> bitSmooth
+                else -> when (flowEase) {
+                    Easing.Default, Easing.Linear -> bitSmooth
+                    Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
+                }
+            }
 
             // Manual rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * bitSmooth
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * bitSmooth
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * bitSmooth
+                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
+                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
+                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
             }
 
             // Manual position
@@ -291,9 +301,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying movement
-                bone.posX += move.target.x * bitSmooth
-                bone.posY += move.target.y * bitSmooth
-                bone.posZ += move.target.z * bitSmooth
+                bone.posX += move.target.x * eased
+                bone.posY += move.target.y * eased
+                bone.posZ += move.target.z * eased
             }
         }
     }
