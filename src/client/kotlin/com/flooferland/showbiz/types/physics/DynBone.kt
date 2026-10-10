@@ -43,7 +43,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
             pos.set(rest); prev.set(rest)
             ready = true
         }
-        val timeVar = delta * UPDATE_RATE
+        val timeVar = delta * params.updateRate
         val restLen = rest.distance(p0)
         if (restLen < 1e-6f) return
         val vx = pos.x - prev.x; val vy = pos.y - prev.y; val vz = pos.z - prev.z
@@ -114,7 +114,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
             for (i in 0..size) { parts[i].set(anims[i]); prevs[i].set(anims[i]) }
             ready = true
         }
-        val timeVar = delta * UPDATE_RATE
+        val timeVar = delta * params.updateRate
         prevs[0].set(parts[0]); parts[0].set(anims[0])
         for (i in 1..size) {
             val vx = parts[i].x - prevs[i].x; val vy = parts[i].y - prevs[i].y; val vz = parts[i].z - prevs[i].z
@@ -216,15 +216,12 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     // One [dynbones."<bone>"] table of a bot's physics.toml, with Faz-Anim's DynamicBone settings for the chain rooted at that bone
     @Serializable
     data class Params(
-        val damping: Float,                                 // speed lost each step
-        val elasticity: Float,                              // pull back toward where the animation puts the end
-        val stiffness: Float = 0f,                          // how close to it the end is held, 0 is free
-        @SerialName("freeze_x") val freezeX: Boolean,       // swings only in the plane across the root's X axis
-        val length: Float = 0f,                             // where the end sits, in pixels, 0 is as far as the bone's cubes reach
-        val links: List<String> = listOf()                  // the bones below the root, for a chain of more than one
+        val damping: Float,                                   // speed lost each step
+        val elasticity: Float,                                // pull back toward where the animation puts the end
+        val stiffness: Float = 0f,                            // how close to it the end is held, 0 is free
+        @SerialName("update_rate") val updateRate: Int = 60,  // scales how hard the part gets pulled back each frame (elasticity × rate / 60)
+        @SerialName("freeze_x") val freezeX: Boolean,         // swings only in the plane across the root's X axis
+        val length: Float = 0f,                               // where the end sits, in pixels, 0 is as far as the bone's cubes reach
+        val links: List<String> = listOf()                    // the bones below the root, for a chain of more than one
     )
-
-    companion object {
-        const val UPDATE_RATE = 60  // Faz-Anim's locked update rate
-    }
 }
