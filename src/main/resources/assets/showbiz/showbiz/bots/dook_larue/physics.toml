@@ -31,5 +31,5 @@ format = 1
 "Head"       = { damping = 0.075, elasticity = 0.1, freeze_x = false }
 "Left Foot"  = { damping = 0.15,  elasticity = 0.1, freeze_x = true }
 "Waist"      = { damping = 0.075, elasticity = 0.1, freeze_x = true }
-"EarR"       = { damping = 0.05,  elasticity = 0.1, freeze_x = false }
-"EarL"       = { damping = 0.05,  elasticity = 0.1, freeze_x = false }
+"EarR"       = { damping = 0.1,  elasticity = 0.02, stiffness = 0.8, freeze_x = false }
+"EarL"       = { damping = 0.1,  elasticity = 0.02, stiffness = 0.8, freeze_x = false }
