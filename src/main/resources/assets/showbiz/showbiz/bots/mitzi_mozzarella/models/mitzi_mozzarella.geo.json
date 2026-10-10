@@ -301,9 +301,21 @@
 				{
 					"name": "hair",
 					"parent": "head",
-					"pivot": [0, 37, 5],
+					"pivot": [0, 37, 5]
+				},
+				{
+					"name": "ponyL",
+					"parent": "hair",
+					"pivot": [5, 37, 5],
 					"cubes": [
-						{"origin": [3, 27, 3], "size": [4, 10, 4], "uv": [17, 35]},
+						{"origin": [3, 27, 3], "size": [4, 10, 4], "uv": [17, 35]}
+					]
+				},
+				{
+					"name": "ponyR",
+					"parent": "hair",
+					"pivot": [-5, 37, 5],
+					"cubes": [
 						{"origin": [-7, 27, 3], "size": [4, 10, 4], "uv": [0, 35]}
 					]
 				}

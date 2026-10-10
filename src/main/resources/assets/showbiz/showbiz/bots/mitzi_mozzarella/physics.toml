@@ -45,7 +45,7 @@ sweep_exit = false        #-skips extra work once chains settle (off until check
 182 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 183 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 184 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
-185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.8,  gravity_out = 0.9,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 186 = { flow_in = 0.5,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 187 = { flow_in = 0.5,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 188 = { flow_in = 0.4,  flow_out = 0.4,  gravity_in = 0.47, gravity_out = 0.47, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
@@ -58,5 +58,7 @@ sweep_exit = false        #-skips extra work once chains settle (off until check
 "ArmL2" = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
 "ArmR"  = { damping = 0.13,  elasticity = 0.05, freeze_x = false }
 "ArmR1" = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
-"earL"  = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
-"earR"  = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
+"earL"  = { damping = 0.12,  elasticity = 0.04, freeze_x = true }
+"earR"  = { damping = 0.12,  elasticity = 0.04, freeze_x = true }
+"ponyL"  = { damping = 0.1,  elasticity = 0.03, freeze_x = true }
+"ponyR"  = { damping = 0.1,  elasticity = 0.03, freeze_x = true }
