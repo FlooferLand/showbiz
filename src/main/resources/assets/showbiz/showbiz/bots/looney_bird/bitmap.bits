@@ -21,6 +21,6 @@ rae 192 {
 }
 
 rae 193 {
-	move "eye_r" x:-0.4
-	move "eye_l" x:0.4
+	move "eye_r" x:0.4
+	move "eye_l" x:-0.4
 }
