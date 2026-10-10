@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.joml.*
 import software.bernie.geckolib.cache.`object`.GeoBone
+import software.bernie.geckolib.cache.`object`.GeoCube
 import kotlin.math.atan2
 
 /**
@@ -44,6 +45,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         }
         val timeVar = delta * UPDATE_RATE
         val restLen = rest.distance(p0)
+        if (restLen < 1e-6f) return
         val vx = pos.x - prev.x; val vy = pos.y - prev.y; val vz = pos.z - prev.z
         prev.set(pos)
         pos.add(vx * (1f - params.damping), vy * (1f - params.damping), vz * (1f - params.damping))
@@ -165,9 +167,10 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     /** The end, like Faz-Anim's _end bones: from the pivot along the bone's cubes, [Params.length] or as far as they reach.
      *  Held to its X plane it is squared to X; swinging free it keeps the cubes' own direction */
     private fun measure(bone: GeoBone): Vector3f {
+        val cubes = bone.cubes.ifEmpty { cubesBelow(bone) }
         val sum = Vector3f()
         var n = 0
-        for (cube in bone.cubes) {
+        for (cube in cubes) {
             for (quad in cube.quads().filterNotNull()) {
                 for (v in quad.vertices()) {
                     sum.add(v.position())
@@ -178,7 +181,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         val pivot = Vector3f(bone.pivotX, bone.pivotY, bone.pivotZ).div(16f)
         val dir = sum.div(maxOf(n, 1).toFloat()).sub(pivot).let { if (params.freezeX) it.setComponent(0, 0f) else it }.normalize()
         var reach = 0f
-        for (cube in bone.cubes) {
+        for (cube in cubes) {
             for (quad in cube.quads().filterNotNull()) {
                 for (vertex in quad.vertices())
                     reach = maxOf(reach, Vector3f(vertex.position()).sub(pivot).dot(dir))
@@ -186,6 +189,8 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         }
         return dir.mul(if (params.length > 0f) params.length / 16f else reach)
     }
+
+    private fun cubesBelow(bone: GeoBone): List<GeoCube> = bone.childBones.flatMap { it.cubes + cubesBelow(it) }
 
     // Where the animation puts the root and its end this step, in model space
     private fun animated(bone: GeoBone) {
