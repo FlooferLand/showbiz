@@ -3,15 +3,13 @@ format = 1
 # One cylinder per bit: Reel to Real's own values.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
 [bits.rae]
-171 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5, gravity_out = 0.5, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
-172 = { flow_in = 0.8, flow_out = 0.9, gravity_in = 0.3, gravity_out = 0.3, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
-167 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+167 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+171 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.16, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
+172 = { flow_in = 0.8, flow_out = 0.95, gravity_in = 0.12, gravity_out = 0.11, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 191 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 192 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 193 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 211, dual_pressure_scale = 0.75 }
 
 # Converted from the old wigglemul.
 [dynbones]
-"looney" = { damping = 0.075, elasticity = 0.05, freeze_x = false }
-"head" = { damping = 0.075, elasticity = 0.05, freeze_x = false }
-"leaf" = { damping = 0.03, elasticity = 0.003, freeze_x = false }
+"head"  = { damping = 0.075, elasticity = 0.05, freeze_x = false }

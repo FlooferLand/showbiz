@@ -11,13 +11,19 @@ accepts.rockafire = true
 accepts.fnaf1 = true
 
 [old_billy_bob]
-name = "Old Billy Bob (TEMP)"
+name = "Old Billy Bob (TEMPORARY)"
 authors = ["Creative Engineering", "LBN"]
 accepts.rockafire = true
 accepts.fnaf1 = true
 
 [looney_bird]
 name = "Looney Bird"
+authors = ["Creative Engineering", "LBN"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[old_looney_bird]
+name = "Old Looney Bird (TEMPORARY)"
 authors = ["Creative Engineering", "FlooferLand", "FizzGoose"]
 accepts.rockafire = true
 accepts.fnaf1 = false

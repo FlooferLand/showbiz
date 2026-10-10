@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.looney_bird.eyes_cross.on": {
+		"animation.old_looney_bird.eyes_cross.on": {
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.1667,
 			"bones": {
@@ -27,7 +27,7 @@
 				}
 			}
 		},
-		"animation.looney_bird.eyes_cross.off": {
+		"animation.old_looney_bird.eyes_cross.off": {
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.1667,
 			"bones": {
