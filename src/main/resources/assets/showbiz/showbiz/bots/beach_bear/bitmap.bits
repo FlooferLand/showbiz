@@ -12,10 +12,10 @@ rae 166 {
 
 # Head
 rae 156 {
-    rotate "Head" y:25
+    rotate "Head" y:40
 }
 rae 157 {
-    rotate "Head" y:-25
+    rotate "Head" y:-40
 }
 rae 158 {
     rotate "Head" x:20
@@ -35,10 +35,10 @@ rae 153 {
 
 # Arms
 rae 161 {
-    rotate "Right Arm" z:60
+    rotate "Right Arm" z:70
 }
 rae 162 {
-    rotate "Right Arm" y:-65
+    rotate "Right Arm" y:-85
 }
 rae 164 {
     rotate "Right Hand" y:-50
