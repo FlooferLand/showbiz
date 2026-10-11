@@ -17,6 +17,9 @@ div {
     box-shadow: inset 0px -1px 0px 0px #51575a;
     text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
 }
+#content {
+	padding: 0.8rem;
+}
 #logo {
 	color: #fff;
 	text-decoration: none;
@@ -24,5 +27,7 @@ div {
 
 .container {
 	position: relative;
+	background: #dddddd;
 	min-height: 160px;
+	padding: 0.8rem;
 }
