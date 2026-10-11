@@ -43,20 +43,25 @@ jobs:
           distribution: temurin
           java-version: "25"
       - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x gradlew && ./gradlew build
+      - run: chmod +x gradlew && ./gradlew runDatagen assemble
 
       - name: Building staticy things into the static page
         env:
           BUILD: ${{ github.run_number }}
         run: |
+          JAR=$(ls versions/1.21.1/build/libs/showbiz-*+1.21.1.jar)
+          cp "$JAR" website/nightly.jar
+      
+          VERSION=$(basename "$JAR" .jar)
+          VERSION=${VERSION#showbiz-}
           SHA=${GITHUB_SHA::7}
           COMMIT=$(git log -1 --pretty=%s)
       
-          cp versions/1.21.1/build/libs/showbiz-*+1.21.1.jar website/nightly.jar
           sed -i \
             -e "s|{{BUILD}}|$BUILD|g" \
             -e "s|{{SHA}}|$SHA|g" \
             -e "s|{{COMMIT}}|$COMMIT|g" \
+            -e "s|{{VERSION}}|$VERSION|g" \
             website/index.html
 
       - uses: actions/configure-pages@v5
