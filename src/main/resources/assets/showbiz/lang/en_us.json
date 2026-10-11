@@ -1,8 +1,5 @@
 {
     "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand and Monsterwaill!",
-    "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
-    "config.prop.audio.playBotEffects": "Play custom bot effects",
-    "config.prop.permissions.restrict": "Restrict permissions (server-only)",
 
     "category.showbiz": "Showbiz",
     "itemGroup.showbiz.main": "Showbiz",
@@ -65,5 +62,13 @@
 
     "key.showbiz.open_in_handbook": "Open in Handbook",
 
-    "other.showbiz.open_in_handbook": "Press %1$s to open the handbook"
+    "other.showbiz.open_in_handbook": "Press %1$s to open the handbook",
+
+    "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
+    "config.prop.audio.playBotEffects": "Play custom bot effects",
+    "config.prop.permissions.controlPlayback": "Who can control show playback",
+    "config.prop.permissions.editScreenAccess": "Who can access edit screens on blocks/entities",
+    "config.prop.permissions.switchReels": "Who can take out or switch show reels",
+    "config.prop.permissions.writeReels": "Who can record to show reels",
+    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)"
 }

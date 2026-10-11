@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.screens
 
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
@@ -31,21 +32,29 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 when (categoryClass) {
                     ModConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
                     ModConfig.Permissions::class -> categoryAddWidgets("Permissions", config.permissions)
+                    ModConfig.Other::class -> categoryAddWidgets("Other", config.other)
                 }
             }
         }.onFailure { Showbiz.log.error("Failure adding config categories", it) }
 
         // Placing the UI
+
+        // Logo
+        val logoText = Component.literal("Showbiz").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
+        val logo = StringWidget(20, (font.lineHeight / 2) + 4, font.width(logoText), font.lineHeight, logoText, font)
+        addRenderableWidget(logo)
+
+        // Categories and widgets
         if (configEntries.isEmpty()) Minecraft.getInstance().setScreen(parent)
-        var categoryWidthsAcc = 0
+        var xAcc = logo.right
         for ((categoryIndex, categoryName) in configEntries.keys.withIndex()) {
             val widgets = configEntries[categoryName] ?: continue
             widgets.firstOrNull()?.widget?.isFocused = true
 
             if (selectedCategory == null) selectedCategory = categoryName
 
-            val categoryWidth = font.width("  $categoryName  ")
-            categoryWidthsAcc += categoryWidth
+            // Category button
+            val categoryWidth = font.width("    $categoryName    ")
             val categoryButton = Button.builder(Component.literal(categoryName))
                 { b ->
                     selectedCategory = categoryName
@@ -57,21 +66,25 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                         }
                     }
                 }
-                .pos(20 + categoryWidthsAcc, 0)
+                .pos(20 + xAcc, 0)
                 .size(categoryWidth, 20)
                 .build()
+            categoryButton.active = (categoryName != selectedCategory)
             addRenderableWidget(categoryButton)
             categoryButtons.add(categoryButton)
+            xAcc += categoryWidth
 
+            // Widgets
             for ((widgetIndex, entry) in widgets.withIndex()) {
                 val location = widgetIndex + 1
                 val (name, widget) = entry
                 val spacing = 40
                 val x = 20
-                val y = (location * spacing) + (categoryIndex * spacing)
+                val y = (location * spacing)
 
-                val nameHeight = (font.lineHeight * 1.65f).toInt()
-                val nameWidget = StringWidget(x, y, width - x, 20, Component.translatable("config.prop.${categoryName.lowercase()}.$name"), font).alignLeft()
+                val nameHeight = (font.lineHeight * 1.7f).toInt()
+                val nameText = Component.translatable("config.prop.${categoryName.lowercase()}.$name")
+                val nameWidget = StringWidget(x, y, width - x, 20, nameText, font).alignLeft()
                 nameWidget.visible = (selectedCategory == categoryName)
                 addRenderableWidget(nameWidget)
                 entry.nameWidget = nameWidget
@@ -93,7 +106,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
 
             @Suppress("UNCHECKED_CAST")
             val widget = when (propValue) {
-                is Boolean -> Checkbox.builder(propName, font)
+                is Boolean -> Checkbox.builder(Component.literal("Enable").withStyle(ChatFormatting.GRAY), font)
                     .selected(propValue)
                     .onValueChange { _, bool ->
                         (prop as? KMutableProperty1<T, Boolean>)?.set(category, bool) ?: Showbiz.log.error("Failed to set '${propName.string}'")
@@ -116,6 +129,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
     override fun onClose() {
         Showbiz.config = config
         Showbiz.config.save()
+        Minecraft.getInstance().setScreen(parent)
         super.onClose()
     }
 }

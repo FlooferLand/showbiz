@@ -91,7 +91,7 @@ object ModClientLights {
         }
     }
 
-    fun useVanillaLights() = IrisShadersState.shadersDisabled()
+    fun useVanillaLights() = IrisShadersState.shadersDisabled() || Showbiz.config.other.forceVanillaLighting
 
     fun emit(level: ClientLevel, delta: Float) {
         for (id in lights) {

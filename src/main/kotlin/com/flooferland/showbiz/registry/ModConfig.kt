@@ -29,7 +29,7 @@ enum class PermissionSelector(private val rank: Int) {
 }
 
 @Serializable
-data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions()) : Cloneable {
+data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions(), val other: Other = Other()) : Cloneable {
     @Serializable
     data class Audio(
         var playPneumaticSounds: Boolean = true,
@@ -42,6 +42,11 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
         var switchReels: PermissionSelector = PermissionSelector.Anyone,
         var controlPlayback: PermissionSelector = PermissionSelector.Anyone,
         var editScreenAccess: PermissionSelector = PermissionSelector.Anyone,
+    )
+
+    @Serializable
+    data class Other(
+        var forceVanillaLighting: Boolean = false
     )
 
     public override fun clone() = super.clone() as ModConfig
