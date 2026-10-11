@@ -99,6 +99,7 @@ loom {
         configureEach {
             generateRunConfig.set(true)
             jvmArguments.addAll((project.property("net.minecraft.jvmargs") as String).split(" "))
+            if (name != "datagen") jvmArguments.add(project.property("net.minecraft.jvmargs.devonly") as String)
         }
     }
     log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
