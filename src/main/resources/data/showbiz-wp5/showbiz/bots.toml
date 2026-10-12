@@ -22,6 +22,12 @@ authors = ["Creative Engineering", "Monsterwaill"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
+[queenie]
+name = "Queenie the Fox"
+authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
 [mini_mozzarella]
 name = "Mini Mozzarella"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
