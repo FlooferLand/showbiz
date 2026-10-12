@@ -14,6 +14,7 @@ import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.IVersionMigrator
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
@@ -67,6 +68,7 @@ object Showbiz : ModInitializer {
             UpdateChecker
             ServerPackets.init()
             ServerStats.init()
+            IVersionMigrator.register()
         }
 
         // Services
