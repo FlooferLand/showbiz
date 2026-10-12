@@ -1,33 +1,42 @@
+@import "font.css";
+@import "header.css";
+
 * {
-	font-family: sans-serif;
+	font-family: monocraft, sans-serif;
+	letter-spacing: -1px;
+	color: white;
 	margin: 0;
 	padding: 0;
 	border: 0;
 	vertical-align: baseline;
 }
 
+a {
+	color: #6495ed;
+}
+
+body {
+	background: linear-gradient(#0006, #0006), #321d11 url("/assets/images/dirt_bg.png") repeat;
+	backdrop-filter: brightness(30%);
+	background-size: 128px 128px;
+	image-rendering: pixelated;
+}
+
 div {
 	display: block;
 }
-
-#header {
-    position: relative;
-    background: #3B4346 url(images/bg01.jpg);
-    border-bottom: solid 1px #272d30;
-    box-shadow: inset 0px -1px 0px 0px #51575a;
-    text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
-}
 #content {
+	background: #321d11 url("/assets/images/dirt_bg.png") repeat;
+	background-size: 128px 128px;
+	image-rendering: pixelated;
+	border: #fff1 solid 4px;
 	padding: 0.8rem;
-}
-#logo {
-	color: #fff;
-	text-decoration: none;
+	margin: 0.8rem;
 }
 
 .container {
 	position: relative;
-	background: #dddddd;
+	background: #0008;
 	min-height: 160px;
 	padding: 0.8rem;
 }

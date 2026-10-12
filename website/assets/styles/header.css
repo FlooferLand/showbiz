@@ -1,0 +1,48 @@
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(#0008, #0008), #321d11 url("/assets/images/barrel_bg.png") repeat;
+    background-size: 96px 96px;
+    image-rendering: pixelated;
+    border-bottom: solid 1px #272d30;
+    box-shadow: inset 0 -1px 0 0 #51575a;
+    text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
+}
+
+#logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+}
+#logo img {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+}
+#logo span {
+    font-size: 1.25rem;
+    font-weight: bold;
+    letter-spacing: -1px;
+    word-spacing: -4px;
+    text-shadow: black 2px 2px 2px;
+}
+
+#header ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+#header ul li a {
+    display: block;
+    color: white;
+    padding: 4px 8px;
+    text-decoration: none;
+}
+#header ul li a:hover {
+    background-color: #fff2;
+}
