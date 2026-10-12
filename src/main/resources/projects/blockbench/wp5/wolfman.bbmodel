@@ -1465,12 +1465,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [5.77613, 3.53255, -1.85065],
-			"to": [5.77613, 5.53255, 2.14935],
+			"from": [5.95113, 3.53255, -1.85065],
+			"to": [5.95113, 5.53255, 2.14935],
 			"autouv": 0,
 			"color": 8,
 			"rotation": [0, 0, -12.5],
-			"origin": [5.77613, 5.53255, 0.14935],
+			"origin": [5.95113, 5.53255, 0.14935],
 			"uv_offset": [59, 12],
 			"faces": {
 				"north": {
@@ -7688,6 +7688,49 @@
 			},
 			"type": "cube",
 			"uuid": "992a9703-8926-0ff3-6f28-db32ebb39bb2"
+		},
+		{
+			"name": "cube",
+			"box_uv": false,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [4.19633, 13.24442, -1.23756],
+			"to": [7.24633, 14.24442, 2.76244],
+			"autouv": 0,
+			"color": 8,
+			"origin": [5.19633, 15.74442, 0.76244],
+			"uv_offset": [16, 44],
+			"faces": {
+				"north": {
+					"uv": [20, 56, 23, 57],
+					"texture": 0
+				},
+				"east": {
+					"uv": [16, 56, 20, 57],
+					"texture": 0
+				},
+				"south": {
+					"uv": [27, 56, 30, 57],
+					"texture": 0
+				},
+				"west": {
+					"uv": [23, 56, 27, 57],
+					"texture": 0
+				},
+				"up": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"down": {
+					"uv": [26, 44, 23, 48],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "219d46a3-0ee2-a22a-317d-23f621b8218d"
 		}
 	],
 	"groups": [
@@ -8126,7 +8169,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"name": "HeadFur",
@@ -8171,7 +8214,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -8332,7 +8375,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -8850,7 +8893,7 @@
 				{
 					"uuid": "87701015-b2e4-d314-7e59-0f5cb027deb5",
 					"isOpen": true,
-					"children": ["8d3459bf-9505-3761-e459-a81a47d1e7ab"]
+					"children": ["8d3459bf-9505-3761-e459-a81a47d1e7ab", "219d46a3-0ee2-a22a-317d-23f621b8218d"]
 				},
 				{
 					"uuid": "af00402e-d65d-4e54-9f39-21d081eb3501",
@@ -8859,7 +8902,7 @@
 						"abcdfbd0-49bb-db9d-7705-e660e9bb7a2a",
 						{
 							"uuid": "0527f0bf-82c8-7a7e-0bfe-d532c8027f39",
-							"isOpen": true,
+							"isOpen": false,
 							"children": [
 								"dfc6ed6d-0cdf-f70f-bd4a-471bd66c0033",
 								"75efffa7-5303-3405-8524-0867a968c24f",
@@ -8914,7 +8957,7 @@
 		},
 		{
 			"uuid": "03423912-c766-9bce-1e09-cb4127b981be",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				{
 					"uuid": "8fc4e748-aae9-8371-6c28-6c6efb704e92",
@@ -9003,880 +9046,6 @@
 			"saved": true,
 			"uuid": "6cb46663-4552-8392-9e60-bb85b741c301",
 			"source": "data:image/png;base64,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"
-		}
-	],
-	"animations": [
-		{
-			"uuid": "965830bd-3da4-2771-6452-5d199c49e4e9",
-			"name": "animation.wolfman.mic_swing.on",
-			"loop": "hold",
-			"override": false,
-			"length": 1,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../../assets/showbiz-wp5/showbiz/bots/wolfman/models/wolfman.animation.json",
-			"scope": 0,
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"d057bcb3-4270-c83e-a7b4-3ad0199821c9": {
-					"name": "Right_Leg2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7ba4c6ea-2005-86b2-711f-307cdfc26425": {
-					"name": "Waist",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"93dced4a-d09a-fe3d-ac4a-a054cc76586f": {
-					"name": "Right Arm",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "97b11a6b-d27e-9a87-a87b-e6d4e14f09ae",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0.6957",
-									"y": "29.554",
-									"z": "-6.645"
-								}
-							],
-							"uuid": "248f1abb-7915-e517-e1bc-aadb345babee",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0.6957",
-									"y": "29.554",
-									"z": "-6.645"
-								}
-							],
-							"uuid": "447797e2-cfd7-3b6d-9330-42381324619a",
-							"time": 1,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "2.2316",
-									"y": "29.1627",
-									"z": "-0.5146"
-								}
-							],
-							"uuid": "7f2d93d7-d398-f57d-a4b9-8a5906be33ce",
-							"time": 0.66667,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"af00402e-d65d-4e54-9f39-21d081eb3501": {
-					"name": "Right Elbow",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "6b52f802-a57a-918f-14c8-f51180cec1ce",
-							"time": 0,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "9.4681",
-									"y": "11.8031",
-									"z": "21.0202"
-								}
-							],
-							"uuid": "d69df46a-6323-8589-99d6-72b6d587b04f",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "8.0231",
-									"y": "6.8851",
-									"z": "12.2618"
-								}
-							],
-							"uuid": "ae36c21a-2004-7c7d-a59f-fed2b867be03",
-							"time": 0.29167,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "9.4681",
-									"y": "11.8031",
-									"z": "21.0202"
-								}
-							],
-							"uuid": "848f80cc-36c7-ce52-cebc-7227604aafea",
-							"time": 1,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "13.8251",
-									"y": "12.1674",
-									"z": "21.669"
-								}
-							],
-							"uuid": "f874bcaa-7756-47ec-5e30-5f813ba96248",
-							"time": 0.66667,
-							"color": -1,
-							"interpolation": "catmullrom"
-						}
-					]
-				},
-				"79d773d3-b7b1-5ead-d63a-40e59c4b39b4": {
-					"name": "Left Arm",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d868044c-ce1f-6dbe-f724-115ae08cdb47": {
-					"name": "Left Elbow",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d1a8fc37-69a1-3121-ca6a-31f7c1dbea04": {
-					"name": "Right Leg",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"52874e4b-6f19-62af-82fe-e3656ef1905a": {
-					"name": "Left Leg",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"0c20b520-505a-c570-6222-3a0348d50d40": {
-					"name": "Eyelid R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"f23836ff-a01f-4d29-e147-0669c5230edd": {
-					"name": "Iris R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e576c724-97ca-e3ad-ba0f-5358360b3fdc": {
-					"name": "Ear R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d450a60a-74a1-2b6f-d523-874080bd84b2": {
-					"name": "Head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e6beae26-719c-c795-1fa7-c42f3194e2fa": {
-					"name": "Jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"13349b35-9640-ff68-f7df-e79b465fc9c2": {
-					"name": "Snout",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"61d87233-fb19-784e-676c-360ca382fb94": {
-					"name": "Eyelid L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ad00d201-ce52-b67f-05f9-448182f2801d": {
-					"name": "Lower Ridge",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1cca27c3-0a39-bc8e-5ae3-44b6dba701a6": {
-					"name": "Upper Ridge",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"129feb73-4fbb-c5a6-4dde-9efce948c79c": {
-					"name": "Goatee",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"60cfd5ab-d5d9-4fd6-5c7c-dcb2c153b0f0": {
-					"name": "Ear L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ee6591ae-aab9-038d-84bc-10ac4a02218d": {
-					"name": "HeadFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03423912-c766-9bce-1e09-cb4127b981be": {
-					"name": "Mic Stand",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "947c46b0-a1c2-ca74-d060-f450ef9cb874",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "11.0179",
-									"y": "-4.2454",
-									"z": "19.5621"
-								}
-							],
-							"uuid": "0149c551-152e-1ebe-9b01-e7484e27c385",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "11.0179",
-									"y": "-4.2454",
-									"z": "19.5621"
-								}
-							],
-							"uuid": "1bc900d5-074a-6fbd-dfbf-fb036cdb3bc5",
-							"time": 1,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "11.157",
-									"y": "-3.8607",
-									"z": "17.5945"
-								}
-							],
-							"uuid": "e45f17d0-e0c7-0159-8ddf-079b4b057427",
-							"time": 0.66667,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"f1ba099c-0da8-80f0-828b-5dc53c8b5d6f": {
-					"name": "Mike",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"5de74785-6516-4021-8900-819c5e714752": {
-					"name": "WaistFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"8af5ba60-267b-8bca-fd7d-b4869d3ec938": {
-					"name": "R Leg Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"5c23cf67-b829-8e97-d01d-6f66487455e5": {
-					"name": "L Leg Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"81d1ca55-1c40-3306-d263-f47346d690c0": {
-					"name": "Waist2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"f6481e28-b9a6-0fb6-d7f9-2b23dace120d": {
-					"name": "WaistFur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"0527f0bf-82c8-7a7e-0bfe-d532c8027f39": {
-					"name": "R Hand Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"c01e14f8-e1a7-0b4f-af8e-72c4b00b9faf": {
-					"name": "R_Hand_Fur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cb44c1c8-bd9f-2c69-ab43-1c39eca6ede4": {
-					"name": "Tail",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"aa41e07f-6332-23c4-3586-50d3ee802718": {
-					"name": "TailFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"eb0a20b2-3275-4b17-6244-3dbd050c1b93": {
-					"name": "Tail2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"242549a2-785c-1b30-a3ca-daaee3294bce": {
-					"name": "TailFur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ca5f9c6b-2716-fa03-7829-7a6a6d9fc507": {
-					"name": "Waist3",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7b9d867a-7d54-91a3-1577-d6368a698036": {
-					"name": "Head2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e4e1c51f-892a-10c8-1945-5f2b5241e591": {
-					"name": "Iris L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d729fe66-a65e-ed6f-17eb-91ae21a95999": {
-					"name": "Eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"8fc4e748-aae9-8371-6c28-6c6efb704e92": {
-					"name": "MicInner",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				}
-			}
-		},
-		{
-			"uuid": "1a5f7422-ce89-6626-a1a5-e94410ebdd79",
-			"name": "animation.wolfman.mic_swing.off",
-			"loop": "hold",
-			"override": false,
-			"length": 1,
-			"snapping": 24,
-			"selected": false,
-			"saved": true,
-			"path": "../../../assets/showbiz-wp5/showbiz/bots/wolfman/models/wolfman.animation.json",
-			"scope": 0,
-			"anim_time_update": "",
-			"blend_weight": "",
-			"start_delay": "",
-			"loop_delay": "",
-			"animators": {
-				"d057bcb3-4270-c83e-a7b4-3ad0199821c9": {
-					"name": "Right_Leg2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7ba4c6ea-2005-86b2-711f-307cdfc26425": {
-					"name": "Waist",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"93dced4a-d09a-fe3d-ac4a-a054cc76586f": {
-					"name": "Right Arm",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "97b11a6b-d27e-9a87-a87b-e6d4e14f09ae",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0.6957",
-									"y": "29.554",
-									"z": "-6.645"
-								}
-							],
-							"uuid": "248f1abb-7915-e517-e1bc-aadb345babee",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "37649e8b-5508-b83e-fd08-e71957680662",
-							"time": 1,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "4.25"
-								}
-							],
-							"uuid": "34125f2c-1e44-11b8-267a-6a2d8f004d29",
-							"time": 0.58333,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"af00402e-d65d-4e54-9f39-21d081eb3501": {
-					"name": "Right Elbow",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "6b52f802-a57a-918f-14c8-f51180cec1ce",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "9.4681",
-									"y": "11.8031",
-									"z": "21.0202"
-								}
-							],
-							"uuid": "d69df46a-6323-8589-99d6-72b6d587b04f",
-							"time": 0,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "8.0231",
-									"y": "6.8851",
-									"z": "12.2618"
-								}
-							],
-							"uuid": "ae36c21a-2004-7c7d-a59f-fed2b867be03",
-							"time": 0.20833,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "32ca9642-3344-d948-c44e-ecee12dabb4a",
-							"time": 0.83333,
-							"color": -1,
-							"interpolation": "catmullrom"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0.4682",
-									"y": "-2.0586",
-									"z": "-1.2574"
-								}
-							],
-							"uuid": "635a7bf4-b0d0-33f6-9851-bef14e1f1552",
-							"time": 0.58333,
-							"color": -1,
-							"interpolation": "catmullrom"
-						}
-					]
-				},
-				"79d773d3-b7b1-5ead-d63a-40e59c4b39b4": {
-					"name": "Left Arm",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d868044c-ce1f-6dbe-f724-115ae08cdb47": {
-					"name": "Left Elbow",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d1a8fc37-69a1-3121-ca6a-31f7c1dbea04": {
-					"name": "Right Leg",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"52874e4b-6f19-62af-82fe-e3656ef1905a": {
-					"name": "Left Leg",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"0c20b520-505a-c570-6222-3a0348d50d40": {
-					"name": "Eyelid R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"f23836ff-a01f-4d29-e147-0669c5230edd": {
-					"name": "Iris R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e576c724-97ca-e3ad-ba0f-5358360b3fdc": {
-					"name": "Ear R",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d450a60a-74a1-2b6f-d523-874080bd84b2": {
-					"name": "Head",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e6beae26-719c-c795-1fa7-c42f3194e2fa": {
-					"name": "Jaw",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"13349b35-9640-ff68-f7df-e79b465fc9c2": {
-					"name": "Snout",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"61d87233-fb19-784e-676c-360ca382fb94": {
-					"name": "Eyelid L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ad00d201-ce52-b67f-05f9-448182f2801d": {
-					"name": "Lower Ridge",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"1cca27c3-0a39-bc8e-5ae3-44b6dba701a6": {
-					"name": "Upper Ridge",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"129feb73-4fbb-c5a6-4dde-9efce948c79c": {
-					"name": "Goatee",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"60cfd5ab-d5d9-4fd6-5c7c-dcb2c153b0f0": {
-					"name": "Ear L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ee6591ae-aab9-038d-84bc-10ac4a02218d": {
-					"name": "HeadFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"03423912-c766-9bce-1e09-cb4127b981be": {
-					"name": "Mic Stand",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false,
-					"keyframes": [
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "947c46b0-a1c2-ca74-d060-f450ef9cb874",
-							"time": 0.5,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "11.0179",
-									"y": "-4.2454",
-									"z": "19.5621"
-								}
-							],
-							"uuid": "0149c551-152e-1ebe-9b01-e7484e27c385",
-							"time": 0,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "0"
-								}
-							],
-							"uuid": "8784b880-78a4-427f-ecc9-4334b875565c",
-							"time": 0.95833,
-							"color": -1,
-							"interpolation": "linear"
-						},
-						{
-							"channel": "rotation",
-							"data_points": [
-								{
-									"x": "0",
-									"y": "0",
-									"z": "-1.75"
-								}
-							],
-							"uuid": "48c9ff03-7216-7ad7-eae1-feb6a6f16bf2",
-							"time": 0.58333,
-							"color": -1,
-							"interpolation": "linear"
-						}
-					]
-				},
-				"f1ba099c-0da8-80f0-828b-5dc53c8b5d6f": {
-					"name": "Mike",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"5de74785-6516-4021-8900-819c5e714752": {
-					"name": "WaistFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"8af5ba60-267b-8bca-fd7d-b4869d3ec938": {
-					"name": "R Leg Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"5c23cf67-b829-8e97-d01d-6f66487455e5": {
-					"name": "L Leg Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"81d1ca55-1c40-3306-d263-f47346d690c0": {
-					"name": "Waist2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"f6481e28-b9a6-0fb6-d7f9-2b23dace120d": {
-					"name": "WaistFur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"0527f0bf-82c8-7a7e-0bfe-d532c8027f39": {
-					"name": "R Hand Fur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"c01e14f8-e1a7-0b4f-af8e-72c4b00b9faf": {
-					"name": "R_Hand_Fur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"cb44c1c8-bd9f-2c69-ab43-1c39eca6ede4": {
-					"name": "Tail",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"aa41e07f-6332-23c4-3586-50d3ee802718": {
-					"name": "TailFur",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"eb0a20b2-3275-4b17-6244-3dbd050c1b93": {
-					"name": "Tail2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"242549a2-785c-1b30-a3ca-daaee3294bce": {
-					"name": "TailFur2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"ca5f9c6b-2716-fa03-7829-7a6a6d9fc507": {
-					"name": "Waist3",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"7b9d867a-7d54-91a3-1577-d6368a698036": {
-					"name": "Head2",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"e4e1c51f-892a-10c8-1945-5f2b5241e591": {
-					"name": "Iris L",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"d729fe66-a65e-ed6f-17eb-91ae21a95999": {
-					"name": "Eyes",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"8fc4e748-aae9-8371-6c28-6c6efb704e92": {
-					"name": "MicInner",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"effects": {
-					"name": "Effects",
-					"type": "effect"
-				}
-			}
 		}
 	],
 	"geckolib_model_type": "Entity"

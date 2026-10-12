@@ -74,7 +74,9 @@ wp5 9, rae 6 {
 # arms
 wp5 15, rae 18 {  # mic swing
     flow 0.3
-    anim "mic_swing"
+    rotate "Mic Stand" x:11 y:-4 z:19.5
+    rotate "Right Elbow" x:12 y:11.8 z:28
+    rotate "Right Arm" x:0.7 y:30 z:-6.6
     wigglemul 1.5
 }
 
