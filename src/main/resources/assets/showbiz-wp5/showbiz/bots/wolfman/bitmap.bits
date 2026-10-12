@@ -25,11 +25,11 @@ wp5 4, rae 3 {
 }
 wp5 5, rae 9 {
     flow 1.3
-    rotate "Ear L" x:35
+    rotate "Ear L" x:25
 }
 wp5 6, rae 10 {
     flow 1.3
-    rotate "Ear R" x:35
+    rotate "Ear R" x:25
 }
 
 
