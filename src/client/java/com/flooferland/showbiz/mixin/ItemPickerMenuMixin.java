@@ -1,8 +1,8 @@
 package com.flooferland.showbiz.mixin;
 
-import com.flooferland.showbiz.mixin.accessor.CreativeModeInventoryScreenSelectedTabAccessor;
 import com.flooferland.showbiz.registry.ModItemGroups;
 import com.flooferland.showbiz.utils.CreateAeronauticsBurglary;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +22,10 @@ public abstract class ItemPickerMenuMixin {
 
 	@Inject(method = "scrollTo", at = @At("HEAD"))
 	private void showbiz_scrollTo(final float f, final CallbackInfo ci) {
-		if (CreativeModeInventoryScreenSelectedTabAccessor.showbiz_getSelectedTab() == ModItemGroups.Main.getTab()) {
-			CreateAeronauticsBurglary.padMenuItems(this.items);
+		if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen screen) {
+			if (screen.getSelectedItemGroup() == ModItemGroups.Main.getTab()) {
+				CreateAeronauticsBurglary.padMenuItems(this.items);
+			}
 		}
 		CreateAeronauticsBurglary.CURRENT_ROW = this.getRowIndexForScroll(f);
 	}

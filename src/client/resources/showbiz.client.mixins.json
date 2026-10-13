@@ -12,8 +12,7 @@
         "ItemPickerMenuMixin",
         "KeyboardHandlerMixin",
         "SimpleTextureMixin",
-        "accessor.CreativeModeInventoryScreenAccessor",
-        "accessor.CreativeModeInventoryScreenSelectedTabAccessor"
+        "accessor.CreativeModeInventoryScreenAccessor"
     ],
     "injectors": {
         "defaultRequire": 1
