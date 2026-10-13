@@ -44,7 +44,7 @@ object ConnectionRenderer {
     val inputColor = FastColor.ARGB32.color(255, 20, 200, 255) // Blue
     val outputColor = FastColor.ARGB32.color(255, 10, 255, 30) // Green
 
-    val flowBound = AABB.ofSize(Vec3.ZERO, 0.08, 0.08, 0.08)!!
+    val flowBound = AABB.ofSize(Vec3.ZERO, 0.06, 0.06, 0.06)!!
     val pointBound = AABB.ofSize(Vec3.ZERO, 0.1, 0.1, 0.1)!!
 
     enum class DrawLayer(val depthWrite: Boolean) {
@@ -161,7 +161,7 @@ object ConnectionRenderer {
             val pos = from.add(dir.scale(distance))
             distance += spacing
             if (eyePos.distanceToSqr(pos) > FLOW_DISTANCE_SQR) continue
-            queueBox(pos, pulseColor, flowBound, shadow = false)
+            queueBox(pos, pulseColor, flowBound, shadow = false, shade = false)
         }
     }
 
@@ -197,7 +197,7 @@ object ConnectionRenderer {
         }
     }
 
-    private fun queueBox(pos: Vec3, color: Int, bound: AABB, shadow: Boolean) {
+    private fun queueBox(pos: Vec3, color: Int, bound: AABB, shadow: Boolean, shade: Boolean = true) {
         if (shadow) {
             deferRender(DrawLayer.Shadow) { pose, consumer ->
                 pose.pushPose()
@@ -209,7 +209,7 @@ object ConnectionRenderer {
         deferRender(if (FastColor.ARGB32.alpha(color) < 255) DrawLayer.Translucent else DrawLayer.Solid) { pose, consumer ->
             pose.pushPose()
             pose.translate(pos.x, pos.y, pos.z)
-            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02), color, normalShade = true)
+            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02), color, normalShade = shade)
             pose.popPose()
         }
     }
