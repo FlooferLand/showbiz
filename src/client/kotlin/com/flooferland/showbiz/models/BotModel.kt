@@ -177,11 +177,12 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                             model: BotModelData, movements: Movements?, showMapping: String?) {
         val cylinders = showMapping?.let { map ->
             bot.physics?.bits?.get(map)
+                // TODO: HEY REDA !!!!
                 // I made it so for now default flows are added for bots with no physics.toml, but aren't added for missing bits in the physics.toml
                 // This should be removed eventually and replaced with compatibility for the old `flow`
                 // -Floof
                 ?: if (bot.physics == null)
-                       mutableMapOf<String, PneumaticValve.Params>().also { bitmapBits.forEach { (bit, _) -> it[bit.toString()] = PneumaticValve.Params(flowIn = 0.4f, flowOut = 0.4f) } }
+                       mutableMapOf<String, PneumaticValve.Params>().also { bitmapBits.forEach { (bit, _) -> it[bit.toString()] = PneumaticValve.Params(flowIn = 0.5f, flowOut = 0.6f) } }
                    else null
         }
         val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: cylinders?.let { PneumaticValve.Supply.DEFAULT }
