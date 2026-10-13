@@ -171,7 +171,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
     }
 
-    // TODO: Make this function not a mess
     private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
                             animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
                             model: BotModelData, movements: Movements?, showMapping: String?) {
