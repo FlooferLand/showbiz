@@ -5,7 +5,6 @@ import net.minecraft.network.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
-import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.connection.ServerConnections.CLIENT_UPDATE_INTERVAL
 import com.flooferland.showbiz.types.connection.ServerConnections.MAX_VIEW_DISTANCE_SQR
@@ -16,12 +15,20 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 
 object ClientConnections {
     val entries = mutableMapOf<OwnerId, MutableList<Point>>()
+    val links = mutableMapOf<OwnerId, Set<OwnerId>>()
     var ticksSincePing = 0
+
+    fun remove(id: OwnerId) {
+        entries.remove(id)
+        links.remove(id)
+    }
 
     init {
         ClientPackets.listen(UpdateConnectionsPacket.type) { packet, _ ->
-            if (packet.points.isEmpty()) entries.remove(packet.id)
-            else entries[packet.id] = packet.points.toMutableList()
+            if (packet.points.isEmpty()) remove(packet.id) else {
+                entries[packet.id] = packet.points.toMutableList()
+                links[packet.id] = packet.points.flatMapTo(hashSetOf()) { point -> point.connections.map { it.id } }
+            }
             ticksSincePing = 0
         }
 
@@ -36,6 +43,7 @@ object ClientConnections {
 
         ClientPlayConnectionEvents.DISCONNECT.register { listener, minecraft ->
             entries.clear()
+            links.clear()
         }
 
         ClientTickEvents.END_WORLD_TICK.register { level ->
@@ -49,7 +57,7 @@ object ClientConnections {
                     if (!ownerId.isLoaded(level)) continue
                     val pos = ownerId.grabPos(level) ?: continue
                     if (player.distanceToSqr(pos) > MAX_VIEW_DISTANCE_SQR)
-                        entries.remove(ownerId)
+                        remove(ownerId)
                 }
                 ticksSincePing = 0
             }

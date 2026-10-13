@@ -4858,7 +4858,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -4950,7 +4950,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -5296,7 +5296,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"name": "Leg L",
@@ -5405,7 +5405,7 @@
 						},
 						{
 							"uuid": "c321a5f7-643f-3068-19a0-47a01de9f56d",
-							"isOpen": false,
+							"isOpen": true,
 							"children": [
 								"4cf1ed44-b60d-fe13-4f87-68998d3da0fc",
 								"0c8a3680-2490-1f64-cfcc-df4a24d611fb",
@@ -5535,7 +5535,7 @@
 								},
 								{
 									"uuid": "e2d60119-8e27-e050-1b48-74950a0a51e9",
-									"isOpen": false,
+									"isOpen": true,
 									"children": [
 										"e3946f9d-72f1-779f-338b-5a151b3c252f",
 										"3f3f1498-641e-c7b4-433c-1485c034a702",

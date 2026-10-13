@@ -26,12 +26,13 @@ sealed class OwnerId() {
     abstract fun isRemovedEntityWorkaround(level: Level): Boolean
 
     data class BlockId(val blockPos: BlockPos) : OwnerId() {
-        override fun grabConnectable(level: Level) = level.getBlockEntity(blockPos) as? IConnectable
+        override fun grabConnectable(level: Level) =
+            if (level.isLoaded(blockPos)) level.getBlockEntity(blockPos) as? IConnectable else null
         override fun grabBlockPos(level: Level) = blockPos
         override fun grabPos(level: Level) = blockPos.center!!
         override fun isLoaded(level: Level): Boolean = grabBlockPos(level).let { level.isLoaded(it) }
         override fun isRemoved(level: Level): Boolean = level.getBlockEntity(blockPos)?.isRemoved ?: true
-        override fun isRemovedEntityWorkaround(level: Level) = isRemoved(level)
+        override fun isRemovedEntityWorkaround(level: Level) = isLoaded(level) && isRemoved(level)
         fun grabBlockState(level: Level): BlockState = level.getBlockState(blockPos)
         fun grabBlockEntity(level: Level) = level.getBlockEntity(blockPos)
     }
