@@ -17,6 +17,7 @@ import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.physics.ChainRig
 import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
@@ -31,6 +32,8 @@ import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 // TODO: Optimize this class loads.
 //       Currently loading and storing a ton of unnecessary models, and is not async
+
+// TODO: Should move to addons being placed inside assets/showbiz instead of assets/<their_namespace>/showbiz
 
 data class LoadedAssets(
     var addons: List<AddonAssets> = mutableListOf(),
@@ -51,9 +54,21 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
             if (pack.packId().startsWith("fabric-")) continue
+            val devIgnoreAddons = ShowbizEnv.isDev() && pack.packId() != Showbiz.MOD_ID
+            var errors = 0
+            var warnings = 0
+
             namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
-                fun err(msg: String, throwable: Throwable? = null) =
-                    Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
+                fun err(msg: String, throwable: Throwable? = null) {
+                    errors += 1
+                    if (devIgnoreAddons) return
+                    Showbiz.log.error("Addon '$namespace': $msg\n", throwable)
+                }
+                fun warn(msg: String, throwable: Throwable? = null) {
+                    warnings += 1
+                    if (devIgnoreAddons) return
+                    Showbiz.log.warn("Addon '$namespace': $msg\n", throwable)
+                }
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
 
@@ -76,7 +91,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 }
 
                 if (pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "showbiz")) != null) {
-                    Showbiz.log.info("Attempting to load addon '${namespace}'")
+                    Showbiz.log.info("Loading addon '${namespace}'")
                 }
 
                 // Finding assets
@@ -142,7 +157,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
                         val res = getResAsString(path) ?: run { err("Failed to find bitsmap file '$path'"); return null }
                         val format = BitsMap()
-                        format.warnHandler = { message -> Showbiz.log.warn("Warning for '$namespace:$id': $message") }
+                        format.warnHandler = { message -> warn("Warning for '$namespace:$id': $message") }
                         val bits = runCatching { format.load(res.byteInputStream()) }
                         bits.exceptionOrNull()?.let { throwable -> err("Failed to load bitsmap file '$filename' on '$path'", throwable) }
                         return bits.getOrNull()
@@ -164,6 +179,10 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     )
                     addons.add(assets)
                 }
+            }
+
+            if (devIgnoreAddons) {
+                if (warnings > 0 || errors > 0) Showbiz.log.warn("Pack '${pack.packId()}' had $warnings warnings and $errors errors")
             }
         }
         out.addons = addons

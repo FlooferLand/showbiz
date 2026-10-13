@@ -1,22 +1,24 @@
 package com.flooferland.showbiz.addons.data
 
-import com.akuleshov7.ktoml.Toml
-import com.flooferland.showbiz.Showbiz
-import com.flooferland.showbiz.addons.AddonId
-import com.flooferland.showbiz.utils.rl
-import com.flooferland.showbiz.utils.rlCustom
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.serializer
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
 import net.minecraft.util.profiling.*
+import com.akuleshov7.ktoml.Toml
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.addons.AddonId
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.utils.rl
+import com.flooferland.showbiz.utils.rlCustom
 import java.io.InputStream
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.serializer
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import kotlin.jvm.optionals.getOrNull
 
 // TODO: Move this to a more efficient async reloader
+
+// TODO: Should move to addons being placed inside assets/showbiz instead of assets/<their_namespace>/showbiz
 
 object AddonDataReloadListener : SimplePreparableReloadListener<List<AddonData>>(), IdentifiableResourceReloadListener {
     const val MANIFEST_NAME = "showbiz.addon.toml"
