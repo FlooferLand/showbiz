@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
+import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
 
@@ -14,19 +15,27 @@ import com.flooferland.showbiz.utils.rl
 class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/spotlight.png")
 
+    var bitFilter: BitSelectButton? = null
     var turn: EditBox? = null
     var angle: EditBox? = null
     var color: ColorPicker? = null
     var shadows: Checkbox? = null
 
-    override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
+    override fun addWidgets(widgets: MutableList<WidgetInfo>) {
+        // Bits
+        run {
+            bitFilter = BitSelectButton(200, 20)
+            bitFilter!!.values = menu.data.base.bitFilter.clone()
+            widgets.add(WidgetInfo(bitFilter!!))
+        }
+
         // Turn
         run {
             turn = EditBox(font, 80, 20, Component.literal("Turn"))
             turn!!.value =
                 editMenu.data.turn.x.toString().replace(".0", "") + ", " + editMenu.data.turn.y.toString().replace(".0", "")
             turn!!.setFilter { turn -> turn.split(',').map { it.trim() }.all { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
-            turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separared by a comma"))
+            turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separated by a comma"))
             widgets.add(WidgetInfo("Turn X/Y", turn!!))
         }
 
@@ -57,6 +66,11 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
     }
 
     override fun saveCustom(data: SpotlightEditPacket) {
+        menu.data.base.bitFilter.clearCharts()
+        bitFilter?.values?.forEach { (chartId, bits) ->
+            menu.data.base.bitFilter.setBits(chartId, bits)
+        }
+
         turn?.value?.split(',')?.let { values ->
             val values = values.map { it.trim() }.mapNotNull { it.toFloatOrNull() }
             if (values.size >= 2) {

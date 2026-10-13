@@ -56,6 +56,11 @@ data class MappedBits(val inner: HashMap<String, MutableSet<BitId>> = HashMap<St
         inner.clear()
         inner.putAll(received)
     }
+    fun clone(): MappedBits {
+        val copy = MappedBits()
+        forEach { (chartId, bits) -> copy.setBits(chartId, HashSet(bits)) }
+        return copy
+    }
 
     companion object {
         val CODEC: Codec<MappedBits> = Codec.unboundedMap(Codec.STRING, Codec.SHORT.listOf()).xmap(

@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.*
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
+import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.rl
 
@@ -16,9 +17,21 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
     override val background = rl("textures/gui/show_parser.png")
     val ports = rl("textures/gui/show_parser_ports.png")
 
-    override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
-        val bitFilter = widgets.first { it.widget == bitSelector }
-        bitFilter.side = WidgetSide.Bottom
+    var bitFilter: BitSelectButton? = null
+
+    override fun addWidgets(widgets: MutableList<WidgetInfo>) {
+        run {
+            bitFilter = BitSelectButton(200, 20)
+            bitFilter!!.values = menu.data.base.bitFilter.clone()
+            widgets.add(WidgetInfo(bitFilter!!))
+        }
+    }
+
+    override fun saveCustom(data: ShowParserEditPacket) {
+        menu.data.base.bitFilter.clearCharts()
+        bitFilter?.values?.forEach { (chartId, bits) ->
+            menu.data.base.bitFilter.setBits(chartId, bits)
+        }
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
