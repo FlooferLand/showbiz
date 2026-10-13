@@ -9988,7 +9988,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "Snout",

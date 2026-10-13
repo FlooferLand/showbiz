@@ -19,6 +19,7 @@ import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
+import com.flooferland.showbiz.items.WandItem
 import java.util.Locale
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -47,6 +48,7 @@ object Extensions {
     fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         val player = player as? ServerPlayer ?: return InteractionResult.PASS
         if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return InteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
         player.openMenu(state.getMenuProvider(level, pos))
         return InteractionResult.SUCCESS
     }
