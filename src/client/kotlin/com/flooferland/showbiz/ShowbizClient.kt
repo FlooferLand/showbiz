@@ -173,7 +173,7 @@ object ShowbizClient : ClientModInitializer {
             pose.pushPose()
             pose.translate(-view.x, -view.y, -view.z)
             JukeboxLyricRenderer.render(level, player, mc.renderBuffers().bufferSource(), pose)
-            ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
+            ConnectionRenderer.draw(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
 

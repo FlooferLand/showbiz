@@ -22,12 +22,14 @@ import com.mojang.blaze3d.vertex.*
 import com.mojang.math.Axis
 import kotlin.math.atan2
 
+// TODO: Remove queuedText and make it work with normal queued rendering
+
 // Thank god for https://github.com/MrCrayfish/MrCrayfishFurnitureMod-Refurbished/tree/1.21.1
 object ConnectionRenderer {
-    val queued = mutableListOf<(pose: PoseStack, consumer: BufferBuilder) -> Unit>()
+    val queued = mutableListOf<QueuedDraw>()
     val queuedText = mutableListOf<QueuedText>()
 
-    const val POINT_POS_MUL = 0.15
+    const val POINT_POS_MUL = 0.13
     const val RENDER_DISTANCE_SQR = 32.0 * 32.0
     const val DETAIL_LABEL_DISTANCE_SQR = 10.0 * 10.0
     const val FLOW_DISTANCE_SQR = 12.0 * 12.0
@@ -45,17 +47,26 @@ object ConnectionRenderer {
     val flowBound = AABB.ofSize(Vec3.ZERO, 0.08, 0.08, 0.08)!!
     val pointBound = AABB.ofSize(Vec3.ZERO, 0.1, 0.1, 0.1)!!
 
+    enum class DrawLayer(val depthWrite: Boolean) {
+        Shadow(false),
+        Solid(true),
+        Translucent(false)
+    }
     data class QueuedText(val x: Float, val y: Float, val z: Float, val value: Component)
-
-    //region Rendering stuff
-    fun render(player: Player, source: MultiBufferSource.BufferSource, partialTick: Float) {
-        if (!isHoldingWand(player)) return
-        val level = player.level() ?: return
-        if (shouldShowDetail(player)) renderDetailed(player, level, partialTick) else renderSimple(player, level, partialTick)
-        renderHeldConnection(player, level, partialTick)
+    data class QueuedDraw(val call: Call, val layer: DrawLayer = DrawLayer.Solid) {
+        typealias Call = (pose: PoseStack, consumer: BufferBuilder) -> Unit
     }
 
-    private fun renderSimple(player: Player, level: Level, partialTick: Float) {
+    fun draw(player: Player, source: MultiBufferSource.BufferSource, partialTick: Float) {
+        queued.clear(); queuedText.clear()
+        if (!isHoldingWand(player)) return
+        val level = player.level() ?: return
+        if (shouldShowDetail(player)) queueRenderDetailed(player, level, partialTick) else queueRenderSimple(player, level, partialTick)
+        queueHeldConnection(player, level, partialTick)
+    }
+
+    //region Queue draw utils stuff
+    private fun queueRenderSimple(player: Player, level: Level, partialTick: Float) {
         val eyePos = player.getEyePosition(partialTick)
         val hoveredId = getHoveredId()
         val time = level.gameTime + partialTick.toDouble()
@@ -66,12 +77,20 @@ object ConnectionRenderer {
             val hovered = ownerId == hoveredId
             val wired = points.any { it.connected } || hovered
             if (eyePos.distanceToSqr(from) < RENDER_DISTANCE_SQR) {
-                deferRender { pose, consumer ->
-                    val size = if (hovered) 0.2 else 0.1
-                    val bound = AABB.ofSize(Vec3.ZERO, size, size, size)
-                    val nodeColor = getNodeColor(points)
-                    val color = if (hovered) FastColor.ARGB32.lerp(0.25f, FastColor.ARGB32.opaque(nodeColor), CommonColors.WHITE) else nodeColor
-                    renderBox(pose, consumer, from, color, bound, shadow = targets.isNotEmpty())
+                val size = if (hovered) 0.2 else 0.1
+                val bound = AABB.ofSize(Vec3.ZERO, size, size, size)
+                val nodeColor = getNodeColor(points)
+                val color = if (hovered) FastColor.ARGB32.lerp(0.25f, FastColor.ARGB32.opaque(nodeColor), CommonColors.WHITE) else nodeColor
+                queueBox(from, color, bound, shadow = wired)
+
+                if (hovered) run {
+                    val pos = ownerId.grabPos(level) ?: return@run
+                    var yOffset = 0.0
+                    for (point in points.distinctBy { it.id }) {
+                        val pointPos = pos.add(0.0, yOffset, 0.0)
+                        queueText(pointPos.x.toFloat(), pointPos.y.toFloat(), pointPos.z.toFloat(), point.id)
+                        yOffset += 0.08f
+                    }
                 }
             }
 
@@ -81,14 +100,14 @@ object ConnectionRenderer {
 
                 val mutual = ClientConnections.links[targetId]?.contains(ownerId) == true
                 if (!(mutual && ownerId.hashCode() > targetId.hashCode())) {
-                    deferRender { pose, consumer -> renderConnection(pose, consumer, from, to, outline = false) }
+                    queueConnection(from, to, outline = false)
                 }
-                renderFlow(eyePos, from, to, time)
+                queueFlow(eyePos, from, to, time)
             }
         }
     }
 
-    private fun renderDetailed(player: Player, level: Level, partialTick: Float) {
+    private fun queueRenderDetailed(player: Player, level: Level, partialTick: Float) {
         val eyePos = player.getEyePosition(partialTick)
         for ((ownerId, points) in ClientConnections.entries) {
             val pos = ownerId.grabPos(level) ?: continue
@@ -96,25 +115,25 @@ object ConnectionRenderer {
             val labels = player.distanceToSqr(pos) < DETAIL_LABEL_DISTANCE_SQR
             for (point in points) {
                 val pointPos = pos.add(0.0, getYOffset(point.index, points.size), 0.0)
-                if (near) deferRender { pose, consumer -> renderPoint(pose, consumer, point, pointPos, labels) }
+                if (near) queuePoint(point, pointPos, labels)
                 for (connection in point.connections.toList()) {
                     val target = connection.point
                     val endPos = connection.id.grabPos(level)?.add(0.0, getYOffset(target.index, target.pointCount), 0.0) ?: continue
                     if (!isSegmentInRange(eyePos, pointPos, endPos, RENDER_DISTANCE_SQR)) continue
-                    deferRender { pose, consumer -> renderConnection(pose, consumer, pointPos, endPos, true) }
+                    queueConnection(pointPos, endPos, true)
                 }
             }
         }
     }
 
-    private fun renderPoint(pose: PoseStack, consumer: BufferBuilder, point: Point, pos: Vec3, label: Boolean = true) {
+    private fun queuePoint(point: Point, pos: Vec3, label: Boolean = true) {
         val color = when (point.type) {
             PointType.Input -> inputColor
             PointType.Output -> outputColor
         }
 
         // Rendering the box
-        renderBox(pose, consumer, pos, color, pointBound, shadow = point.connected)
+        queueBox(pos, color, pointBound, shadow = point.connected)
 
         // Rendering the text
         if (label) {
@@ -125,28 +144,11 @@ object ConnectionRenderer {
             val text = Component.literal(textSign).withColor(color)
                 .append(Component.literal(" ").withColor(0xFFFFFFFF.toInt()))
                 .append(Component.literal(point.id).withColor(0xFFFFFFFF.toInt()))
-            renderText(pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(), text)
+            queueText(pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(), text)
         }
     }
 
-    private fun renderConnection(pose: PoseStack, consumer: BufferBuilder, startPos: Vec3, endPos: Vec3, outline: Boolean) {
-        val delta = endPos.subtract(startPos)
-        val length = delta.length()
-        val color = FastColor.ARGB32.color(255, 100, 255, 100)
-        val darkColor = FastColor.ARGB32.color(255, 10, 10, 10)
-        val yaw = atan2(-delta.z, delta.x) + Mth.PI
-        val pitch = atan2(delta.horizontalDistance(), delta.y) + Mth.HALF_PI
-
-        pose.pushPose()
-        pose.translate(startPos.x, startPos.y, startPos.z)
-        pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
-        pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
-        DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.01125, -0.01125, length, 0.01125, 0.01125), color, alpha = 0.6f)
-        if (outline) DrawUtils.drawBox(pose, consumer, AABB(0.0, -0.01125, -0.01125, length, 0.01125, 0.01125).inflate(0.01), darkColor, alpha = 0.2f)
-        pose.popPose()
-    }
-
-    private fun renderFlow(eyePos: Vec3, from: Vec3, to: Vec3, time: Double) {
+    private fun queueFlow(eyePos: Vec3, from: Vec3, to: Vec3, time: Double) {
         val delta = to.subtract(from)
         val length = delta.length()
         if (length < 0.01) return
@@ -159,11 +161,11 @@ object ConnectionRenderer {
             val pos = from.add(dir.scale(distance))
             distance += spacing
             if (eyePos.distanceToSqr(pos) > FLOW_DISTANCE_SQR) continue
-            deferRender { pose, consumer -> renderBox(pose, consumer, pos, pulseColor, flowBound, shadow = false) }
+            queueBox(pos, pulseColor, flowBound, shadow = false)
         }
     }
 
-    private fun renderHeldConnection(player: Player, level: Level, partialTicks: Float) {
+    private fun queueHeldConnection(player: Player, level: Level, partialTicks: Float) {
         val client = Minecraft.getInstance() ?: return
         val mainHand = client.options?.mainHand()?.get() ?: HumanoidArm.RIGHT
         val firstPerson = client.options?.cameraType?.isFirstPerson ?: false
@@ -181,24 +183,59 @@ object ConnectionRenderer {
             .add(view.scale(1.3))
             .add(rightVec.scale(1.3))
 
-        deferRender { pose, consumer ->
-            renderConnection(pose, consumer, startPos, endPos, outline = false)
-            renderBox(pose, consumer, endPos, nodeFullColor, pointBound, shadow = false)
+        queueBox(endPos, nodeFullColor, pointBound, shadow = false)
+        queueConnection(startPos, endPos, outline = false)
+    }
+
+    private fun queueConnection(startPos: Vec3, endPos: Vec3, outline: Boolean) {
+        if (outline) deferRender(DrawLayer.Shadow) { pose, consumer ->
+            renderLine(pose, consumer, startPos, endPos, 0x66000000.toInt(), thickness = 2f)
+        }
+        deferRender(DrawLayer.Translucent) { pose, consumer ->
+            val color = FastColor.ARGB32.color(140, 100, 255, 100)
+            renderLine(pose, consumer, startPos, endPos, color, thickness = 1.0f)
         }
     }
 
-    private fun renderBox(pose: PoseStack, consumer: BufferBuilder, pos: Vec3, color: Int, bound: AABB, shadow: Boolean) {
-        pose.pushPose()
-        pose.translate(pos.x, pos.y, pos.z)
-        DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02), color, alpha = (FastColor.ARGB32.alpha(color).toFloat() / 255f).coerceIn(0f, 1f))
-        pose.popPose()
+    private fun queueBox(pos: Vec3, color: Int, bound: AABB, shadow: Boolean) {
+        if (shadow) {
+            deferRender(DrawLayer.Shadow) { pose, consumer ->
+                pose.pushPose()
+                pose.translate(pos.x, pos.y, pos.z)
+                DrawUtils.drawBox(pose, consumer, bound, 0xAA000000.toInt(), normalShade = false)
+                pose.popPose()
+            }
+        }
+        deferRender(if (FastColor.ARGB32.alpha(color) < 255) DrawLayer.Translucent else DrawLayer.Solid) { pose, consumer ->
+            pose.pushPose()
+            pose.translate(pos.x, pos.y, pos.z)
+            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02), color, normalShade = true)
+            pose.popPose()
+        }
     }
 
-    fun renderText(x: Float, y: Float, z: Float, text: String) {
-        queuedText.add(QueuedText(x, y, z, Component.literal(text)))
+    fun queueText(x: Float, y: Float, z: Float, text: String) {
+        queueText(x, y, z, Component.literal(text))
     }
-    fun renderText(x: Float, y: Float, z: Float, text: Component) {
-        queuedText.add(QueuedText(x, y, z, text))
+    fun queueText(x: Float, y: Float, z: Float, text: Component) {
+        queuedText += QueuedText(x, y, z, text)
+    }
+    //endregion
+
+    //region Render methods
+    private fun renderLine(pose: PoseStack, consumer: BufferBuilder, startPos: Vec3, endPos: Vec3, color: Int, thickness: Float = 1.0f) {
+        val delta = endPos.subtract(startPos)
+        val length = delta.length()
+        val yaw = atan2(-delta.z, delta.x) + Mth.PI
+        val pitch = atan2(delta.horizontalDistance(), delta.y) + Mth.HALF_PI
+
+        val thickness = 0.01125 * thickness
+        pose.pushPose()
+        pose.translate(startPos.x, startPos.y, startPos.z)
+        pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
+        pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -thickness, -thickness, length, thickness, thickness), color, normalShade = true)
+        pose.popPose()
     }
 
     fun renderDeferred(pose: PoseStack) {
@@ -220,12 +257,13 @@ object ConnectionRenderer {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         pose.pushPose()
 
-        val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL)
-        val queuedSnapshot = queued.toList()
-        for (consumer in queuedSnapshot) {
-            consumer(pose, builder)
+        val layers = queued.toList().groupBy { it.layer }.toSortedMap()
+        for ((layer, draws) in layers) {
+            RenderSystem.depthMask(layer.depthWrite)
+            val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL)
+            for (draw in draws) draw.call(pose, builder)
+            builder.build()?.let { mesh -> BufferUploader.drawWithShader(mesh) }
         }
-        builder.build()?.let { mesh -> BufferUploader.drawWithShader(mesh) }
 
         run { // Render text
             val mc = Minecraft.getInstance() ?: return@run
@@ -261,13 +299,10 @@ object ConnectionRenderer {
         RenderSystem.depthMask(true)
 
         mc.mainRenderTarget.bindWrite(false)
-
-        queued.clear()
-        queuedText.clear()
     }
 
-    private fun deferRender(callback: (pose: PoseStack, consumer: BufferBuilder) -> Unit) {
-        queued.add(callback)
+    private fun deferRender(layer: DrawLayer = DrawLayer.Solid, call: QueuedDraw.Call) {
+        queued += QueuedDraw(call, layer)
     }
     //endregion
 
@@ -288,13 +323,13 @@ object ConnectionRenderer {
         else -> null
     }
 
-    fun isHoldingWand(player: Player) = player.isHolding(ModItems.Wand.item)
     fun shouldShowDetail(player: Player) = player.isCrouching
+    fun isHoldingWand(player: Player) = player.isHolding(ModItems.Wand.item)
     fun isSegmentInRange(eye: Vec3, a: Vec3, b: Vec3, maxSqr: Double): Boolean {
         val ab = b.subtract(a)
-        val len = ab.lengthSqr()
-        val t = if (len < 1.0E-9) 0.0 else (eye.subtract(a).dot(ab) / len).coerceIn(0.0, 1.0)
-        return eye.distanceToSqr(a.add(ab.scale(t))) < maxSqr
+        val length = ab.lengthSqr()
+        val factor = if (length < 1.0E-9) 0.0 else (eye.subtract(a).dot(ab) / length).coerceIn(0.0, 1.0)
+        return eye.distanceToSqr(a.add(ab.scale(factor))) < maxSqr
     }
     //endregion
 }
