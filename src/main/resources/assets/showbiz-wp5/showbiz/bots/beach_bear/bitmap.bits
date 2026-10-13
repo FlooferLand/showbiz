@@ -21,7 +21,7 @@ wp5 41, rae 152 {
 }
 wp5 42, rae 158 {
     flow 0.6
-    rotate "Head" x:22.5
+    rotate "Head" x:13
     wigglemul 2.0
 }
 wp5 43, rae 156 {
@@ -34,17 +34,16 @@ wp5 44, rae 157 {
     rotate "Head" y:-20
     wigglemul 2.0
 }
-wp5 45, rae 155 {
+wp5 45, rae 155 {  # Raise
     flow 0.6
     rotate "Guitar" z:-10
-    rotate "ElbowL" x:20
-    rotate "ElbowL" z:-2.5
+    rotate "ElbowL" x:18 z:-2.5
 }
-wp5 46, rae 154 {
+wp5 46, rae 154 {  # Slide
     flow 0.6
     move "HandL" x:-4
-    rotate "ArmL" z:25
-    rotate "ElbowL" x:10
+    rotate "ArmL" z:28
+    rotate "ElbowL" x:8
 }
 wp5 47, rae 163 {  # Strum
     flow 0.8
