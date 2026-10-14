@@ -17,7 +17,7 @@ format = 1
 12 = { flow_in = 0.24, flow_out = 0.3,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.12, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 13 = { flow_in = 0.35, flow_out = 0.45, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.07, smash_out = 0.44, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 14 = { flow_in = 0.2,  flow_out = 0.25, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.19, smash_out = 0.27, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
-15 = { flow_in = 0.4, flow_out = 0.5,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.07, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+15 = { flow_in = 0.4, flow_out = 0.3,  gravity_in = 0.7, gravity_out = 0.7, smash_in = 0.0,  smash_out = 0.07, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 16 = { flow_in = 0.2,  flow_out = 0.25, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.19, smash_out = 0.27, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 
 # Converted from the old wigglemul.

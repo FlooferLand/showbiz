@@ -202,11 +202,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [4.19633, 14.24442, -1.23756],
-			"to": [7.24633, 22.74442, 2.76244],
+			"from": [3.94633, 14.49442, -2.23756],
+			"to": [6.99633, 22.99442, 1.76244],
 			"autouv": 0,
 			"color": 8,
-			"origin": [5.19633, 16.74442, 0.76244],
+			"rotation": [0, 0, 7.5],
+			"origin": [4.94633, 16.99442, -0.23756],
 			"uv_offset": [16, 44],
 			"faces": {
 				"north": {
@@ -7697,11 +7698,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [4.19633, 13.24442, -1.23756],
-			"to": [7.24633, 14.24442, 2.76244],
+			"from": [3.94633, 13.49442, -2.23756],
+			"to": [6.99633, 14.49442, 1.76244],
 			"autouv": 0,
 			"color": 8,
-			"origin": [5.19633, 15.74442, 0.76244],
+			"rotation": [0, 0, 7.5],
+			"origin": [4.94633, 15.99442, -0.23756],
 			"uv_offset": [16, 44],
 			"faces": {
 				"north": {
@@ -7721,16 +7723,60 @@
 					"texture": 0
 				},
 				"up": {
-					"uv": [0, 0, 0, 0],
-					"texture": null
+					"uv": [18.5, 57, 16, 56],
+					"texture": 0
 				},
 				"down": {
-					"uv": [26, 44, 23, 48],
+					"uv": [21, 56, 18.5, 57],
 					"texture": 0
 				}
 			},
 			"type": "cube",
-			"uuid": "219d46a3-0ee2-a22a-317d-23f621b8218d"
+			"uuid": "cde99c65-77ee-161b-a1dd-a4982fa9c6f0"
+		},
+		{
+			"name": "cube",
+			"box_uv": false,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [3.20289, 12.83006, -1.73756],
+			"to": [6.25289, 14.58006, 2.01244],
+			"autouv": 0,
+			"color": 8,
+			"rotation": [0, 0, 57.5],
+			"origin": [4.72789, 14.08006, 0.13744],
+			"uv_offset": [16, 44],
+			"faces": {
+				"north": {
+					"uv": [20, 56, 23, 57],
+					"texture": 0
+				},
+				"east": {
+					"uv": [16, 56, 20, 57],
+					"texture": 0
+				},
+				"south": {
+					"uv": [27, 56, 30, 57],
+					"texture": 0
+				},
+				"west": {
+					"uv": [23, 56, 27, 57],
+					"texture": 0
+				},
+				"up": {
+					"uv": [18.5, 57, 16, 56],
+					"texture": 0
+				},
+				"down": {
+					"uv": [21, 56, 18.5, 57],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "2dda92a7-171b-54b7-1048-9754c9becd21"
 		}
 	],
 	"groups": [
@@ -7801,7 +7847,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "Right Elbow",
@@ -8214,7 +8260,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -8237,7 +8283,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -8260,7 +8306,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -8620,8 +8666,8 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [5.19633, 22.74442, 0.76244],
-			"rotation": [0, 0, 0],
+			"origin": [5.19633, 22.74442, 0.01244],
+			"rotation": [-6.5, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
@@ -8843,7 +8889,7 @@
 				},
 				{
 					"uuid": "5de74785-6516-4021-8900-819c5e714752",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						"fa2821f3-d35d-c953-e1a4-8793e00662ec",
 						"e52144c9-9009-e29c-6036-8d3d56c35813",
@@ -8893,13 +8939,14 @@
 				{
 					"uuid": "87701015-b2e4-d314-7e59-0f5cb027deb5",
 					"isOpen": true,
-					"children": ["8d3459bf-9505-3761-e459-a81a47d1e7ab", "219d46a3-0ee2-a22a-317d-23f621b8218d"]
+					"children": ["8d3459bf-9505-3761-e459-a81a47d1e7ab", "cde99c65-77ee-161b-a1dd-a4982fa9c6f0"]
 				},
 				{
 					"uuid": "af00402e-d65d-4e54-9f39-21d081eb3501",
 					"isOpen": true,
 					"children": [
 						"abcdfbd0-49bb-db9d-7705-e660e9bb7a2a",
+						"2dda92a7-171b-54b7-1048-9754c9becd21",
 						{
 							"uuid": "0527f0bf-82c8-7a7e-0bfe-d532c8027f39",
 							"isOpen": false,
@@ -8957,7 +9004,7 @@
 		},
 		{
 			"uuid": "03423912-c766-9bce-1e09-cb4127b981be",
-			"isOpen": false,
+			"isOpen": true,
 			"children": [
 				{
 					"uuid": "8fc4e748-aae9-8371-6c28-6c6efb704e92",
@@ -8967,7 +9014,7 @@
 						"1308dd9c-9b1a-9141-dc73-87676b617df5",
 						{
 							"uuid": "f1ba099c-0da8-80f0-828b-5dc53c8b5d6f",
-							"isOpen": true,
+							"isOpen": false,
 							"children": ["1b88632d-e3a2-f943-cf34-be78d91299b8", "a680d20c-7424-4e0b-eed5-ac6f065a641a", "e53955ad-3182-3df8-e9c5-f91dbd8473cf"]
 						}
 					]
