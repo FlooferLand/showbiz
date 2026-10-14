@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +40,7 @@
 
                 <br/>
                 <p>Build name "{{ site.data.nightly.name }}"</p>
-                <a href="{{ site.data.nightly.assets[0].url }}" download="showbiz-{{VERSION}}-nightly.jar">Download {{ site.data.nightly.assets[0].name }}</a>
+                <a href="{{ site.data.nightly.assets[0].url }}">Download {{ site.data.nightly.assets[0].name }}</a>
 
                 <h2>Changes since the previous release</h2>
                 {{ site.data.nightly.body | markdownify }}
