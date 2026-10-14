@@ -40,6 +40,11 @@
 
                 <br/>
                 <p>Build name "{{ site.data.nightly.name }}"</p>
+                <p>Built on <time id="build-date" datetime="{{ site.data.nightly.publishedAt }}">{{ site.data.nightly.publishedAt | date: "%Y-%m-%d %H:%M" }} UTC</time></p>
+                <script>
+                    const built = document.getElementById("build-date")
+                    built.textContent = new Date(built.dateTime).toLocaleString()
+                </script>
                 <a href="{{ site.data.nightly.assets[0].url }}">Download {{ site.data.nightly.assets[0].name }}</a>
 
                 <h2>Changes since the previous release</h2>

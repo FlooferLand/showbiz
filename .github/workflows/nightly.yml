@@ -45,9 +45,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "25"
-
       - uses: gradle/actions/setup-gradle@v4
-        name: Building the mod
+
+      - name: Building the mod
         run: |
           chmod +x gradlew
           ./gradlew runDatagen
@@ -60,7 +60,9 @@ jobs:
         run: |
           PREV=$(git rev-parse -q --verify 'refs/tags/nightly^{commit}' || true)
           echo "View the full changelog [here](https://github.com/FlooferLand/showbiz/tree/main/changelogs)" > notes.md
-          git log --max-count=50 --no-merges --pretty='- %s (%h)' ${PREV:+$PREV..}HEAD > notes.md
+          echo >> notes.md
+          git log --max-count=50 --no-merges --pretty="- %s ([%h]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/%H))" ${PREV:+$PREV..}HEAD >> notes.md
+
 
           gh release delete nightly --cleanup-tag --yes || true
           gh release create nightly versions/1.21.1/build/libs/showbiz-*+1.21.1.jar \

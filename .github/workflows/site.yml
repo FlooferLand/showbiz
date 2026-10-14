@@ -30,7 +30,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p website/_data
-          gh release view nightly --json name,body,assets > website/_data/nightly.json
+          gh release view nightly --json name,body,assets,publishedAt > website/_data/nightly.json
 
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
