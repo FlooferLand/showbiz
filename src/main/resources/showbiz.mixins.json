@@ -3,7 +3,6 @@
     "package": "com.flooferland.showbiz.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
-        "ChunkSerializerMixin",
         "JukeboxBlockEntityMixin",
         "PlayerMixin",
         "RedStoneWireBlockMixin"
