@@ -9,7 +9,9 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
+import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
@@ -45,8 +47,12 @@ class CurtainShadowBlock(props: Properties) : Block(props) {
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         val parentPos = getParent(level, pos) ?: return InteractionResult.FAIL
-        val parentState = level.getBlockState(parentPos) ?: state
-        return (ModBlocks.CurtainBlock.block as CurtainBlock).useWithoutItem(parentState, level, parentPos, player, hitResult)
+        val parentEntity = level.getBlockEntity(parentPos) as? CurtainBlockEntity ?: return InteractionResult.FAIL
+
+        if (!player.mayInteractWith(parentEntity)) return InteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return InteractionResult.FAIL
+        parentEntity.setCurtains(!parentEntity.isOpen)
+        return InteractionResult.SUCCESS
     }
 
     override fun destroy(level: LevelAccessor, pos: BlockPos, state: BlockState) {
