@@ -208,8 +208,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             for (bit in bitmapBits.keys) {
                 val cylinder = cylinders[bit.toString()] ?: continue
                 val valve = storage.valves.getOrPut(bit) { PneumaticValve() }
-                val dualPressure = cylinder.dualPressureBit != 0 && frame.frameHas(cylinder.dualPressureBit)
-                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualPressure, cylinder)
+                val dualBit = cylinder.dualPressureBit ?: supply.dualPressureBit
+                val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) cylinder.dualPressureScale ?: supply.dualPressureScale else 1f
+                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualScale, cylinder)
                 if (hits != null && valve.hit > 0f) playHit(animatable, hits, bit, valve.hit, valve.pos >= 1f)
             }
             if (storage.dynBones.isNotEmpty()) {
