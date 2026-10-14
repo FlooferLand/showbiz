@@ -40,8 +40,16 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private val since: Quaternionf = Quaternionf()
     private val now: Quaternionf = Quaternionf()
     
-    fun step(bones: (String) -> GeoBone?, delta: Float) {
-        if (params.links.isNotEmpty()) return stepLinked(bones, delta)
+
+    private var watched: List<GeoBone> = emptyList()
+    private var pose: FloatArray = FloatArray(0)
+    private var next: FloatArray = FloatArray(0)
+    private var still: Int = 0  // steps in a row on the same pose that left every particle exactly where it was
+
+    fun step(bones: (String) -> GeoBone?, delta: Float, sleep: Boolean) {
+        val same = sleep && samePose(bones, delta)
+        if (same && still >= 2) return
+        if (params.links.isNotEmpty()) return stepLinked(bones, delta, same)
         val bone = bones(root) ?: return
         animated(bone)
         if (!ready) {
@@ -71,6 +79,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         d.set(p0).sub(pos)
         val len = d.length()
         if (len > 1e-6f) pos.fma((len - restLen) / len, d)
+        still = if (same && pos == prev) still + 1 else 0
         lastDev = dev
         lastTurn.set(turn)
         if (params.freezeX) {
@@ -106,7 +115,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private var turns: Array<Quaternionf> = emptyArray()
     private var lastTurns: Array<Quaternionf> = emptyArray()
 
-    private fun stepLinked(bones: (String) -> GeoBone?, delta: Float) {
+    private fun stepLinked(bones: (String) -> GeoBone?, delta: Float, same: Boolean) {
         val chain = boneNames.map { bones(it) ?: return }
         val size = chain.size
         val last = chain.last()
@@ -150,6 +159,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
             val len = d.length()
             if (len > 1e-6f) p.fma((len - restLen) / len, d)
         }
+        still = if (same && (1..size).all { parts[it] == prevs[it] }) still + 1 else 0
         val saved = chain.map { floatArrayOf(it.rotX, it.rotY, it.rotZ) }
         for (i in 0 until size) {
             lastTurns[i].set(turns[i])
@@ -164,6 +174,26 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         for ((k, b) in chain.withIndex()) { b.rotX = saved[k][0]; b.rotY = saved[k][1]; b.rotZ = saved[k][2] }
     }
 
+
+    private fun samePose(bones: (String) -> GeoBone?, delta: Float): Boolean {
+        val top = bones(root) ?: return false
+        if (watched.firstOrNull() !== top) {
+            watched = boneNames.mapNotNull(bones).flatMap { generateSequence(it) { bone -> bone.parent }.toList() }.distinct()
+            pose = FloatArray(watched.size * 9 + 1)
+            next = FloatArray(pose.size)
+        }
+        var i = 0
+        for (bone in watched) {
+            next[i] = bone.posX; next[i + 1] = bone.posY; next[i + 2] = bone.posZ
+            next[i + 3] = bone.rotX; next[i + 4] = bone.rotY; next[i + 5] = bone.rotZ
+            next[i + 6] = bone.scaleX; next[i + 7] = bone.scaleY; next[i + 8] = bone.scaleZ
+            i += 9
+        }
+        next[i] = delta
+        val same = next.contentEquals(pose)
+        next = pose.also { pose = next }
+        return same
+    }
 
     private fun push(bone: GeoBone): Vector3f {
         if (gravity.lengthSquared() == 0f) return force.zero()

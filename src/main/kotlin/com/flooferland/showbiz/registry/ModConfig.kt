@@ -46,8 +46,9 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
 
     @Serializable
     data class Other(
-        var forceVanillaLighting: Boolean = false
-    )
+        var forceVanillaLighting: Boolean = false,
+        var sleepFloppyParts: Boolean = false
+        )
 
     public override fun clone() = super.clone() as ModConfig
 

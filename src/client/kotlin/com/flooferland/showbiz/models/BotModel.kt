@@ -208,7 +208,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             }
             if (storage.dynBones.isNotEmpty()) {
                 poseBits(bitmapBits, storage, cylinders, model) { it.pos }
-                for (dynBone in storage.dynBones) dynBone.step(animationProcessor::getBone, 1f / supply.rate)
+                for (dynBone in storage.dynBones) dynBone.step(animationProcessor::getBone, 1f / supply.rate, Showbiz.config.other.sleepFloppyParts)
             }
         }
 
