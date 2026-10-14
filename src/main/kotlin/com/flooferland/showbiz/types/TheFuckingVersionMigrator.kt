@@ -17,7 +17,7 @@ typealias DataMigrationStep = (BlockEntity) -> String?
  * Don't forget to fucking call the fucking save and load functions as well!
  * Fucking phenomenal!
  */
-class TheFuckingVersionMigrator(private val owner: BlockEntity, private val steps: List<DataMigrationStep>) {
+class TheFuckingVersionMigrator(private val owner: BlockEntity, private val steps: List<DataMigrationStep>, private val runSteps: Boolean = true) {
     // The more steps, the more it should increment the version.. right?
     private var dataVersion = steps.size
 
@@ -37,7 +37,7 @@ class TheFuckingVersionMigrator(private val owner: BlockEntity, private val step
         IVersionMigrator.queuedMigrations.add {
             val pendingSteps = steps.drop(dataVersion)
             if (!entity.isRemoved && pendingSteps.isNotEmpty()) {
-                pendingSteps.forEachIndexed { i, step ->
+                if (runSteps) pendingSteps.forEachIndexed { i, step ->
                     val err = step(entity)
                     err?.let {
                         Showbiz.log.error("Failed to migrate block at ${entity.blockPos}: $it (step $i failed)")
@@ -59,7 +59,11 @@ interface IVersionMigrator {
     val migrator: TheFuckingVersionMigrator
     companion object {
         val queuedMigrations = ArrayDeque<() -> Unit>()
+
         fun make(entity: BlockEntity, steps: List<DataMigrationStep>) = TheFuckingVersionMigrator(entity, steps)
+
+        @Deprecated("Nuhuh", ReplaceWith("make"))
+        fun makeTemporaryTransition(entity: BlockEntity, steps: List<DataMigrationStep>) = TheFuckingVersionMigrator(entity, steps, runSteps = false)
 
         fun register() {
             ServerTickEvents.END_SERVER_TICK.register {
