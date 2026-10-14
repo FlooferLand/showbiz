@@ -174,17 +174,8 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
                             animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
                             model: BotModelData, movements: Movements?, showMapping: String?) {
-        val cylinders = showMapping?.let { map ->
-            bot.physics?.bits?.get(map)
-                // TODO: HEY REDA !!!!
-                // I made it so for now default flows are added for bots with no physics.toml, but aren't added for missing bits in the physics.toml
-                // This should be removed eventually and replaced with compatibility for the old `flow`
-                // -Floof
-                ?: if (bot.physics == null)
-                       mutableMapOf<String, PneumaticValve.Params>().also { bitmapBits.forEach { (bit, _) -> it[bit.toString()] = PneumaticValve.Params(flowIn = 0.5f, flowOut = 0.6f) } }
-                   else null
-        }
-        val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: cylinders?.let { PneumaticValve.Supply.DEFAULT }
+        val cylinders = showMapping?.let { bot.physics?.bits?.get(it) }
+        val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: PneumaticValve.Supply.DEFAULT
         val hits = showMapping?.let { bot.physics?.hits?.get(it) }
         val dynBones = bot.physics?.dynbones
         if (dynBones != null && storage.dynBonesFor !== dynBones) {
@@ -193,21 +184,23 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
         val frame = animatable.show?.data?.signal ?: SignalFrame()
         var steps = 0
-        if (supply != null) {
-            storage.cylinderClock += delta * 0.05   // ticks to seconds
-            while (storage.cylinderClock >= 1.0 / supply.rate) {
-                storage.cylinderClock -= 1.0 / supply.rate
-                steps++
-            }
+        storage.cylinderClock += delta * 0.05   // ticks to seconds
+        while (storage.cylinderClock >= 1.0 / supply.rate) {
+            storage.cylinderClock -= 1.0 / supply.rate
+            steps++
         }
 
-        val alpha = if (supply != null) (storage.cylinderClock * supply.rate).toFloat() else 1f
+        val alpha = (storage.cylinderClock * supply.rate).toFloat()
 
         // Every cylinder a step at a time, then the floppy parts off the pose that step puts the bones in
-        if (supply != null && cylinders != null) repeat(steps) {
-            for (bit in bitmapBits.keys) {
-                val cylinder = cylinders[bit.toString()] ?: continue
+        repeat(steps) {
+            for ((bit, data) in bitmapBits) {
                 val valve = storage.valves.getOrPut(bit) { PneumaticValve() }
+                val cylinder = cylinders?.get(bit.toString())
+                if (cylinder == null) {
+                    valve.stepFlow(frame.frameHas(bit), 60f / supply.rate, data.flow.speed.toFloat())
+                    continue
+                }
                 val dualBit = cylinder.dualPressureBit ?: supply.dualPressureBit
                 val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) cylinder.dualPressureScale ?: supply.dualPressureScale else 1f
                 valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualScale, cylinder)
