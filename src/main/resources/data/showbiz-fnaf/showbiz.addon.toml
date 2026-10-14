@@ -1,9 +1,0 @@
-[addon]
-id = "showbiz-fnaf"
-name = "Showbiz Fnaf Addon"
-authors = ["Monsterwaill", "Mephilis", "Flooferland"]
-version = "$version" # Filled by build.gradle.kts
-description = '''
-    The Official FNaF Mod addon with Showbiz Mod, following the Faz Anim Shows for movement.
-'''
-format = 1
