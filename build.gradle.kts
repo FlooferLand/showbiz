@@ -291,7 +291,7 @@ publishMods {
     fun addGeneralDeps(m: Modrinth) {
         m.requires { slug = "fabric-language-kotlin" }
         m.requires { slug = "geckolib" }
-        m.requires { slug = "irlights" }
+        m.optional { slug = "irlights" }
     }
 
     val sharedOptions = modrinthOptions {

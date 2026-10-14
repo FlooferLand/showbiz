@@ -15,6 +15,7 @@ import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.math.ColorMath.srgbToLinear
 import com.flooferland.showbiz.types.math.Kelvin
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.lerp
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -22,9 +23,6 @@ import java.util.concurrent.ConcurrentHashMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.loader.api.FabricLoader
-import org.qualet.irl.light.LightMath
-import org.qualet.irl.light.LightRegistry
-import org.qualet.irl.light.iris.IrisShadersState
 import kotlin.math.roundToInt
 
 object ModClientLights {
@@ -80,18 +78,11 @@ object ModClientLights {
         }
     }
 
-    fun getCookie(): Int {
-        try {
-            val cls = Class.forName("org.qualet.irlredactor.light.cookie.CookieArray")
-            val resolveMethod = cls.getMethod("resolve", String::class.java)
-            return resolveMethod.invoke(null, "showbiz_spotlight.png") as? Int ?: -1
-        } catch (error: Exception) {
-            Showbiz.log.error("Failed to set the cookie mask", error)
-            return -1;
-        }
+    fun useVanillaLights(): Boolean {
+        if (Showbiz.config.other.forceVanillaLighting) return true
+        if (ShowbizEnv.hasIRLights()) run { return com.flooferland.showbiz.types.IRLights.shadersDisabled() }
+        return true
     }
-
-    fun useVanillaLights() = IrisShadersState.shadersDisabled() || Showbiz.config.other.forceVanillaLighting
 
     fun emit(level: ClientLevel, delta: Float) {
         for (id in lights) {
@@ -135,12 +126,11 @@ object ModClientLights {
         val pos = entity.blockPos.center.add(forward.x.toDouble(), forward.y.toDouble(), forward.z.toDouble())
         val id = entity.blockPos.asLong()
 
-        val color = entity.colorAverage.safe()
-            .saturate(2.5f)
+        val color = entity.colorAverage.safe().saturate(2.5f)
 
         // Vanilla block lights look too bad with the TV so it only uses shaders
-        if (!useVanillaLights())
-            LightRegistry.registerPoint(
+        if (!useVanillaLights() && ShowbizEnv.hasIRLights()) run {
+            org.qualet.irl.light.LightRegistry.registerPoint(
                 pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
                 color.r.toFloat(), color.g.toFloat(), color.b.toFloat(),
                 0.02f,
@@ -151,14 +141,12 @@ object ModClientLights {
                 true,
                 id
             )
+        }
     }
 
     fun emitSpotlight(level: ClientLevel, entity: SpotlightBlockEntity, delta: Float) {
         val dir = entity.endPos.subtract(entity.startPos).normalize()
         val pos = entity.endPos
-
-        val cookie = getCookie()
-        val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
         val id = entity.blockPos.asLong()
 
         val kelvinColor = Kelvin.toColor(entity.kelvin)
@@ -173,41 +161,40 @@ object ModClientLights {
         entity.value = lerp(entity.value, target, speed * delta)
         entity.value = entity.value.coerceIn(0f, 1f)
 
-        // Proper spotlights
-        if (!useVanillaLights()) LightRegistry.registerSpot(
-            pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
-            dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
-            r, g, b,
-            entity.value,
-            15f,
-            cone.cosOuter, cone.cosInner,
-            false, false,
-            0.5f, 0.8f,
-            0.5f, 0.0f,
-            entity.shadows,
-            cookie.toFloat(), 0f, 1f, 0f,
-            id
-        )
-
-        // Block lights for compatibility
-        val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
-        if (entity.value <= 0f || !useVanillaLights()) return
-        val start = pos.add(dir)
-        val range = pos.add(dir.scale(10.0))
-        BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
-            val state = level.getBlockState(blockPos)
-            val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
-            if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
-            if (blocked) blockPos else null
-        }, { null })
+        if (useVanillaLights()) {
+            val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
+            if (entity.value <= 0f) return
+            val start = pos.add(dir)
+            val range = pos.add(dir.scale(10.0))
+            BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
+                val state = level.getBlockState(blockPos)
+                val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
+                if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
+                if (blocked) blockPos else null
+            }, { null })
+        } else if (ShowbizEnv.hasIRLights()) run {
+            val cookie = com.flooferland.showbiz.types.IRLights.getCookie()
+            val cone = org.qualet.irl.light.LightMath.cone(entity.angle, entity.angle * 0.75f)
+            org.qualet.irl.light.LightRegistry.registerSpot(
+                pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
+                dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
+                r, g, b,
+                entity.value,
+                15f,
+                cone.cosOuter, cone.cosInner,
+                false, false,
+                0.5f, 0.8f,
+                0.5f, 0.0f,
+                entity.shadows,
+                cookie.toFloat(), 0f, 1f, 0f,
+                id
+            )
+        }
     }
 
     fun emitFloodlight(level: ClientLevel, entity: FloodlightEntity, delta: Float) {
         val dir = entity.endPos.subtract(entity.startPos).normalize()
         val pos = entity.endPos
-
-        val cookie = getCookie()
-        val cone = LightMath.cone(entity.angle, entity.angle * 0.75f)
         val id = entity.id.toLong()
 
         val r = (entity.color shr 16 and 0xFF) / 255f
@@ -221,33 +208,35 @@ object ModClientLights {
         entity.value = lerp(entity.value, target, speed * delta)
         entity.value = entity.value.coerceIn(0f, 1f)
 
-        // Proper Floodlights
-        if (!useVanillaLights()) LightRegistry.registerSpot(
-            pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
-            dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
-            r, g, b,
-            entity.value,
-            15f,
-            cone.cosOuter, cone.cosInner,
-            false, false,
-            0.5f, 0.8f,
-            0.5f, 0.0f,
-            entity.shadows,
-            cookie.toFloat(), 0f, 1f, 0f,
-            id
-        )
-
-        // Block lights for compatibility
-        val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
-        if (entity.value <= 0f || !useVanillaLights()) return
-        val start = pos.add(dir)
-        val range = pos.add(dir.scale(10.0))
-        BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
-            val state = level.getBlockState(blockPos)
-            val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
-            if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
-            if (blocked) blockPos else null
-        }, { null })
+        if (useVanillaLights()) {
+            val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
+            if (entity.value <= 0f) return
+            val start = pos.add(dir)
+            val range = pos.add(dir.scale(10.0))
+            BlockGetter.traverseBlocks<BlockPos?, Unit?>(start, range, Unit, { _, blockPos ->
+                val state = level.getBlockState(blockPos)
+                val blocked = !state.getVisualShape(level, blockPos, CollisionContext.empty()).isEmpty
+                if (!blocked) frameBlockLights[blockPos.asLong()] = blockLight
+                if (blocked) blockPos else null
+            }, { null })
+        } else if (ShowbizEnv.hasIRLights()) run {
+            val cookie = com.flooferland.showbiz.types.IRLights.getCookie()
+            val cone = org.qualet.irl.light.LightMath.cone(entity.angle, entity.angle * 0.75f)
+            org.qualet.irl.light.LightRegistry.registerSpot(
+                pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
+                dir.x.toFloat(), dir.y.toFloat(), dir.z.toFloat(),
+                r, g, b,
+                entity.value,
+                15f,
+                cone.cosOuter, cone.cosInner,
+                false, false,
+                0.5f, 0.8f,
+                0.5f, 0.0f,
+                entity.shadows,
+                cookie.toFloat(), 0f, 1f, 0f,
+                id
+            )
+        }
     }
 
     fun paintLightLevel(level: ClientLevel, pos: Long, light: Int) {

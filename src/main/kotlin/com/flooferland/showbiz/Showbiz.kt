@@ -18,7 +18,7 @@ import com.flooferland.showbiz.types.IVersionMigrator
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
-import com.flooferland.showbiz.utils.ShowbizUtils
+import com.flooferland.showbiz.utils.ShowbizEnv
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -61,7 +61,7 @@ object Showbiz : ModInitializer {
             ModPlayerSynchedData
             ModCommands.register()
             ModScreenHandlers
-            if (ShowbizUtils.hasComputerCraft()) run { ModPeripherals.register() }
+            if (ShowbizEnv.hasComputerCraft()) run { ModPeripherals.register() }
             ServerConnections
             FileStorage
             FileServer

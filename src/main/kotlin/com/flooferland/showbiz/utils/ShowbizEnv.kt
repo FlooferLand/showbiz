@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.FabricLoader
 
 /** Environment/system utilities */
 object ShowbizEnv {
+    //region System stuff
     fun openFileManager(path: Path) {
         val dir = path.toFile().also { runCatching { it.mkdirs() } }
         val os = System.getProperty("os.name")?.lowercase() ?: ""
@@ -21,6 +22,16 @@ object ShowbizEnv {
             }
         }
     }
+    //endregion
+
+    //region Mod stuff
+    fun hasComputerCraft() =
+        FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
+    fun hasIRLights() =
+        FabricLoader.getInstance()?.getModContainer("irl-redactor")?.isPresent == true
+    //endregion
+
+    //region Dev stuff
     fun isDev() =
         FabricLoader.getInstance()?.isDevelopmentEnvironment == true
     fun devThrow(text: String, error: Exception? = null) {
@@ -29,4 +40,5 @@ object ShowbizEnv {
     fun <T> assert(a: T, b: T, ctx: String) where T: Comparable<T> {
         if (a != b) devThrow("Assertion failed: $a != $b ($ctx)")
     }
+    //endregion
 }

@@ -37,6 +37,7 @@ import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.MainClientUtils
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.tc
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
@@ -73,6 +74,7 @@ object ShowbizClient : ClientModInitializer {
             ModClientLights.load()
             ClientConnections
             ClientPackets.init()
+            if (ShowbizEnv.hasIRLights()) run { IRLights.register() }
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
