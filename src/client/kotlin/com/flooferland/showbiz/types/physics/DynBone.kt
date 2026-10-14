@@ -35,6 +35,11 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private val q: Quaternionf = Quaternionf()
     private val r: Quaternionf = Quaternionf()
 
+    private val gravity: Vector3f = Vector3f(params.gravity[0], params.gravity[1], params.gravity[2])
+    private val force: Vector3f = Vector3f()
+    private val since: Quaternionf = Quaternionf()
+    private val now: Quaternionf = Quaternionf()
+    
     fun step(bones: (String) -> GeoBone?, delta: Float) {
         if (params.links.isNotEmpty()) return stepLinked(bones, delta)
         val bone = bones(root) ?: return
@@ -49,6 +54,8 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         val vx = pos.x - prev.x; val vy = pos.y - prev.y; val vz = pos.z - prev.z
         prev.set(pos)
         pos.add(vx * (1f - params.damping), vy * (1f - params.damping), vz * (1f - params.damping))
+        pos.add(push(bone))
+
         d.set(rest).sub(pos)
         pos.fma(params.elasticity * timeVar, d)
         if (params.stiffness > 0f) {
@@ -116,10 +123,11 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         }
         val timeVar = delta * params.updateRate
         prevs[0].set(parts[0]); parts[0].set(anims[0])
+        push(chain[0])
         for (i in 1..size) {
             val vx = parts[i].x - prevs[i].x; val vy = parts[i].y - prevs[i].y; val vz = parts[i].z - prevs[i].z
             prevs[i].set(parts[i])
-            parts[i].add(vx * (1f - params.damping), vy * (1f - params.damping), vz * (1f - params.damping))
+            parts[i].add(vx * (1f - params.damping), vy * (1f - params.damping), vz * (1f - params.damping)).add(force)
         }
         for (i in 1..size) {
             val p = parts[i]; val up = parts[i - 1]
@@ -154,6 +162,21 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
             turnBone(chain[i], turns[i])
         }
         for ((k, b) in chain.withIndex()) { b.rotX = saved[k][0]; b.rotY = saved[k][1]; b.rotZ = saved[k][2] }
+    }
+
+
+    private fun push(bone: GeoBone): Vector3f {
+        if (gravity.lengthSquared() == 0f) return force.zero()
+        model(bone).getNormalizedRotation(now)
+        restTurn(bone, since).conjugate().premul(now).transform(force.set(gravity))
+        val along = force.dot(gravity) / gravity.length()
+        return force.set(gravity).mul(1f - maxOf(along, 0f) / gravity.length())
+    }
+
+    private fun restTurn(bone: GeoBone, out: Quaternionf): Quaternionf {
+        bone.parent?.let { restTurn(it, out) } ?: out.identity()
+        val rest = bone.initialSnapshot
+        return out.rotateZ(rest?.rotZ ?: bone.rotZ).rotateY(rest?.rotY ?: bone.rotY).rotateX(rest?.rotX ?: bone.rotX)
     }
 
     /** The bone turned by [by], back into GeckoLib Z-Y-X angles */
@@ -222,6 +245,9 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         @SerialName("update_rate") val updateRate: Int = 60,  // scales how hard the part gets pulled back each frame (elasticity × rate / 60)
         @SerialName("freeze_x") val freezeX: Boolean,         // swings only in the plane across the root's X axis
         val length: Float = 0f,                               // where the end sits, in pixels, 0 is as far as the bone's cubes reach
-        val links: List<String> = listOf()                    // the bones below the root, for a chain of more than one
-    )
+        val links: List<String> = listOf(),                   // the bones below the root, for a chain of more than one
+        val gravity: List<Float> = listOf(0f, 0f, 0f)         // a push on the end each step, in blocks along the model's axes, as DynamicBone's m_Gravity
+    ) {
+        init { require(gravity.size == 3) { "gravity takes three numbers: x, y and z" } }
+    }
 }

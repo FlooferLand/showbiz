@@ -18,5 +18,6 @@ dual_pressure_scale = 0.75
 # Converted from the old wigglemul.
 [dynbones]
 "looney" = { damping = 0.1, elasticity = 0.08, freeze_x = false }
-"head" = { damping = 0.1, elasticity = 0.08, freeze_x = false }
+# head: Reel to Real's head jiggle on Looney, gravity turned into this model's axes and scaled to this head's length
+"head" = { damping = 0.021, elasticity = 0.032, stiffness = 0.0, update_rate = 60, freeze_x = true, gravity = [0.0195, 0.0195, -0.0195] }
 "leaf" = { damping = 0.03, elasticity = 0.003, freeze_x = false }
