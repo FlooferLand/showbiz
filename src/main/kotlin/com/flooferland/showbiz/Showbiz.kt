@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
 
 object Showbiz : ModInitializer {
     const val MOD_ID = "showbiz"
-    val log: Logger = LoggerFactory.getLogger(MOD_ID)
+    @JvmField val log: Logger = LoggerFactory.getLogger(MOD_ID)
 
     var addons = listOf<AddonData>()
     var bots = mapOf<ResourceId, AddonBotEntry>()

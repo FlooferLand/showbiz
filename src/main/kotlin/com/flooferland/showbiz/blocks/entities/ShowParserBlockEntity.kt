@@ -27,7 +27,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
-    override val migrator = IVersionMigrator.makeTemporaryTransition(this, DataMigrationSteps.showParser)
+    override val migrator = IVersionMigrator.make(this, DataMigrationSteps.showParser)
 
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
