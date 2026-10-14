@@ -35,9 +35,13 @@
             <div class="container">
                 <p style="color: #ffff00"><b style="color: #ffff00">NOTE:</b> These builds are VERY experimental and will likely break your worlds</p>
                 <p>Updated every day at <a href="https://www.google.com/search?q=3+AM+UTC+to+my+timezone">3 AM (UTC)</a></p>
-                <p>Build #{{BUILD}}: <code>{{COMMIT}}</code></p>
-                <p>Commit <a href="https://github.com/FlooferLand/showbiz/commit/{{SHA}}">{{SHA}}</a></p>
-                <a href="nightly.jar" download="showbiz-{{VERSION}}-nightly.jar">Download showbiz-{{VERSION}}-nightly.jar</a>
+
+                <br/>
+                <p>Build name "{{ site.data.nightly.name }}"</p>
+                <a href="{{ site.data.nightly.assets[0].url }}" download="showbiz-{{VERSION}}-nightly.jar">Download {{ site.data.nightly.assets[0].name }}</a>
+
+                <h2>Changes since the previous release</h2>
+                {{ site.data.nightly.body | markdownify }}
             </div>
         </div>
     </div>

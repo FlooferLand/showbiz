@@ -40,12 +40,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "25"
+
       - uses: gradle/actions/setup-gradle@v4
-      - run: |
+        name: Building the mod
+        run: |
           chmod +x gradlew
           ./gradlew runDatagen
           ./gradlew assemble
@@ -56,6 +59,7 @@ jobs:
           BUILD: ${{ github.run_number }}
         run: |
           PREV=$(git rev-parse -q --verify 'refs/tags/nightly^{commit}' || true)
+          echo "View the full changelog [here](https://github.com/FlooferLand/showbiz/tree/main/changelogs)" > notes.md
           git log --max-count=50 --no-merges --pretty='- %s (%h)' ${PREV:+$PREV..}HEAD > notes.md
 
           gh release delete nightly --cleanup-tag --yes || true
