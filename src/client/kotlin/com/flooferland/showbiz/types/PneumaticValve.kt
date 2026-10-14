@@ -36,11 +36,10 @@ class PneumaticValve {
     private var lastState: Boolean = false
 
     // Stepping once. [dt60] is the step length in 60 fps frames, 1 at 60 steps a second
-    fun step(on: Boolean, dt60: Float, psi: Float, dualPressure: Boolean, params: Params) {
+    fun step(on: Boolean, dt60: Float, psi: Float, dualScale: Float, params: Params) {
         lastPos = pos
         var next = pos
-        var drive = psi / 1050f * params.psiScale * dt60
-        if (dualPressure) drive *= params.dualPressureScale
+        val drive = psi / 1050f * params.psiScale * dt60 * dualScale
 
         val smash: Float
         val smashSpeed: Float
@@ -79,12 +78,22 @@ class PneumaticValve {
         pos = minOf(maxOf(next, 0f), 1f)
     }
 
+    fun stepFlow(on: Boolean, dt60: Float, speed: Float) {
+        lastPos = pos
+        hit = 0f
+        val t = (speed * 0.1f * dt60).coerceIn(0f, 10f)
+        val next = pos * (1f - t) + (if (on) 1f else 0f) * t
+        pos = if (next.isFinite()) next.coerceIn(0f, 1f) else 0f
+    }
+
     fun drawn(alpha: Float): Float = lastPos + (pos - lastPos) * alpha
 
     @Serializable
     data class Supply(
-        val psi: Float = 80f,   // the air supply, 80 in Faz-Anim
-        val rate: Float = 60f   // 60 steps a second
+        val psi: Float = 80f,                                                  // the air supply, 80 in Faz-Anim
+        val rate: Float = 60f,                                                 // 60 steps a second
+        @SerialName("dual_pressure_bit") val dualPressureBit: Int = 0,         // while this bit is on, psi x dual_pressure_scale. 0: none
+        @SerialName("dual_pressure_scale") val dualPressureScale: Float = 1f   // the psi scale while dual_pressure_bit is on
     ) {
         companion object {
             val DEFAULT get() = Supply()
@@ -103,8 +112,8 @@ class PneumaticValve {
         @SerialName("smash_out") val smashOut: Float = 0f,                       // the bounce off the out end, 0 is none
         @SerialName("smash_speed_in") val smashSpeedIn: Float = 0f,              // how fast it recovers from a bounce off the in end
         @SerialName("smash_speed_out") val smashSpeedOut: Float = 0f,            // how fast it recovers from a bounce off the out end
-        @SerialName("dual_pressure_bit") val dualPressureBit: Int = 0,           // while this bit is on, psi x dual_pressure_scale. 0: none
-        @SerialName("dual_pressure_scale") val dualPressureScale: Float = 1.0f,  // the psi scale while dual_pressure_bit is on
+        @SerialName("dual_pressure_bit") val dualPressureBit: Int? = null,        // this cylinder's own, over the [cylinders] table's
+        @SerialName("dual_pressure_scale") val dualPressureScale: Float? = null,  // this cylinder's own, over the [cylinders] table's
         val curve: Curve = Curve.Smooth                                          // how the bones follow the cylinder, see Curve
     ) {
         companion object {

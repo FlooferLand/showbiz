@@ -1,24 +1,29 @@
 format = 1
 
+# While dual_pressure_bit is on, every cylinder's psi x dual_pressure_scale. A bit's own line can set either
+[cylinders.rae]
+dual_pressure_bit = 41
+dual_pressure_scale = 0.75
+
 # One cylinder per bit: Reel to Real's own values.
-# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing). dual_pressure_bit 0: none
+# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.rae]
-41 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-42 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-43 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-44 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-45 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-51 = { flow_in = 0.8, flow_out = 0.8, gravity_in = 0.6,  gravity_out = 0.6, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-52 = { flow_in = 0.8, flow_out = 0.8, gravity_in = 0.6,  gravity_out = 0.6, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-53 = { flow_in = 1.3,  flow_out = 0.2,  gravity_in = 0.3,  gravity_out = 1.65, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-54 = { flow_in = 0.52, flow_out = 0.6,  gravity_in = 0.45, gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-55 = { flow_in = 0.54, flow_out = 0.6,  gravity_in = 0.45, gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-57 = { flow_in = 0.8,  flow_out = 0.5, gravity_in = 0.45, gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-58 = { flow_in = 0.8,  flow_out = 0.5, gravity_in = 0.45, gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-59 = { flow_in = 0.65, flow_out = 1.3,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-60 = { flow_in = 0.65, flow_out = 1.3,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-61 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.2,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
-62 = { flow_in = 0.6, flow_out = 0.3,  gravity_in = 0.6, gravity_out = 0.6,  smash_in = 0.5, smash_out = 0.3, smash_speed_in = 0.6, smash_speed_out = 0.4, dual_pressure_bit = 41, dual_pressure_scale = 0.75 }
+41 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+42 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+43 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+44 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+45 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+51 = { flow_in = 0.8, flow_out = 0.8, gravity_in = 0.6,  gravity_out = 0.6, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+52 = { flow_in = 0.8, flow_out = 0.8, gravity_in = 0.6,  gravity_out = 0.6, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+53 = { flow_in = 1.3,  flow_out = 0.2,  gravity_in = 0.3,  gravity_out = 1.65, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+54 = { flow_in = 0.52, flow_out = 0.6,  gravity_in = 0.45, gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+55 = { flow_in = 0.54, flow_out = 0.6,  gravity_in = 0.45, gravity_out = 0.45, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+57 = { flow_in = 0.8,  flow_out = 0.5, gravity_in = 0.45, gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+58 = { flow_in = 0.8,  flow_out = 0.5, gravity_in = 0.45, gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+59 = { flow_in = 0.65, flow_out = 1.3,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+60 = { flow_in = 0.65, flow_out = 1.3,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+61 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.2,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+62 = { flow_in = 0.6, flow_out = 0.3,  gravity_in = 0.6, gravity_out = 0.6,  smash_in = 0.5, smash_out = 0.3, smash_speed_in = 0.6, smash_speed_out = 0.4 }
 
 # Converted from the old wigglemul.
 [dynbones]
