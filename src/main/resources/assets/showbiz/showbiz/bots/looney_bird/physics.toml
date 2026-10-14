@@ -8,16 +8,15 @@ dual_pressure_scale = 0.75
 # One cylinder per bit: Reel to Real's own values.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.rae]
-171 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5, gravity_out = 0.5, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+171 = { flow_in = 0.4, flow_out = 0.7,  gravity_in = 0.5, gravity_out = 0.5, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
 172 = { flow_in = 0.8, flow_out = 0.9, gravity_in = 0.3, gravity_out = 0.3, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-167 = { flow_in = 1.5, flow_out = 3.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-191 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-192 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-193 = { flow_in = 2.0, flow_out = 2.0,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+167 = { flow_in = 1.6, flow_out = 2.6,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+191 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+192 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+193 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
 
 # Converted from the old wigglemul.
 [dynbones]
 "looney" = { damping = 0.1, elasticity = 0.08, freeze_x = false }
-# head: Reel to Real's head jiggle on Looney, gravity turned into this model's axes and scaled to this head's length
 "head" = { damping = 0.021, elasticity = 0.032, stiffness = 0.0, update_rate = 60, freeze_x = true, gravity = [0.0195, 0.0195, -0.0195] }
-"leaf" = { damping = 0.03, elasticity = 0.003, freeze_x = false }
+"leaf" = { damping = 0.005, elasticity = 0.06, freeze_x = false, gravity = [0.005, 0.005, -0.005]  }
