@@ -1,0 +1,56 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Showbiz Mod</title>
+    <link rel="stylesheet" href="assets/styles/main.css" />
+</head>
+<body>
+    <section id="header">
+        <a href="index.html" id="logo">
+            <img src="/assets/images/icon.png" alt="Icon" />
+            <span>Showbiz Mod</span>
+        </a>
+        <ul>
+            <li><a href="https://modrinth.com/discover/mods?q=Showbiz">Addons</a></li>
+            <li><a href="https://github.com/FlooferLand/showbiz/wiki">Wiki</a></li>
+            <li><a href="https://modrinth.com/mod/showbiz">Modrinth</a></li>
+        </ul>
+    </section>
+    <div id="content">
+        <div id="description">
+            <p>Advanced animatronic show simulator featuring an addon system.</p>
+            <p>Watch the Rock-afire Explosion perform, or any other band through addons (FNaF, etc)</p>
+        </div>
+
+        <br/>
+        <br/>
+        <h2>Builds</h2>
+        <div class="container">
+            <p>Visit <a href="https://modrinth.com/mod/showbiz">the Modrinth</a> for the latest stable-ish builds</p>
+            <p>Everything is for Fabric 1.21.1, but you can use it with the <a href="https://modrinth.com/mod/connector">Sinytra Connector</a> on the silly fox mod loader</p>
+
+            <br/>
+            <h2>Latest nightly build</h2>
+            <div class="container">
+                <p style="color: #ffff00"><b style="color: #ffff00">NOTE:</b> These builds are VERY experimental and will likely break your worlds</p>
+                <p>Updated every day at <a href="https://www.google.com/search?q=3+AM+UTC+to+my+timezone">3 AM (UTC)</a></p>
+
+                <br/>
+                <p>Build name "{{ site.data.nightly.name }}"</p>
+                <p>Built on <time id="build-date" datetime="{{ site.data.nightly.publishedAt }}">{{ site.data.nightly.publishedAt | date: "%Y-%m-%d %H:%M" }} UTC</time></p>
+                <script>
+                    const built = document.getElementById("build-date")
+                    built.textContent = new Date(built.dateTime).toLocaleString()
+                </script>
+                <a href="{{ site.data.nightly.assets[0].url }}">Download {{ site.data.nightly.assets[0].name }}</a>
+
+                <h2>Changes since the previous release</h2>
+                {{ site.data.nightly.body | markdownify }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

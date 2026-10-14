@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.datagen.blocks
 
+import net.minecraft.core.*
 import net.minecraft.resources.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.properties.*
@@ -31,7 +32,6 @@ interface CustomBlockModel {
         }
     }
 
-    // TODO: Adapt defaultState to allow use of several states in data generation
     @CustomBlockModelDsl
     class BlockStateBuilder(val blockId: ResourceLocation, val block: Block) {
         constructor(block: ModBlocks) : this(block.id, block.block)
@@ -128,7 +128,13 @@ interface CustomBlockModel {
                 val direction = value.value
                 val name = NameBuilder(this, name = this.blockId.path, suffix = null)
                 val built = StateModel(this, name)
-                built.y = ((direction.get2DDataValue() and 3) * 90) - 180
+                built.y = when (direction) {
+                    Direction.NORTH -> 0
+                    Direction.EAST -> 90
+                    Direction.SOUTH -> 180
+                    Direction.WEST -> 270
+                    else -> error("Unexpected direction $direction for the facing property")
+                }
                 built.model = Model(this).also { it.texture(this.blockId) }
                 this.states.add(Variation(
                     this, StrippedProperty(this.block, prop),

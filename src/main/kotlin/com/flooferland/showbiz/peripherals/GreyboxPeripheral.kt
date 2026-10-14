@@ -12,9 +12,15 @@ import dan200.computercraft.api.lua.LuaFunction
 import dan200.computercraft.api.lua.MethodResult
 import dan200.computercraft.api.peripheral.IPeripheral
 
+@Suppress("unused")
 class GreyboxPeripheral(val blockEntity: GreyboxBlockEntity) : IPeripheral {
-    override fun equals(other: IPeripheral?) = other is GreyboxPeripheral && blockEntity == other.blockEntity
     override fun getType() = "greybox"
+
+    override fun equals(other: Any?): Boolean = other is IPeripheral && equals(other)
+    override fun equals(other: IPeripheral?): Boolean = other is GreyboxPeripheral && blockEntity == other.blockEntity
+    override fun hashCode(): Int {
+        return blockEntity.hashCode()
+    }
 
     @LuaFunction
     @Throws(LuaException::class)
@@ -33,8 +39,8 @@ class GreyboxPeripheral(val blockEntity: GreyboxBlockEntity) : IPeripheral {
 
     @LuaFunction
     @Throws(LuaException::class)
-    public fun hasBit(bitId: Int): Boolean {
-        return blockEntity.show.data.signal.frameHas(bitId)
+    public fun hasBit(ctx: ILuaContext, bitId: Int): MethodResult {
+        return ctx.executeMainThreadTask { arrayOf(blockEntity.show.data.signal.frameHas(bitId)) }
     }
 
     @LuaFunction

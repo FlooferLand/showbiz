@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.menus
 
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModScreenHandlers
 import com.flooferland.showbiz.types.EditScreenMenu
 

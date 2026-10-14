@@ -18,15 +18,12 @@ object ShowbizUtils {
         "flooferland", "monsterwaill" -> true
         else -> false
     }
-
-    fun clientHasVeil() =
-        FabricLoader.getInstance()?.getModContainer("veil")?.isPresent == true
-
     fun hasComputerCraft() =
         FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
 
-    fun loadBakedModel(location: ResourceLocation, json: String) = runCatching {
-        val model = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
+    fun loadBakedModel(location: ResourceLocation, json: String, transform: ((Model) -> Model)? = null) = runCatching {
+        val parsed = GsonHelper.fromJson(KeyFramesAdapter.GEO_GSON, json, Model::class.java)
+        val model = transform?.invoke(parsed) ?: parsed
         val geo = GeometryTree.fromModel(model)
         BakedModelFactory.getForNamespace(location.namespace).constructGeoModel(geo)
     }.onFailure { Showbiz.log.error("Failed to load GeckoLib model '${location}'", it) }.getOrNull()
@@ -39,7 +36,7 @@ object ShowbizUtils {
         for (text in comp.string.split('\n')) {
             var comp = Component.literal(text).withStyle(ChatFormatting.GRAY)
             if (text.startsWith('(') && text.endsWith(')')) {
-                comp = comp.withStyle(ChatFormatting.DARK_GRAY)
+                comp = comp.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
             }
             tooltip.add(comp)
         }

@@ -12,8 +12,11 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.properties.*
+import net.minecraft.world.level.redstone.*
 import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
@@ -25,6 +28,7 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handItem
 import com.flooferland.showbiz.utils.Extensions.setInventoryChanged
 import com.flooferland.showbiz.utils.Sounds
+import com.flooferland.showbiz.utils.tc
 
 class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
     override val codec = simpleCodec(::ReelToReelBlock)!!
@@ -61,9 +65,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
     }
 
     override fun useItemOn(heldStack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        if (heldStack.item is WandItem) {
-            return ItemInteractionResult.FAIL
-        }
+        if (heldStack.item is WandItem) return ItemInteractionResult.FAIL
 
         // Hand stack
         if (player.getItemInHand(hand) != heldStack) return ItemInteractionResult.FAIL
@@ -71,19 +73,21 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         // Finding the BE
         val entity = level.getBlockEntity(pos)
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
+        if (!player.mayInteractWith(entity)) return ItemInteractionResult.FAIL
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
-            if (heldStack.item is ReelItem && entity.showData.isEmpty()) {
+            if (heldStack.item is ReelItem && entity.showData.isNotLoaded()) {
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
-                    val stackCopy = heldStack.copy()
-                    player.setItemInHand(hand, Items.AIR.defaultInstance)
                     player.displayClientMessage(Component.literal("Loading.."), true)
                     Sounds.play(player, ModSounds.ReelEnter)
 
                     // Playback
-                    if (player is ServerPlayer) {
+                    if (player is ServerPlayer && Permissions.SwitchReels.testAndNotify(player)) {
+                        val stackCopy = heldStack.copy()
+                        player.setItemInHand(hand, Items.AIR.defaultInstance)
+
                         entity.resetPlayback()
                         entity.showData.load(filename) { _, err ->
                             if (player.isRemoved) return@load
@@ -97,11 +101,11 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     }
                 } else {
                     player.displayClientMessage(
-                        Component.translatable("message.showbiz.empty_reel_warning").withStyle(ChatFormatting.RED), true
+                        tc("message", "empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.showData.isEmpty()) {  // Removing
-                if (player is ServerPlayer) {
+            } else if (heldStack.isEmpty && !entity.showData.isNotLoaded() && player is ServerPlayer) {  // Removing
+                if (Permissions.SwitchReels.testAndNotify(player)) {
                     val showName = entity.showData.name
                     showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
                     Sounds.play(player, ModSounds.ReelExit)
@@ -113,9 +117,9 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
-        } else if (!level.isClientSide) {
-            // Pausing
-            if (!entity.showData.isEmpty()) {
+        } else if (player is ServerPlayer && Permissions.ControlPlayback.testAndNotify(player)) {
+            // Pausing / unpausing
+            if (!entity.showData.isNotLoaded()) {
                 var paused = entity.paused
 
                 entity.applyChange(true) {
@@ -138,6 +142,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             }
         }
         return ItemInteractionResult.SUCCESS
+    }
+
+    override fun isSignalSource(state: BlockState) = true
+    override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
+        val entity = level.getBlockEntity(pos) as? ReelToReelBlockEntity ?: return Redstone.SIGNAL_NONE
+        return if (entity.playing) Redstone.SIGNAL_MAX else Redstone.SIGNAL_NONE
     }
 
     override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {

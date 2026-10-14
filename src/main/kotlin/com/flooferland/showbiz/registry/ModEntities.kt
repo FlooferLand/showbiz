@@ -5,14 +5,12 @@ import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.*
-import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.utils.rl
 
 @Suppress("unused")
 sealed class ModEntities<T : Entity> {
     data object Plush : ModEntities<PlushEntity>("plush", ::PlushEntity);
-    data object Bot : ModEntities<BotEntity>("bot", ::BotEntity);
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>

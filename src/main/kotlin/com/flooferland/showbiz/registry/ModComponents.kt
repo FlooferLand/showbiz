@@ -5,10 +5,11 @@ import net.minecraft.core.component.*
 import net.minecraft.core.registries.*
 import net.minecraft.network.codec.*
 import net.minecraft.resources.*
+import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
-import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.utils.rl
 import com.mojang.serialization.Codec
 
@@ -32,6 +33,10 @@ sealed class ModComponents<T> {
     data object BotId : ModComponents<ResourceId>(
         "bot",
         { b -> b.persistent(ResourceId.CODEC).networkSynchronized(ResourceId.STREAM_CODEC) }
+    )
+    data object Floodlight : ModComponents<FloodlightComponent>(
+        "floodlight",
+        { b -> b.persistent(FloodlightComponent.CODEC).networkSynchronized(FloodlightComponent.STREAM_CODEC) }
     )
     ;
 

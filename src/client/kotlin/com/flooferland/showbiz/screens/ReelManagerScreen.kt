@@ -9,13 +9,12 @@ import net.minecraft.network.chat.*
 import net.minecraft.world.item.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.FileStorage
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowFileListPacket
 import com.flooferland.showbiz.network.packets.ShowFileSelectPacket
 import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
 import com.flooferland.showbiz.types.ShowFileInfo
-import com.flooferland.showbiz.utils.PlatformUtils
+import com.flooferland.showbiz.utils.ShowbizEnv
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.io.path.pathString
 
@@ -63,9 +62,10 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                 StringWidget(width / 2 - 50, height / 2 - 50, 100, 20, Component.literal("No shows found"), font)
             )
             run {
-                val message = Component.literal("Upload or create an ${Showbiz.charts.extensions.joinToString("/")} show file in your ")
+                val message = Component.literal("Upload or create a show file in your ")
                 if (!isLocalServer()) message.append("server's ")
                 message.append(Component.literal(FileStorage.SHOWS_DIR.pathString).withStyle(ChatFormatting.BOLD))
+                message.append(Component.literal(" folder"))
                 addRenderableWidget(
                     MultiLineTextWidget(
                         (width - maxWidth) / 2,
@@ -87,7 +87,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         if (isLocalServer()) {
             val openDirButton =
                 Button.builder(Component.literal("Open file manager")) {
-                    PlatformUtils.openFileManager(FileStorage.SHOWS_DIR)
+                    ShowbizEnv.openFileManager(FileStorage.SHOWS_DIR)
                 }.pos(x, y).size(100, 20).build()
             bottomBarButtons.add(openDirButton)
             addRenderableWidget(openDirButton)

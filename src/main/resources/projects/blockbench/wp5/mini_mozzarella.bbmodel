@@ -15,7 +15,7 @@
 	"unhandled_root_fields": {},
 	"geckolib_modid": "",
 	"geckolib_filepath_cache": {
-		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz-wp5\\showbiz\\bots\\mini_mozzarella\\models\\mini_mozzarella.geo.json"
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz-wp5\\showbiz\\bots\\mini_mozzarella\\models\\mini_mozzarella.geo.json"
 	},
 	"resolution": {
 		"width": 128,
@@ -3326,12 +3326,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [0, 4, -0.4],
-			"to": [0, 16, 10.6],
+			"from": [0, 3.75, -0.4],
+			"to": [0, 15.75, 10.6],
 			"autouv": 0,
 			"color": 1,
 			"rotation": [45, 0, 0],
-			"origin": [0, 10, 5.1],
+			"origin": [0, 9.75, 5.1],
 			"uv_offset": [38, 66],
 			"faces": {
 				"north": {
@@ -4116,6 +4116,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4127,7 +4128,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4139,6 +4139,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4150,7 +4151,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4162,6 +4162,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4173,7 +4174,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4185,6 +4185,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4196,7 +4197,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4208,6 +4208,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4219,7 +4220,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4231,6 +4231,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4242,7 +4243,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4254,6 +4254,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4265,7 +4266,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4277,6 +4277,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4288,9 +4289,8 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -4300,6 +4300,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4311,7 +4312,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4323,6 +4323,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4334,7 +4335,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4346,6 +4346,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4357,7 +4358,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4369,6 +4369,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4380,7 +4381,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4392,6 +4392,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4403,7 +4404,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4415,6 +4415,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4426,7 +4427,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4438,6 +4438,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4449,7 +4450,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
 			"primary_selected": false
@@ -4461,6 +4461,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4472,7 +4473,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
 			"primary_selected": false
@@ -4484,6 +4484,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4495,7 +4496,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": false,
 			"primary_selected": false
@@ -4507,6 +4507,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4518,7 +4519,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4530,6 +4530,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4541,7 +4542,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4553,6 +4553,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4564,7 +4565,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4576,6 +4576,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4587,7 +4588,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4599,6 +4599,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -4610,7 +4611,29 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": true,
+			"primary_selected": false
+		},
+		{
+			"name": "Tail",
+			"uuid": "195a8944-044b-e66c-15b7-637a547920e1",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
 			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [0, 13.25, 1.6],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -4628,11 +4651,15 @@
 				},
 				{
 					"uuid": "c321a5f7-643f-3068-19a0-47a01de9f56d",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						"4cf1ed44-b60d-fe13-4f87-68998d3da0fc",
 						"0c8a3680-2490-1f64-cfcc-df4a24d611fb",
-						"fb19cb61-3720-c48d-ac53-2b14faed2c30",
+						{
+							"uuid": "195a8944-044b-e66c-15b7-637a547920e1",
+							"isOpen": true,
+							"children": ["fb19cb61-3720-c48d-ac53-2b14faed2c30"]
+						},
 						"e3a715e8-ca82-f683-61d6-e777043407f8",
 						{
 							"uuid": "c83fc482-68c3-4637-5c80-6735316f8e9a",
@@ -4845,6 +4872,7 @@
 			"wrap_mode": "limited",
 			"pbr_channel": "color",
 			"fps": 7,
+			"force_translucent": false,
 			"frame_time": 1,
 			"frame_order_type": "loop",
 			"frame_order": "",

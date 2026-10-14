@@ -7,9 +7,9 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 
 interface IBot {
     public var botId: ResourceId?
+    public val botOwnerId: OwnerId? get
     public val botLevel: Level? get
     public val botPos: Vec3? get
-    public val botRemoved: Boolean get
 
     public val show: ConnectionPort<PackedShowData>?
 }

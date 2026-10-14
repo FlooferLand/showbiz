@@ -109,6 +109,15 @@ enum class ModRecipes {
         ),
         outputItem = { ModBlocks.Spotlight.item.defaultInstance }
     ),
+    Floodlight(
+        listOf(
+            Ingredient("redstone_lamp"),
+            Ingredient("redstone"),
+            Ingredient("copper_ingot"),
+            Ingredient(tag="dyes")
+        ),
+        outputItem = { ModItems.Floodlight.item.defaultInstance }
+    ),
     BitViewBlock(
         "O-O",
         "-S-",
@@ -205,6 +214,31 @@ enum class ModRecipes {
         outputItem = {
             ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("gully_dook"))) }
         }
+    ),
+
+    // DECORATIVE BLOCKS
+    // TODO: Should automatically generate these by just specifying a material or something for each
+    RedDoor(
+        "DD",
+        "DD",
+        "CC",
+        mapOf("D" to Ingredient(tag="red_concrete"), "C" to Ingredient("gray_concrete")),
+        id = "red_door",
+        outputItem = { ModDecoBlocks.RedDoor.entry.item.defaultInstance }
+    ),
+    VoronoiStripeBlock(
+        "OB",
+        "BO",
+        mapOf("O" to Ingredient("orange_wool"), "B" to Ingredient("brown_wool")),
+        id = "voronoi_stripe_block",
+        outputItem = { ItemStack(ModDecoBlocks.VoronoiStripeCarpet.full.item, 8) }
+    ),
+    VoronoiStripeCarpet(
+        "OB",
+        "BO",
+        mapOf("O" to Ingredient("orange_carpet"), "B" to Ingredient("brown_carpet")),
+        id = "voronoi_stripe_carpet",
+        outputItem = { ItemStack(ModDecoBlocks.VoronoiStripeCarpet.carpet.item, 8) }
     )
     ;
 

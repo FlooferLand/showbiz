@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.blocks.entities
 
+import net.minecraft.*
 import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
+import net.minecraft.util.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
@@ -20,6 +22,10 @@ import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Sounds
+import kotlin.math.abs
+import kotlin.math.roundToInt
+
+const val BLOCK_SPEED: Float = 0.08f
 
 class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.CurtainBlock.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
@@ -30,6 +36,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     }
 
     var color: Int = 0xffffff
+    var group: Int = 0
     var openAmount: Float = 0f
     var isOpen: Boolean = true
         public get
@@ -37,6 +44,16 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
 
     var connectedCurtains = mutableSetOf<BlockPos>()
     var centerCurtain: BlockPos? = null
+    var bottom = 0.0
+
+    val groupMax = 4
+    fun getGroupColor(): Int = when (group) {
+        1 -> ChatFormatting.AQUA.color!!
+        2 -> ChatFormatting.RED.color!!
+        3 -> ChatFormatting.GREEN.color!!
+        4 -> ChatFormatting.GOLD.color!!
+        else -> ChatFormatting.WHITE.color!!
+    }.let { FastColor.ARGB32.opaque(it) }
 
     fun closeCurtains() = setCurtains(false)
     fun openCurtains() = setCurtains(true)
@@ -52,14 +69,15 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             val blockEntity = level.getBlockEntity(pos) as? CurtainBlockEntity ?: return@forEach
             blockEntity.applyChange(true) {
                 blockEntity.isOpen = isOpen
-                for (y in 1..blockEntity.findLength()) {
+                val length = blockEntity.findLength()
+                for (y in 1..length.roundToInt()) {
                     val pos = blockEntity.blockPos.offset(0, -y, 0)
                     val state = level.getBlockState(pos) ?: Blocks.AIR.defaultBlockState()
                     if (isOpen) {  // Should open
                         if (state.block is CurtainShadowBlock)
                             level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
                     } else {  // Should close
-                        if (state.isAir)
+                        if (state.isAir && y < length)
                             level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
                     }
                 }
@@ -73,7 +91,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         Sounds.play(level, center, SoundEvents.WOOL_HIT, SoundSource.BLOCKS)
     }
 
-    fun findConnectedCurtains(): Set<BlockPos> {
+    fun findConnectedCurtains(ignoreGroups: Boolean = false, affectWorld: Boolean = true): Set<BlockPos> {
         val level = level ?: return emptySet()
         val connected = mutableSetOf<BlockPos>()
         val queue = ArrayDeque<BlockPos>()
@@ -87,15 +105,19 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             for (x in -1..1) {
                 for (z in -1..1) {
                     val pos = current.offset(x, 0, z)
-                    if (level.getBlockState(pos).block is CurtainBlock && !connected.contains(pos)) {
+                    val curtain = level.getBlockEntity(pos) as? CurtainBlockEntity
+                    val validCurtain = (!ignoreGroups && curtain?.group == group) || (ignoreGroups && curtain != null)
+                    if (validCurtain && !connected.contains(pos)) {
                         queue.add(pos)
                     }
                 }
             }
         }
 
-        connectedCurtains.clear()
-        connectedCurtains.addAll(connected)
+        if (affectWorld) {
+            connectedCurtains.clear()
+            connectedCurtains.addAll(connected)
+        }
         return connected
     }
 
@@ -103,21 +125,18 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         rails.sumOf { otherPos -> pos.distSqr(otherPos) }
     }.also { centerCurtain = it }
 
-    fun findLength(): Int {
-        var isLast = false
-        var length = 0
-        for (y in 0..MAX_LENGTH) {
-            length = y
-            for (y2 in 1..2) {
-                val below = blockPos.below(y + y2)
-                if ((level?.getBlockState(below)?.isSolidRender(level!!, below) ?: true)) {
-                    isLast = true
-                    break
-                }
+    fun findLength(): Double {
+        val level = level ?: return 0.0
+        for (y in 1..MAX_LENGTH) {
+            val below = blockPos.below(y)
+            val state = level.getBlockState(below)
+            if (state.block is CurtainBlock || state.block is CurtainShadowBlock) continue
+            val collisionShape = state.getCollisionShape(level, below)
+            if (!collisionShape.isEmpty) {
+                return (y + 1).toDouble() - collisionShape.max(Direction.Axis.Y) - 0.4
             }
-            if (isLast) break
         }
-        return length
+        return MAX_LENGTH.toDouble()
     }
 
     fun tick() {
@@ -127,11 +146,12 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             return
         }
 
-        if (isOpen && openAmount < 1.0f) {
-            applyChange(true) { openAmount += 0.01f }
-        } else if (!isOpen && openAmount > 0.0f) {
-            applyChange(true) { openAmount -= 0.01f }
-        }
+        val moving = if (isOpen) openAmount < 1.0f else openAmount > 0.0f
+        if (!moving) return
+        val center = findCenter(findConnectedCurtains()) ?: return
+        val maxDist = connectedCurtains.maxOf { maxOf(abs(it.x - center.x), abs(it.y - center.y), abs(it.z - center.z)) }
+        val step = BLOCK_SPEED / (maxDist + 0.1f)
+        applyChange(true) { openAmount = (openAmount + if (isOpen) step else -step).coerceIn(0f, 1f) }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -139,6 +159,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         tag.getFloatOrNull("open_amount")?.let { openAmount = it }
         tag.getBooleanOrNull("is_open")?.let { isOpen = it }
         tag.getIntOrNull("color")?.let { color = it }
+        tag.getIntOrNull("group")?.let { group = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -146,6 +167,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         tag.putFloat("open_amount", openAmount)
         tag.putBoolean("is_open", isOpen)
         tag.putInt("color", color)
+        tag.putInt("group", group)
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag {
@@ -157,6 +179,6 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     override fun getUpdatePacket() = ClientboundBlockEntityDataPacket.create(this)!!
 
     companion object {
-        const val MAX_LENGTH: Int = 6
+        const val MAX_LENGTH: Int = 5
     }
 }

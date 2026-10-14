@@ -1,0 +1,50 @@
+@import "font.css";
+@import "header.css";
+
+* {
+	font-family: monocraft, sans-serif;
+	letter-spacing: -1px;
+	color: white;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	vertical-align: baseline;
+}
+
+a {
+	color: #6495ed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin-top: 1rem;
+}
+
+li {
+	margin-left: 2rem;
+}
+
+body {
+	background: linear-gradient(#0006, #0006), #321d11 url("/assets/images/dirt_bg.png") repeat;
+	backdrop-filter: brightness(30%);
+	background-size: 128px 128px;
+	image-rendering: pixelated;
+}
+
+div {
+	display: block;
+}
+#content {
+	background: #321d11 url("/assets/images/dirt_bg.png") repeat;
+	background-size: 128px 128px;
+	image-rendering: pixelated;
+	border: #fff1 solid 4px;
+	padding: 0.8rem;
+	margin: 0.8rem;
+}
+
+.container {
+	position: relative;
+	background: #0008;
+	min-height: 160px;
+	padding: 0.8rem;
+}

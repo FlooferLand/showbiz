@@ -6,6 +6,7 @@ import net.minecraft.server.level.*
 import net.minecraft.world.*
 import net.minecraft.world.item.*
 import net.minecraft.world.item.context.*
+import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.entities.BotEntity
@@ -17,11 +18,13 @@ class BotItem(properties: Properties) : Item(properties) {
     override fun useOn(context: UseOnContext): InteractionResult {
         val level = context.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = context.player ?: return InteractionResult.PASS
+        val pos = context.clickedPos.above()
+        val stack = context.itemInHand
+        if (!player.mayPlaceAt(level, pos, stack)) return InteractionResult.FAIL
 
-        val placeState = level.getBlockState(context.clickedPos.above())
-        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, context.clickedPos.above())
+        val placeState = level.getBlockState(pos)
+        val canPlaceOnBlock = placeState.isAir || !placeState.isCollisionShapeFullBlock(level, pos)
         if (canPlaceOnBlock && context.hand == InteractionHand.MAIN_HAND) {
-            val stack = context.itemInHand
             val botId = stack.get(ModComponents.BotId.type) ?: run { // Default bot
                 Showbiz.bots.keys
                     .sortedWith(compareBy({ it.namespace != MOD_ID }, { it.toString() }))
@@ -33,7 +36,15 @@ class BotItem(properties: Properties) : Item(properties) {
             }
             val entity = BotEntity(level, botId)
             entity.setPos(context.clickLocation)
-            entity.yRot = 180f + context.rotation
+            (180f + context.rotation).let { yaw ->
+                entity.xRot = 0f
+                entity.yRot = yaw
+                entity.yRotO = yaw
+                entity.yHeadRot = yaw
+                entity.yHeadRotO = yaw
+                entity.yBodyRot = yaw
+                entity.yBodyRotO = yaw
+            }
             level.addFreshEntity(entity)
             player.setItemInHand(context.hand, ItemStack.EMPTY)
         }

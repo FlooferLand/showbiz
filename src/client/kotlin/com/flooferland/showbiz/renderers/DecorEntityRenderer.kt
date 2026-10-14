@@ -3,6 +3,7 @@ package com.flooferland.showbiz.renderers
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.renderer.*
+import net.minecraft.client.renderer.culling.*
 import net.minecraft.client.renderer.entity.*
 import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.models.DecorModel
@@ -11,6 +12,10 @@ import com.mojang.blaze3d.vertex.PoseStack
 import software.bernie.geckolib.renderer.GeoEntityRenderer
 
 class DecorEntityRenderer(ctx: EntityRendererProvider.Context) : GeoEntityRenderer<DecorEntity>(ctx, DecorModel()) {
+    override fun shouldRender(entity: DecorEntity, camera: Frustum, camX: Double, camY: Double, camZ: Double): Boolean {
+        return super.shouldRender(entity, camera, camX, camY, camZ)
+                && entity.position().distanceTo(entity.newPos) < 3.0
+    }
     override fun render(entity: DecorEntity, entityYaw: Float, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int) {
         if (Minecraft.getInstance()?.gui?.debugOverlay?.showDebugScreen() == true) {
             val dispatcher = entityRenderDispatcher

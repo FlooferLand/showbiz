@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayHurt
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModEntities
@@ -26,6 +28,7 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 import kotlin.jvm.optionals.getOrNull
 
+// Should probably port it to BasePropEntity
 class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plush.type, level), GeoEntity {
     constructor(level: Level) : this(level, ModItems.Plush.item.defaultInstance!!)
     val cache = GeckoLibUtil.createInstanceCache(this)!!
@@ -68,13 +71,14 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     }
 
     override fun interactAt(player: Player, vec: Vec3, hand: InteractionHand): InteractionResult {
-        val level = level() as? ServerLevel ?: return InteractionResult.SUCCESS
+        val player = player as? ServerPlayer ?: return InteractionResult.SUCCESS
+        if (!player.mayInteractWith(this)) return InteractionResult.FAIL
 
         // Stacking plushies
         val stack = player.getItemInHand(hand).copyWithCount(1)
         val item = stack.item
         if (item is PlushItem && hand == InteractionHand.MAIN_HAND) {
-            item.place(level, player, stack, position().add(vec))
+            item.place(level(), player, stack, position().add(vec))
             return InteractionResult.SUCCESS
         }
 
@@ -97,6 +101,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             return false
         }
 
+        if (!attacker.mayHurt(this) || isInvulnerableTo(source)) return false
         if (attacker.isCreative && amount > 0f) {
             playSound(ModSounds.HonkBye.event)
             remove(RemovalReason.DISCARDED)
@@ -105,7 +110,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             grab(attacker)
         }
 
-        return false
+        return true
     }
 
     override fun tick() {
@@ -118,7 +123,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
             // Random honking
             if (level.gameTime > lastHonked + 2.secsToTicks() && level.random.nextIntBetweenInclusive(0, 300) == 7) {
                 val nearby = level.getNearbyPlayers(AABB.ofSize(position(), 2.0, 2.0, 2.0))
-                if (!nearby.isEmpty())
+                if (nearby.isNotEmpty())
                     level().playSound(null, blockPosition(), ModSounds.Honk.event, SoundSource.BLOCKS, 0.05f, 0.95f)
                 lastHonked = level.gameTime
             }

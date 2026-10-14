@@ -62,15 +62,19 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var isLoaded = false
 
     fun getFilePath(filename: String) = FileStorage.cachedShowPaths[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
-    fun isEmpty() = !isLoaded
+    fun isNotLoaded() = !isLoaded
+    fun isEmpty() = audio.size == 0
+    fun approxByteSize(): Long {
+        val audioBytes = audio.size.toLong() * Byte.SIZE_BYTES
+        val signalBytes = signal.sumOf { Byte.SIZE_BYTES + (it.size.toLong() * BitId.SIZE_BYTES) }
+        return audioBytes + signalBytes
+    }
 
     fun load(filename: String, onLoadOrErr: (data: ShowData?, error: Component?) -> Unit = { _, _ -> }) {
         unload()
         name = filename
         loading = true
         id = UUID.randomUUID()
-
-        Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
 
         val exceptionHandler = CoroutineExceptionHandler { context, throwable ->  }
         loadJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
@@ -82,6 +86,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                     error("Format '${ext}' was not among: [${Showbiz.charts.extensions.joinToString()}]")
                 }
             }
+            Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
             val path = getFilePath(filename)
             val loaded = run {
                 val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }

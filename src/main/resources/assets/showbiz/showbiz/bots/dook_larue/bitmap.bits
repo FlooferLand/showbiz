@@ -2,15 +2,16 @@ set rae dook
 
 rae 30 {
     flow 2.0
-    rotate "jaw" x:-25
+    rotate "jaw" x:-30
 }
 rae 34 {
     flow 0.7
     rotate "Right Arm" y:-45
 }
 rae 33 {
+	# Should probably move the arm up while switching between the snare and hat
     flow 0.7
-    rotate "Left Arm" y:30
+    rotate "Left Arm" y:38 z:-5
 }
 rae 63 {
     flow 1.7
@@ -18,12 +19,12 @@ rae 63 {
 }
 rae 31 {
     flow ease-in 1.9
-    rotate "RightElbow" x:-47
+    rotate "RightElbow" x:-44
     wigglemul 0.3
 }
 rae 35 {
     flow ease-in 1.9
-    rotate "LeftElbow" x:-47
+    rotate "LeftElbow" x:-44
     wigglemul 0.3
 }
 rae 22 {
@@ -53,14 +54,14 @@ rae 64 {
     rotate "LeftElbow" x:-10
     wigglemul 2.0
 }
-rae 24 {
-    flow 0.8
-    rotate "EarR" z:50
-    wigglemul 3.0
-}
 rae 23 {
     flow 0.8
-    rotate "EarL" z:-50
+    rotate "EarL" z:-55
+    wigglemul 3.0
+}
+rae 24 {
+    flow 0.8
+    rotate "EarR" z:55
     wigglemul 3.0
 }
 rae 28 {

@@ -13,9 +13,11 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
-import com.flooferland.showbiz.network.packets.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
@@ -24,16 +26,16 @@ import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
-import com.flooferland.showbiz.types.connection.data.PackedAudioData
-import com.flooferland.showbiz.types.connection.data.PackedControlData
-import com.flooferland.showbiz.types.connection.data.PackedShowData
-import com.flooferland.showbiz.types.connection.data.PackedVideoData
+import com.flooferland.showbiz.types.connection.data.*
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
+import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
+import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import kotlin.math.roundToInt
@@ -68,9 +70,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     public var recording: Boolean = false
     public var showData: ShowData = ShowData(this)
-    public var seek = 0.0
     public val signal = SignalFrame()
 
+    var seek = 0.0
+        public get private set
     var playing = false
         public get private set
     var paused = false
@@ -86,18 +89,37 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.1, 0.1, 0.15))
     }
-
     private var audioBytesWritten = 0
+    private var stateDirty = false
 
     fun tick() {
-        modelPartInstance.tick(level ?: return, blockPos, blockState)
+        val level = level ?: return
+        modelPartInstance.tick(level, blockPos, blockState)
+        if (stateDirty) {
+            updateState()
+            stateDirty = false
+        }
+
+        // Loading the show
+        val filename = showData.name
+        if (showData.isLoaded && filename != null && showData.isEmpty() && !getItem(0).isEmpty && playing && !level.isClientSide) {
+            val seek = seek
+            loadShow(filename) { data ->
+                if (data != null) applyChange(true) {
+                    setPlaying(true)
+                    seekTo(seek)
+                }
+            }
+        }
+
+        // Playback stuff
         if (playing && !paused) {
             seek += tickDelta
             seekInt = (seek * fps).roundToInt()
         }
-        if (level?.isClientSide ?: true) return
+        if (level.isClientSide) return
 
-        val runningShow = (playing || recording) && !showData.isEmpty()
+        val runningShow = (playing || recording) && !showData.isNotLoaded()
         val passthrough = recordQueue.isNotEmpty()
         if (!runningShow && !passthrough) return
 
@@ -174,10 +196,17 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
 
             // Setting playing to false when the show ends
+            // TODO: Unload the show data as well; currently makes the reel item vanish though
             if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
                 setPlaying(false)
                 hasFinished = true
+                // showData.unload()
             }
+        }
+
+        // Saving the seek every once in a while
+        if (runningShow && level.gameTime % 2.secsToTicks() == 0L) {
+            level.blockEntityChanged(blockPos)
         }
     }
 
@@ -188,46 +217,38 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
         audio.data.mono = chunk
+        audio.data.chunkId++
         audio.send()
     }
 
+    // region | Playback
     fun setPlaying(playing: Boolean) {
         this.playing = playing
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
-        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
-        setChanged()
-
-        // TODO: Find only near players
-        val serverLevel = level as? ServerLevel ?: return
-        for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = this.paused, seek = seek)
-            ServerPlayNetworking.send(player, state)
-        }
+        audio.sendTrigger(if (playing) PackedAudioData.Action.None else PackedAudioData.Action.Stop)
+        stateDirty = true
     }
-
     fun setPaused(paused: Boolean) {
         this.playing = !paused
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
-        level?.sendBlockUpdated(blockPos, blockState, blockState.setValue(PLAYING, playing && !paused), 3)  // Visual
-        setChanged()
-
-        // TODO: Find only near players
-        val serverLevel = level as? ServerLevel ?: return
-        for (player in serverLevel.players()) {
-            val state = PlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
-            ServerPlayNetworking.send(player, state)
-        }
+        audio.sendTrigger(if (paused) PackedAudioData.Action.Pause else PackedAudioData.Action.Unpause)
+        stateDirty = true
     }
+    fun seekTo(seconds: Double) {
+        this.seek = seconds
 
-    fun getFormat() = showData.format ?: showData.targetFormat
-
+        val format = getFormat()
+        val alignedBytes = (seconds * format.sampleRate).toLong() * format.frameSize
+        audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+        stateDirty = true
+    }
     fun resetPlayback() {
         seek = 0.0
         seekInt = 0
         audioBytesWritten = 0
-        audio.data.chunkId = 0
+        audio.data.clear()
         if (playing) setPlaying(false)
         recordQueue.clear()
         hasFinished = false
@@ -238,37 +259,64 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             video.send()
             it.close()
         }
+        stateDirty = true
         setChanged()
     }
-
     /** Client-side only !! */
-    fun clientApplyPlaybackState(packet: PlaybackStatePacket) {
+    fun clientApplyPlaybackState(packet: ShowPlaybackStatePacket) {
         this.playing = packet.playing
         this.paused = packet.paused
         this.seek = packet.seek
     }
+    // endregion
+
+    fun updateState() {
+        // Visual and redstone
+        val state = blockState.setValue(PLAYING, playing && !paused)
+        level?.setBlockAndUpdate(blockPos, state)
+        level?.updateNeighborsAt(blockPos, state.block)
+        setChanged()
+
+        // TODO: Find only near players
+        val serverLevel = level as? ServerLevel ?: return
+        for (player in serverLevel.players()) {
+            val state = ShowPlaybackStatePacket(blockPos, playing = playing, paused = paused, seek = seek)
+            ServerPlayNetworking.send(player, state)
+        }
+    }
+
+    fun getFormat() = showData.format ?: showData.targetFormat
 
     override fun getInteractionMapping() = mapOf("record" to 0)
 
     override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
 
     override fun onInteract(key: Int, level: Level, player: Player) {
-        if (level !is ServerLevel) return
-        if (key == 0) applyChange(true) {
-            if (recording) {
-                recording = false
-                showData.saveToDisk(player)
-                Sounds.exit(player)
-            } else if (playing) {
-                if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
-                    player.displayClientMessage(Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW), true)
+        val player = player as? ServerPlayer ?: return
+        if (key != 0) return
+        if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
+            applyChange(true) {
+                if (recording) {
+                    recording = false
+                    showData.saveToDisk(player)
+                    Sounds.exit(player)
+                } else if (playing) {
+                    if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
+                        player.displayClientMessage(
+                            Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW),
+                            true
+                        )
+                    }
+                    recording = true
+                    Sounds.enter(player)
+                } else {
+                    player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+                    Sounds.bad(player)
                 }
-                recording = true
-                Sounds.enter(player)
-            } else {
-                player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
-                Sounds.bad(player)
             }
+        } else {
+            player.notifyPermissionError(Permissions.WriteReels)
+            Sounds.bad(player)
         }
     }
 
@@ -277,13 +325,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Removing legacy tags
         tag.removeIfPresent("signal_frame")
-        tag.removeIfPresent("seek")
 
         // Save other
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
+        tag.putDouble("seek", seek)
         connectionManager.save(tag)
         showData.saveNBT(tag)  // TODO: Should probably remove this?
     }
@@ -296,6 +344,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         paused = tag.getBooleanOrNull("paused") ?: false
         recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
+        seek = tag.getDoubleOrNull("seek") ?: 0.0
         connectionManager.load(tag)
         showData.loadNBT(tag)
     }
@@ -309,16 +358,26 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
 
+    fun loadShow(filename: String, block: (ShowData?) -> Unit) {
+        showData.load(filename) { data, err ->
+            val level = level as? ServerLevel ?: return@load
+            if (err != null) {
+                val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
+                nearby.forEach { it.displayClientMessage(err, true) }
+            }
+            block(data)
+        }
+    }
+
+    // region | Container
     fun getNearbyContainer() =
         arrayOf(blockPos.north(), blockPos.east(), blockPos.west(), blockPos.south())
             .mapNotNull { level?.getBlockEntity(it) as? Container }
             .firstOrNull { it !is ReelToReelBlockEntity }
-
-    // region | Container
     override fun getContainerSize() = 1
     override fun getMaxStackSize() = 1
     override fun canPlaceItem(slot: Int, stack: ItemStack) = (slot < containerSize) && stack.item is ReelItem
-    override fun isEmpty() = showData.isEmpty()
+    override fun isEmpty() = showData.isNotLoaded()
     override fun getItem(slot: Int): ItemStack {
         return showData.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
     }
@@ -342,12 +401,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val filename = ReelItem.getFilename(stack) ?: return
             resetPlayback()
             showData.isLoaded = true
-            showData.load(filename) { data, err ->
-                val level = level as? ServerLevel ?: return@load
-                if (err != null) {
-                    val nearby = level.getNearbyPlayers(AABB.ofSize(blockPos.center, 12.0, 12.0, 12.0))
-                    nearby.forEach { it.displayClientMessage(err, true) }
-                }
+            loadShow(filename) { data ->
                 if (data != null) applyChange(true) {
                     setPlaying(true)
                 }

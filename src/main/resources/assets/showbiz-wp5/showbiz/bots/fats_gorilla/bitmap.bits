@@ -31,7 +31,7 @@ wp5 25, rae 62 { # Body lean
 
 wp5 20, rae 54 { # Head left
     flow 0.35
-    rotate "Head_Turn" x:3 y:80
+    rotate "Head_Turn" x:3 y:70
     move "Head_Turn" z:-1
     wigglemul 0.0
 }
@@ -49,12 +49,12 @@ wp5 17, rae 45 { # Mouth
 
 wp5 18, rae 41 { # Left eyelid
     flow 2.0
-    move "EyelidL" y:-1.6
+    move "EyelidL" y:-1.25
 }
 
 wp5 19, rae 42 { # Right eyelid
     flow 2.0
-    move "EyelidR" y:-1.6
+    move "EyelidR" y:-1.25
 }
 
 wp5 26, rae 61 {

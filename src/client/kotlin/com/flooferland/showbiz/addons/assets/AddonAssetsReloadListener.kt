@@ -10,11 +10,14 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
+import com.flooferland.showbiz.addons.data.PassivePlan
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.types.math.Vec3fc
+import com.flooferland.showbiz.types.physics.ChainRig
 import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
@@ -23,10 +26,14 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
+import software.bernie.geckolib.cache.`object`.GeoBone
+import software.bernie.geckolib.loading.json.raw.Model
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 // TODO: Optimize this class loads.
 //       Currently loading and storing a ton of unnecessary models, and is not async
+
+// TODO: Should move to addons being placed inside assets/showbiz instead of assets/<their_namespace>/showbiz
 
 data class LoadedAssets(
     var addons: List<AddonAssets> = mutableListOf(),
@@ -38,6 +45,7 @@ data class LoadedAssets(
 object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(), IdentifiableResourceReloadListener {
     const val ASSETS_TOML_NAME = "assets.toml"
     const val BITMAP_BITS_NAME = "bitmap.bits"
+    const val PHYSICS_TOML_NAME = "physics.toml"
 
     override fun getFabricId(): ResourceLocation = rl("assets")
 
@@ -46,14 +54,44 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
             if (pack.packId().startsWith("fabric-")) continue
+            val devIgnoreAddons = ShowbizEnv.isDev() && pack.packId() != Showbiz.MOD_ID
+            var errors = 0
+            var warnings = 0
+
             namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
-                fun err(msg: String, throwable: Throwable? = null) =
-                    Showbiz.log.error("Addon '$namespace' (resource pack): $msg\n", throwable)
+                fun err(msg: String, throwable: Throwable? = null) {
+                    errors += 1
+                    if (devIgnoreAddons) return
+                    Showbiz.log.error("Addon '$namespace': $msg\n", throwable)
+                }
+                fun warn(msg: String, throwable: Throwable? = null) {
+                    warnings += 1
+                    if (devIgnoreAddons) return
+                    Showbiz.log.warn("Addon '$namespace': $msg\n", throwable)
+                }
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
 
+                val physicsData = mutableMapOf<String, PhysicsData?>()
+                fun getPhysics(botId: String): PhysicsData? {
+                    if (botId in physicsData) return physicsData[botId]
+                    val path = rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/$PHYSICS_TOML_NAME")
+                    val physics = getResAsString(path)?.let { text ->
+                        runCatching { PhysicsData.readOrThrow(text) }.onFailure { err("Failed to parse '$path'", it) }.getOrNull()
+                    }
+                    physicsData[botId] = physics
+                    return physics
+                }
+                fun chainTransform(botId: String): ((Model) -> Model)? {
+                    val chains = getPhysics(botId)?.chains ?: return null
+                    if (chains.isEmpty()) return null
+                    val texture = pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/textures/$botId.png"))?.get()?.readAllBytes()
+                        ?: run { err("Bot '$botId' has [chains] but no texture to cut them from"); return null }
+                    return ChainRig.transform(texture, chains, botId)
+                }
+
                 if (pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "showbiz")) != null) {
-                    Showbiz.log.info("Attempting to load addon '${namespace}'")
+                    Showbiz.log.info("Loading addon '${namespace}'")
                 }
 
                 // Finding assets
@@ -74,7 +112,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     if (location.path.endsWith(".geo.json")) {
                         val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
                         assets.model = location
-                        val model = string?.let { ShowbizUtils.loadBakedModel(location, it) }
+                        val model = string?.let { ShowbizUtils.loadBakedModel(location, it, chainTransform(botId)) }
                         if (model != null) out.models[location] = model
                     }
 
@@ -119,7 +157,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
                         val res = getResAsString(path) ?: run { err("Failed to find bitsmap file '$path'"); return null }
                         val format = BitsMap()
-                        format.warnHandler = { message -> Showbiz.log.warn("Warning for '$namespace:$id': $message") }
+                        format.warnHandler = { message -> warn("Warning for '$namespace:$id': $message") }
                         val bits = runCatching { format.load(res.byteInputStream()) }
                         bits.exceptionOrNull()?.let { throwable -> err("Failed to load bitsmap file '$filename' on '$path'", throwable) }
                         return bits.getOrNull()
@@ -127,7 +165,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
                     val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: run { err("Failed to get $ASSETS_TOML_NAME"); continue }
                     val bitmap = getBits(BITMAP_BITS_NAME) ?: run { err("Failed to get $BITMAP_BITS_NAME"); continue }
-                    bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations)
+                    bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations, physics = getPhysics(id))
                 }
 
                 if (bots.isNotEmpty()) {
@@ -141,6 +179,10 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     )
                     addons.add(assets)
                 }
+            }
+
+            if (devIgnoreAddons) {
+                if (warnings > 0 || errors > 0) Showbiz.log.warn("Pack '${pack.packId()}' had $warnings warnings and $errors errors")
             }
         }
         out.addons = addons
@@ -179,11 +221,25 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 )
             }
 
+            // Ordered walk, so parentIndex[i] is always less than i
+            val order = ArrayList<String>()
+            val parents = ArrayList<Int>()
+            fun walk(bone: GeoBone, parent: Int) {
+                val index = order.size
+                order += bone.name
+                parents += parent
+                bone.childBones.forEach { walk(it, index) }
+            }
+            model.topLevelBones.forEach { walk(it, -1) }
+
             models[id] = BotModelData(
                 initBoneRots = initBoneRots,
                 initBoneMoves = initBoneMoves,
                 bakedModel = model
-            )
+            ).also {
+                it.passivePlan = PassivePlan(order.toTypedArray(), parents.toIntArray())
+                it.chainLayout = ChainRig.layout(model)
+            }
         }
         ShowbizClient.botModels = models
         ShowbizClient.animations = loaded.animations

@@ -2,6 +2,7 @@ package com.flooferland.showbiz.types.connection
 
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.entities.BotEntity
+import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
 // TODO: Rework the automatic connection hell class
@@ -46,6 +47,13 @@ object AutoConnection {
                 show.bindListener(spotlight)
             }
             "Spotlight added"
+        }
+        is GreyboxBlockEntity if first is FloodlightEntity -> {
+            val (greybox, floodlight) = Pair(last, first)
+            greybox.applyChange(true) {
+                show.bindListener(floodlight)
+            }
+            "Floodlight added"
         }
         is GreyboxBlockEntity if first is SpeakerBlockEntity -> {
             val (greybox, speaker) = Pair(last, first)

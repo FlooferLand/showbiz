@@ -1,0 +1,78 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.c.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: c
+        run: |
+          PREV=$(git rev-parse -q --verify 'refs/tags/nightly^{commit}' || true)
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ -n "$PREV" ] \
+             && git diff --quiet "$PREV" HEAD -- . ':(exclude)website'; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Building the mod
+        run: |
+          chmod +x gradlew
+          ./gradlew runDatagen
+          ./gradlew assemble
+
+      - name: Publish nightly release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD: ${{ github.run_number }}
+        run: |
+          PREV=$(git rev-parse -q --verify 'refs/tags/nightly^{commit}' || true)
+          echo "View the full changelog [here](https://github.com/FlooferLand/showbiz/tree/main/changelogs)" > notes.md
+          echo >> notes.md
+          git log --max-count=50 --no-merges --pretty="- %s ([%h]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/%H))" ${PREV:+$PREV..}HEAD >> notes.md
+
+
+          gh release delete nightly --cleanup-tag --yes || true
+          gh release create nightly versions/1.21.1/build/libs/showbiz-*+1.21.1.jar \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "Nightly #$BUILD" --notes-file notes.md
+
+  site:
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/site.yml

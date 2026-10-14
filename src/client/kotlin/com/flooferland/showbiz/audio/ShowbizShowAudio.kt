@@ -1,11 +1,9 @@
 package com.flooferland.showbiz.audio
 
-import net.minecraft.client.multiplayer.*
 import net.minecraft.core.*
 import com.flooferland.showbiz.ClientPackets
-import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
-import com.flooferland.showbiz.network.packets.PlaybackStatePacket
+import com.flooferland.showbiz.network.packets.PlaybackAudioStatePacket
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
@@ -14,6 +12,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 @Environment(EnvType.CLIENT)
 object ShowbizShowAudio {
     val sources = mutableMapOf<BlockPos, Source>()
+    private var gamePaused = false
 
     fun init() {
         ClientPackets.listen(PlaybackAudioChunkPacket.type) { payload, context ->
@@ -25,22 +24,23 @@ object ShowbizShowAudio {
                 }
             }
         }
-        ClientPackets.listen(PlaybackStatePacket.type) { packet, context ->
+        ClientPackets.listen(PlaybackAudioStatePacket.type) { packet, context ->
             context.client().execute {
-                val level = context.player().level() as? ClientLevel ?: return@execute
-                val blockEntity = level.getBlockEntity(packet.blockPos) as? ReelToReelBlockEntity ?: return@execute
-                blockEntity.clientApplyPlaybackState(packet)
-                val state = sources[packet.blockPos] ?: return@execute
+                val source = sources[packet.blockPos] ?: return@execute
+                if (packet.paused != source.paused) {
+                    if (packet.paused) source.pause() else source.resume()
+                }
                 if (!packet.playing) {
-                    state.close()
+                    source.close()
                     sources.remove(packet.blockPos)
-                    return@execute
                 }
             }
         }
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val paused = client.isPaused
+            if (paused == gamePaused) return@register
+            gamePaused = paused
             for (source in sources.values) {
                 if (paused) source.pause() else source.resume()
             }

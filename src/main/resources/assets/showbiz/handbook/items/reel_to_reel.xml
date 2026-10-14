@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root xmlns="showbiz:handbook">
+    <head>
+        <summary>Plays back reels</summary>
+        <facts>
+            <l>Slot in a reel at the top</l>
+            <l>Start/pause playback by right-clicking on the sides</l>
+            <l>Can pull reels from a chest on its side</l>
+            <l>Emits a redstone signal while a show is playing</l>
+        </facts>
+    </head>
+    <pages>
+        <page title="Page 1">
+            <container type="vbox">
+                <p style="color:red">Some text</p>
+                <list type="ordered">
+                    <l>Some list of sorts</l>
+                    <l>Yippe</l>
+                </list>
+                <image src="showbiz:textures/item/bot.png" alt="test image" />
+            </container>
+        </page>
+    </pages>
+</root>

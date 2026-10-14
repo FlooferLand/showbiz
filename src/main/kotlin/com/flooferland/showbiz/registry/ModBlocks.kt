@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.state.*
 import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.*
 import com.flooferland.showbiz.blocks.entities.*
-import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -61,8 +60,17 @@ enum class ModBlocks {
             .strength(0.5f)
             .sound(SoundType.METAL)
             .noOcclusion(),
-        modelPreset = BlockModelId.Custom,
+        modelPreset = BlockModelId.None,
         entity = Entity(::ShowParserBlockEntity, isGeckolib = false),
+    ),
+    ShowBridge(
+        "show_bridge", ::ShowBridgeBlock,
+        Properties.of()
+            .strength(0.5f)
+            .sound(SoundType.METAL)
+            .noOcclusion(),
+        modelPreset = BlockModelId.Custom,
+        entity = Entity(::ShowBridgeBlockEntity, isGeckolib = false),
     ),
     ShowSelector(
         "show_selector", ::ShowSelectorBlock,
@@ -197,7 +205,7 @@ enum class ModBlocks {
         this.item = Items.registerBlock(blockItem) as BlockItem
 
         // Entity
-        if (entity != null && !DataGenerator.engaged) {
+        if (entity != null) {
             this.entityType = BlockEntityType.Builder.of(entity.entity, this.block).build()
             Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.id, this.entityType!!)
         }

@@ -2,7 +2,6 @@ package com.flooferland.showbiz.entities
 
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
-import net.minecraft.network.syncher.*
 import net.minecraft.server.level.*
 import net.minecraft.sounds.*
 import net.minecraft.world.*
@@ -14,12 +13,16 @@ import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
+import com.flooferland.showbiz.entities.base.BasePropEntity
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModEntities
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.registry.ModLivingEntities
 import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
@@ -37,9 +40,16 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: Figure out if calls to connectionChanged and entity accessors are even needed
+// TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
-class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
-    constructor(level: Level) : this(level, null)
+/**
+ * The main class of the mod.
+ * Has to be a LivingEntity unfortunately to cast shadows when using shaders
+ */
+class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
+    constructor(level: Level) : this(level, null) {
+        refreshDimensions()
+    }
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -51,7 +61,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
 
     override val botLevel: Level? get() = level()
     override val botPos: Vec3 get() = position()
-    override val botRemoved get() = isRemoved
+    override val botOwnerId get() = OwnerId.ofEntity(this)
     override var botId: ResourceId? = null
         set(value) {
             field = value
@@ -69,6 +79,15 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
             botId.matches("showbiz-wp5:mini_mozzarella") -> {
                 map("Booper", CollidePartId.Boop)
             }
+            botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
+                map("LeftStickCollision", CollidePartId.LeftStick)
+                map("RightStickCollision", CollidePartId.RightStick)
+                map("HiHatCollision", CollidePartId.HiHat)
+                map("CymbalCollision", CollidePartId.Cymbal)
+                map("KickFootCollision", CollidePartId.KickFoot)
+                map("Kick", CollidePartId.Kick)
+                map("Snare", CollidePartId.Snare)
+            }
         }
     }
 
@@ -76,26 +95,20 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     private var killDelayTicks = 0
     private val pendingShow = PackedShowData()
 
-    override fun getDimensions(pose: Pose): EntityDimensions {
-        return EntityDimensions.fixed(0.6f, 2.0f)
-    }
-
     init {
         this.botId = botId
         refreshDimensions()
+        updatePersistentData { addAdditionalSaveData(it) }
     }
 
-    override fun isInvulnerable() = false
-    override fun isPushable() = false
-    override fun isPickable() = true
-    override fun isAttackable() = true
-    override fun canBeCollidedWith() = true
-    override fun canBeHitByProjectile() = true
+    override fun getDefaultDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.6f, 2.0f)
     override fun getPickResult() = makeItem()
 
     override fun tick() {
         super.tick()
         val level = level() ?: return
+        decor?.tick(this)
+        soundHandler?.tick(this)
         if (!level.isClientSide) {
             show.data.tempReset()
             show.data.merge(pendingShow)
@@ -105,7 +118,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
             killDelayTicks -= 1
             if (killDelayTicks == 0) {
                 drop()
-                kill()
+                remove(RemovalReason.DISCARDED)
                 return
             }
         }
@@ -135,15 +148,16 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
+        if (killDelayTicks > 0 || isRemoved) return false
         val attacker = source.entity
         fun playSound(sound: SoundEvent) {
             level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
         }
         if (attacker !is Player) return false
+        if (isInvulnerableTo(source)) return false
 
         val isClient = attacker.level().isClientSide
-        val critAttack = attacker.fallDistance > 0.2f && !attacker.onGround() && !attacker.isSprinting
-        if (!isClient && amount > 0f && critAttack) {
+        if (!isClient && amount > 0f) {
             playSound(SoundEvents.ARMOR_STAND_BREAK)
             killDelayTicks = 2
         }
@@ -151,12 +165,14 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {
+        if (!player.mayInteractWith(this)) return InteractionResult.FAIL
+
         // Grabbing the bot
         if (player.isCrouching) return grab(player)
 
         // Opening up the selection screen
         val id = OwnerId.of(this)
-        if (id != null) {
+        if (id != null && Permissions.EditScreenAccess.test(player)) {
             player.openMenu(object : ExtendedScreenHandlerFactory<BotListSelectPacket> {
                 override fun getDisplayName() = Component.empty()
                 override fun createMenu(containerId: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
@@ -169,39 +185,23 @@ class BotEntity(level: Level, botId: ResourceId? = null) : Entity(ModEntities.Bo
         return InteractionResult.SUCCESS
     }
 
-    fun updatePersistentData(block: (CompoundTag) -> Unit) {
-        val tag = entityData.get(persistentDataAccessor).copy()
-        block(tag)
-        entityData.set(persistentDataAccessor, tag)
-    }
-
-    override fun defineSynchedData(builder: SynchedEntityData.Builder) {
-        builder.define(persistentDataAccessor, CompoundTag().also { it.putString("bot_id", botId?.toString() ?: "") })
-    }
-
-    override fun onSyncedDataUpdated(dataAccessor: EntityDataAccessor<*>) {
-        super.onSyncedDataUpdated(dataAccessor)
-        if (dataAccessor == persistentDataAccessor && level().isClientSide) {
-            val tag = entityData.get(persistentDataAccessor)
-            readAdditionalSaveData(tag)
-        }
-    }
-
     override fun connectionChanged() {
         if (!level().isClientSide) updatePersistentData { connectionManager.save(it) }
     }
 
     override fun addAdditionalSaveData(tag: CompoundTag) {
         tag.putString("bot_id", botId?.toString() ?: "")
+        super.addAdditionalSaveData(tag)
         connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
         botId = tag.getStringOrNull("bot_id")?.let { if (it.isNotBlank()) ResourceId.of(it) else null }
-        if (!level().isClientSide) entityData.set(persistentDataAccessor, tag)
+        super.readAdditionalSaveData(tag)
         connectionManager.load(tag)
     }
 
     companion object {
-        val persistentDataAccessor = SynchedEntityData.defineId(BotEntity::class.java, EntityDataSerializers.COMPOUND_TAG)!!
+        var soundHandler: IBotAttachment? = null
+        var decor: IBotAttachment? = null
     }
 }

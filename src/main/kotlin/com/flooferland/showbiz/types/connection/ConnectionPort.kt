@@ -4,6 +4,7 @@ import net.minecraft.core.*
 import net.minecraft.nbt.*
 import net.minecraft.network.*
 import net.minecraft.server.level.*
+import net.minecraft.world.entity.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
@@ -16,6 +17,7 @@ import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import io.netty.buffer.Unpooled
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import org.jetbrains.annotations.NotNull
 
@@ -67,6 +69,10 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
             Showbiz.log.warn("Something tried to listen to port '$name', yet this port is an input port.")
             return
         }
+        if (listening.connectionManager.inputs[id] == null) {
+            Showbiz.log.warn("'${listening::class.java.name}' has no input port '${id}' for output '$name'")
+            return
+        }
 
         val id = OwnerId.of(listening)
         if (id != null) listeners.add(id)
@@ -78,6 +84,7 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
         val ownerId = OwnerId.of(owner)
         (listening.grabLevel() as? ServerLevel)?.let {
+            ServerConnections.updateConnections(owner)
             if (ownerId != null) ServerConnections.broadcastUpdate(ownerId, it)
             if (id != null) ServerConnections.broadcastUpdate(id, it)
         }
@@ -131,13 +138,14 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     /** Sends the current data through this port and notifies the listeners */
     fun send() {
         val level = owner.grabLevel() ?: return
+        val bytes = (level as? ServerLevel)?.let { encodeData() }
 
         @Suppress("UNCHECKED_CAST")
         listeners.forEach { ownerId ->
             val connectable = ownerId.grabConnectable(level) ?: return@forEach
             val listener = connectable.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
 
-            listener.dataReceived = data
+            listener.dataReceived = data //.duplicate()
             if (listener.autoUseReceived) {
                 listener.data = listener.dataReceived
             }
@@ -148,18 +156,9 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
                 listener.react(listener, listener.dataReceived)
             }.onFailure { Showbiz.log.error("Failed to call react on listener", it) }
 
-            if (level is ServerLevel) {
-                val byteBuf = FriendlyByteBuf(Unpooled.buffer())
-                data.encode(byteBuf)
-
-                val bytes = ByteArray(byteBuf.readableBytes())
-                byteBuf.readBytes(bytes)
-                byteBuf.release()
-
+            if (level is ServerLevel && bytes != null) {
                 val packet = ConnectionDataPacket(ownerId, id, bytes)
-                for (player in level.players()) {
-                    ServerPlayNetworking.send(player, packet)
-                }
+                for (player in playersAffected(level, connectable)) ServerPlayNetworking.send(player, packet)
             }
         }
     }
@@ -168,5 +167,17 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     fun send(data: T) {
         this.data = data
         send()
+    }
+
+    fun encodeData(): ByteArray {
+        val buf = FriendlyByteBuf(Unpooled.buffer())
+        data.encode(buf)
+        return ByteArray(buf.readableBytes()).also { buf.readBytes(it); buf.release() }
+    }
+
+    fun playersAffected(level: ServerLevel, target: IConnectable): Collection<ServerPlayer> = when (target) {
+        is BlockEntity -> PlayerLookup.tracking(level, target.blockPos)
+        is Entity -> PlayerLookup.tracking(target)
+        else -> emptyList()
     }
 }

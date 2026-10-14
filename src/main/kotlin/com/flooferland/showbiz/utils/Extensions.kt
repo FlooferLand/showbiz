@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.utils
 
+import net.minecraft.core.*
 import net.minecraft.core.component.*
 import net.minecraft.nbt.*
 import net.minecraft.network.chat.*
@@ -13,11 +14,19 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
+import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions
+import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
+import com.flooferland.showbiz.items.WandItem
+import java.util.Locale
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import kotlin.math.roundToInt
+import kotlin.reflect.KClass
+
 
 @Suppress("unused")
 object Extensions {
@@ -36,14 +45,29 @@ object Extensions {
         setChanged()
         level?.sendBlockUpdated(this.blockPos, blockState, blockState, Block.UPDATE_ALL)
     }
+    fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
+        val player = player as? ServerPlayer ?: return InteractionResult.PASS
+        if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return InteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
+        player.openMenu(state.getMenuProvider(level, pos))
+        return InteractionResult.SUCCESS
+    }
 
     fun Player.setInventoryChanged() {
         inventoryMenu.broadcastChanges()
         inventory.setChanged()
     }
+    fun Player.notifyPermissionError(ctx: Permissions? = null) {
+        val comp = tc("message", "permission_error")
+        ctx?.let { comp.append(": ").append(Component.literal(ctx.name)) }
+        displayClientMessage(comp, true)
+    }
+    fun Player.onServerOrFalse(block: (ServerPlayer) -> Boolean): Boolean {
+        return (this as? ServerPlayer)?.let(block) ?: false
+    }
 
     @DslMarker annotation class BlockEntityApplyDsl;
-    @BlockEntityApplyDsl
+
     fun <T: BlockEntity> T.applyChange(rerender: Boolean, change: T.() -> Unit) {
         change(this)
         markDirtyNotifyAll()
@@ -69,6 +93,31 @@ object Extensions {
         return bones
     }
     //endregion
+
+    // region VoxelShapes (thank you Skillet!!)
+    /** Rotates a north shape to any direction */
+    fun VoxelShape.rotateShape(to: Direction): VoxelShape {
+        val buffer = arrayOf<VoxelShape>(this, Shapes.empty())
+        val times: Int = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4
+        for (i in 0..<times) {
+            buffer[0].forAllBoxes { minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double ->
+                buffer[1] = Shapes.or(buffer[1], Shapes.box(1.0f - maxZ, minY, minX, 1.0f - minZ, maxY, maxX))
+            }
+            buffer[0] = buffer[1]
+            buffer[1] = Shapes.empty()
+        }
+        return buffer[0]
+    }
+    fun VoxelShape.generateHorizontal() = hashMapOf(
+        Direction.NORTH to rotateShape(Direction.NORTH).optimize(),
+        Direction.SOUTH to rotateShape(Direction.SOUTH).optimize(),
+        Direction.WEST to rotateShape(Direction.WEST).optimize(),
+        Direction.EAST to rotateShape(Direction.EAST).optimize()
+    )
+    fun MutableMap<Direction, VoxelShape>.getCachedOrRotate(to: Direction): VoxelShape {
+        return getOrPut(to) { (get(Direction.NORTH) ?: Shapes.block()).rotateShape(to).optimize() }
+    }
+    // endregion
 
     //region Compound functions, since these change for 1.21.5+
     fun CompoundTag.removeIfPresent(key: String)    = if (contains(key)) remove(key) else Unit
@@ -106,16 +155,32 @@ object Extensions {
         withStyle { it.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, comp)) }!!
     fun MutableComponent.click(action: ClickEvent.Action, value: String) =
         withStyle { it.withClickEvent(ClickEvent(action, value)) }!!
-    fun MutableComponent.asLink(url: String) = withStyle {
+
+    fun MutableComponent.withLink(url: String) = withStyle {
         it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, url))
             .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open this URL in your browser")))
             .withColor(FastColor.ARGB32.color(120, 200, 255))
             .withUnderlined(true)
             .withBold(true)
     }!!
-    fun MutableComponent.asLink() = asLink(string)
+    fun MutableComponent.withTeleport(pos: BlockPos) = withStyle {
+        val coords = "${pos.x} ${pos.y} ${pos.z}"
+        it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s $coords"))
+            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to teleport to $coords")))
+            .withColor(FastColor.ARGB32.color(120, 200, 255))
+            .withUnderlined(true)
+            .withBold(true)
+    }!!
+
+    fun MutableComponent.asLink() = withLink(string)
+    fun BlockPos.toComp() = Component.literal("$x $y $z").withTeleport(this)
     //endregion
 
+    fun KClass<*>.forceLoad() {
+        sealedSubclasses.forEach { it.objectInstance ?: it.forceLoad() }
+    }
+
+    fun String.count(substring: String) = windowed(substring.length) { if (it == substring) 1 else 0 }.sum()
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
     fun String.alwaysEndsWith(suffixes: Collection<String>): String {
         if (suffixes.any { this.endsWith(it) } || suffixes.isEmpty()) return this
@@ -123,7 +188,26 @@ object Extensions {
     }
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
+
+    // region Number conversion funkiness
     fun Int.secsToTicks(): Int = this * 20
     fun Float.secsToTicks(): Int = (this * 20).roundToInt()
     fun Double.secsToTicks(): Int = (this * 20).roundToInt()
+
+    fun Int.bytesToFriendlySize() = this.toLong().bytesToFriendlySize()
+    fun Long.bytesToFriendlySize(): String {
+        val kb = 1024.0
+        val mb = kb * 1024
+        val gb = mb * 1024
+        return when {
+            this >= gb -> String.format(Locale.US, "%.2f GB", this / gb)
+            this >= mb -> String.format(Locale.US, "%.2f MB", this / mb)
+            this >= kb -> String.format(Locale.US, "%.2f KB", this / kb)
+            else -> "$this bytes"
+        }
+    }
+    // endregion
+
+    fun Number.formatDecimal(precision: Int = 3) =
+        runCatching { "%.${precision}f".format(this) }.getOrDefault(toString())
 }

@@ -4,14 +4,19 @@ import net.minecraft.network.*
 import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.network.packets.*
+import com.flooferland.showbiz.network.packets.editscreen.*
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 
 sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackAudioChunk : ModPackets<PlaybackAudioChunkPacket>(ServerToClient, PlaybackAudioChunkPacket.type, PlaybackAudioChunkPacket.codec)
-    data object PlaybackState : ModPackets<PlaybackStatePacket>(ServerToClient, PlaybackStatePacket.type, PlaybackStatePacket.codec)
-    data object ShowParserData : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
+    data object PlaybackAudioState : ModPackets<PlaybackAudioStatePacket>(ServerToClient, PlaybackAudioStatePacket.type, PlaybackAudioStatePacket.codec)
+    data object ShowPlaybackState : ModPackets<ShowPlaybackStatePacket>(ServerToClient, ShowPlaybackStatePacket.type, ShowPlaybackStatePacket.codec)
+    data object ShowParserEdit : ModPackets<ShowParserEditPacket>(Bidirectional, ShowParserEditPacket.type, ShowParserEditPacket.codec)
+    data object ShowBridgeEdit : ModPackets<ShowBridgeEditPacket>(Bidirectional, ShowBridgeEditPacket.type, ShowBridgeEditPacket.codec)
     data object SpotlightEdit : ModPackets<SpotlightEditPacket>(Bidirectional, SpotlightEditPacket.type, SpotlightEditPacket.codec)
+    data object FloodlightEdit : ModPackets<FloodlightEditPacket>(Bidirectional, FloodlightEditPacket.type, FloodlightEditPacket.codec)
     data object ModelPartInteract : ModPackets<ModelPartInteractPacket>(ClientToServer, ModelPartInteractPacket.type, ModelPartInteractPacket.codec)
     data object ModelPartNames : ModPackets<ModelPartNamesPacket>(ServerToClient, ModelPartNamesPacket.type, ModelPartNamesPacket.codec)
     data object ShowFileList : ModPackets<ShowFileListPacket>(Bidirectional, ShowFileListPacket.type, ShowFileListPacket.codec)
@@ -29,6 +34,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object JukeboxLyric: ModPackets<JukeboxLyricPacket>(ServerToClient, JukeboxLyricPacket.type, JukeboxLyricPacket.codec)
     data object ServerInfo: ModPackets<ServerCapabilitiesPacket>(ServerToClient, ServerCapabilitiesPacket.type, ServerCapabilitiesPacket.codec)
     data object ConnectionData: ModPackets<ConnectionDataPacket>(ServerToClient, ConnectionDataPacket.type, ConnectionDataPacket.codec)
+    data object OpenClientConfig: ModPackets<OpenClientConfigPacket>(ServerToClient, OpenClientConfigPacket.type, OpenClientConfigPacket.codec)
 
     constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
         when (way) {
@@ -45,7 +51,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
 
     companion object {
         fun register() {
-            ModPackets::class.sealedSubclasses.forEach { it.objectInstance }
+            ModPackets::class.forceLoad()
         }
     }
 }

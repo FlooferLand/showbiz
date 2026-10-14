@@ -2,20 +2,16 @@ package com.flooferland.showbiz.blocks.entities
 
 import net.minecraft.core.*
 import net.minecraft.nbt.*
-import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.*
 import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.server.level.*
+import net.minecraft.world.entity.player.*
+import net.minecraft.world.inventory.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.menus.BitViewMenu
-import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BitViewPacket
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.types.EditScreenOwner
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection

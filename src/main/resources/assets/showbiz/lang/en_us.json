@@ -1,9 +1,7 @@
 {
     "text.mod.description": "Unofficial Rock-afire Explosion simulator for Minecraft, mod made by FlooferLand and Monsterwaill!",
-    "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
-    "config.prop.audio.playBotEffects": "Play custom bot effects",
-    "config.prop.permissions.restrict": "Restrict permissions (server-only)",
 
+    "category.showbiz": "Showbiz",
     "itemGroup.showbiz.main": "Showbiz",
 
     "block.showbiz.staged_bot": "Staged Bot",
@@ -11,15 +9,22 @@
     "block.showbiz.greybox": "Greybox",
     "block.showbiz.speaker": "Speaker",
     "block.showbiz.show_parser": "Show Parser",
-    "block.showbiz.show_selector": "Show Selector",
+    "block.showbiz.show_bridge": "Show Bridge (W.I.P)",
+    "block.showbiz.show_selector": "Show Selector (W.I.P)",
     "block.showbiz.curtain_block": "Curtain Railing",
     "block.showbiz.curtain_controller": "Curtain Controller",
-    "block.showbiz.spotlight": "Spotlight (W.I.P)",
+    "block.showbiz.spotlight": "Spotlight",
+    "block.showbiz.floodlight": "Floodlight (W.I.P)",
     "block.showbiz.bit_view": "Bit View",
     "block.showbiz.programmer": "Programmer (W.I.P)",
     "block.showbiz.monitor": "Monitor (W.I.P)",
     "block.showbiz.cymbal": "Cymbal",
     "block.showbiz.reel_holder": "Reel Holder (W.I.P)",
+
+    "block.showbiz.red_door": "Red Door",
+    "block.showbiz.voronoi_stripe_block": "Voronoi Stripe Block (W.I.P)",
+    "block.showbiz.voronoi_stripe_carpet": "Voronoi Stripe Carpet (W.I.P)",
+    "block.showbiz.chair": "Chair (W.I.P)",
 
     "item.showbiz.wand": "Wand",
     "item.showbiz.reel": "Reel",
@@ -30,21 +35,41 @@
     "item.showbiz.plush.gully_dook": "Gully Dook Plush",
     "item.showbiz.music_disc": "Music Disc",
     "item.showbiz.ender_earl": "Ender Earl",
+    "item.showbiz.floodlight": "Floodlight (W.I.P)",
 
     "tooltip.showbiz.block.staged_bot": "Also known as animatronics/figures\n- Right-click to change models\n- Place a block on top to hide the block",
-    "tooltip.showbiz.block.reel_to_reel": "Plays back reels\nSlot in a reel at the top\nStart/pause playback by right-clicking on the sides\nCan pull reels from a chest on its side",
+    "tooltip.showbiz.block.reel_to_reel": "Plays back shows from reels",
     "tooltip.showbiz.block.greybox": "Reads data from a reel-to-reel\nand spits out show data",
     "tooltip.showbiz.block.speaker": "Shakes the air violently to produce sound\n(currently only mono audio supported)",
     "tooltip.showbiz.block.show_parser": "Turns show bit data into redstone\nwhen hooked up to a Greybox",
+    "tooltip.showbiz.block.show_bridge": "Allows you to send data outside of Minecraft\n(ex: controlling real animatronics)",
     "tooltip.showbiz.block.show_selector": "Allows people to select a reel to be played\nwhen hooked up to a reel-to-reel",
-    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nConnect one of them to a Curtain Controller\nUse a dye to change the colour",
+    "tooltip.showbiz.block.curtain_block": "Place at the top of a stage to droop curtains down.\nConnect one of them to a Curtain Controller\nSneak-interact to change the group\nUse a dye to change the colour",
     "tooltip.showbiz.block.curtain_controller": "Converts bits to curtain control signals",
-    "tooltip.showbiz.block.spotlight": "Work-in-progress\nOnly works with Veil installed\nVeil is known to cause bugs",
+    "tooltip.showbiz.block.spotlight": "Requires a shader patched with IRLights (J menu).\nRead the IRLights documentation",
+    "tooltip.showbiz.block.floodlight": "Requires a shader patched with IRLights (J menu).\nRead the IRLights documentation\nWORK IN PROGRESS",
     "tooltip.showbiz.block.bit_view": "Shows bits and their names live when plugged into a show",
     "tooltip.showbiz.block.programmer": "Allows you to record in bits",
     "tooltip.showbiz.block.cymbal": "Gives Rolfe something to hit (or not)",
     "tooltip.showbiz.item.bot": "Shift right-click to pick it back up\nRight click to customize\nWork in progress!",
 
+    "tooltip.showbiz.block.voronoi_stripe_block": "Might vanish in future updates\nThe Block ID might change",
+    "tooltip.showbiz.block.voronoi_stripe_carpet": "Might vanish in future updates\nThe Block ID might change",
+
     "message.showbiz.show_load_fail": "Failed to load show",
-    "message.showbiz.empty_reel_warning": "This reel has no show on it!"
+    "message.showbiz.empty_reel_warning": "This reel has no show on it!",
+    "message.showbiz.permission_error": "Missing permissions",
+
+    "key.showbiz.open_in_handbook": "Open in Handbook",
+
+    "other.showbiz.open_in_handbook": "Press %1$s to open the handbook",
+
+    "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
+    "config.prop.audio.playBotEffects": "Play custom bot effects",
+    "config.prop.permissions.controlPlayback": "Who can control show playback",
+    "config.prop.permissions.editScreenAccess": "Who can access edit screens on blocks/entities",
+    "config.prop.permissions.switchReels": "Who can take out or switch show reels",
+    "config.prop.permissions.writeReels": "Who can record to show reels",
+    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)",
+    "config.prop.other.sleepFloppyParts": "Sleep floppy parts once they settle (they move exactly the same)"
 }

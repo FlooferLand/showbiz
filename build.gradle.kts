@@ -1,9 +1,12 @@
+
+import java.awt.Desktop
+import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-fun vers(name: String): String = property("vers.${name}") as String
-fun dep(name: String): String = property("deps.${name}") as String
+fun vers(name: String): String = project.property("vers.${name}") as String
+fun dep(name: String): String = project.property("deps.${name}") as String
 
 val kotlin = dep("kotlin")
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
@@ -11,8 +14,8 @@ val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
 val loader = "fabric"
 
 val minecraft = stonecutter.current.version
-val modId = property("mod.id") as String
-val modVersion = property("mod.version") as String
+val modId = project.property("mod.id") as String
+val modVersion = project.property("mod.version") as String
 group = "com.flooferland"
 version = "${modVersion}+$minecraft"
 base {
@@ -55,7 +58,55 @@ repositories {
     }
 }
 
+// Mappings
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        register(modId) {
+            sourceSet("main")
+            sourceSet("client")
+        }
+    }
+    runs {
+        named("server") {
+            server()
+            runDirectory.set(File("../../run-server"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            environmentVars.put("DEVAUTH_ENABLED", "false")
+        }
+        named("client") {
+            client()
+            runDirectory.set(File("../../run"))
+            jvmArguments.add("-Ddevauth.enabled=true")
+            environmentVars.put("DEVAUTH_ENABLED", "true")
+        }
+        create("client_offline") {
+            client()
+            displayName.set("Minecraft Client (Offline)")
+            runDirectory.set(File("../../run"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            programArguments.addAll(listOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
+            environmentVars.put("DEVAUTH_ENABLED", "false")
+        }
+        create("client_alt") {
+            client()
+            displayName.set("Minecraft Client (Offline)")
+            runDirectory.set(File("../../run-alt"))
+            jvmArguments.add("-Ddevauth.enabled=false")
+            programArguments.addAll(listOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
+            environmentVars.put("DEVAUTH_ENABLED", "false")
+        }
+        configureEach {
+            generateRunConfig.set(true)
+            jvmArguments.addAll((project.property("net.minecraft.jvmargs") as String).split(" "))
+            if (name != "datagen") jvmArguments.add(project.property("net.minecraft.jvmargs.devonly") as String)
+        }
+    }
+    log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
+}
+
 val fabricLanguageKotlin = dep("fabric_language_kotlin")
+val irlights = "${dep("irlights")}+mc$minecraft"
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${dep("kotlin_json")}")
@@ -79,9 +130,9 @@ dependencies {
 
     // Showbiz data library (https://github.com/FlooferLand/bizlib)
     // TODO: Relocate Bizlib's dependencies to my own com.flooferland.showbiz.shadow package so other mods using ANTLR wont collide with Showbiz
-    implementation("com.flooferland:bizlib:${dep("bizlib")}")
-    include("com.flooferland:bizlib:${dep("bizlib")}")
-    shadow("com.flooferland:bizlib:${dep("bizlib")}")
+    implementation("com.github.flooferland:bizlib:${dep("bizlib")}")
+    include("com.github.flooferland:bizlib:${dep("bizlib")}")
+    shadow("com.github.flooferland:bizlib:${dep("bizlib")}")
 
     // ktoml
     // TODO: Relocate ktoml to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
@@ -89,14 +140,21 @@ dependencies {
     include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
     shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
+    // XMLUtil
+    // TODO: Relocate xmlutil to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
+    val xmlutil = dep("xmlutil")
+    implementation("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    include("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    shadow("io.github.pdvrieze.xmlutil:core:$xmlutil")
+    implementation("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+    include("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+    shadow("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
 
-    // Veil
-    modCompileOnly("foundry.veil:veil-$loader-$minecraft:${dep("veil")}") {
-        exclude(group="maven.modrinth")
-        exclude(group="me.fallenbreath")
-    }
+    // IRLights
+    compileOnly("com.github.quaIett:irl-core:${dep("irlights_core")}")
 
     // CC Tweaked
     modCompileOnly("cc.tweaked:cc-tweaked-$minecraft-$loader-api:${dep("cctweaked")}")
@@ -118,47 +176,12 @@ tasks.shadowJar {
     minimize()
 }
 
-// Mappings
-loom {
-    splitEnvironmentSourceSets()
-    mods {
-        register(modId) {
-            sourceSet("main")
-            sourceSet("client")
-        }
-    }
-    runs {
-        create("client_offline") {
-            client()
-            name("Minecraft Client (Offline)")
-            runDir = "../../run"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", System.getProperty("user.name", "").replace(" ", "_")))
-            environmentVariable("DEVAUTH_ENABLED", "false")
-        }
-        create("client_alt") {
-            client()
-            name("Minecraft Client (ALT)")
-            runDir = "../../run-alt"
-            vmArgs += "-Ddevauth.enabled=false"
-            programArgs.addAll(arrayOf("--username", if (System.getProperty("user.name", "").lowercase() == "flooferland") "MAWQUEEL" else "MumboJumbo"))
-            environmentVariable("DEVAUTH_ENABLED", "false")
-        }
-    }
-    runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "../../run" // Shared run folder between versions
-        vmArgs.addAll((properties["net.minecraft.jvmargs"] as String).split(" "))
-    }
-    log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
-}
-
 // License
 tasks.jar {
-    inputs.property("archivesName", base.archivesName.get())
+    inputs.property("archivesName", project.base.archivesName.get())
     excludedFromJar.forEach { exclude(it) }
     from("LICENSE") {
-        rename { "${it}_${base.archivesName}" }
+        rename { "${it}_${project.base.archivesName}" }
     }
 }
 tasks.remapJar {
@@ -184,7 +207,7 @@ tasks.withType<ProcessResources>().configureEach {
         "fabric_language_kotlin" to fabricLanguageKotlin,
         "fabric_api" to dep("fabric_api"),
         "geckolib" to dep("geckolib"),
-        "veil" to dep("veil"),
+        "irlights" to irlights,
         "cctweaked" to dep("cctweaked"),
         "archivesName" to modId,
         "archivesBaseName" to modId
@@ -194,15 +217,26 @@ tasks.withType<ProcessResources>().configureEach {
     }
     filesMatching("fabric.mod.json") { expand(properties) }
     filesMatching("$modId.client.mixins.json") { expand(properties) }
+    filesMatching("$modId.mixins.json") { expand(properties) }
     filesMatching("data/showbiz/showbiz.addon.toml")  { expand(properties) }
+}
+tasks.register("giveMeTheJarFile") {
+    description = "Builds the mod and opens up a file manager"
+    dependsOn("assemble")
+
+    doLast {
+        val dir = layout.buildDirectory.get().asFile.resolve("libs")
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().open(dir)
+        } else {
+            println("\nThe mod jar is in this folder:\n$dir\n")
+        }
+    }
 }
 
 // Datagen
-tasks.register<JavaExec>("runDatagen") {
-    group = "flooferland"
-    classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.flooferland.showbiz.datagen.DataGenerator")
-    systemProperty("$modId.datagen", "true")
+fabricApi {
+    configureDataGeneration()
 }
 sourceSets {
     main {
@@ -248,16 +282,16 @@ publishMods {
             ?: "No changelog provided."
     )
     type.set(when {
-        isAlpha -> ALPHA
-        isBeta -> BETA
-        else -> STABLE
+        isAlpha -> ReleaseType.ALPHA
+        isBeta -> ReleaseType.BETA
+        else -> ReleaseType.STABLE
     })
     dryRun = System.getenv("dryrun") == "1"
 
     fun addGeneralDeps(m: Modrinth) {
         m.requires { slug = "fabric-language-kotlin" }
         m.requires { slug = "geckolib" }
-        m.optional { slug = "veil" }
+        m.requires { slug = "irlights" }
     }
 
     val sharedOptions = modrinthOptions {

@@ -1,0 +1,27 @@
+/** Main */
+@font-face {
+    font-family: monocraft;
+    src: url("/assets/fonts/monocraft/Monocraft.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: monocraft;
+    src: url("/assets/fonts/monocraft/weights/Monocraft-Italic.ttf");
+    font-weight: normal;
+    font-style: italic;
+}
+
+/** Bold */
+@font-face {
+    font-family: monocraft;
+    src: url("/assets/fonts/monocraft/weights/Monocraft-Bold.ttf");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: monocraft;
+    src: url("/assets/fonts/monocraft/weights/Monocraft-Bold-Italic.ttf");
+    font-weight: bold;
+    font-style: italic;
+}

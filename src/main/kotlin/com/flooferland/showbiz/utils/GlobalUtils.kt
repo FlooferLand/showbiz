@@ -1,12 +1,15 @@
 package com.flooferland.showbiz.utils
 
-import com.flooferland.showbiz.Showbiz
+import net.minecraft.network.chat.*
 import net.minecraft.resources.*
+import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.Showbiz.MOD_ID
+import com.flooferland.showbiz.utils.Extensions.count
 import kotlin.math.roundToInt
 
-/** Creates a [ResourceLocation] using the [Showbiz.MOD_ID] namespace */
+/** Creates a [ResourceLocation] using the [MOD_ID] namespace */
 fun rl(path: String): ResourceLocation {
-    return ResourceLocation.fromNamespaceAndPath(Showbiz.MOD_ID, path)
+    return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
 }
 
 /** Creates a [ResourceLocation] using the vanilla Minecraft namespace */
@@ -22,6 +25,23 @@ fun rlCustom(namespace: String, path: String): ResourceLocation {
 /** Creates a [ResourceLocation] from a `namespace:path` string */
 fun rlString(string: String): ResourceLocation {
     return ResourceLocation.bySeparator(string, ':')
+}
+
+/**
+ * Creates a translatable [net.minecraft.network.chat.Component] using the [MOD_ID] id </br>
+ * TODO: Replace this with static compilation (have a ShowbizTranslations) class thats automatically generated
+ */
+fun tc(suffix: String, path: String, vararg params: Any): MutableComponent {
+    val key = "${suffix}.${MOD_ID}.${path}"
+    val component = Component.translatableWithFallback(key, "FALLBACK", *params)
+    if (ShowbizEnv.isDev()) {
+        if (component.string == "FALLBACK")
+            Showbiz.log.error("No valid translation found for '$key'")
+        val missingArgs = component.string.count("[Ljava.")
+        if (missingArgs > 0)
+            Showbiz.log.error("$missingArgs parameter(s) are missing/broken for '$key' (output='${component.string}')")
+    }
+    return component
 }
 
 fun <E> MutableList<E>.copy(): MutableList<E> {

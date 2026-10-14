@@ -19,7 +19,7 @@ rae 55 {
 }
 rae 52 {
     flow ease-in 0.28
-    rotate "Head" z:-15
+    rotate "Head" z:-18
 }
 rae 57 {
     flow 0.7
@@ -45,9 +45,9 @@ rae 53 {
 }
 rae 62 {
     flow 0.3
-    rotate "Waist" x:10
-    rotate "Right Elbow" x:-10
-    rotate "Left Elbow" x:-10
+    rotate "Waist" x:12
+    rotate "Right Elbow" x:-12
+    rotate "Left Elbow" x:-12
     wigglemul 2.0
 }
 rae 43 {
@@ -62,11 +62,11 @@ rae 44 {
 }
 rae 41 {
     flow 3.0
-    move "Left Eyelid" y:-1.6
+    move "Left Eyelid" y:-1.3
 }
 rae 42 {
     flow 3.0
-    move "Right Eyelid" y:-1.6
+    move "Right Eyelid" y:-1.3
 }
 rae 61 {
     flow 0.7

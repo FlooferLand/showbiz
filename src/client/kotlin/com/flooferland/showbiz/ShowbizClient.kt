@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.*
 import net.minecraft.client.multiplayer.*
 import net.minecraft.client.renderer.*
 import net.minecraft.client.renderer.blockentity.*
+import net.minecraft.core.registries.*
 import net.minecraft.network.chat.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
@@ -17,12 +18,16 @@ import com.flooferland.showbiz.addons.assets.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.entities.DecorEntity
+import com.flooferland.showbiz.handbook.Handbook
+import com.flooferland.showbiz.handbook.HandbookReloadListener
 import com.flooferland.showbiz.items.PlushItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
 import com.flooferland.showbiz.models.BaseBotModel
+import com.flooferland.showbiz.models.GenericBlockItemModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
@@ -32,11 +37,12 @@ import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.MainClientUtils
-import com.flooferland.showbiz.utils.ShowbizUtils
+import com.flooferland.showbiz.utils.tc
 import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -44,9 +50,9 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
-import software.bernie.geckolib.model.DefaultedBlockGeoModel
 import software.bernie.geckolib.renderer.GeoItemRenderer
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.max
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = emptyList()
@@ -58,20 +64,19 @@ object ShowbizClient : ClientModInitializer {
         // Loading the mod
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(HandbookReloadListener)
         @Suppress("UnusedExpression")
         run {
             ModPackets
             ModClientEntities
-            ModClientCommands
-            if (ShowbizUtils.clientHasVeil()) {
-                @Suppress("RedundantLambdaOrAnonymousFunction")
-                { ModClientVeil.load() }()
-            }
+            ModClientInput.entries
+            ModClientLights.load()
             ClientConnections
             ClientPackets.init()
         }
         ShowbizShowAudio.init()
         StagedBotBlockEntity.soundHandler = BotSoundHandler()
+        BotEntity.soundHandler = BotSoundHandler()
         for (block in ModBlocks.entries) {
             val container = FabricLoader.getInstance().getModContainer(MOD_ID).getOrNull() ?: break
             val paths = listOf(
@@ -88,7 +93,9 @@ object ShowbizClient : ClientModInitializer {
 
         // Screens
         MenuScreens.register(ModScreenHandlers.ShowParserEdit.type, ::ShowParserEditScreen)
+        MenuScreens.register(ModScreenHandlers.ShowBridgeEdit.type, ::ShowBridgeEditScreen)
         MenuScreens.register(ModScreenHandlers.SpotlightEdit.type, ::SpotlightEditScreen)
+        MenuScreens.register(ModScreenHandlers.FloodlightEdit.type, ::FloodlightEditScreen)
         MenuScreens.register(ModScreenHandlers.CurtainControllerEdit.type, ::CurtainControllerEditScreen)
         MenuScreens.register(ModScreenHandlers.BotSelect.type, ::BotSelectScreen)
         MenuScreens.register(ModScreenHandlers.BitView.type, ::BitViewScreen)
@@ -114,7 +121,9 @@ object ShowbizClient : ClientModInitializer {
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
-            EntityRendererRegistry.register(ModEntities.Bot.type, ::BotEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Bot.type, ::BotEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Floodlight.type, ::FloodlightEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Seat.type, ::SeatEntityRenderer)
         }
 
         // GeckoLib renderers
@@ -137,13 +146,8 @@ object ShowbizClient : ClientModInitializer {
             if (!block.isGeckoLib) continue
             val item = block.item as? GeoBlockItem ?: continue
             item.renderProviderHolder.value = object : GeoRenderProvider {
-                var renderer: GeoItemRenderer<*>? = null
-                override fun getGeoItemRenderer(): GeoItemRenderer<*> {
-                    if (renderer == null) renderer = when (block) {
-                        else -> object : GeoItemRenderer<GeoBlockItem>(DefaultedBlockGeoModel(block.id)) {}
-                    }
-                    return renderer!!
-                }
+                var renderer = object : GeoItemRenderer<GeoBlockItem>(GenericBlockItemModel(block.id)) {}
+                override fun getGeoItemRenderer() = renderer
             }
         }
 
@@ -151,6 +155,9 @@ object ShowbizClient : ClientModInitializer {
         for (block in ModBlocks.entries) {
             if (block.model?.transparent != true) continue
             BlockRenderLayerMap.INSTANCE.putBlock(block.block, RenderType.cutout())
+        }
+        for (deco in ModDecoBlocks.children) {
+            if (deco.transparent) BlockRenderLayerMap.INSTANCE.putBlock(deco.block, RenderType.cutout())
         }
 
         // World
@@ -166,7 +173,7 @@ object ShowbizClient : ClientModInitializer {
             pose.pushPose()
             pose.translate(-view.x, -view.y, -view.z)
             JukeboxLyricRenderer.render(level, player, mc.renderBuffers().bufferSource(), pose)
-            ConnectionRenderer.render(player, mc.renderBuffers().bufferSource(), partialTick)
+            ConnectionRenderer.draw(player, mc.renderBuffers().bufferSource(), partialTick)
             ConnectionRenderer.renderDeferred(pose)
             pose.popPose()
 
@@ -174,7 +181,7 @@ object ShowbizClient : ClientModInitializer {
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
             if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
-                for (err in BaseBotModel.errorsTriggered) {
+                for ((_, err) in BaseBotModel.errorsTriggered) {
                     val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
                     Showbiz.log.error(message)
                     Minecraft.getInstance()?.player?.displayClientMessage(
@@ -217,12 +224,22 @@ object ShowbizClient : ClientModInitializer {
                 minecraft.player?.displayClientMessage(UpdateChecker.getMessage(), false)
         }
 
+        // Handbook ponder
+        ItemTooltipCallback.EVENT.register { stack, context, flag, components ->
+            val key = ModClientInput.OpenInHandbook.mapping.translatedKeyMessage
+            val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
+            if (!Handbook.cache.items.has(itemId)) return@register
+            val comp = tc("other", "open_in_handbook", key)
+            components.add(max(0, components.size - 2), comp)
+        }
+
         // DARN YOU SPLIT SOURCESETS
         MainClientUtils.getEntityByUuid = { level, uuid -> (level as? ClientLevel)?.entitiesForRendering()?.firstOrNull { it.uuid == uuid } }
         ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
         ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
         StagedBotBlockEntity.decor = DecorEntity.decorTick
+        BotEntity.decor = DecorEntity.decorTick
     }
 
     fun getDeltaTime() =

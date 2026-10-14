@@ -1,0 +1,14 @@
+format = 1
+
+# One cylinder per bit: today's motion, converted.
+# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
+[bits.rae]
+66 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+67 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+68 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+69 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+71 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+72 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+73 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+74 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+75 = { flow_in = 1.0, flow_out = 1.0, gravity_in = 50.0, gravity_out = 50.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }

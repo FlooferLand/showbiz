@@ -18,7 +18,9 @@ import com.mojang.blaze3d.systems.RenderSystem
 import kotlin.math.max
 
 // Welcome to hell
-class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWidget(x, y, width, height, Component.literal("Bit select")) {
+class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWidget(x, y, width, height, Component.literal("Bit filter")) {
+    constructor(width: Int, height: Int) : this(0, 0, width, height)
+
     val popupY get() = y + height
     val popupHeight get() = (Minecraft.getInstance().screen!!.height - popupY) - 5
     val popupWidth get() = max(180, width+1)

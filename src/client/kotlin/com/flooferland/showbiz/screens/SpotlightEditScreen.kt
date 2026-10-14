@@ -4,34 +4,39 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
-import com.flooferland.showbiz.network.packets.SpotlightEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
+import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
+
+// TODO: Should turn this into a general light edit screen? Floodlights could use it
 
 class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/spotlight.png")
 
-    var turnX: EditBox? = null
-    var turnY: EditBox? = null
+    var bitFilter: BitSelectButton? = null
+    var turn: EditBox? = null
     var angle: EditBox? = null
     var color: ColorPicker? = null
+    var shadows: Checkbox? = null
 
-    override fun addCustomWidgets(widgets: MutableList<WidgetInfo>) {
-        // Turn X
+    override fun addWidgets(widgets: MutableList<WidgetInfo>) {
+        // Bits
         run {
-            turnX = EditBox(font, 40, 20, Component.literal("Turn X"))
-            turnX!!.value = editMenu.data.turn.x.toString().replace(".0", "")
-            turnX!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
-            widgets.add(WidgetInfo("Turn X", turnX!!))
+            bitFilter = BitSelectButton(200, 20)
+            bitFilter!!.values = menu.data.base.bitFilter.clone()
+            widgets.add(WidgetInfo(bitFilter!!))
         }
 
-        // Turn Y
+        // Turn
         run {
-            turnY = EditBox(font, 40, 20, Component.literal("Turn Y"))
-            turnY!!.value = editMenu.data.turn.y.toString().replace(".0", "")
-            turnY!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') }
-            widgets.add(WidgetInfo("Turn Y", turnY!!))
+            turn = EditBox(font, 80, 20, Component.literal("Turn"))
+            turn!!.value =
+                editMenu.data.turn.x.toString().replace(".0", "") + ", " + editMenu.data.turn.y.toString().replace(".0", "")
+            turn!!.setFilter { turn -> turn.split(',').map { it.trim() }.all { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
+            turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separated by a comma"))
+            widgets.add(WidgetInfo("Turn X/Y", turn!!))
         }
 
         // Angle (radius)
@@ -44,18 +49,38 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
         }
 
         // Color
-        /*run {
-            color = ColorPicker(0, 0, 80, 40, editMenu.data.color)
+        run {
+            color = ColorPicker(0, 0, 160, 40, defaultKelvin = editMenu.data.kelvin)
+            color!!.value = editMenu.data.brightness
+            color!!.allowedModes = mutableSetOf(ColorPicker.Mode.Kelvin)
             widgets.add(WidgetInfo("Color", color!!))
-        }*/
+        }
+
+        // Shadows
+        run {
+            shadows = Checkbox.builder(Component.literal("Shadows"), font)
+                .selected(editMenu.data.shadows)
+                .build()
+            widgets.add(WidgetInfo(null, shadows!!))
+        }
     }
 
     override fun saveCustom(data: SpotlightEditPacket) {
-        turnX?.value?.toFloatOrNull()?.let { data.turn.x = it }
-        turnY?.value?.toFloatOrNull()?.let { data.turn.y = it }
-        angle?.value?.toFloatOrNull()?.let { data.angle = it }
-        color?.value?.let {
-            data.color = it
+        menu.data.base.bitFilter.clearCharts()
+        bitFilter?.values?.forEach { (chartId, bits) ->
+            menu.data.base.bitFilter.setBits(chartId, bits)
         }
+
+        turn?.value?.split(',')?.let { values ->
+            val values = values.map { it.trim() }.mapNotNull { it.toFloatOrNull() }
+            if (values.size >= 2) {
+                data.turn.x = values[0]
+                data.turn.y = values[1]
+            }
+        }
+        angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
+        color?.kelvin?.let { data.kelvin = it }
+        color?.value?.let { data.brightness = it }
+        shadows?.selected()?.let { data.shadows = it }
     }
 }

@@ -3,7 +3,6 @@ package com.flooferland.showbiz
 import net.minecraft.server.level.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.*
-import com.akuleshov7.ktoml.Toml
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
@@ -15,19 +14,17 @@ import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.IVersionMigrator
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.ShowbizUtils
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
-import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -42,17 +39,7 @@ object Showbiz : ModInitializer {
 
     override fun onInitialize() {
         // Loading config
-        val configResult = runCatching {
-            val configFile = FabricLoader.getInstance().configDir.resolve("$MOD_ID.toml").toFile()
-            if (configFile.exists()) {
-                config = Toml.decodeFromString<ModConfig>(configFile.readText())
-            } else {
-                configFile.writeText(Toml.encodeToString<ModConfig>(config))
-            }
-        }
-        configResult.onFailure { throwable ->
-            Showbiz.log.error("Error loading config", throwable)
-        }
+        config = ModConfig.load()
 
         // Loading FFMPEG
         FFmpeg.init()
@@ -63,13 +50,16 @@ object Showbiz : ModInitializer {
             ModComponents.register()
             ModPackets.register()
             ModEntities.register()
+            ModLivingEntities.register()
+            ModSetTypes.entries
             ModBlocks.entries
+            ModDecoBlocks.register()
             ModItems.entries
             ModMusicDiscs.entries
             ModItemGroups.entries
             ModSounds.entries
             ModPlayerSynchedData
-            ModCommands
+            ModCommands.register()
             ModScreenHandlers
             if (ShowbizUtils.hasComputerCraft()) run { ModPeripherals.register() }
             ServerConnections
@@ -77,6 +67,8 @@ object Showbiz : ModInitializer {
             FileServer
             UpdateChecker
             ServerPackets.init()
+            ServerStats.init()
+            IVersionMigrator.register()
         }
 
         // Services

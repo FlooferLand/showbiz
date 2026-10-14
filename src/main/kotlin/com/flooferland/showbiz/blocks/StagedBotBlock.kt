@@ -10,24 +10,20 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
 import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
-import foundry.veil.api.network.VeilPacketManager.level
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     val codec: MapCodec<StagedBotBlock> = simpleCodec(::StagedBotBlock)
-    val occlusionShape = Shapes.create(AABB.ofSize(Vec3(0.5, 0.0, 0.5), 2.0, 4.0, 2.0))!!
 
     init {
         registerDefaultState(stateDefinition.any().setValue(facing, GigaDirectionProperty.Enum.North))
@@ -35,13 +31,9 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
     override fun codec(): MapCodec<out BaseEntityBlock> = codec
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
-    override fun getOcclusionShape(state: BlockState, level: BlockGetter, pos: BlockPos) = occlusionShape
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
-        if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
-        if (player.isHolding { s -> !s.isEmpty }) return InteractionResult.PASS
-        player.openMenu(state.getMenuProvider(level, pos))
-        return super.useWithoutItem(state, level, pos, player, hitResult)
+        return handleEditScreen(state, level, pos, player, hitResult)
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {

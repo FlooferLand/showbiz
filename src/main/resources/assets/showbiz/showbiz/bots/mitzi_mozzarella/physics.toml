@@ -1,0 +1,69 @@
+# showbiz:mitzi_mozzarella
+format = 1
+
+[chains."Pom*"]
+col_step = 4              #-how many pixels wide each chain is
+step = 2                  #-how many pixels tall each link is
+sim_segments = 8          #-physics points per chain (more is smoother, but slower)
+gravity = 0.04            #-how hard chains fall (0.08 is Minecraft's gravity)
+rope_damp = 0.85          #-speed kept each tick: lower stops sooner, higher swings longer
+stiff = 0.02              #-pull back to the modelled shape, 0.0 is a loose rope
+stiff_falloff = 3.0       #-how fast that pull fades toward the tip
+bend_stiff = 0.12         #-how much joints resist bending, smooths out kinks
+max_bend = 2000.0         #-bend limit in degrees (out of reach on purpose)
+soft_band = 0.5           #-how gently that limit kicks in
+proj_clamp = 1.5          #-safety: the most a joint can jump in one step
+substep_cap = 16          #-safety: the most physics steps in one frame
+lag = 3                   #-each chain trails the hand by up to this many frames
+anchor_smooth = 0.55      #-smooths the hand: higher follows tighter, 0.0 is off
+pin_lag_max = 0.04        #-furthest the smoothing lets chains fall behind, in blocks
+sleep = 0.0004            #-slower than this, a chain rests and costs nothing...
+wake = 0.0002             #-...until the hand moves faster than this
+repel = 0.5               #-how hard chains push each other apart, 0.0 is off
+repel_radius = 0.12       #-how close chains get before pushing, in blocks
+repel_cap = 0.0           #-the most one push can move a joint, 0.0 is no limit
+repel_up = 1.0            #-how much pushes can go up or down, 0.0 is sideways only
+render_cone = 110.0       #-most a link can turn from its modelled angle, in degrees
+fixed_step = 0.16666667   #-physics step length in ticks, so it looks the same at any fps
+sweep_exit = false        #-skips extra work once chains settle (off until checked)
+
+# While dual_pressure_bit is on, every cylinder's psi x dual_pressure_scale. A bit's own line can set either
+[cylinders.rae]
+dual_pressure_bit = 211
+dual_pressure_scale = 0.75
+
+# One cylinder per bit: Reel to Real's own values.
+# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
+[bits.rae]
+168 = { flow_in = 0.8,  flow_out = 0.5,  gravity_in = 0.5,  gravity_out = 0.5,   smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+169 = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+170 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+173 = { flow_in = 0.8,  flow_out = 0.5,  gravity_in = 0.5,  gravity_out = 0.5,   smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+174 = { flow_in = 1.0,  flow_out = 1.0,  gravity_in = 0.28, gravity_out = 0.28, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+175 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.18, gravity_out = 0.18, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+176 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+177 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.5,  gravity_out = 0.8,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+178 = { flow_in = 0.7,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+179 = { flow_in = 0.7,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+180 = { flow_in = 0.7,  flow_out = 0.7,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+181 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+182 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.4,  gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+183 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+184 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.45, gravity_out = 0.4,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+185 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+186 = { flow_in = 0.5,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+187 = { flow_in = 0.5,  flow_out = 0.7,  gravity_in = 0.6,  gravity_out = 0.6,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+188 = { flow_in = 0.4,  flow_out = 0.4,  gravity_in = 0.47, gravity_out = 0.47, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+
+# Converted from the old wigglemul.
+[dynbones]
+"head"  = { damping = 0.1, elasticity = 0.08, freeze_x = false }
+"chest" = { damping = 0.075, elasticity = 0.08, freeze_x = false }
+"ArmL"  = { damping = 0.13,  elasticity = 0.05, freeze_x = false }
+"ArmL2" = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
+"ArmR"  = { damping = 0.13,  elasticity = 0.05, freeze_x = false }
+"ArmR1" = { damping = 0.13,  elasticity = 0.05, freeze_x = true }
+"earL"  = { damping = 0.12,  elasticity = 0.04, freeze_x = true }
+"earR"  = { damping = 0.12,  elasticity = 0.04, freeze_x = true }
+"ponyL"  = { damping = 0.1,  elasticity = 0.03, freeze_x = true }
+"ponyR"  = { damping = 0.1,  elasticity = 0.03, freeze_x = true }

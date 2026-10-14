@@ -4,7 +4,6 @@ import net.minecraft.core.*
 import net.minecraft.core.registries.*
 import net.minecraft.resources.*
 import net.minecraft.sounds.*
-import com.flooferland.showbiz.datagen.DataGenerator
 import com.flooferland.showbiz.utils.rl
 
 /// NOTE: Data generator should be called after adding new sounds here
@@ -25,7 +24,9 @@ enum class ModSounds {
     EnderEarl("ender_earl"),
     Boop("boop"),
     Honk("honk"),
-    HonkBye("honk_bye")
+    HonkBye("honk_bye"),
+    DoorOpen("door_open"),
+    DoorClose("door_close")
     ;
 
     constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {
@@ -34,9 +35,7 @@ enum class ModSounds {
         this.sounds = sounds.map { rl(it) }.toTypedArray()
         this.folder = folder
         this.procedural = procedural
-        if (!DataGenerator.engaged) {
-            Registry.register(BuiltInRegistries.SOUND_EVENT, this.id, this.event)
-        }
+        Registry.register(BuiltInRegistries.SOUND_EVENT, this.id, this.event)
     }
 
     val id: ResourceLocation

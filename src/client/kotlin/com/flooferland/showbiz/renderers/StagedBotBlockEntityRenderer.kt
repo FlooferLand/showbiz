@@ -22,6 +22,10 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
         addRenderLayer(AutoGlowingGeoLayer(this))
     }
 
+    override fun shouldRenderOffScreen(blockEntity: StagedBotBlockEntity): Boolean {
+        return true
+    }
+
     override fun preRender(poseStack: PoseStack, animatable: StagedBotBlockEntity, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
         if (!isReRender) {
             poseStack.translate(0.0, 1.0, 0.0)
@@ -101,8 +105,8 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             MolangQueries.clearActor()
         } catch (throwable: Throwable) {
             val message = throwable.toString()
-            if (!BaseBotModel.errorsTriggered.any { it.context == message }) {
-                BaseBotModel.errorsTriggered.add(BaseBotModel.Error.RenderException.withBot(animatable).withContext(message))
+            if (!BaseBotModel.errorsTriggered.values.any { it.context == message }) {
+                BaseBotModel.errorsTriggered[animatable] = BaseBotModel.Error.RenderException.withBot(animatable).withContext(message)
             }
         }
         poseStack.popPose()

@@ -1,0 +1,112 @@
+set rae billy_bob
+
+rae 213 {
+    flow 0.2
+    rotate "torso" x:10
+    wigglemul 2.0
+}
+
+rae 211 {
+    flow 0.2
+    rotate "torso" y:25
+}
+
+rae 212 {
+    flow 0.2
+    rotate "torso" y:-25
+}
+
+rae 205 {
+    flow 0.5
+    rotate "head" x:13
+    wigglemul 3.0
+}
+
+rae 201 {
+    flow 0.15
+    rotate "head" y:45
+    wigglemul 3.0
+}
+
+rae 202 {
+    flow 0.15
+    rotate "head" y:-45
+    wigglemul 3.0
+}
+
+rae 203 {
+    flow 0.3
+    rotate "head" z:10
+}
+
+rae 204 {
+    flow 0.3
+    rotate "head" z:-10
+}
+
+# arms
+
+rae 206 {
+    flow 0.15
+    rotate "arm_r" z:110
+    wigglemul 1.5
+}
+
+rae 207 {
+    flow 0.13
+    rotate "arm_r" x:90
+    wigglemul 1.5
+}
+
+rae 208 {  # guitar strum
+    flow 1.2
+    rotate "hand_r" y:-35
+    wigglemul 2.0
+}
+
+rae 189 {
+    flow 0.4
+    rotate "arm_l" x:-15
+}
+
+rae 209 {
+    flow 0.4
+    rotate "hand_r" z:40
+    wigglemul 2.0
+}
+
+rae 190 {
+    flow 0.4
+    rotate "banjo" z:-15
+    rotate "arm_l" y:-20
+}
+
+# legs
+
+rae 194 {
+    flow 0.4
+    rotate "toes_r" x:20
+}
+
+# face
+
+rae 196 {
+    flow 1.2
+    rotate "jaw" x:-15
+    rotate "snout" x:5
+}
+
+rae 199 {
+    flow 0.5
+    move "eyes" x:1
+}
+
+rae 200 {
+    flow 0.5
+    move "eyes" x:-1
+}
+
+rae 197, rae 198 {
+    flow 0.8
+    anim "eyelids"
+}

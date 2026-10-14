@@ -24,7 +24,7 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         val reelStack = entity.getItem(0)
 
         // Time
-        val rotationAngle = entity.seek.toFloat() * 200f
+        val rotationAngle = entity.seek.toFloat() * 150f
 
         poseStack.pushPose()
         poseStack.translate(0.5, 0.0, 0.5)

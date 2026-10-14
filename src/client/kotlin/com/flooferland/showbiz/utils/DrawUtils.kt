@@ -1,13 +1,14 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.client.renderer.LightTexture
-import net.minecraft.client.renderer.texture.OverlayTexture
-import net.minecraft.util.FastColor
+import net.minecraft.client.renderer.*
+import net.minecraft.client.renderer.texture.*
+import net.minecraft.util.*
 import net.minecraft.world.phys.*
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import org.joml.Matrix4f
+import org.joml.Vector3f
 
 object DrawUtils {
     @Suppress("DuplicatedCode")
@@ -16,7 +17,6 @@ object DrawUtils {
         consumer: VertexConsumer,
         box: AABB,
         color: Int? = null,
-        alpha: Float? = null,
         packedOverlay: Int? = null,
         packedLight: Int? = null,
         sidesOnly: Boolean = false,
@@ -25,10 +25,11 @@ object DrawUtils {
         drawWest: Boolean = true,
         drawEast: Boolean = true,
         drawTop: Boolean = true,
-        drawBottom: Boolean = true
+        drawBottom: Boolean = true,
+        normalShade: Boolean = false
     ) {
         val matrix = poseStack.last().pose()
-        val color = if (color != null) FastColor.ARGB32.color(((alpha ?: 1f) * 255).toInt(), color) else null
+        val alpha = color?.let { FastColor.ARGB32.alpha(it).toFloat() / 255f }
 
         val minX = box.minX.toFloat()
         val minY = box.minY.toFloat()
@@ -43,12 +44,17 @@ object DrawUtils {
 
         fun addVertex(pose: Matrix4f, x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float) {
             val shaderColor = RenderSystem.getShaderColor()
-            val color = color ?: FastColor.ARGB32.colorFromFloat(
+            var color = color ?: FastColor.ARGB32.colorFromFloat(
                 alpha ?: shaderColor.getOrNull(3) ?: 1f,
                 shaderColor.getOrNull(0) ?: 0f,
                 shaderColor.getOrNull(1) ?: 0f,
                 shaderColor.getOrNull(2) ?: 0f
             )
+            if (normalShade) {
+                val normal = poseStack.last().normal().transform(nx, ny, nz, Vector3f())
+                val brightness = normal.let { it.x * it.x * 0.6f + it.z * it.z * 0.8f + it.y * it.y * (if (it.y > 0f) 1.0f else 0.5f) }
+                color = FastColor.ARGB32.multiply(color, FastColor.ARGB32.colorFromFloat(1f, brightness, brightness, brightness))
+            }
             consumer.addVertex(pose, x, y, z)
                 .setColor(color)
                 .setUv(u, v)

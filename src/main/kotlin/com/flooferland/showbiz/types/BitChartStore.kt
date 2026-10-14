@@ -18,11 +18,11 @@ class BitChartStore {
         add(id = FAZ_ID,
             BitChartInfo(extension = "fshw", color = 0xFF8D6320.toInt())
         )
-        add(id = CEC_ID,
-            BitChartInfo(extension = "cshw", color = 0xFF8D6320.toInt())
-        )
         add(id = FAZTOYS_ID,
             BitChartInfo(extension = "tshw", color = 0xFF204A8D.toInt())
+        )
+        add(id = CEC_ID,
+            BitChartInfo(extension = "cshw", color = 0xFF8D6320.toInt())
         )
     }
 

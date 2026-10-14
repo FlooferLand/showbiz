@@ -1,17 +1,17 @@
 package com.flooferland.showbiz.blocks
 
 import net.minecraft.core.*
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.ItemInteractionResult
+import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.*
 import net.minecraft.world.phys.shapes.*
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
+import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
 
@@ -42,13 +42,17 @@ class CurtainShadowBlock(props: Properties) : Block(props) {
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
         val parentPos = getParent(level, pos) ?: return ItemInteractionResult.FAIL
         val parentState = level.getBlockState(parentPos) ?: state
-        return (ModBlocks.CurtainBlock.block as CurtainBlock).useItem(stack, parentState, level, parentPos)
+        return (ModBlocks.CurtainBlock.block as CurtainBlock).useItemOn(stack, parentState, level, parentPos, player, hand, hitResult)
     }
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         val parentPos = getParent(level, pos) ?: return InteractionResult.FAIL
-        val parentState = level.getBlockState(parentPos) ?: state
-        return (ModBlocks.CurtainBlock.block as CurtainBlock).use(parentState, level, parentPos, player, hitResult)
+        val parentEntity = level.getBlockEntity(parentPos) as? CurtainBlockEntity ?: return InteractionResult.FAIL
+
+        if (!player.mayInteractWith(parentEntity)) return InteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return InteractionResult.FAIL
+        parentEntity.setCurtains(!parentEntity.isOpen)
+        return InteractionResult.SUCCESS
     }
 
     override fun destroy(level: LevelAccessor, pos: BlockPos, state: BlockState) {

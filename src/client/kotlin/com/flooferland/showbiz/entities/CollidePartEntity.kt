@@ -42,6 +42,7 @@ class CollidePartEntity(level: Level, val ownerId: OwnerId? = null, val partId: 
 
     val colliding = mutableSetOf<Entity>()
     val used = mutableSetOf<Entity>()
+    val ignored = mutableSetOf<Entity>()
     var setupFinished = false
     var targetPos = Vec3.ZERO!!
     var targetSize = Vec3(0.1, 0.1, 0.1)
@@ -93,33 +94,43 @@ class CollidePartEntity(level: Level, val ownerId: OwnerId? = null, val partId: 
         val boxCollisions = level.getEntities(this, boundingBox).filter { it != this }
         colliding += boxCollisions.filter { it.position() != position() }  // Filter prevents a weird bug triggering all of them at once upon join
         used.removeIf { it !in colliding }
+        ignored.removeIf { it !in colliding }
 
-        val newCollisions = colliding.filter { it !in used }
-        if (newCollisions.isNotEmpty() && Showbiz.config.audio.playBotEffects && setupFinished) run {
+        val newCollisions = colliding.filter { it !in used && it !in ignored }
+        if (newCollisions.isNotEmpty() && Showbiz.config.audio.playBotEffects && setupFinished) run check@ {
             val hitter = newCollisions.first()
             val hitDir = calculateHitDirection(hitter)
-            val (downHitVolume, downHitPitch) = run {
-                val forceV = abs(hitDir.y.toFloat())
-                val forceH = hitDir.horizontalDistance().toFloat()
-                val force = forceH + (forceV * 4f)
-                val strength = force * if (hitDir.y.toFloat() < 0.0f) 1.5f else 0.2f
-                if (strength < 0.1f) return@run Pair(0f, 0f)
+
+            val forceV = abs(hitDir.y.toFloat())
+            val forceH = hitDir.horizontalDistance().toFloat()
+            val force = forceH + (forceV * 4f)
+            val strength = force * if (hitDir.y.toFloat() < 0.0f) 1.5f else 0.2f
+            val (downHitVolume, downHitPitch) = run downhit@ {
                 val hitFreq = ((tickCount - lastHitTime) / 8f).coerceIn(0.1f, 1.0f)
                 val volume = (hitFreq * strength * 1.5f).coerceIn(0.05f, 1.0f)
                 val pitch = 1f + (level.random.nextFloat() - level.random.nextFloat()) * 0.05f
                 Pair(volume, pitch)
             }
+            if (strength < 0.1f) {
+                ignored += newCollisions
+                return@check
+            }
+
             when (partId) {
                 CollidePartId.Cymbal -> {
-                    level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
-                    used += newCollisions
+                    if (downHitVolume > 0.4) {
+                        level.playLocalSound(x, y, z, ModSounds.Cymbal.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                        used += newCollisions
+                    } else {
+                        ignored += newCollisions
+                    }
                 }
                 CollidePartId.Snare -> {
-                    level.playLocalSound(x, y, z, ModSounds.Snare.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                    level.playLocalSound(x, y, z, ModSounds.Snare.event, SoundSource.BLOCKS, downHitVolume * 0.8f, downHitPitch, false)
                     used += newCollisions
                 }
                 CollidePartId.Kick -> {
-                    level.playLocalSound(x, y, z, ModSounds.Kick.event, SoundSource.BLOCKS, downHitVolume * 0.8f, downHitPitch, false)
+                    level.playLocalSound(x, y, z, ModSounds.Kick.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
                     used += newCollisions
                 }
                 CollidePartId.HiHat -> {
@@ -128,7 +139,7 @@ class CollidePartEntity(level: Level, val ownerId: OwnerId? = null, val partId: 
                             && show.data.mapping == BitChartStore.RAE_ID
                             && show.data.signal.frameHas(32) // Dook High Hat Close
                     val sound = if (closed) ModSounds.HihatClosed else ModSounds.HihatOpen
-                    level.playLocalSound(x, y, z, sound.event, SoundSource.BLOCKS, downHitVolume, downHitPitch, false)
+                    level.playLocalSound(x, y, z, sound.event, SoundSource.BLOCKS, downHitVolume * 0.5f, downHitPitch, false)
                     used += newCollisions
                 }
                 CollidePartId.Boop if punched -> {
@@ -138,8 +149,10 @@ class CollidePartEntity(level: Level, val ownerId: OwnerId? = null, val partId: 
                 else -> {}
             }
 
-            lastHitTime = tickCount
-            hitDirection = hitDir
+            if (used.isNotEmpty()) {
+                lastHitTime = tickCount
+                hitDirection = hitDir
+            }
         }
         colliding.clear()
         punched = false

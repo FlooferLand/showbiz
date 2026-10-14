@@ -44,7 +44,7 @@ object ServerConnections {
         level.server?.playerList?.players?.forEach { ServerPlayNetworking.send(it, packet) }
     }
     fun broadcastUpdate(id: OwnerId, level: ServerLevel) {
-        val points = points[id] ?: return
+        val points = points[id]?.map { it.copy(connections = it.connections.toMutableList()) } ?: return
         val server = level.server
         val connectable = id.grabConnectable(level)
         val centerPos = connectable?.grabCenterPos() ?: Vec3.ZERO
@@ -73,12 +73,9 @@ object ServerConnections {
                 val points = mutableListOf<Point>()
                 var index = 0
 
-                manager.inputs.keys.sorted().forEach { key ->
-                    points.add(Point(index++, manager.inputs.size, key, PointType.Input))
-                }
-                manager.outputs.keys.sorted().forEach { key ->
-                    points.add(Point(index++, manager.outputs.size, key, PointType.Output))
-                }
+                val total = manager.inputs.size + manager.outputs.size
+                manager.inputs.keys.sorted().forEach { key -> points.add(Point(index++, total, key, PointType.Input)) }
+                manager.outputs.keys.sorted().forEach { key -> points.add(Point(index++, total, key, PointType.Output)) }
 
                 ServerConnections.points[id] = points
                 queued.add(connectable)
@@ -96,6 +93,11 @@ object ServerConnections {
             }
             for (connectable in queued) {
                 updateConnections(connectable)
+            }
+
+            // Sending a packet to the client while they hold the wand
+            if (level.gameTime % CLIENT_UPDATE_INTERVAL == 0L) {
+                for (connectable in queued) OwnerId.of(connectable)?.let { broadcastUpdate(it, level) }
             }
 
             if (Showbiz.log.isDebugEnabled) {
@@ -120,7 +122,7 @@ object ServerConnections {
         // Clearing invalid listeners
         if (level != null && level is ServerLevel && level.gameTime > 100L) {
             for ((_, port) in manager.outputs) {
-                port.removeListeners { listener -> listener.isRemoved(level) }
+                port.removeListeners { listener -> listener.isRemovedEntityWorkaround(level) }
             }
         }
 
@@ -133,17 +135,13 @@ object ServerConnections {
             val fromIndex = points.indexOfFirst { it.id == portId && it.type == PointType.Output }
             if (fromIndex == -1) continue
 
-            // TODO: "id" being used here isn't correct? No fucking clue why using listenerId breaks things
             for (listenerId in port.readListeners()) {
-                val otherPoints = ServerConnections.points[id] ?: continue
+                val otherPoints = ServerConnections.points[listenerId] ?: continue
                 val otherPoint = otherPoints.firstOrNull { it.id == portId && it.type == PointType.Input } ?: continue
                 points[fromIndex].connections.add(Connection(listenerId, otherPoint))
+                points[fromIndex].connected = true
+                otherPoint.connected = true
             }
-        }
-
-        // Sending a packet to the client while they hold the wand
-        if (level is ServerLevel && level.gameTime % CLIENT_UPDATE_INTERVAL == 0L && id != null) {
-            broadcastUpdate(id, level)
         }
     }
 
@@ -163,13 +161,14 @@ object ServerConnections {
             )
         }
     }
-    data class Point(val index: Int, val pointCount: Int, val id: String, val type: PointType, val connections: MutableList<Connection> = mutableListOf()) {
+    data class Point(val index: Int, val pointCount: Int, val id: String, val type: PointType, var connected: Boolean = false, val connections: MutableList<Connection> = mutableListOf()) {
         companion object {
             fun encode(buf: FriendlyByteBuf, point: Point, shallow: Boolean = false) {
                 buf.writeInt(point.index)
                 buf.writeInt(point.pointCount)
                 buf.writeUtf(point.id)
                 buf.writeEnum(point.type)
+                buf.writeBoolean(point.connected)
                 if (!shallow) buf.writeCollection(point.connections, Connection::encode)
             }
             fun decode(buf: FriendlyByteBuf, shallow: Boolean = false): Point = Point(
@@ -177,6 +176,7 @@ object ServerConnections {
                 pointCount = buf.readInt(),
                 id = buf.readUtf(),
                 type = buf.readEnum(PointType::class.java),
+                connected = buf.readBoolean(),
                 connections = if (!shallow) buf.readList(Connection::decode) else mutableListOf()
             )
         }

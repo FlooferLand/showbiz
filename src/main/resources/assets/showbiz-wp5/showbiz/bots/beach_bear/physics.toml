@@ -1,0 +1,28 @@
+format = 1
+
+# One cylinder per bit: today's motion, converted.
+# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
+[bits.wp5]
+38 = { flow_in = 0.7,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+39 = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+40 = { flow_in = 0.8, flow_out = 0.4, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+41 = { flow_in = 0.8, flow_out = 0.4, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+42 = { flow_in = 0.45, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.38, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+43 = { flow_in = 0.38, flow_out = 0.4, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.38, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+44 = { flow_in = 0.38, flow_out = 0.4, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.38, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+45 = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+46 = { flow_in = 0.48, flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+47 = { flow_in = 0.8, flow_out = 0.8, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.2, smash_out = 0.42, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+48 = { flow_in = 0.24, flow_out = 0.3, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.12, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+49 = { flow_in = 0.8,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
+
+# Converted from the old wigglemul.
+[dynbones]
+"Head"   = { damping = 0.075, elasticity = 0.1, freeze_x = false }
+"Guitar" = { damping = 0.15,  elasticity = 0.1, freeze_x = false }
+"ElbowL" = { damping = 0.15,  elasticity = 0.2, freeze_x = false }
+"HandL"  = { damping = 0.15,  elasticity = 0.2, freeze_x = false }
+"ArmL"   = { damping = 0.15,  elasticity = 0.3, freeze_x = false }
+"HandR"  = { damping = 0.075, elasticity = 0.1, freeze_x = false }
+"Waist"  = { damping = 0.06,  elasticity = 0.1, freeze_x = true }
+"Foot"   = { damping = 0.15,  elasticity = 0.1, freeze_x = true }

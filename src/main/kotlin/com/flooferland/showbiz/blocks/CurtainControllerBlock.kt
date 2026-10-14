@@ -10,10 +10,11 @@ import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.CurtainControllerBlockEntity
-import com.flooferland.showbiz.items.WandItem
-import com.flooferland.showbiz.network.packets.CurtainControllerEditPacket
+import com.flooferland.showbiz.network.packets.editscreen.CurtainControllerEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 
 class CurtainControllerBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::CurtainControllerBlock)!!
@@ -23,17 +24,14 @@ class CurtainControllerBlock(props: Properties) : FacingEntityBlock(props) {
         ModBlocks.CurtainController.entityType!!.create(pos, state)!!
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
-        if (level.isClientSide) return InteractionResult.PASS
-        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
-        player.openMenu(state.getMenuProvider(level, pos))
-        return InteractionResult.SUCCESS
+        return handleEditScreen(state, level, pos, player, hitResult)
     }
 
     companion object {
         init {
             ServerPackets.listen(CurtainControllerEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen
-                val blockEntity = player.serverLevel().getBlockEntity(packet.base.blockPos) as? CurtainControllerBlockEntity ?: return@listen
+                val blockEntity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? CurtainControllerBlockEntity ?: return@listen
                 blockEntity.applyChange(true) {
                     blockEntity.menuData = packet.base
                     blockEntity.bitFilterOpen = packet.bitFilterOpen

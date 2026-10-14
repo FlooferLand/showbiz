@@ -7,13 +7,19 @@
     "authors": ["FlooferLand"],
     "contact": {
         "homepage": "https://modrinth.com/mod/showbiz",
-        "sources": "https://github.com/FlooferLand/Showbiz-Mod",
-        "issues": "https://github.com/FlooferLand/Showbiz-Mod/issues"
+        "sources": "https://github.com/FlooferLand/showbiz",
+        "issues": "https://github.com/FlooferLand/showbiz/issues"
     },
     "license": "LGPL3",
     "icon": "assets/showbiz/icon.png",
     "environment": "*",
     "entrypoints": {
+        "preLaunch": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizPrelaunch",
+                "adapter": "kotlin"
+            }
+        ],
         "main": [
             {
                 "value": "com.flooferland.showbiz.Showbiz",
@@ -26,6 +32,12 @@
                 "adapter": "kotlin"
             }
         ],
+        "fabric-datagen": [
+            {
+                "value": "com.flooferland.showbiz.ShowbizDataGenerator",
+                "adapter": "kotlin"
+            }
+        ],
         "modmenu": [
             {
                 "value": "com.flooferland.showbiz.ShowbizModMenu",
@@ -33,7 +45,13 @@
             }
         ]
     },
-    "mixins": ["showbiz.mixins.json"],
+    "mixins": [
+        "showbiz.mixins.json",
+        {
+            "config": "showbiz.client.mixins.json",
+            "environment": "client"
+        }
+    ],
     "depends": {
         "fabricloader": ">=$fabric_loader",
         "fabric-api": ">=$fabric_api",
@@ -43,7 +61,7 @@
         "geckolib": "^$geckolib"
     },
     "suggests": {
-        "veil": ">=$veil",
-        "computercraft": ">=$cctweaked"
+        "computercraft": ">=$cctweaked",
+        "irl-redactor": "^$irlights"
     }
 }
