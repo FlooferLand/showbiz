@@ -26,7 +26,8 @@ class TheFuckingVersionMigrator(private val owner: BlockEntity, private val step
         tag.putInt(VERSION_KEY, dataVersion)
     }
     fun load(tag: CompoundTag) {
-        dataVersion = tag.getInt(VERSION_KEY)
+        if (tag.contains(VERSION_KEY)) dataVersion = tag.getInt(VERSION_KEY)
+        else if (owner.level == null) dataVersion = 0
     }
 
     fun setLevel(entity: BlockEntity) {
