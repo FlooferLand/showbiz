@@ -158,8 +158,8 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
 
     /** The bone turned by [by], back into GeckoLib Z-Y-X angles */
     private fun turnBone(bone: GeoBone, by: Quaternionf) {
-        val vec = Quaterniond().rotateZ(bone.rotZ.toDouble()).rotateY(bone.rotY.toDouble()).rotateX(bone.rotX.toDouble())
-            .mul(Quaterniond(by.x.toDouble(), by.y.toDouble(), by.z.toDouble(), by.w.toDouble()))
+        val vec = Matrix3d().rotateZ(bone.rotZ.toDouble()).rotateY(bone.rotY.toDouble()).rotateX(bone.rotX.toDouble())
+            .rotate(Quaterniond(by.x.toDouble(), by.y.toDouble(), by.z.toDouble(), by.w.toDouble()))
             .getEulerAnglesZYX(Vector3d())
         bone.rotX = vec.x.toFloat(); bone.rotY = vec.y.toFloat(); bone.rotZ = vec.z.toFloat()
     }
