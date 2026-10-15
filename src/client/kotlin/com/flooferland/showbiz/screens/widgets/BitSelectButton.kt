@@ -34,6 +34,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
             field = value
             updateChartButtons()
         }
+    var onChanged: ((MappedBits) -> Unit)? = null
 
     var scrollOffset = 0.0
     var bitWidgets = mutableListOf<AbstractWidget>()
@@ -71,6 +72,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
             searchBar = null
             usedBits.clear()
             bitWidgets = mutableListOf()
+            onChanged?.invoke(values)
         }
 
         expanded = open
@@ -120,6 +122,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
                 values.addBit(chartId, bitId)
                 popupSetOpen(false)
             }
+            onChanged?.invoke(values)
         }
         chart?.forEach { (fixtureName, movements) ->
             val movements = movements.entries
@@ -192,8 +195,10 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
 
         // Chart buttons
         buttons.forEach { (chartId, button) ->
+            button.active = this.active
             button.render(guiGraphics, mouseX, mouseY, partialTick)
-            val outlineColor = Showbiz.charts.idsToInfo[pickingChart?: chartId]?.color ?: 0xFFFFFFFF.toInt()
+
+            val outlineColor = Showbiz.charts.idsToInfo[pickingChart ?: chartId]?.color ?: 0xFFFFFFFF.toInt()
             guiGraphics.renderOutline(button.x, button.y, button.width, button.height, FastColor.ARGB32.color(100, outlineColor))
 
             // Bit chart ID

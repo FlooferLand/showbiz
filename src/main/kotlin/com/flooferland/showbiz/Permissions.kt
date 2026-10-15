@@ -17,6 +17,7 @@ enum class Permissions(var selector: PermissionSelector) {
     SwitchReels(Showbiz.config.permissions.switchReels),
     ControlPlayback(Showbiz.config.permissions.controlPlayback),
     EditScreenAccess(Showbiz.config.permissions.editScreenAccess),
+    EditServerShowBridge(Showbiz.config.permissions.editServerShowBridge),
     ;
 
     fun test(player: Player): Boolean {

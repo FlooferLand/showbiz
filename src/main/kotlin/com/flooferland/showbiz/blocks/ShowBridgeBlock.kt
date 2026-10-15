@@ -7,7 +7,12 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
+import com.flooferland.showbiz.ServerPackets
+import com.flooferland.showbiz.blocks.entities.ShowBridgeBlockEntity
+import com.flooferland.showbiz.network.packets.editscreen.ShowBridgeEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 import com.mojang.serialization.MapCodec
 
@@ -20,5 +25,19 @@ class ShowBridgeBlock(properties: Properties) : BaseEntityBlock(properties) {
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         return handleEditScreen(state, level, pos, player, hitResult)
+    }
+
+    companion object {
+        init {
+            ServerPackets.listen(ShowBridgeEditPacket.type) { packet, context ->
+                val player = context.player() ?: return@listen
+                val entity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? ShowBridgeBlockEntity ?: return@listen
+                entity.applyChange(true) {
+                    menuData = packet.base
+                    serverProfile = packet.serverProfile
+                    playerProfiles[player.uuid] = packet.playerProfile
+                }
+            }
+        }
     }
 }

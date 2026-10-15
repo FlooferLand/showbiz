@@ -42,13 +42,14 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
         var switchReels: PermissionSelector = PermissionSelector.Anyone,
         var controlPlayback: PermissionSelector = PermissionSelector.Anyone,
         var editScreenAccess: PermissionSelector = PermissionSelector.Anyone,
+        var editServerShowBridge: PermissionSelector = PermissionSelector.Operator,
     )
 
     @Serializable
     data class Other(
         var forceVanillaLighting: Boolean = false,
         var sleepFloppyParts: Boolean = false
-        )
+    )
 
     public override fun clone() = super.clone() as ModConfig
 
