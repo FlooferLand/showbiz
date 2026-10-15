@@ -83,6 +83,13 @@ object AutoConnection {
             }
             "Monitor added"
         }
+        is GreyboxBlockEntity if first is ShowBridgeBlockEntity -> {
+            val (greybox, bridge) = Pair(last, first)
+            greybox.applyChange(true) {
+                show.bindListener(bridge)
+            }
+            "Show Bridge added"
+        }
 
 
         // Other

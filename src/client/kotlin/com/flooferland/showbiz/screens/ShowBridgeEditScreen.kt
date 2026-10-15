@@ -5,7 +5,9 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.layouts.*
 import net.minecraft.network.chat.*
+import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
+import com.fazecast.jSerialComm.SerialPort
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.menus.ShowBridgeEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.ShowBridgeEditPacket
@@ -19,7 +21,7 @@ import com.flooferland.showbiz.utils.rl
 class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, title: Component) : EditScreen<ShowBridgeEditMenu, ShowBridgeEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/show_bridge.png")
 
-    var selectedTab = Tab.Player
+    var selectedTab = Tab.entries.firstOrNull { getProfile(it).enabled } ?: Tab.Player
     val profile get() = getProfile(selectedTab)
 
     enum class Tab { Player, Server }
@@ -56,11 +58,24 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
         }
 
         field("Serial port") {
-            EditBox(font, 60, 20, Component.literal("Serial port"))
+            EditBox(font, 60, 20, Component.literal("Serial port")).also { port ->
+                val ports = editMenu.data.serverPorts
+                port.value = profile.serialPort
+                port.tooltip = Tooltip.create(Component.literal("Case sensitive"))
+                port.setResponder { text ->
+                    profile.serialPort = text
+                    val suggestion = ports.firstOrNull { it.startsWith(text, ignoreCase = true) } ?: ""
+                    port.setSuggestion(if (suggestion.length > port.cursorPosition) suggestion.substring(port.cursorPosition) else "")
+                }
+            }
         }
 
         field("Serial baud rate") {
-            EditBox(font, 60, 20, Component.literal("Serial baud rate"))
+            EditBox(font, 60, 20, Component.literal("Serial baud rate")).also { baud ->
+                baud.value = profile.serialBaudRate.toString()
+                baud.setFilter { text -> text.all { it.isDigit() } && text.length < 8 }
+                baud.setResponder { profile.serialBaudRate = it.toIntOrNull() ?: profile.serialBaudRate }
+            }
         }
 
         layout.addChild(SpacerElement.height(20))
@@ -133,6 +148,38 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
             tabButton.active = selectedTab != tab
             addRenderableWidget(tabButton)
             profileX += tabButton.width + 10
+        }
+
+        // Serial port info
+        run {
+            val ports = when (selectedTab) {
+                Tab.Player -> SerialPort.getCommPorts().map { it.systemPortName }
+                Tab.Server -> menu.data.serverPorts
+            }
+
+            val lines = mutableListOf<Component>()
+            lines += Component.literal("$selectedTab serial ports")
+            ports.forEach { lines += Component.literal("- $it") }
+
+            val x = 20
+            val y = y + (lines.size * font.lineHeight / 2)
+            lines.forEachIndexed { i, text ->
+                val name = StringWidget(x, y + (i * font.lineHeight), font.width(text), font.lineHeight, text, font).alignLeft()
+                addRenderableWidget(name)
+            }
+        }
+
+        // Bottom output
+        run {
+            val x = x
+            val y = height - 30
+            val output = EditBox(font, x, y, texSize - 20, 20, Component.literal("Output"))
+            output.setMaxLength(512)
+            output.value = profile.output.ifEmpty { "<empty>" }
+            output.tooltip = Tooltip.create(Component.literal("Output"))
+            output.setEditable(false)
+            output.setTextColor(CommonColors.GRAY)
+            addRenderableWidget(output)
         }
 
         // Layout

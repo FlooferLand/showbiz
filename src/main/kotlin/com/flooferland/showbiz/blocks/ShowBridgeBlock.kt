@@ -5,6 +5,7 @@ import net.minecraft.world.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.level.block.*
+import net.minecraft.world.level.block.entity.*
 import net.minecraft.world.level.block.state.*
 import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ServerPackets
@@ -26,6 +27,9 @@ class ShowBridgeBlock(properties: Properties) : BaseEntityBlock(properties) {
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         return handleEditScreen(state, level, pos, player, hitResult)
     }
+
+    override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
+        BlockEntityTicker { _, _, _, entity -> (entity as? ShowBridgeBlockEntity)?.tick() }
 
     companion object {
         init {

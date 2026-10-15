@@ -7,7 +7,7 @@ import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.showbridge.ShowBridgeProfile
 import com.flooferland.showbiz.utils.rl
 
-class ShowBridgeEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var serverProfile: ShowBridgeProfile, var playerProfile: ShowBridgeProfile) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
+class ShowBridgeEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var serverProfile: ShowBridgeProfile, var playerProfile: ShowBridgeProfile, var serverPorts: List<String> = emptyList()) : EditScreenMenu.EditScreenPacketPayload(editScreen) {
     override fun type() = type
 
     companion object {
@@ -17,12 +17,14 @@ class ShowBridgeEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var serverP
                 conf.base.encode(buf)
                 ShowBridgeProfile.codec.encode(buf, conf.serverProfile)
                 ShowBridgeProfile.codec.encode(buf, conf.playerProfile)
+                buf.writeCollection(conf.serverPorts) { buf, string -> buf.writeUtf(string) }
             },
             { buf ->
                 ShowBridgeEditPacket(
                     editScreen = EditScreenMenu.EditScreenBuf.decode(buf),
                     serverProfile = ShowBridgeProfile.codec.decode(buf),
                     playerProfile = ShowBridgeProfile.codec.decode(buf),
+                    serverPorts = buf.readList { it.readUtf() }
                 )
             }
         )!!

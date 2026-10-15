@@ -128,27 +128,33 @@ dependencies {
         modImplementation("net.fabricmc:fabric-language-kotlin:${dep("fabric_language_kotlin")}")
     }
 
-    // Showbiz data library (https://github.com/FlooferLand/bizlib)
-    // TODO: Relocate Bizlib's dependencies to my own com.flooferland.showbiz.shadow package so other mods using ANTLR wont collide with Showbiz
-    implementation("com.github.flooferland:bizlib:${dep("bizlib")}")
-    include("com.github.flooferland:bizlib:${dep("bizlib")}")
-    shadow("com.github.flooferland:bizlib:${dep("bizlib")}")
+    // External libraries
+    // TODO: Relocate these to my own com.flooferland.showbiz.shadow package so other mods using them won't collide with Showbiz
+    run {
+        // Showbiz data library (https://github.com/FlooferLand/bizlib)
+        implementation("com.github.flooferland:bizlib:${dep("bizlib")}")
+        include("com.github.flooferland:bizlib:${dep("bizlib")}")
+        shadow("com.github.flooferland:bizlib:${dep("bizlib")}")
 
-    // ktoml
-    // TODO: Relocate ktoml to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
-    implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
-    include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
-    shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+        // ktoml
+        implementation("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+        include("com.akuleshov7:ktoml-core:${dep("ktoml")}")
+        shadow("com.akuleshov7:ktoml-core:${dep("ktoml")}")
 
-    // XMLUtil
-    // TODO: Relocate xmlutil to my own com.flooferland.showbiz.shadow package so other mods using it won't collide with Showbiz
-    val xmlutil = dep("xmlutil")
-    implementation("io.github.pdvrieze.xmlutil:core:$xmlutil")
-    include("io.github.pdvrieze.xmlutil:core:$xmlutil")
-    shadow("io.github.pdvrieze.xmlutil:core:$xmlutil")
-    implementation("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
-    include("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
-    shadow("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+        // XMLUtil
+        val xmlutil = dep("xmlutil")
+        implementation("io.github.pdvrieze.xmlutil:core:$xmlutil")
+        include("io.github.pdvrieze.xmlutil:core:$xmlutil")
+        shadow("io.github.pdvrieze.xmlutil:core:$xmlutil")
+        implementation("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+        include("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+        shadow("io.github.pdvrieze.xmlutil:serialization:$xmlutil")
+
+        // Source: https://mvnrepository.com/artifact/com.fazecast/jSerialComm
+        implementation("com.fazecast:jSerialComm:${dep("jserialcomm")}")
+        include("com.fazecast:jSerialComm:${dep("jserialcomm")}")
+        shadow("com.fazecast:jSerialComm:${dep("jserialcomm")}")
+    }
 
     // GeckoLib
     modImplementation("software.bernie.geckolib:geckolib-${loader}-${minecraft}:${dep("geckolib")}")
