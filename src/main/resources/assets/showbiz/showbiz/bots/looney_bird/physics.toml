@@ -8,11 +8,11 @@ dual_pressure_scale = 0.75
 # One cylinder per bit: Reel to Real's own values.
 # curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.rae]
-171 = { flow_in = 0.4, flow_out = 0.7,  gravity_in = 0.5, gravity_out = 0.5, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-172 = { flow_in = 0.8, flow_out = 0.9, gravity_in = 0.3, gravity_out = 0.3, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-167 = { flow_in = 1.6, flow_out = 2.6,  gravity_in = 1.0,  gravity_out = 1.0,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-191 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-192 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.5,  gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+171 = { flow_in = 0.8, flow_out = 0.8,  gravity_in = 0.54, gravity_out = 0.54, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+172 = { flow_in = 0.63, flow_out = 0.65, gravity_in = 0.19, gravity_out = 0.19, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+167 = { flow_in = 1.2, flow_out = 1.2,  gravity_in = 1.25,  gravity_out = 1.25,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+191 = { flow_in = 1.8, flow_out = 1.8,  gravity_in = 0.9,  gravity_out = 0.9,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+192 = { flow_in = 1.8, flow_out = 1.8,  gravity_in = 0.9,  gravity_out = 0.9,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
 193 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
 
 # Converted from the old wigglemul.

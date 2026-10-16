@@ -1,15 +1,16 @@
 set rae looney_bird
 
 rae 171 {
-    rotate "head" y:-75
+    rotate "head" y:-65
 }
 
 rae 172 {
-    move "looney" y:8
+    move "looney" y:9
 }
 
 rae 167 {
     rotate "mouth" x:-35
+    rotate "snout" x:8
 }
 
 rae 191 {

@@ -1511,7 +1511,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1535,7 +1535,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1559,7 +1559,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1607,7 +1607,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1896,7 +1896,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "Arm2L",
@@ -1967,7 +1967,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1991,7 +1991,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -2166,16 +2166,16 @@
 	"outliner": [
 		{
 			"uuid": "9b7b4868-2727-96d5-eb6e-e3bc89a4b369",
-			"isOpen": false,
+			"isOpen": true,
 			"children": [
 				"6bc4b9ae-efb0-7df3-5798-1bdf16fb0845",
 				{
 					"uuid": "fb75f83e-60c0-d35d-1bc7-10866acc8879",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						{
 							"uuid": "d7b59c66-d74c-d8ce-4c06-0867d111b649",
-							"isOpen": false,
+							"isOpen": true,
 							"children": [
 								{
 									"uuid": "0ca9ec99-8809-2d99-6368-81bd39761d36",
@@ -2183,7 +2183,7 @@
 									"children": [
 										{
 											"uuid": "8ad2fd74-6503-75a3-a5bc-5fbb0bca49e2",
-											"isOpen": false,
+											"isOpen": true,
 											"children": [
 												"9d4b881b-de93-9587-8726-0f8f925c1d08",
 												"47caecf7-9ce5-c682-124f-b7872df5df5d",
@@ -2279,11 +2279,11 @@
 				},
 				{
 					"uuid": "177c86fe-3ccb-67bf-1a7d-75e0f4e4cd77",
-					"isOpen": false,
+					"isOpen": true,
 					"children": [
 						{
 							"uuid": "47b334ae-6c3a-f582-e970-a3c04202e661",
-							"isOpen": false,
+							"isOpen": true,
 							"children": [
 								"a2495ee2-6692-a8d1-013e-a25074dbea21",
 								{
