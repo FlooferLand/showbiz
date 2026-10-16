@@ -79,7 +79,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
         when (entity.mode) {
             ShowParserBlockEntity.Mode.Bits -> show.data.playing && bitFilter.chartHasBit(show.data.mapping) { show.data.signal.frameHas(it) }
             ShowParserBlockEntity.Mode.Playing -> show.data.playing
-        }
+        }.let { if (invert) !it else it }
     }
 
     override fun triggerEvent(state: BlockState, level: Level, pos: BlockPos, id: Int, param: Int): Boolean {

@@ -26,10 +26,10 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
     override fun addWidgets(widgets: MutableList<WidgetInfo>) {
         // Invert
         run {
-            invert = Checkbox.builder(Component.literal("Invert"), font)
+            invert = Checkbox.builder(Component.empty(), font)
                 .selected(menu.data.invert)
                 .build()
-            widgets.add(WidgetInfo(invert!!))
+            widgets.add(WidgetInfo("Invert", invert!!))
         }
 
         // Mode
@@ -40,7 +40,7 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
                 .create(Component.literal("Mode")) { _, mode ->
                     bitFilter?.active = (mode == ShowParserBlockEntity.Mode.Bits)
                 }
-            widgets.add(WidgetInfo(mode!!))
+            widgets.add(WidgetInfo("Mode", mode!!))
         }
 
         // Bit filter
@@ -48,7 +48,7 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
             bitFilter = BitSelectButton(200, 20)
             bitFilter!!.values = menu.data.bitFilter.clone()
             bitFilter!!.active = (mode?.value == ShowParserBlockEntity.Mode.Bits)
-            widgets.add(WidgetInfo(bitFilter!!))
+            widgets.add(WidgetInfo("Bit Filter", bitFilter!!))
         }
     }
 
@@ -73,6 +73,6 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
         guiGraphics.setColor(lightness, lightness, lightness, 0.8f)
         guiGraphics.blit(ports, textureX, textureY, 0f, 0f, size, size / 2, size, size)
         guiGraphics.setColor(1f, 1f, 1f, 1f)
-        guiGraphics.drawCenteredString(font, "Signal", textureX + (size / 2), textureY + (size * 0.84).toInt(), CommonColors.WHITE)
+        guiGraphics.drawCenteredString(font, "Note that some things might change", textureX + (size / 2), textureY + (size * 0.84).toInt(), CommonColors.WHITE)
     }
 }
