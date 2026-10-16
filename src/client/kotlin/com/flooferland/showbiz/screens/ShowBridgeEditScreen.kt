@@ -4,6 +4,7 @@ import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.layouts.*
+import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
@@ -16,6 +17,7 @@ import com.flooferland.showbiz.screens.widgets.TextWidget
 import com.flooferland.showbiz.types.showbridge.SafeSerialPort
 import com.flooferland.showbiz.types.showbridge.ShowBridgeMethod
 import com.flooferland.showbiz.types.showbridge.ShowBridgeProfile
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.rl
 
 class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, title: Component) : EditScreen<ShowBridgeEditMenu, ShowBridgeEditPacket>(editMenu, inventory, title) {
@@ -185,6 +187,25 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
             output.setEditable(false)
             output.setTextColor(CommonColors.GRAY)
             addRenderableWidget(output)
+        }
+
+        // Help button
+        run {
+            val x = x + (texSize - 20)
+            val y = height - 30
+            val url = "https://github.com/FlooferLand/showbiz/wiki/Controlling-real-bots"
+            val client = Minecraft.getInstance()
+            val help = Button.builder(Component.literal("?")) {
+                    client.setScreen(ConfirmLinkScreen({ confirmed ->
+                        if (confirmed) ShowbizEnv.openLink(url)
+                        client.setScreen(this)
+                    }, url, true))
+                }
+                .pos(x, y)
+                .size(20, 20)
+                .tooltip(Tooltip.create(Component.literal("Help")))
+                .build()
+            addRenderableWidget(help)
         }
 
         // Layout

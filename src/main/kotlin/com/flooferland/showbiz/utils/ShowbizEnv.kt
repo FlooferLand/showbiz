@@ -1,6 +1,8 @@
 package com.flooferland.showbiz.utils
 
+import net.minecraft.*
 import com.flooferland.showbiz.Showbiz
+import java.net.URI
 import java.nio.file.Path
 import net.fabricmc.loader.api.FabricLoader
 
@@ -20,6 +22,15 @@ object ShowbizEnv {
             else -> {
                 ProcessBuilder("xdg-open", dir.absolutePath).start()
             }
+        }
+    }
+
+    fun openLink(url: String) {
+        try {
+            val uri = URI(url)
+            Util.getPlatform().openUri(uri)
+        } catch (e: Exception) {
+            Showbiz.log.error("Failed to open URL '${url}'", e)
         }
     }
     //endregion
