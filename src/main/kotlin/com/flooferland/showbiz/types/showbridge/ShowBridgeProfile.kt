@@ -6,8 +6,10 @@ import net.minecraft.network.codec.*
 import com.flooferland.showbiz.types.ICompoundable
 import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getEnumOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
+import com.flooferland.showbiz.utils.Extensions.putEnum
 import kotlin.jvm.optionals.getOrNull
 
 data class ShowBridgeProfile(
@@ -27,7 +29,7 @@ data class ShowBridgeProfile(
     override fun save(tag: CompoundTag) {
         tag.putBoolean("enabled", enabled)
         tag.putBoolean("stay_open", stayOpen)
-        tag.putInt("method", method.ordinal)
+        tag.putEnum("method", method)
         MappedBits.CODEC.encodeStart(NbtOps.INSTANCE, bitFilter).result().getOrNull()?.let {
             tag.put("bit_filter", it)
         }
@@ -43,7 +45,7 @@ data class ShowBridgeProfile(
     override fun load(tag: CompoundTag) {
         enabled = tag.getBooleanOrNull("enabled") ?: false
         stayOpen = tag.getBooleanOrNull("stay_open") ?: false
-        tag.getIntOrNull("method")?.let { method = ShowBridgeMethod.entries.getOrNull(it) ?: ShowBridgeMethod.TextList }
+        tag.getEnumOrNull<ShowBridgeMethod>("method")?.let { method = it }
         tag.get("bit_filter")?.let { filterTag ->
             MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->
                 loaded.charts.forEach { chartId ->

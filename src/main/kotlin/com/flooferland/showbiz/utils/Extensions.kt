@@ -24,6 +24,7 @@ import java.util.Locale
 import java.util.UUID
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
+import kotlin.enums.enumEntries
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
@@ -135,6 +136,12 @@ object Extensions {
     fun CompoundTag.getByteArrayOrNull(key: String) = if (contains(key)) getByteArray(key) else null
     fun CompoundTag.getLongArrayOrNull(key: String) = if (contains(key)) getLongArray(key) else null
     fun CompoundTag.getUUIDOrNull(key: String)      = if (contains(key)) getUUID(key) else null
+    inline fun <reified E : Enum<E>> CompoundTag.getEnumOrNull(key: String): E? {
+        return getIntOrNull(key)?.let { enumEntries<E>().getOrNull(it) }
+    }
+    inline fun <reified E : Enum<E>> CompoundTag.putEnum(key: String, value: E) {
+        putInt(key, value.ordinal)
+    }
     //endregion
 
     fun LivingEntity.getHeldItem(filter: (ItemStack) -> Boolean): ItemStack? =

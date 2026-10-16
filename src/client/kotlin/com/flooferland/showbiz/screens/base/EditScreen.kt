@@ -14,6 +14,8 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import kotlin.math.roundToInt
 
+// TODO: This system makes it so screens trying to hide a widget end up still displaying the name/label text.. which is a problem
+
 abstract class EditScreen<M, P: EditScreenMenu.EditScreenPacketPayload>(open val editMenu: M, inventory: Inventory, title: Component) : Screen(title), MenuAccess<M> where M: EditScreenMenu<P> {
     data class WidgetInfo(val name: String?, val widget: AbstractWidget, val settings: (LayoutSettings) -> LayoutSettings = { it }) {
         constructor(widget: AbstractWidget) : this(widget.message.string, widget)

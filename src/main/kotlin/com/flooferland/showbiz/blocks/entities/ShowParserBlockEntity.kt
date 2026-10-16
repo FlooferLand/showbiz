@@ -18,6 +18,9 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getEnumOrNull
+import com.flooferland.showbiz.utils.Extensions.putEnum
 
 class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, EditScreenOwner<ShowParserEditPacket>, IVersionMigrator {
     override val connectionManager = ConnectionManager(this)
@@ -29,24 +32,34 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
     override val migrator = IVersionMigrator.makeTemporaryTransition(this, DataMigrationSteps.showParser)
 
+    enum class Mode { Bits, Playing }
+
+    val bitFilter = MappedBits()
+    var mode = Mode.Bits
+    var invert = false
+
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
         val player = player as? ServerPlayer ?: return null
         return ShowParserEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        ShowParserEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping))
+        ShowParserEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition)), bitFilter, mode, invert)
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         migrator.load(tag)
         connectionManager.load(tag)
-        menuData.loadAdditional(tag)
+        bitFilter.load(tag, "bit_filter")
+        tag.getEnumOrNull<Mode>("mode")?.let { mode = it }
+        tag.getBooleanOrNull("invert")?.let { invert = it }
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         migrator.save(tag)
         connectionManager.save(tag)
-        menuData.saveAdditional(tag)
+        bitFilter.save(tag, "bit_filter")
+        tag.putEnum("mode", mode)
+        tag.putBoolean("invert", invert)
     }
 
     override fun setLevel(level: Level) {

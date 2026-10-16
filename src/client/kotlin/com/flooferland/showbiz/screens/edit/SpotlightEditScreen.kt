@@ -3,8 +3,8 @@ package com.flooferland.showbiz.screens
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import net.minecraft.world.entity.player.*
-import com.flooferland.showbiz.menus.FloodlightEditMenu
-import com.flooferland.showbiz.network.packets.editscreen.FloodlightEditPacket
+import com.flooferland.showbiz.menus.SpotlightEditMenu
+import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.ColorPicker
@@ -12,7 +12,7 @@ import com.flooferland.showbiz.utils.rl
 
 // TODO: Should turn this into a general light edit screen? Floodlights could use it
 
-class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, title: Component) : EditScreen<FloodlightEditMenu, FloodlightEditPacket>(editMenu, inventory, title) {
+class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, title: Component) : EditScreen<SpotlightEditMenu, SpotlightEditPacket>(editMenu, inventory, title) {
     override val background = rl("textures/gui/spotlight.png")
 
     var bitFilter: BitSelectButton? = null
@@ -25,7 +25,7 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
         // Bits
         run {
             bitFilter = BitSelectButton(200, 20)
-            bitFilter!!.values = menu.data.base.bitFilter.clone()
+            bitFilter!!.values = menu.data.bitFilter.clone()
             widgets.add(WidgetInfo(bitFilter!!))
         }
 
@@ -50,8 +50,9 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
 
         // Color
         run {
-            color = ColorPicker(0, 0, 160, 40, defaultColor = editMenu.data.color)
+            color = ColorPicker(0, 0, 160, 40, defaultKelvin = editMenu.data.kelvin)
             color!!.value = editMenu.data.brightness
+            color!!.allowedModes = mutableSetOf(ColorPicker.Mode.Kelvin)
             widgets.add(WidgetInfo("Color", color!!))
         }
 
@@ -64,10 +65,10 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
         }
     }
 
-    override fun saveCustom(data: FloodlightEditPacket) {
-        menu.data.base.bitFilter.clearCharts()
+    override fun saveCustom(data: SpotlightEditPacket) {
+        menu.data.bitFilter.clearCharts()
         bitFilter?.values?.forEach { (chartId, bits) ->
-            menu.data.base.bitFilter.setBits(chartId, bits)
+            menu.data.bitFilter.setBits(chartId, bits)
         }
 
         turn?.value?.split(',')?.let { values ->
@@ -78,7 +79,7 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
             }
         }
         angle?.value?.toFloatOrNull()?.let { data.angle = it.coerceIn(1f, 180f) }
-        color?.color?.let { data.color = it }
+        color?.kelvin?.let { data.kelvin = it }
         color?.value?.let { data.brightness = it }
         shadows?.selected()?.let { data.shadows = it }
     }

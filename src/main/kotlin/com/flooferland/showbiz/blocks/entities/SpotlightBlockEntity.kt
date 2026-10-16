@@ -16,6 +16,7 @@ import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.EditScreenMenu
 import com.flooferland.showbiz.types.EditScreenOwner
+import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
@@ -32,9 +33,10 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
 class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Spotlight.entityType!!, pos, blockState), IConnectable, GeoBlockEntity, EditScreenOwner<SpotlightEditPacket> {
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
-        lit = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
+        lit = bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
@@ -43,7 +45,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var supportAbove = false
     var supportBelow = false
 
-    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
+    val bitFilter = MappedBits()
     var turn = Vec2f.ZERO
     var angle = 45f
     var shadows: Boolean = true
@@ -71,10 +73,11 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return SpotlightEditMenu(i, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition), menuData.bitFilter, show.data.mapping), turn, angle, shadows, kelvin, brightness)
+        SpotlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition)), bitFilter, turn, angle, shadows, kelvin, brightness)
 
     fun applyPacket(packet: SpotlightEditPacket) {
         menuData = packet.base
+        bitFilter.set(packet.bitFilter)
         turn = packet.turn
         angle = packet.angle
         kelvin = packet.kelvin
@@ -84,7 +87,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
-        menuData.loadAdditional(tag)
+        bitFilter.load(tag, "bit_filter")
         tag.getBooleanOrNull("lit")?.let { lit = it }
         tag.getBooleanOrNull("shadows")?.let { shadows = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }
@@ -101,7 +104,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
-        menuData.saveAdditional(tag)
+        bitFilter.save(tag, "bit_filter")
         tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
         tag.putFloat("turn_x", turn.x)

@@ -15,13 +15,13 @@ class CurtainControllerEditPacket(editScreen: EditScreenMenu.EditScreenBuf, var 
         val codec = StreamCodec.of<FriendlyByteBuf, CurtainControllerEditPacket>(
             { buf, conf ->
                 conf.base.encode(buf)
-                ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, conf.bitFilterOpen)
-                ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, conf.bitFilterClose)
+                MappedBits.STREAM_CODEC.encode(buf, conf.bitFilterOpen)
+                MappedBits.STREAM_CODEC.encode(buf, conf.bitFilterClose)
             },
             { buf ->
                 val editScreen = EditScreenMenu.EditScreenBuf.decode(buf)
-                val bitFilterOpen = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
-                val bitFilterClose = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
+                val bitFilterOpen = MappedBits.STREAM_CODEC.decode(buf)
+                val bitFilterClose = MappedBits.STREAM_CODEC.decode(buf)
                 CurtainControllerEditPacket(editScreen, bitFilterOpen = bitFilterOpen, bitFilterClose = bitFilterClose)
             }
         )!!

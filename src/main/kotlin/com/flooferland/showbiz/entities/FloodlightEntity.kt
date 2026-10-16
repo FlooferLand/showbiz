@@ -53,7 +53,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
 
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { show ->
-        lit = menuData.bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
+        lit = bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
         if (!level().isClientSide) updatePersistentData { it.putBoolean("lit", lit) }
     }
 
@@ -68,7 +68,8 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     var supportBlock: BlockPos? = null
     var supportBlockLoc: Vec3? = null
 
-    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this), comp.bitFilter)
+    override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this))
+    val bitFilter = comp.bitFilter
     var angle = comp.angle
     var shadows: Boolean = comp.shadows
     var color: Int = comp.color
@@ -150,10 +151,11 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         return FloodlightEditMenu(containerId, getScreenOpeningData(player))
     }
     override fun getScreenOpeningData(player: ServerPlayer) =
-        FloodlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this), menuData.bitFilter, show.data.mapping), turn, angle, shadows, color, brightness)
+        FloodlightEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this)), bitFilter, turn, angle, shadows, color, brightness)
 
     fun applyPacket(packet: FloodlightEditPacket) {
         menuData = packet.base
+        bitFilter.set(packet.bitFilter)
         turn = packet.turn
         angle = packet.angle
         color = packet.color
@@ -168,7 +170,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     }
 
     override fun addAdditionalSaveData(tag: CompoundTag) {
-        menuData.saveAdditional(tag)
+        bitFilter.save(tag, "bit_filter")
         tag.putBoolean("lit", lit)
         tag.putBoolean("shadows", shadows)
         tag.putFloat("turn_x", turn.x)
@@ -195,7 +197,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
-        menuData.loadAdditional(tag)
+        bitFilter.load(tag, "bit_filter")
         tag.getBooleanOrNull("lit")?.let { lit = it }
         tag.getBooleanOrNull("shadows")?.let { shadows = it }
         tag.getFloatOrNull("turn_x")?.let { turn.x = it }

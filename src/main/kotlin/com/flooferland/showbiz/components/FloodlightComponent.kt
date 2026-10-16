@@ -16,7 +16,7 @@ data class FloodlightComponent(var turn: Vec2f = Vec2f.ZERO, var angle: Float = 
             angle = entity.angle,
             shadows = entity.shadows,
             color = entity.color,
-            bitFilter = entity.menuData.bitFilter
+            bitFilter = entity.bitFilter
         )
 
         val CODEC: Codec<FloodlightComponent> = RecordCodecBuilder.create { instance ->

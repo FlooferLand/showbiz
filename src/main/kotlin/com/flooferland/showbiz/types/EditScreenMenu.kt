@@ -1,59 +1,25 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.nbt.*
 import net.minecraft.network.*
-import net.minecraft.network.codec.*
 import net.minecraft.network.protocol.common.custom.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.inventory.*
 import net.minecraft.world.item.*
-import com.flooferland.showbiz.show.toBitId
-import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
-import kotlin.jvm.optionals.getOrNull
 
 open class EditScreenMenu<P>(containerId: Int, menuType: MenuType<*>, val data: P) : AbstractContainerMenu(menuType, containerId)
 where P: EditScreenMenu.EditScreenPacketPayload {
     val id = data.base.id
 
     abstract class EditScreenPacketPayload(val base: EditScreenBuf) : CustomPacketPayload
-    data class EditScreenBuf(val id: OwnerId, val bitFilter: MappedBits = MappedBits(), var mapping: String? = null) {
-        fun loadAdditional(tag: CompoundTag) {
-            bitFilter.clearCharts()
-
-            // Backwards compatibility with pre-0.4.0
-            if (tag.contains("bit_filter", Tag.TAG_INT_ARRAY.toInt())) {
-                tag.getIntArrayOrNull("bit_filter")?.forEach {
-                    bitFilter.addBit(BitChartStore.DEFAULT, it.toBitId())
-                }
-            } else {
-                // Reading post-0.4.0
-                tag.get("bit_filter")?.let { filterTag ->
-                    MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->
-                        loaded.charts.forEach { chartId ->
-                            loaded.getOrPutDefault(chartId).forEach { bitFilter.addBit(chartId, it) }
-                        }
-                    }
-                }
-            }
-        }
-        fun saveAdditional(tag: CompoundTag) {
-            MappedBits.CODEC.encodeStart(NbtOps.INSTANCE, bitFilter).result().getOrNull()?.let {
-                tag.put("bit_filter", it)
-            }
-        }
-
+    data class EditScreenBuf(val id: OwnerId) {
         fun encode(buf: FriendlyByteBuf) {
             id.encode(buf)
-            ByteBufCodecs.fromCodec(MappedBits.CODEC).encode(buf, bitFilter)
-            buf.writeUtf(mapping ?: "")
         }
         companion object {
             fun decode(buf: FriendlyByteBuf): EditScreenBuf {
                 val id = OwnerId.decode(buf)
-                val bitFilter = ByteBufCodecs.fromCodec(MappedBits.CODEC).decode(buf)
-                val mapping = buf.readUtf().takeIf { it.isNotEmpty() }
-                return EditScreenBuf(id, bitFilter, mapping)
+                return EditScreenBuf(id)
             }
         }
     }

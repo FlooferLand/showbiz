@@ -55,7 +55,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
 
     fun refreshOutputState(level: Level, pos: BlockPos, state: BlockState, entity: ShowParserBlockEntity) {
         val level = level as? ServerLevel ?: return
-        if (entity.menuData.bitFilter.isEmpty()) {
+        if (entity.bitFilter.isEmpty() && entity.mode == ShowParserBlockEntity.Mode.Bits) {
             if (level.gameTime % 40 == 0L) {
                 val facing = state.getValue(FACING)
                 val backward = Vec3(facing.normal.x.toDouble(), facing.normal.y.toDouble(), facing.normal.z.toDouble())
@@ -67,11 +67,18 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
         }
 
         val powered = state.getValue(POWERED)
-        val shouldPower = entity.show.data.playing && entity.menuData.bitFilter.chartHasBit(entity.show.data.mapping) { entity.show.data.signal.frameHas(it) }
+        val shouldPower = shouldPower(entity)
         if (powered != shouldPower) {
             val newState = state.setValue(POWERED, shouldPower)
             level.setBlockAndUpdate(pos, newState)
             updateNeighborsInFront(level, pos, newState)
+        }
+    }
+
+    fun shouldPower(entity: ShowParserBlockEntity): Boolean = with(entity) {
+        when (entity.mode) {
+            ShowParserBlockEntity.Mode.Bits -> show.data.playing && bitFilter.chartHasBit(show.data.mapping) { show.data.signal.frameHas(it) }
+            ShowParserBlockEntity.Mode.Playing -> show.data.playing
         }
     }
 
@@ -117,9 +124,12 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
         init {
             ServerPackets.listen(ShowParserEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen
-                val blockEntity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? ShowParserBlockEntity ?: return@listen
-                blockEntity.applyChange(true) {
-                    blockEntity.menuData = packet.base
+                val entity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? ShowParserBlockEntity ?: return@listen
+                entity.applyChange(true) {
+                    entity.menuData = packet.base
+                    entity.bitFilter.set(packet.bitFilter)
+                    entity.mode = packet.mode
+                    entity.invert = packet.invert
                 }
             }
         }

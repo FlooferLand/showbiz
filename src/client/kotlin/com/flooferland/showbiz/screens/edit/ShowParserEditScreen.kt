@@ -1,11 +1,13 @@
-package com.flooferland.showbiz.screens
+package com.flooferland.showbiz.screens.edit
 
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
+import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.block.*
+import com.flooferland.showbiz.blocks.entities.ShowParserBlockEntity
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
@@ -17,21 +19,47 @@ class ShowParserEditScreen(override val editMenu: ShowParserEditMenu, inventory:
     override val background = rl("textures/gui/show_parser.png")
     val ports = rl("textures/gui/show_parser_ports.png")
 
+    var invert: Checkbox? = null
+    var mode: CycleButton<ShowParserBlockEntity.Mode>? = null
     var bitFilter: BitSelectButton? = null
 
     override fun addWidgets(widgets: MutableList<WidgetInfo>) {
+        // Invert
+        run {
+            invert = Checkbox.builder(Component.literal("Invert"), font)
+                .selected(menu.data.invert)
+                .build()
+            widgets.add(WidgetInfo(invert!!))
+        }
+
+        // Mode
+        run {
+            mode = CycleButton.builder<ShowParserBlockEntity.Mode> { Component.literal(it.name) }
+                .withValues(ShowParserBlockEntity.Mode.entries)
+                .withInitialValue(menu.data.mode)
+                .create(Component.literal("Mode")) { _, mode ->
+                    bitFilter?.active = (mode == ShowParserBlockEntity.Mode.Bits)
+                }
+            widgets.add(WidgetInfo(mode!!))
+        }
+
+        // Bit filter
         run {
             bitFilter = BitSelectButton(200, 20)
-            bitFilter!!.values = menu.data.base.bitFilter.clone()
+            bitFilter!!.values = menu.data.bitFilter.clone()
+            bitFilter!!.active = (mode?.value == ShowParserBlockEntity.Mode.Bits)
             widgets.add(WidgetInfo(bitFilter!!))
         }
     }
 
     override fun saveCustom(data: ShowParserEditPacket) {
-        menu.data.base.bitFilter.clearCharts()
+        menu.data.bitFilter.clearCharts()
         bitFilter?.values?.forEach { (chartId, bits) ->
-            menu.data.base.bitFilter.setBits(chartId, bits)
+            menu.data.bitFilter.setBits(chartId, bits)
         }
+
+        mode?.value?.let { menu.data.mode = it }
+        invert?.selected()?.let { menu.data.invert = it }
     }
 
     override fun renderBackground(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
