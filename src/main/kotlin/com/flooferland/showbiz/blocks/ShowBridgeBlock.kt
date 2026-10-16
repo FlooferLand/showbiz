@@ -40,6 +40,9 @@ class ShowBridgeBlock(properties: Properties) : BaseEntityBlock(properties) {
                     menuData = packet.base
                     serverProfile = packet.serverProfile
                     playerProfiles[player.uuid] = packet.playerProfile
+
+                    serialPorts.values.forEach { it.close() }
+                    serialPorts.clear()
                 }
             }
         }

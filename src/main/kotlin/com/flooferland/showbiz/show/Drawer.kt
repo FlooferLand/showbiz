@@ -1,8 +1,6 @@
 package com.flooferland.showbiz.show
 
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.HoverEvent
-import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.*
 import com.flooferland.bizlib.bits.BitUtils
 
 // TODO: Write an extension for this and a bit type,
@@ -37,14 +35,25 @@ enum class Drawer {
         fun fromBit(bit: BitId): Drawer =
             if (bit < BitUtils.NEXT_DRAWER) Drawer.Top else Drawer.Bottom
 
+        /** Converts a global bit id into a local bit (ex: "16 TD") */
+        fun toLocalBit(bit: BitId): Pair<BitId, Drawer> =
+            Pair(
+                if (bit > BitUtils.NEXT_DRAWER) (bit - BitUtils.NEXT_DRAWER).toUShort() else bit,
+                Drawer.fromBit(bit)
+            )
+
         /** Formats a global bit id into a string (ex: "16 TD") */
-        fun formatBit(bit: BitId): String =
-            "${if (bit > BitUtils.NEXT_DRAWER) bit - BitUtils.NEXT_DRAWER else bit} ${Drawer.fromBit(bit).toStringDrawer()}"
+        fun formatBit(bit: BitId): String {
+            val localBit = toLocalBit(bit)
+            return "${localBit.first} ${localBit.second.toStringDrawer()}"
+        }
 
         /** Formats a global bit id into a text component (ex: "16 TD") */
-        fun formatBitAsComp(bit: BitId): MutableComponent =
-            Component.literal((if (bit > BitUtils.NEXT_DRAWER) bit - BitUtils.NEXT_DRAWER else bit).toString())
+        fun formatBitAsComp(bit: BitId): MutableComponent {
+            val localBit = toLocalBit(bit)
+            return Component.literal(localBit.first.toString())
                 .append(" ")
-                .append(Drawer.fromBit(bit).toCompDrawer())
+                .append(localBit.second.toCompDrawer())
+        }
     }
 }

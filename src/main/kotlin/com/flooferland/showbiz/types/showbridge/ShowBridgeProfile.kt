@@ -3,7 +3,6 @@ package com.flooferland.showbiz.types.showbridge
 import net.minecraft.nbt.*
 import net.minecraft.network.*
 import net.minecraft.network.codec.*
-import com.fazecast.jSerialComm.SerialPort
 import com.flooferland.showbiz.types.ICompoundable
 import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
@@ -13,6 +12,7 @@ import kotlin.jvm.optionals.getOrNull
 
 data class ShowBridgeProfile(
     var enabled: Boolean = false,
+    var stayOpen: Boolean = true,
     var method: ShowBridgeMethod = ShowBridgeMethod.TextList
 ) : ICompoundable {
     var bitFilter = MappedBits()
@@ -23,10 +23,10 @@ data class ShowBridgeProfile(
     val binaryList = ShowBridgeSettings.BinaryList()
 
     var output: String = ""
-    var serial: SerialPort? = null
 
     override fun save(tag: CompoundTag) {
         tag.putBoolean("enabled", enabled)
+        tag.putBoolean("stay_open", stayOpen)
         tag.putInt("method", method.ordinal)
         MappedBits.CODEC.encodeStart(NbtOps.INSTANCE, bitFilter).result().getOrNull()?.let {
             tag.put("bit_filter", it)
@@ -42,6 +42,7 @@ data class ShowBridgeProfile(
 
     override fun load(tag: CompoundTag) {
         enabled = tag.getBooleanOrNull("enabled") ?: false
+        stayOpen = tag.getBooleanOrNull("stay_open") ?: false
         tag.getIntOrNull("method")?.let { method = ShowBridgeMethod.entries.getOrNull(it) ?: ShowBridgeMethod.TextList }
         tag.get("bit_filter")?.let { filterTag ->
             MappedBits.CODEC.parse(NbtOps.INSTANCE, filterTag).result().getOrNull()?.let { loaded ->

@@ -7,13 +7,13 @@ import net.minecraft.client.gui.layouts.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.player.*
-import com.fazecast.jSerialComm.SerialPort
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.menus.ShowBridgeEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.ShowBridgeEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.TextWidget
+import com.flooferland.showbiz.types.showbridge.SafeSerialPort
 import com.flooferland.showbiz.types.showbridge.ShowBridgeMethod
 import com.flooferland.showbiz.types.showbridge.ShowBridgeProfile
 import com.flooferland.showbiz.utils.rl
@@ -26,9 +26,12 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
 
     enum class Tab { Player, Server }
 
-    fun getProfile(tab: Tab): ShowBridgeProfile =
-        if (tab == Tab.Player) menu.data.playerProfile else menu.data.serverProfile
-
+    fun getProfile(tab: Tab): ShowBridgeProfile {
+        return if (tab == Tab.Player) menu.data.playerProfile else menu.data.serverProfile
+    }
+    fun getFreePorts(): List<String> {
+        return if (selectedTab == Tab.Server) editMenu.data.serverFreePorts else SafeSerialPort.getUnusedPorts()
+    }
     fun canEditServer(): Boolean {
         return Minecraft.getInstance().player?.let { Permissions.EditServerShowBridge.test(it) } ?: false
     }
@@ -59,12 +62,11 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
 
         field("Serial port") {
             EditBox(font, 60, 20, Component.literal("Serial port")).also { port ->
-                val ports = editMenu.data.serverPorts
                 port.value = profile.serialPort
                 port.tooltip = Tooltip.create(Component.literal("Case sensitive"))
                 port.setResponder { text ->
                     profile.serialPort = text
-                    val suggestion = ports.firstOrNull { it.startsWith(text, ignoreCase = true) } ?: ""
+                    val suggestion = getFreePorts().firstOrNull { it.startsWith(text, ignoreCase = true) } ?: ""
                     port.setSuggestion(if (suggestion.length > port.cursorPosition) suggestion.substring(port.cursorPosition) else "")
                 }
             }
@@ -92,22 +94,9 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
 
         // Method specific options
         when (profile.method) {
-            ShowBridgeMethod.TextList -> {
-                val list = profile.textList
-                field("Separator") {
-                    fun tooltip() = Component.literal("Length ${list.separator.length}\n").append("Separator character between the bits")
-                    val edit = EditBox(font, 40, 20, Component.literal("Separator"))
-                    edit.value = list.separator
-                    edit.tooltip = Tooltip.create(tooltip())
-                    edit.setResponder { v ->
-                        list.separator = v
-                        edit.tooltip = Tooltip.create(tooltip())
-                    }
-                    edit
-                }
-            }
+            ShowBridgeMethod.TextList -> {}
             ShowBridgeMethod.BinaryList -> {
-                // TODO
+                layout.addChild(TextWidget(font, Component.literal("This method is a huge work in progress, expect breaking changes!"), contentWidth))
             }
         }
 
@@ -128,7 +117,7 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
         for (tab in Tab.entries) {
             val profile = getProfile(tab)
 
-            // Enable checkbox
+            // Checkboxes
             val enableCheckbox = Checkbox.builder(Component.empty(), font)
                 .pos(x + profileX, y)
                 .selected(profile.enabled)
@@ -153,21 +142,37 @@ class ShowBridgeEditScreen(editMenu: ShowBridgeEditMenu, inventory: Inventory, t
         // Serial port info
         run {
             val ports = when (selectedTab) {
-                Tab.Player -> SerialPort.getCommPorts().map { it.systemPortName }
-                Tab.Server -> menu.data.serverPorts
+                Tab.Player -> SafeSerialPort.getAllPorts()
+                Tab.Server -> menu.data.serverAllPorts
             }
 
             val lines = mutableListOf<Component>()
             lines += Component.literal("$selectedTab serial ports")
-            ports.forEach { lines += Component.literal("- $it") }
+            ports.forEach { portName ->
+                val free = getFreePorts().contains(portName)
+                lines += Component.literal("- ").append(Component.literal(portName).withStyle(if (free) ChatFormatting.GREEN else ChatFormatting.RED))
+            }
 
+            val lineHeight = font.lineHeight + 3
             val x = 20
-            val y = y + (lines.size * font.lineHeight / 2)
+            val y = y + (lines.size * lineHeight / 2)
             lines.forEachIndexed { i, text ->
-                val name = StringWidget(x, y + (i * font.lineHeight), font.width(text), font.lineHeight, text, font).alignLeft()
+                val name = StringWidget(x, y + (i * lineHeight), font.width(text), lineHeight, text, font).alignLeft()
                 addRenderableWidget(name)
             }
         }
+
+        // Stay open checkbox
+        val stayOpenCheckbox = Checkbox.builder(Component.literal("Stay open"), font)
+            .pos(x + profileX, y)
+            .selected(profile.stayOpen)
+            .tooltip(Tooltip.create(Component.literal("Always keeps the profile engaged even if no show is playing")))
+            .onValueChange { _, v ->
+                profile.stayOpen = v
+                rebuildWidgets()
+            }
+            .build()
+        addRenderableWidget(stayOpenCheckbox)
 
         // Bottom output
         run {
