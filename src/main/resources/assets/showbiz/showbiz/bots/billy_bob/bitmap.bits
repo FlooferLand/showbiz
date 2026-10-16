@@ -18,7 +18,7 @@ rae 212 {
 
 rae 205 {
     flow 0.8
-    rotate "Head" x:8
+    rotate "Head3" x:15
     wigglemul 3.0
 }
 
@@ -36,12 +36,12 @@ rae 202 {
 
 rae 203 {
     flow 0.4
-    rotate "Head" z:10
+    rotate "Head4" z:25
 }
 
 rae 204 {
     flow 0.4
-    rotate "Head" z:-10
+    rotate "Head4" z:-25
 }
 
 # arms
@@ -54,13 +54,13 @@ rae 206 {
 
 rae 207 {
     flow 0.25
-    rotate "ArmR" x:90
+    rotate "ArmR" x:60
     wigglemul 1.5
 }
 
 rae 208 {  # guitar strum
     flow 2.5
-    rotate "Arm2R" x:-30
+    rotate "Arm2R" x:-60
     wigglemul 1.5
 }
 
@@ -71,7 +71,7 @@ rae 189 {
 
 rae 209 {
     flow 0.6
-    rotate "HandR" z:40
+    rotate "HandR" z:80
     wigglemul 2.0
 }
 
