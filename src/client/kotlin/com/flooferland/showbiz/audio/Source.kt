@@ -23,7 +23,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             else -> error("Unsupported format: $friendlyFormat")
         }
     }
-    val maxDistance = 32f
+    val maxDistance = 48f
     val paused get() = getState() == AL_PAUSED
     var lastReceivedChunkId = -1
     var source = 0
