@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.*
 import com.flooferland.bizlib.bits.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
-import com.flooferland.showbiz.addons.assets.AddonBot
+import com.flooferland.showbiz.addons.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.ChainLayout
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateAnimation

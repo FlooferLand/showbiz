@@ -70,6 +70,8 @@
     "config.prop.permissions.editScreenAccess": "Who can access edit screens on blocks/entities",
     "config.prop.permissions.switchReels": "Who can take out or switch show reels",
     "config.prop.permissions.writeReels": "Who can record to show reels",
+    "config.prop.permissions.editServerShowBridge": "Who can edit the server's Show Bridge (serial port access)",
+    "config.prop.addons.showNoticeScreenOnReload": "Show notice screen on reload",
     "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)",
     "config.prop.other.sleepFloppyParts": "Sleep floppy parts once they settle (they move exactly the same)"
 }

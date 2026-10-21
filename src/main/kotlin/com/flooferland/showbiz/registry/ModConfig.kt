@@ -29,7 +29,7 @@ enum class PermissionSelector(private val rank: Int) {
 }
 
 @Serializable
-data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions(), val other: Other = Other()) : Cloneable {
+data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions(), val addons: Addons = Addons(), val other: Other = Other()) : Cloneable {
     @Serializable
     data class Audio(
         var playPneumaticSounds: Boolean = true,
@@ -43,6 +43,11 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
         var controlPlayback: PermissionSelector = PermissionSelector.Anyone,
         var editScreenAccess: PermissionSelector = PermissionSelector.Anyone,
         var editServerShowBridge: PermissionSelector = PermissionSelector.Operator,
+    )
+
+    @Serializable
+    data class Addons(
+        var showNoticeScreenOnReload: Boolean = true
     )
 
     @Serializable

@@ -1,5 +1,6 @@
-package com.flooferland.showbiz.addons.assets
+package com.flooferland.showbiz.addons
 
+import net.minecraft.client.*
 import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.server.packs.resources.*
@@ -11,6 +12,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.PassivePlan
+import com.flooferland.showbiz.screens.AddonNoticeScreen
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.types.math.Vec3fc
@@ -50,24 +52,26 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
     override fun getFabricId(): ResourceLocation = rl("assets")
 
     override fun prepare(manager: ResourceManager, profiler: ProfilerFiller): LoadedAssets {
+        AddonClientNotices.clear()
         val out = LoadedAssets()
         val addons = mutableListOf<AddonAssets>()
         for (pack in manager.listPacks()) {
-            if (pack.packId().startsWith("fabric-")) continue
+            if (pack.packId().let { it.startsWith("fabric-") || it == "minecraft" || it == "realms" }) continue
             val devIgnoreAddons = ShowbizEnv.isDev() && pack.packId() != Showbiz.MOD_ID
             var errors = 0
             var warnings = 0
 
             namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
-                fun err(msg: String, throwable: Throwable? = null) {
+                fun err(type: AddonErr, throwable: Throwable? = null) {
                     errors += 1
-                    if (devIgnoreAddons) return
-                    Showbiz.log.error("Addon '$namespace': $msg\n", throwable)
+                    AddonClientNotices.add(namespace, AddonNotice(AddonNotice.Severity.Error, type.getText()))
+                    Showbiz.log.error("Addon '$namespace': ${type.getText().string}\n", throwable)
                 }
-                fun warn(msg: String, throwable: Throwable? = null) {
+                fun bitmapWarnHandler(id: String, message: BitsMap.LogMessage) {
                     warnings += 1
-                    if (devIgnoreAddons) return
-                    Showbiz.log.warn("Addon '$namespace': $msg\n", throwable)
+                    //if (devIgnoreAddons) return
+                    AddonClientNotices.add(namespace, AddonNotice(AddonNotice.Severity.Warning, rlCustom(namespace, id), message))
+                    Showbiz.log.warn("Bitmap '$namespace:$id': $message")
                 }
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
@@ -77,7 +81,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     if (botId in physicsData) return physicsData[botId]
                     val path = rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/$PHYSICS_TOML_NAME")
                     val physics = getResAsString(path)?.let { text ->
-                        runCatching { PhysicsData.readOrThrow(text) }.onFailure { err("Failed to parse '$path'", it) }.getOrNull()
+                        runCatching { PhysicsData.readOrThrow(text) }.onFailure { err(AddonErr.FailedToParse(path.toString()), it) }.getOrNull()
                     }
                     physicsData[botId] = physics
                     return physics
@@ -86,7 +90,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     val chains = getPhysics(botId)?.chains ?: return null
                     if (chains.isEmpty()) return null
                     val texture = pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/textures/$botId.png"))?.get()?.readAllBytes()
-                        ?: run { err("Bot '$botId' has [chains] but no texture to cut them from"); return null }
+                        ?: run { err(AddonErr.ChainMissingTexture(botId)); return null }
                     return ChainRig.transform(texture, chains, botId)
                 }
 
@@ -132,8 +136,8 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 }
                 pack.listResources(PackType.CLIENT_RESOURCES, namespace, Showbiz.MOD_ID, onList)
                 for ((botId, botAsset) in botAssets) {
-                    if (botAsset.model == null) err("Bot '${botId}' was found, but it's model wasn't")
-                    if (botAsset.rootPath == null) err("Bot '${botId}' was found, but it's root path wasn't (missing assets.toml?)")
+                    if (botAsset.model == null) err(AddonErr.BotMissingAsset(botId, "No model was found"))
+                    if (botAsset.rootPath == null) err(AddonErr.BotMissingAsset(botId, "No root path was found (missing assets.toml?)"))
                 }
 
                 // Finding toml def files
@@ -141,38 +145,35 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 for ((id, bot) in botAssets) {
                     bots[id] = null
                     if (bot.rootPath == null || bot.model == null) {
-                        err("INTERNAL: Failed to load root path or model for '${id}'")
+                        err(AddonErr.Other("Failed to load root path or model for '${id}'"))
                         continue
                     }
 
                     fun <T> getToml(filename: String, fetchToml: (String) -> T?): T? {
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                        val res = getResAsString(path) ?: run { err("Failed to find '$path'"); return null }
+                        val res = getResAsString(path) ?: run { err(AddonErr.FailedToFind("$path")); return null }
                         val toml = runCatching { fetchToml(res) }
-                        toml.exceptionOrNull()?.let { throwable -> err("Failed to parse TOML '$path'", throwable) }
+                        toml.exceptionOrNull()?.let { throwable -> err(AddonErr.FailedToParse("$path"), throwable) }
                         return toml.getOrNull()
                     }
 
                     fun getBits(filename: String): BotBitmapFile? {
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                        val res = getResAsString(path) ?: run { err("Failed to find bitsmap file '$path'"); return null }
+                        val res = getResAsString(path) ?: run { err(AddonErr.FailedToFind("$path")); return null }
                         val format = BitsMap()
-                        format.warnHandler = { message -> warn("Warning for '$namespace:$id': $message") }
+                        format.warnHandler = { bitmapWarnHandler(id, it) }
                         val bits = runCatching { format.load(res.byteInputStream()) }
-                        bits.exceptionOrNull()?.let { throwable -> err("Failed to load bitsmap file '$filename' on '$path'", throwable) }
+                        bits.exceptionOrNull()?.let { throwable -> err(AddonErr.FailedToParse("$path"), throwable) }
                         return bits.getOrNull()
                     }
 
-                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: run { err("Failed to get $ASSETS_TOML_NAME"); continue }
-                    val bitmap = getBits(BITMAP_BITS_NAME) ?: run { err("Failed to get $BITMAP_BITS_NAME"); continue }
+                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: run { err(AddonErr.FailedToParse(ASSETS_TOML_NAME)); continue }
+                    val bitmap = getBits(BITMAP_BITS_NAME) ?: run { err(AddonErr.FailedToParse(BITMAP_BITS_NAME)); continue }
                     bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations, physics = getPhysics(id))
                 }
 
                 if (bots.isNotEmpty()) {
-                    bots.entries.removeIf { (botId, bot) ->
-                        if (bot == null) err("Bot '${botId}' has no associated data. Missing files")
-                        bot == null
-                    }
+                    bots.entries.removeIf { (botId, bot) -> botId.isEmpty() || bot == null }
                     val assets = AddonAssets(
                         id = namespace,
                         bots = bots.mapKeys { (key, _) -> ResourceId(namespace, key) }.mapValues { (_, v) -> v!! }
@@ -243,5 +244,12 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         }
         ShowbizClient.botModels = models
         ShowbizClient.animations = loaded.animations
+
+        // Displaying the notice screen
+        if (AddonClientNotices.shouldShowScreen()) {
+            val minecraft = Minecraft.getInstance()
+            val parent = minecraft.screen
+            minecraft.setScreen(AddonNoticeScreen(parent))
+        }
     }
 }

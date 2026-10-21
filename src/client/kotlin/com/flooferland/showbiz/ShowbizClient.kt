@@ -12,9 +12,7 @@ import net.minecraft.resources.*
 import net.minecraft.server.packs.*
 import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz.MOD_ID
-import com.flooferland.showbiz.addons.assets.AddonAssets
-import com.flooferland.showbiz.addons.assets.AddonAssetsReloadListener
-import com.flooferland.showbiz.addons.assets.AddonBot
+import com.flooferland.showbiz.addons.*
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -200,27 +198,36 @@ object ShowbizClient : ClientModInitializer {
         }
         ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft ->
             resetAssetErrors()
+            val player = minecraft.player ?: return@register
 
             // Temporary beta warning
-            val player = minecraft.player ?: return@register
             val logo = Component.literal("Showbiz").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
             val version = Component.literal(UpdateChecker.currentVersion).withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE, ChatFormatting.BOLD)
-            player.displayClientMessage(logo.append(" ").append(version).append("\n"), false)
-            player.displayClientMessage(
-                Component.literal("WARNING: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
-                    .append(Component.literal(
-                        "Showbiz is still in very early access.\n" +
-                                "Expect the mod's blocks, items, and other things to vanish or break when you update the mod.\n"
-                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
-                false
-            )
-            /*player.displayClientMessage(
-                Component.literal("KNOWN BUGS: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
-                    .append(Component.literal(
-                        "- None"
-                    ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
-                false
-            )*/
+            val text =
+                logo.append(" ").append(version).append("\n")
+                    .append(
+                        Component.literal("WARNING: \n").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
+                            .append(Component.literal(
+                                "Showbiz is still in very early access.\n" +
+                                        "Expect the mod's blocks, items, and other things to vanish or break when you update the mod.\n"
+                            ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
+                    )
+            if (AddonClientNotices.shouldShowScreen()) {
+                val addonIds = AddonClientNotices.getAddonIds()
+                val errors = addonIds.filter { addonId -> AddonClientNotices.getAddon(addonId).any { it.severity == AddonNotice.Severity.Error } }
+                val warnings = addonIds.filter { addonId -> AddonClientNotices.getAddon(addonId).any { it.severity == AddonNotice.Severity.Warning } }
+                if (errors.isNotEmpty() || warnings.isNotEmpty()) {
+                    text.append(Component.literal("\n").withStyle(ChatFormatting.RESET))
+                    if (errors.isNotEmpty()) text.append(
+                        Component.literal("Addons with errors: ${errors.joinToString(", ")}\n"
+                    ).withStyle(ChatFormatting.RED))
+                    if (warnings.isNotEmpty()) text.append(
+                        Component.literal("Addons with warnings: ${warnings.joinToString(", ")}\n"
+                    ).withStyle(ChatFormatting.YELLOW))
+                }
+            }
+
+            player.displayClientMessage(text, false)
 
             // Version check
             if (UpdateChecker.newerVersion != null)

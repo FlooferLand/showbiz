@@ -32,6 +32,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 when (categoryClass) {
                     ModConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
                     ModConfig.Permissions::class -> categoryAddWidgets("Permissions", config.permissions)
+                    ModConfig.Addons::class -> categoryAddWidgets("Addons", config.addons)
                     ModConfig.Other::class -> categoryAddWidgets("Other", config.other)
                 }
             }
@@ -126,10 +127,13 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
         }
     }
 
-    override fun onClose() {
+    override fun removed() {
         Showbiz.config = config
         Showbiz.config.save()
+        super.removed()
+    }
+
+    override fun onClose() {
         Minecraft.getInstance().setScreen(parent)
-        super.onClose()
     }
 }

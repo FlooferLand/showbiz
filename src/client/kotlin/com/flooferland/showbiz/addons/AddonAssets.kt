@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.addons.assets
+package com.flooferland.showbiz.addons
 
 import com.flooferland.showbiz.types.ResourceId
 

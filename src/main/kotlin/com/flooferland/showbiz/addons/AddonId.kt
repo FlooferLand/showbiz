@@ -14,22 +14,27 @@ object AddonId {
     }
 
     fun checkValid(packId: String, manifest: AddonManifest, onErr: (msg: String, throwable: Throwable?) -> Unit, onWarn: (msg: String) -> Unit): Boolean {
-        fun err(msg: String, throwable: Throwable? = null) = onErr(msg, throwable)
+        var errors = 0
         fun warn(msg: String) = onWarn(msg)
+        fun err(msg: String, throwable: Throwable? = null) {
+            onErr(msg, throwable)
+            errors += 1
+        }
 
         val id = manifest.id.lowercase()
         if (id != manifest.id) {
             err("Manifest ID must be lowercase")
-            return false
         }
         if (AddonId.isTooGeneric(id)) {
             err("Addon manifest ID '$id' is too generic of an ID and might be used by another addon. Please note the ID is NOT the same as your addon's name and it has to be unique.")
-            return false
+        }
+
+        if (packId !in listOf("showbiz", "showbiz-fnaf") && manifest.id.startsWith("showbiz-")) {
+            warn("Please don't use addon IDs starting or ending with `showbiz` as your addon might break in the future. This prefix is reserved for built-in or official addons.")
         }
         if (AddonId.mightBeTooGeneric(id)) {
             warn("Addon manifest ID '$id' might be too generic of an ID and might be used by another addon.")
-            return false
         }
-        return true
+        return errors == 0
     }
 }
