@@ -47,7 +47,7 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
 
     @Serializable
     data class Addons(
-        var showNoticeScreenOnReload: Boolean = true
+        var showNoticeScreen: Boolean = true
     )
 
     @Serializable

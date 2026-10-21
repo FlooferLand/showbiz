@@ -7,7 +7,6 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.screens.*
 import net.minecraft.network.chat.*
 import net.minecraft.util.*
-import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.addons.AddonClientNotices
 import com.flooferland.showbiz.addons.AddonNotice
 
@@ -18,10 +17,6 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
 
     override fun init() {
         val minecraft = minecraft ?: return
-        if (!Showbiz.config.addons.showNoticeScreenOnReload) {
-            minecraft.setScreen(null)
-            return
-        }
 
         val listTop = 32
         val listHeight = height - 60

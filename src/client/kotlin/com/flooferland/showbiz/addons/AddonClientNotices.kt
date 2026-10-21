@@ -5,11 +5,12 @@ import com.flooferland.showbiz.Showbiz
 object AddonClientNotices {
     private val inner = hashMapOf<String, MutableList<AddonNotice>>()
 
-    fun shouldShowScreen(): Boolean =
-        Showbiz.config.addons.showNoticeScreenOnReload
-        && inner.any { addon ->
-            addon.value.any { notice -> notice.severity.ordinal > AddonNotice.Severity.Info.ordinal }
-        }
+    fun shouldShowScreen(): Boolean {
+        val severities = inner.flatMap { notices -> notices.value.map { it.severity } }
+        val hasProblems = severities.any { it.ordinal > AddonNotice.Severity.Info.ordinal }
+        val hasErrors = severities.any { it == AddonNotice.Severity.Error }
+        return hasErrors || (Showbiz.config.addons.showNoticeScreen && hasProblems)
+    }
 
     //region Collection stuff
     fun add(addonId: String, notice: AddonNotice) {

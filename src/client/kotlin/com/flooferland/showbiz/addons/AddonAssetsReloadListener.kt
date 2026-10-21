@@ -79,6 +79,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     )
                     Showbiz.log.warn("Bitmap '$namespace:$id': $message")
                 }
+                err(AddonErr.Other("test"))
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
 
