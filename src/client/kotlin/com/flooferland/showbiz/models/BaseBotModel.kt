@@ -47,7 +47,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     override fun getModelResource(animatable: T): ResourceLocation {
         val botId = animatable.botId ?: return emptyModel
         val bot = ShowbizClient.bots[botId] ?: run {
-            val context = "Failed to get model. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]. This error usually occurs when you haven't added a bot correctly"
+            val context = "Failed to get model for bot $botId. This error usually occurs when your files aren't structured properly"
             addError(Error.MissingBot, animatable, context)
             return emptyModel
         }
@@ -58,7 +58,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
         val botId = animatable.botId ?: return emptyTexture
         val bot = ShowbizClient.bots[botId] ?: run {
             addError(Error.MissingBot, animatable,
-                "Failed to get texture. The bot '$botId' does not exist in: [${ShowbizClient.bots.keys.joinToString(", ")}]"
+                "Failed to get texture for bot $botId"
             )
             return emptyTexture
         }
