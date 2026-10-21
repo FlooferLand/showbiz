@@ -10,6 +10,7 @@ import kotlin.math.atan2
 /**
  * One of Faz-Anim's DynamicBone chains, rebuilt from how DynamicBone is documented to behave.
  * The root is pinned where the animation puts it, a free particle at its end is pulled back toward rest, and the root turns to point at it
+ * Credit: Reda Karimi
  */
 class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     @JvmField val boneNames: List<String> = listOf(root) + params.links
@@ -39,7 +40,6 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
     private val force: Vector3f = Vector3f()
     private val since: Quaternionf = Quaternionf()
     private val now: Quaternionf = Quaternionf()
-    
 
     private var watched: List<GeoBone> = emptyList()
     private var pose: FloatArray = FloatArray(0)
@@ -273,7 +273,7 @@ class DynBone(@JvmField val root: String, @JvmField val params: Params) {
         val elasticity: Float,                                // pull back toward where the animation puts the end
         val stiffness: Float = 0f,                            // how close to it the end is held, 0 is free
         @SerialName("update_rate") val updateRate: Int = 60,  // scales how hard the part gets pulled back each frame (elasticity × rate / 60)
-        @SerialName("freeze_x") val freezeX: Boolean,         // swings only in the plane across the root's X axis
+        @SerialName("freeze_x") val freezeX: Boolean = false, // swings only in the plane across the root's X axis
         val length: Float = 0f,                               // where the end sits, in pixels, 0 is as far as the bone's cubes reach
         val links: List<String> = listOf(),                   // the bones below the root, for a chain of more than one
         val gravity: List<Float> = listOf(0f, 0f, 0f)         // a push on the end each step, in blocks along the model's axes, as DynamicBone's m_Gravity

@@ -73,6 +73,5 @@
     "config.prop.permissions.writeReels": "Who can record to show reels",
     "config.prop.permissions.editServerShowBridge": "Who can edit the server's Show Bridge (serial port access)",
     "config.prop.addons.showNoticeScreen": "Show the notice screen more (you can't escape it)",
-    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)",
-    "config.prop.other.sleepFloppyParts": "Sleep floppy parts once they settle (they move exactly the same)"
+    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)"
 }
