@@ -137,7 +137,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
 
         // Unused bits
         widgets.add(StringWidget(x + 5, 0, popupWidth - 10, popupEntryHeight, Component.literal("Unused"), font))
-        val unusedBits = (1..(BitUtils.NEXT_DRAWER * 2u).toInt()).filter { it.toBitId() !in usedBits }
+        val unusedBits = (1..BitUtils.DRAWER_MAX.toInt()).filter { it.toBitId() !in usedBits }
         unusedBits.forEach { id ->
             val bitId = id.toBitId()
             addBitButton(fixtureName = "unused", movementName = "Bit $bitId", bitId = bitId, false, { bitButtonClick(bitId) },)
