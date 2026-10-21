@@ -1,0 +1,6 @@
+set rae props
+
+rae 50 {
+    move "Body" y:6.7
+    rotate "Body" x:2.5
+}

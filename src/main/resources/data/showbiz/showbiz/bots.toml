@@ -53,7 +53,7 @@ accepts.rockafire = true
 accepts.fnaf1 = false
 
 [organ]
-name = "Fatz' Organ"
+name = "Prop - Fatz' Organ"
 authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
@@ -67,5 +67,11 @@ accepts.fnaf1 = false
 [uncle_klunk]
 name = "Uncle Klunk (W.I.P, innacurate)"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[choo_choo]
+name = "Prop - Choo Choo"
+authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false

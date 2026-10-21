@@ -54,7 +54,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 setBots(bots, click)
             }
             addEntry(category)
-            if (namespace in visibleCategories) botEntries.forEach { (botId, bot) ->
+            if (namespace in visibleCategories) botEntries.sortedBy { it.value.name }.forEach { (botId, bot) ->
                 if (botId.toString() == "showbiz:conner") return@forEach
                 addEntry(BotEntry(botId, bot) { click(botId) })
             }

@@ -64,13 +64,19 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
             namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
                 fun err(type: AddonErr, throwable: Throwable? = null) {
                     errors += 1
-                    AddonClientNotices.add(namespace, AddonNotice(AddonNotice.Severity.Error, type.getText()))
+                    AddonClientNotices.add(
+                        namespace,
+                        AddonNotice(AddonNotice.Severity.Error, type.getText(), throwable = throwable)
+                    )
                     Showbiz.log.error("Addon '$namespace': ${type.getText().string}\n", throwable)
                 }
                 fun bitmapWarnHandler(id: String, message: BitsMap.LogMessage) {
                     warnings += 1
-                    //if (devIgnoreAddons) return
-                    AddonClientNotices.add(namespace, AddonNotice(AddonNotice.Severity.Warning, rlCustom(namespace, id), message))
+                    if (devIgnoreAddons) return
+                    AddonClientNotices.add(
+                        namespace,
+                        AddonNotice(AddonNotice.Severity.Warning, rlCustom(namespace, id), message)
+                    )
                     Showbiz.log.warn("Bitmap '$namespace:$id': $message")
                 }
                 fun getResAsString(location: ResourceLocation) =

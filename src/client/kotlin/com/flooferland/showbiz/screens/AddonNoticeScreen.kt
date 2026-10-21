@@ -87,12 +87,15 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
             val label = Component.literal(labelText)
             notice.title?.let { label.append(Component.literal(" : $it").withStyle(ChatFormatting.GRAY)) }
 
+            val text = notice.text.copy()
+            notice.throwable?.let { text.append(Component.literal("\n${it}\n").withStyle(ChatFormatting.GRAY)) }
+
             // Adding lines
-            noticeList.addRow(NoticeLine(label.visualOrderText, labelColor, backgroundColor, 4, true, notice.text))
-            font.split(notice.text, wrapWidth).forEach { line ->
-                noticeList.addRow(NoticeLine(line, 0xFFFFFF, backgroundColor, 12, false, notice.text))
+            noticeList.addRow(NoticeLine(label.visualOrderText, labelColor, backgroundColor, 4, true, text))
+            font.split(text, wrapWidth).forEach { line ->
+                noticeList.addRow(NoticeLine(line, 0xFFFFFF, backgroundColor, 12, false, text))
             }
-            noticeList.addRow(NoticeLine(FormattedCharSequence.EMPTY, CommonColors.WHITE, backgroundColor, 0, false, notice.text))
+            noticeList.addRow(NoticeLine(FormattedCharSequence.EMPTY, CommonColors.WHITE, backgroundColor, 0, false, text))
         }
     }
 

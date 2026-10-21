@@ -1,0 +1,7 @@
+format = 1
+
+[bits.rae]
+50 = { flow_in = 0.54, flow_out = 0.54, gravity_in = 0.65, gravity_out = 0.65 }
+
+[dynbones]
+"Body" = { damping = 0.01, elasticity = 0.08, stiffness = 0.0, freeze_x = false, gravity = [0.025, 0.025, -0.025] }
