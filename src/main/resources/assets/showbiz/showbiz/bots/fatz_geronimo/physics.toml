@@ -1,12 +1,9 @@
 format = 1
 
-# While dual_pressure_bit is on, every cylinder's psi x dual_pressure_scale. A bit's own line can set either
 [cylinders.rae]
 dual_pressure_bit = 41
 dual_pressure_scale = 0.75
 
-# One cylinder per bit: Reel to Real's own values.
-# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.rae]
 41 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
 42 = { flow_in = 2.0,  flow_out = 2.0,  gravity_in = 0.7,  gravity_out = 0.7,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }

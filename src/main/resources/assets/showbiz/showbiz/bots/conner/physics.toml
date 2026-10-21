@@ -2,8 +2,6 @@ format = 1
 
 [cylinders.faz]
 
-# One cylinder per bit: today's motion, converted.
-# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.faz]
 33 = { flow_in = 1.2,  flow_out = 1.5, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 34 = { flow_in = 0.56, flow_out = 0.7, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }

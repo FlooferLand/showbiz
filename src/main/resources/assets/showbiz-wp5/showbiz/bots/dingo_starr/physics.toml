@@ -1,7 +1,5 @@
 format = 1
 
-# One cylinder per bit: today's motion, converted.
-# curve: smooth (Faz-Anim's clips), linear, or bitmap (the bitmap's own easing)
 [bits.wp5]
 27 = { flow_in = 0.7,  flow_out = 1.0, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
 28 = { flow_in = 0.4,  flow_out = 0.6, gravity_in = 1.0, gravity_out = 1.0, smash_in = 0.0,  smash_out = 0.0,  smash_speed_in = 0.1, smash_speed_out = 0.1, curve = "bitmap" }
