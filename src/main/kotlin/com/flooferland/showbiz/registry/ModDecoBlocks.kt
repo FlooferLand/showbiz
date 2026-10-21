@@ -34,15 +34,17 @@ sealed class ModDecoBlocks {
     object RedDoor : BaseDoor("red_door")
     object VoronoiStripeCarpet : BaseCarpet("voronoi_stripe")
     object Chair : BaseChair("chair")
-
+    object DinerMisc1 : BaseThinDeco("diner_misc_1")
 
     // region | Base types
+    sealed class BaseThinDeco(val id: String) : ModDecoBlocks() {
+        val entry = make(id, constructor = { CarpetBlock(it.sound(SoundType.EMPTY)) })
+        override fun addBlockModels(g: BlockModelGenerators) {
+            g.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(entry.block, rl(id).blockPath()))
+        }
+    }
     sealed class BaseDoor(id: String) : ModDecoBlocks() {
-        val entry = make<ShowbizDoorBlock>(
-            id,
-            transparent = true,
-            constructor = ::ShowbizDoorBlock
-        )
+        val entry = make<ShowbizDoorBlock>(id, transparent = true, constructor = ::ShowbizDoorBlock)
         override fun addLoot(p: BlockLootSubProvider) {
             p.add(entry.block, p.createDoorTable(entry.block))
         }
@@ -51,14 +53,7 @@ sealed class ModDecoBlocks {
         }
     }
     sealed class BaseChair(id: String) : ModDecoBlocks() {
-        val entry = make<ChairBlock>(
-            id,
-            transparent = true,
-            constructor = ::ChairBlock
-        )
-        override fun addLoot(p: BlockLootSubProvider) {
-            p.add(entry.block, p.createSingleItemTable(entry.item))
-        }
+        val entry = make<ChairBlock>(id, transparent = true, constructor = ::ChairBlock)
         override fun addBlockModels(g: BlockModelGenerators) {
             val blockModel = entry.id.blockPath()
             g.blockStateOutput.accept(
@@ -69,14 +64,8 @@ sealed class ModDecoBlocks {
         }
     }
     sealed class BaseCarpet(name: String) : ModDecoBlocks() {
-        val full = make<Block>(
-            "${name}_block",
-            constructor = { Block(it.sound(SoundType.WOOL)) }
-        )
-        val carpet = make<CarpetBlock>(
-            "${name}_carpet",
-            constructor = { CarpetBlock(it.sound(SoundType.WOOL)) }
-        )
+        val full = make<Block>("${name}_block", constructor = { Block(it.sound(SoundType.WOOL)) })
+        val carpet = make<CarpetBlock>("${name}_carpet", constructor = { CarpetBlock(it.sound(SoundType.WOOL)) })
         override fun addBlockModels(g: BlockModelGenerators) {
             g.createFullAndCarpetBlocks(full.block, carpet.block)
         }
