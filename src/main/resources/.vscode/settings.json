@@ -1,0 +1,12 @@
+{
+    "python-envs.pythonProjects": [
+        {
+            "path": "scripts",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ],
+    "python-envs.workspaceSearchPaths": [
+        "scripts/.venv",
+    ]
+}
