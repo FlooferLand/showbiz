@@ -1,7 +1,6 @@
 package com.flooferland.showbiz
 
 import net.minecraft.*
-import net.minecraft.core.component.*
 import net.minecraft.network.chat.*
 import net.minecraft.server.*
 import net.minecraft.server.level.*
@@ -43,22 +42,27 @@ object FileServer {
         // Show files
         ServerPackets.listen(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
         ServerPackets.listen(ShowFileSelectPacket.type) { packet, ctx ->
-            val reel = ctx.player().getHeldItem { it.item is ReelItem } ?: return@listen
+            // Trying to debug something with this rn
+            val id = "!! ShowFileSelectPacket"
+            val player = ctx.player()
+            val reel = player.getHeldItem { it.item is ReelItem }
+            if (reel == null) {
+                Showbiz.log.warn("$id: No held reel")
+                return@listen
+            }
             val selected = packet.selected
             val shows = runCatching { FileStorage.fetchShowPaths() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
             if (shows.isNullOrEmpty()) {
-                serverError("No shows found on the server", ctx.player())
+                serverError("No shows found on the server", player)
                 return@listen
             }
             if (shows.none { it.key == selected.id }) {
-                serverError("Show file '$selected' does not exist", ctx.player())
+                serverError("Show file '$selected' does not exist", player)
                 return@listen
             }
-            reel.applyComponentsAndValidate(
-                DataComponentPatch.builder()
-                    .set(ModComponents.FileName.type, selected.id)
-                    .build()
-            )
+            ReelItem.setFilename(reel, selected.id)
+            Showbiz.log.info("$id: Stack filename is now {}", reel.get(ModComponents.FileName.type))
+            player.inventoryMenu.broadcastChanges()
         }
         ServerPackets.listen(ShowFileEditPacket.type) { packet, ctx ->
             if (!Permissions.WriteReels.test(ctx.player())) {

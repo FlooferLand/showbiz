@@ -4,8 +4,11 @@ import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
 import net.minecraft.network.chat.*
+import net.minecraft.resources.*
+import net.minecraft.util.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.ShowFileInfo
+import com.mojang.blaze3d.systems.RenderSystem
 
 /** Lists shw files mainly for [com.flooferland.showbiz.screens.ReelManagerScreen] (or anything that requires a show file listing) */
 class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSelectionList<ShowFileListWidget.FileEntry>(Minecraft.getInstance(), width, height, y, 15) {
@@ -25,6 +28,10 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
         return x + width - 5
     }
 
+    override fun getRowWidth(): Int {
+        return width - 70
+    }
+
     public fun setSelected(filename: String) {
         for (child in children()) {
             child.button.active = (child.file.id != filename)
@@ -34,17 +41,37 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
     public fun setFiles(files: Collection<ShowFileInfo>, click: (ShowFileInfo) -> Unit) {
         clearEntries()
         files.forEach { addEntry(FileEntry(it) { click(it) }) }
+        scrollAmount = 0.0
+    }
+
+    class FileButton(width: Int, height: Int, message: Component, onPress: OnPress) : Button(0, 0, width, height, message, onPress, DEFAULT_NARRATION) {
+        var sprites: WidgetSprites = WidgetSprites(
+            ResourceLocation.withDefaultNamespace("widget/button"),
+            ResourceLocation.withDefaultNamespace("widget/button_disabled"),
+            ResourceLocation.withDefaultNamespace("widget/button_highlighted")
+        )
+        override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+            val minecraft = Minecraft.getInstance()
+            RenderSystem.enableBlend()
+            RenderSystem.enableDepthTest()
+
+            guiGraphics.setColor(0.4f, 0.4f, 0.4f, 0.9f)
+            guiGraphics.blitSprite(sprites.get(active, isHoveredOrFocused()), x, y, width, height)
+
+            guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f)
+            guiGraphics.drawString(minecraft.font, message, x + 5, y + ((height - 6) / 2), CommonColors.WHITE)
+        }
     }
 
     inner class FileEntry(val file: ShowFileInfo, val click: () -> Unit) : Entry<FileEntry>() {
         val font = Minecraft.getInstance().font!!
-        val name = file.id.substringBefore('.')
-        val ext = file.id.substringAfter('.')
-        val button = Button.builder(Component.literal(name))
+        val name = file.id.substringBeforeLast('.')
+        val ext = file.id.substringAfterLast('.')
+
+        val button = FileButton(width - 80, itemHeight, Component.literal(name))
             { setSelected(file.id); click() }
-            .size(width - 70, itemHeight)
-            .tooltip(Tooltip.create(Component.literal(file.id)))
-            .build()!!
+            .also { it.tooltip = Tooltip.create(Component.literal(file.id)) }
+
         val extLabel = StringWidget(Component.empty(), font)
             .also {
                 val color = Showbiz.charts.getColor(ext = ext)
@@ -52,6 +79,7 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
                 it.tooltip = Tooltip.create(Component.literal(ext).withColor(color))
             }
             .alignLeft()!!
+
         val videoLabel = StringWidget(Component.empty(), font)
             .also {
                 val color = 0xFF24D3F9.toInt()

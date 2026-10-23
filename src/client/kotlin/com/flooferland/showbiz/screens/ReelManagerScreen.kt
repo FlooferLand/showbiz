@@ -25,11 +25,18 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     val bottomBarButtons = mutableListOf<Button>()
 
+    lateinit var fileListWidget: ShowFileListWidget
+
     override fun isPauseScreen() = false
 
     override fun init() {
         ClientPlayNetworking.send(ShowFileListPacket())
         refresh()
+    }
+
+    fun onFileSelected(file: ShowFileInfo) {
+        ClientPlayNetworking.send(ShowFileSelectPacket(file))
+        Minecraft.getInstance().setScreen(null)
     }
 
     fun refresh() {
@@ -40,18 +47,15 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         val filename = ReelItem.getFilename(reelStack)
 
         // File listing
-        val fileListWidget = ShowFileListWidget(
+        fileListWidget = ShowFileListWidget(
             (width - maxWidth) / 2, (height - maxHeight) / 2, maxWidth, maxHeight
         )
-        fileListWidget.setFiles(files) { file ->
-            ClientPlayNetworking.send(ShowFileSelectPacket(file))
-            Minecraft.getInstance().setScreen(null)
-        }
+        fileListWidget.setFiles(files, ::onFileSelected)
         filename?.let { fileListWidget.setSelected(it) }
         addRenderableWidget(fileListWidget)
 
         // Additional
-        updateBottomBarButtons(fileListWidget.x + 4, fileListWidget.y + fileListWidget.height + 4)
+        updateBottomBar(fileListWidget.x + 4, fileListWidget.y + fileListWidget.height + 4)
         addRenderableWidget(
             StringWidget(fileListWidget.x, fileListWidget.y - 20, fileListWidget.width, 20, Component.literal("Reel Manager"), font).alignCenter()
         )
@@ -75,14 +79,14 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                     ).setCentered(true).setMaxWidth(maxWidth).also { it.setPosition((width - it.width) / 2, height / 2 - 20) }
                 )
             }
-            updateBottomBarButtons(width / 2, height / 2 + 20, center = true)
+            updateBottomBar(width / 2, height / 2 + 20, center = true)
             return
         }
     }
 
-    fun updateBottomBarButtons(x: Int, y: Int, center: Boolean = false) {
+    fun updateBottomBar(x: Int, y: Int, center: Boolean = false) {
         bottomBarButtons.removeIf { removeWidget(it); true }
-        var totalWidth = 0
+        var offsetX = 0
 
         if (isLocalServer()) {
             val openDirButton =
@@ -91,18 +95,39 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                 }.pos(x, y).size(100, 20).build()
             bottomBarButtons.add(openDirButton)
             addRenderableWidget(openDirButton)
-            totalWidth += openDirButton.width
+            offsetX = openDirButton.right
         }
         if (authorized) {
             val createShowButton =
                 Button.builder(Component.literal("Create a show")) {
                     Minecraft.getInstance().setScreen(CreateShowScreen(this))
-                }.pos(x + totalWidth, y).size(100, 20).build()
+                }.pos(offsetX, y).size(100, 20).build()
             bottomBarButtons.add(createShowButton)
             addRenderableWidget(createShowButton)
-            totalWidth += createShowButton.width
+            offsetX = createShowButton.right
         }
-        if (center) updateBottomBarButtons(x - (totalWidth / 2), y)
+
+        // Search bar
+        val searchBar = EditBox(font, offsetX, y, width - offsetX - 70, 20, Component.literal("Search") )
+        searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
+        searchBar.setSuggestion("Search..")
+        searchBar.setResponder { name ->
+            if (name.isBlank()) {
+                fileListWidget.setFiles(files, ::onFileSelected)
+                searchBar.setSuggestion("Search..")
+                return@setResponder
+            }
+            searchBar.setSuggestion(null)
+
+            val files = files.filter { it.id.contains(name, ignoreCase = true) }
+            fileListWidget.setFiles(files, ::onFileSelected)
+        }
+        searchBar.isFocused = true
+        searchBar.setCanLoseFocus(true)
+        addRenderableWidget(searchBar)
+        this.focused = searchBar
+
+        if (center) updateBottomBar(x - (offsetX / 2), y)
     }
 
     fun isLocalServer() = Minecraft.getInstance().isLocalServer
