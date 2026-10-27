@@ -45,7 +45,10 @@ class ShowBridgeBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         if (level.isClientSide) {
             for ((id, profile) in playerProfiles) {
-                if (!keepPlaying && !profile.stayOpen) continue
+                if (!keepPlaying && !profile.stayOpen) {
+                    serialPorts[profile.serialPort]?.close()
+                    continue
+                }
                 tickProfile(id.toString(), profile)
             }
         } else if (keepPlaying || serverProfile.stayOpen) {

@@ -13,9 +13,11 @@ import com.flooferland.showbiz.blocks.entities.ShowBridgeBlockEntity
 import com.flooferland.showbiz.network.packets.editscreen.ShowBridgeEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.types.showbridge.SafeSerialPort
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.handleEditScreen
 import com.mojang.serialization.MapCodec
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 
 class ShowBridgeBlock(properties: Properties) : BaseEntityBlock(properties) {
     val codec: MapCodec<ShowBridgeBlock> = simpleCodec(::ShowBridgeBlock)
@@ -33,6 +35,7 @@ class ShowBridgeBlock(properties: Properties) : BaseEntityBlock(properties) {
 
     companion object {
         init {
+            ServerPlayerEvents.LEAVE.register { _ -> SafeSerialPort.closeAll() }
             ServerPackets.listen(ShowBridgeEditPacket.type) { packet, context ->
                 val player = context.player() ?: return@listen
                 val entity = (packet.base.id as? OwnerId.BlockId)?.grabBlockEntity(player.serverLevel()) as? ShowBridgeBlockEntity ?: return@listen

@@ -98,6 +98,12 @@ class SafeSerialPort(val portName: String, val baudRate: Int, private val owner:
         /** Port names (ex: COM3) to serial ports **/
         private val usedPorts = ConcurrentHashMap<String, SafeSerialPort>()
 
+        fun closeAll() {
+            for (port in usedPorts.values) {
+                port.close()
+            }
+        }
+
         fun getUsedPorts(): List<String> {
             return usedPorts.keys.toList()
         }
