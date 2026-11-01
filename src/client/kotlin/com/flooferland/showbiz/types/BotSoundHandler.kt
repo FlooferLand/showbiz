@@ -14,19 +14,19 @@ import java.util.WeakHashMap
 class BotSoundHandler : IBotAttachment {
     private val lastBits = WeakHashMap<IBot, MutableMap<BitId, Boolean>>()
 
-    override fun tick(entity: IBot) {
+    override fun tick(bot: IBot) {
         if (!Showbiz.config.audio.playPneumaticSounds) return
 
-        val bot = ShowbizClient.bots[entity.botId] ?: return
-        val level = entity.botLevel as? ClientLevel ?: return
-        val pos = entity.botPos?.add(0.0, 2.0, 0.0) ?: return
-        val show = entity.show?.data ?: return
-        val bitmapBits = bot.bitmap.bits[show.mapping] ?: return
+        val addonBot = ShowbizClient.bots[bot.botId] ?: return
+        val level = bot.botLevel as? ClientLevel ?: return
+        val pos = bot.botPos?.add(0.0, 2.0, 0.0) ?: return
+        val show = bot.show?.data ?: return
+        val bitmapBits = addonBot.bitmap.bits[show.mapping] ?: return
         /*if (!show.playing) {
-            lastBits.remove(entity)
+            lastBits.remove(bot)
             return
         }*/
-        val states = lastBits.getOrPut(entity) { mutableMapOf() }
+        val states = lastBits.getOrPut(bot) { mutableMapOf() }
 
         val minVolume = 0.04f
         val maxVolume = 0.1f
@@ -39,7 +39,7 @@ class BotSoundHandler : IBotAttachment {
                 val playerDist = Minecraft.getInstance().player?.distanceToSqr(pos) ?: 0.0
                 val playerDistMul = if (playerDist < 3 * 3) 1.5f else minVolume
                 val sound = if (bitOn) ModSounds.PneumaticFire else ModSounds.PneumaticRelease
-                val flow = data.flow.speed.toFloat().coerceIn(0.1f, 1.0f)
+                val flow = data.flow?.flowIn?.toFloat()?.coerceIn(0.1f, 1.0f) ?: 0.5f
                 val pitch = 0.3f + (flow * 0.9f)
                 val volume = (0.5f * playerDistMul) + (flow * 0.5f)
                 level.playLocalSound(

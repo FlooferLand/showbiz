@@ -198,8 +198,10 @@ tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.WARN
     exclude("**/*.lnk", "**/*.exe", "**/*.dll", "**/*.so", "**/*.jar")
     exclude("projects")
+    exclude("scripts")
     exclude("log4j2.xml")
     exclude(".vscode")
+    exclude(".venv")
     exclude(".assets_helper")
 
     // Inserting strings into what-not

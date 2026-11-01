@@ -173,8 +173,8 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                         return bits.getOrNull()
                     }
 
-                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: run { err(AddonErr.FailedToParse(ASSETS_TOML_NAME)); continue }
-                    val bitmap = getBits(BITMAP_BITS_NAME) ?: run { err(AddonErr.FailedToParse(BITMAP_BITS_NAME)); continue }
+                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
+                    val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
                     bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations, physics = getPhysics(id))
                 }
 

@@ -91,7 +91,7 @@ def update_bitmap(path: Path):
             continue
 
         # Making the new flow statement
-        def make_flow_line() -> str:
+        def make_flow_lines() -> list[str]:
             found_flows: list[tuple[str, int, PhysFlowValues]] = []
             any_missing = False
             for map, bits in block_bits.items():
@@ -105,10 +105,10 @@ def update_bitmap(path: Path):
                         found_flows.append((map, bit, found))
 
             if any_missing:
-                return ""
+                return []
             if len(found_flows) == 0:
                 line_warn("No bits found in block")
-                return ""
+                return []
 
             preferred = found_flows[0]
             for entry in found_flows:
@@ -123,43 +123,53 @@ def update_bitmap(path: Path):
 
             # Building the string
             flow: PhysFlowValues = preferred[2]
-            out: str = f"flow in:{flow["flow_in"]} out:{flow["flow_out"]}"
+            out: list[str] = [f"flow speed in:{flow["flow_in"]} out:{flow["flow_out"]}"]
 
+            accel: list[str] = []
             if "gravity_in" in flow:
-                out += f" gravity_in:{flow["gravity_in"]}"
+                accel.append(f"in:{flow["gravity_in"]}")
             if "gravity_out" in flow:
-                out += f" gravity_out:{flow["gravity_out"]}"
+                accel.append(f"out:{flow["gravity_out"]}")
+            if accel:
+                out.append(f"flow accel {' '.join(accel)}")
 
+            smash: list[str] = []
             if "smash_in" in flow:
-                out += f" smash_in:{flow["smash_in"]}"
+                smash.append(f"in:{flow["smash_in"]}")
             if "smash_out" in flow:
-                out += f" smash_out:{flow["smash_out"]}"
+                smash.append(f"out:{flow["smash_out"]}")
+            if smash:
+                out.append(f"flow smash {' '.join(smash)}")
+
+            smash_speed: list[str] = []
             if "smash_in_speed" in flow:
-                out += f" smash_in_speed:{flow["smash_in_speed"]}"
+                smash_speed.append(f"in:{flow["smash_in_speed"]}")
             if "smash_out_speed" in flow:
-                out += f" smash_out_speed:{flow["smash_out_speed"]}"
+                smash_speed.append(f"out:{flow["smash_out_speed"]}")
+            if smash_speed:
+                out.append(f"flow smash_speed {' '.join(smash_speed)}")
             
-            return out.strip()
+            return out
 
         # Finding the flow
         if line_strip.startswith("flow:"):
-            new = make_flow_line()
+            new = make_flow_lines()
             if len(new) == 0: continue
-            lines[line_index] = (' ' * 4) + new
-            bot_info(f"Found old flow '{line_strip}', replacing with '{new}'")
+            for i in range(0, len(new)):
+                lines.insert(line_index, (' ' * 4) + new[i])
+            bot_info(f"Found old flow '{line_strip}', replacing")
         elif block_entry_last_line:
-            new = make_flow_line()
+            new = make_flow_lines()
             if len(new) == 0: continue
-            lines.insert(line_index, (' ' * 4) + new)
+            for i in range(0, len(new)):
+                lines.insert(line_index, (' ' * 4) + new[i])
             block_entry_last_line = False
-            bot_info(f"Adding new flow statement '{new}'")
+            bot_info(f"Adding new flow statement")
 
     path.write_text('\n'.join(lines))
 
 
 def convert_bot(dir: Path):
-    if dir.name != "choo_choo": return  # test
-
     physics_file = dir / "physics.toml"
     update_physics(physics_file)
 

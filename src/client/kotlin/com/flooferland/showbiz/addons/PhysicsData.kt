@@ -1,9 +1,9 @@
 package com.flooferland.showbiz.addons
 
 import com.akuleshov7.ktoml.Toml
-import com.flooferland.showbiz.types.PneumaticValve
 import com.flooferland.showbiz.types.physics.ChainSolver
 import com.flooferland.showbiz.types.physics.DynBone
+import com.flooferland.showbiz.types.pneumatic.PneumaticValve
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 
@@ -14,7 +14,6 @@ data class PhysicsData(
     val format: Int = 1,
     val chains: Map<String, ChainSolver.Params> = emptyMap(),
     val cylinders: Map<String, PneumaticValve.Supply> = emptyMap(),
-    val bits: Map<String, Map<String, PneumaticValve.Params>> = emptyMap(),
     val hits: Map<String, PneumaticValve.Hit> = emptyMap(),
     val dynbones: Map<String, DynBone.Params> = emptyMap()
 ) {

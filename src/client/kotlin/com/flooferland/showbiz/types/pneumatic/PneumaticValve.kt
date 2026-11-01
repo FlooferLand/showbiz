@@ -1,5 +1,6 @@
-package com.flooferland.showbiz.types
+package com.flooferland.showbiz.types.pneumatic
 
+import com.flooferland.bizlib.bits.BitMappingData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -117,7 +118,23 @@ class PneumaticValve {
         val curve: Curve = Curve.Smooth                                          // how the bones follow the cylinder, see Curve
     ) {
         companion object {
-            val DEFAULT get() = Params()
+            val default get() = Params()
+            fun from(data: BitMappingData) = with (data) {
+                Params(
+                    flowIn = flow?.flowIn?.toFloat() ?: default.flowIn,
+                    flowOut = flow?.flowOut?.toFloat() ?: default.flowOut,
+
+                    gravityIn = flow?.gravityIn?.toFloat() ?: default.gravityIn,
+                    gravityOut = flow?.gravityOut?.toFloat() ?: default.gravityOut,
+
+                    smashIn = flow?.smashIn?.toFloat() ?: default.smashIn,
+                    smashOut = flow?.smashOut?.toFloat() ?: default.smashOut,
+                    smashSpeedIn = flow?.smashInSpeed?.toFloat() ?: default.smashSpeedIn,
+                    smashSpeedOut = flow?.smashOutSpeed?.toFloat() ?: default.smashSpeedOut,
+
+                    // curve = flow?.easing
+                )
+            }
         }
     }
 

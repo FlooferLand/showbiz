@@ -18,13 +18,17 @@ import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
 import com.flooferland.showbiz.models.CymbalModel.CymbalState
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.SignalFrame
-import com.flooferland.showbiz.types.*
+import com.flooferland.showbiz.types.ClientCollidePartInstance
+import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
+import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.physics.ChainRig
 import com.flooferland.showbiz.types.physics.ChainSolver
 import com.flooferland.showbiz.types.physics.DynBone
+import com.flooferland.showbiz.types.pneumatic.PneumaticValve
 import com.mojang.blaze3d.Blaze3D
 import java.util.WeakHashMap
 import software.bernie.geckolib.animatable.GeoAnimatable
@@ -174,7 +178,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
                             animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
                             model: BotModelData, movements: Movements?, showMapping: String?) {
-        val cylinders = showMapping?.let { bot.physics?.bits?.get(it) }
         val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: PneumaticValve.Supply.DEFAULT
         val hits = showMapping?.let { bot.physics?.hits?.get(it) }
         val dynBones = bot.physics?.dynbones
@@ -196,18 +199,23 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         repeat(steps) {
             for ((bit, data) in bitmapBits) {
                 val valve = storage.valves.getOrPut(bit) { PneumaticValve() }
-                val cylinder = cylinders?.get(bit.toString())
-                if (cylinder == null) {
-                    valve.stepFlow(frame.frameHas(bit), 60f / supply.rate, data.flow.speed.toFloat())
+
+                // Fallback for the old flows
+                if (data.flow == null) {
+                    valve.stepFlow(frame.frameHas(bit), 60f / supply.rate, data.oldFlow?.speed?.toFloat() ?: 1.0f)
                     continue
                 }
-                val dualBit = cylinder.dualPressureBit ?: supply.dualPressureBit
-                val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) cylinder.dualPressureScale ?: supply.dualPressureScale else 1f
-                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualScale, cylinder)
+
+                // TODO: Figure out if we should allow setting the dual pressure stuff per bit
+                //val dualBit = cylinder.dualPressureBit ?: supply.dualPressureBit
+                // val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) cylinder.dualPressureScale ?: supply.dualPressureScale else 1f
+                val dualBit = supply.dualPressureBit
+                val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) supply.dualPressureScale else 1f
+                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualScale, PneumaticValve.Params.from(data))
                 if (hits != null && valve.hit > 0f) playHit(animatable, hits, bit, valve.hit, valve.pos >= 1f)
             }
             if (storage.dynBones.isNotEmpty()) {
-                poseBits(bitmapBits, storage, cylinders, model) { it.pos }
+                poseBits(bitmapBits, storage, model) { it.pos }
                 for (dynBone in storage.dynBones) dynBone.step(animationProcessor::getBone, 1f / supply.rate, true)
             }
         }
@@ -251,12 +259,12 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 }
             }
         }
-        poseBits(bitmapBits, storage, cylinders, model) { it.drawn(alpha) }
+        poseBits(bitmapBits, storage, model) { it.drawn(alpha) }
         for (dynBone in storage.dynBones) dynBone.draw(animationProcessor::getBone, alpha)
     }
 
     // Laying the bitmap's rotates and moves over the rest pose, each valve at [at] of its travel, floppy parts back at rest
-    private fun poseBits(bitmapBits: MutableMap<UShort, BitMappingData>, storage: LocalBotStorage, cylinders: Map<String, PneumaticValve.Params>?, model: BotModelData, at: (PneumaticValve) -> Float) {
+    private fun poseBits(bitmapBits: MutableMap<UShort, BitMappingData>, storage: LocalBotStorage, model: BotModelData, at: (PneumaticValve) -> Float) {
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
@@ -275,17 +283,14 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
         }
         for ((bit, data) in bitmapBits) {
-            val flowEase = data.flow.easing
+            val flowEase = data.flow?.easing ?: data.oldFlow?.easing ?: Easing.Default
             val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
 
             // Easing: https://easings.net/#easeOutSine
-            val eased = when (cylinders?.get(bit.toString())?.curve) {
-                PneumaticValve.Curve.Smooth -> bitSmooth * bitSmooth * (3f - 2f * bitSmooth)
-                PneumaticValve.Curve.Linear -> bitSmooth
-                else -> when (flowEase) {
-                    Easing.Default, Easing.Linear -> bitSmooth
-                    Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
-                }
+            val eased = when (flowEase) {
+                Easing.Default, Easing.Linear -> bitSmooth
+                Easing.Smooth -> bitSmooth * bitSmooth * (3f - 2f * bitSmooth)
+                Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
             }
 
             // Manual rotation
@@ -293,9 +298,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
 
                 // Applying movement
-                bone.rotX += (rotate.target.x * Mth.DEG_TO_RAD) * eased
-                bone.rotY += (rotate.target.y * Mth.DEG_TO_RAD) * eased
-                bone.rotZ += (rotate.target.z * Mth.DEG_TO_RAD) * eased
+                bone.rotX += (rotate.target.x.toFloat() * Mth.DEG_TO_RAD) * eased
+                bone.rotY += (rotate.target.y.toFloat() * Mth.DEG_TO_RAD) * eased
+                bone.rotZ += (rotate.target.z.toFloat() * Mth.DEG_TO_RAD) * eased
             }
 
             // Manual position
@@ -303,9 +308,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
 
                 // Applying movement
-                bone.posX += move.target.x * eased
-                bone.posY += move.target.y * eased
-                bone.posZ += move.target.z * eased
+                bone.posX += move.target.x.toFloat() * eased
+                bone.posY += move.target.y.toFloat() * eased
+                bone.posZ += move.target.z.toFloat() * eased
             }
         }
     }
@@ -313,13 +318,16 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     // Playing a cylinder's thunk at an end of its stroke, as its [PneumaticValve.Hit] says
     private fun playHit(animatable: T, hits: PneumaticValve.Hit, bit: UShort, speed: Float, out: Boolean) {
         if (!Showbiz.config.audio.playPneumaticSounds) return
+        val level = animatable.botLevel as? ClientLevel ?: return
+        val pos = animatable.botPos ?: return
+
         val own = hits.bits[bit.toString()]
         if (speed < (own?.minSpeed ?: hits.minSpeed)) return
+
         val volume = (own?.volume ?: hits.volume) * (speed / (own?.fullSpeed ?: hits.fullSpeed)).coerceAtMost(1f)
         if (volume <= 0f) return
-        val sound = if (out) own?.soundOut ?: hits.soundOut else own?.soundIn ?: hits.soundIn
-        val pos = animatable.botPos ?: return
-        val level = animatable.botLevel as? ClientLevel ?: return
+
+        val sound = if (out) (own?.soundOut ?: hits.soundOut) else (own?.soundIn ?: hits.soundIn)
         val pitch = (own?.pitch ?: hits.pitch) + (level.random.nextFloat() * 2f - 1f) * (own?.pitchSpread ?: hits.pitchSpread)
         level.playLocalSound(pos.x, pos.y, pos.z, SoundEvent.createVariableRangeEvent(ResourceLocation.parse(sound)), SoundSource.BLOCKS, volume, pitch, false)
     }
