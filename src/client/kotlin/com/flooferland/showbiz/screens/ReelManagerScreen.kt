@@ -86,7 +86,8 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
 
     fun updateBottomBar(x: Int, y: Int, center: Boolean = false) {
         bottomBarButtons.removeIf { removeWidget(it); true }
-        var offsetX = 0
+        var offsetX = x
+        val pad = 4
 
         if (isLocalServer()) {
             val openDirButton =
@@ -95,7 +96,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                 }.pos(x, y).size(100, 20).build()
             bottomBarButtons.add(openDirButton)
             addRenderableWidget(openDirButton)
-            offsetX = openDirButton.right
+            offsetX = openDirButton.right + pad
         }
         if (authorized) {
             val createShowButton =
@@ -104,7 +105,7 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                 }.pos(offsetX, y).size(100, 20).build()
             bottomBarButtons.add(createShowButton)
             addRenderableWidget(createShowButton)
-            offsetX = createShowButton.right
+            offsetX = createShowButton.right + pad
         }
 
         // Search bar
