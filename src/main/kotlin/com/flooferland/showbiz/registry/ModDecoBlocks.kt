@@ -35,6 +35,7 @@ sealed class ModDecoBlocks {
     object VoronoiStripeCarpet : BaseCarpet("voronoi_stripe")
     object Chair : BaseChair("chair")
     object DinerMisc1 : BaseThinDeco("diner_misc_1")
+    object DinerMisc2 : BaseThinDeco("diner_misc_2")
 
     // region | Base types
     sealed class BaseThinDeco(val id: String) : ModDecoBlocks() {
