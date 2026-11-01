@@ -127,8 +127,8 @@ class PneumaticValve {
                     gravityIn = flow?.gravityIn?.toFloat() ?: default.gravityIn,
                     gravityOut = flow?.gravityOut?.toFloat() ?: default.gravityOut,
 
-                    smashIn = flow?.smashIn?.toFloat() ?: default.smashIn,
-                    smashOut = flow?.smashOut?.toFloat() ?: default.smashOut,
+                    smashIn = flow?.let { if (it.smashInSpeed != null) it.smashIn?.toFloat() else null } ?: default.smashIn,
+                    smashOut = flow?.let { if (it.smashOutSpeed != null) it.smashOut?.toFloat() else null } ?: default.smashOut,
                     smashSpeedIn = flow?.smashInSpeed?.toFloat() ?: default.smashSpeedIn,
                     smashSpeedOut = flow?.smashOutSpeed?.toFloat() ?: default.smashSpeedOut,
 
