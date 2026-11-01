@@ -58,16 +58,17 @@ def update_bitmap(path: Path):
         bot_warn(f"Bitmap is missing at path: {path}")
         return
     
-    lines = path.read_text().splitlines()
+    lines: list[str] = []
     block_bits: MappedBits = { }
     block_entry_last_line = False
-    for line_index, line in enumerate(lines):
+    for line_num, line in enumerate(path.read_text().splitlines()):
         line_strip: str = line.strip()
-        def line_warn(msg): warn(f"[{bot_id}] Line {line_index}: {msg}")
-        def line_err(msg): err(f"[{bot_id}] Line {line_index}: {msg}")
+        def line_warn(msg): warn(f"[{bot_id}] Line {line_num}: {msg}")
+        def line_err(msg): err(f"[{bot_id}] Line {line_num}: {msg}")
 
         # Finding the block
         if line_strip.endswith('{'):
+            block_bits.clear()
             block_line = line_strip.replace(',', '').replace('{', '').strip().split(' ')
             current_map = ""
             for i, token in enumerate(block_line):
@@ -88,88 +89,95 @@ def update_bitmap(path: Path):
                     if bit <= 0: continue
                     block_bits[current_map].append(bit)
             block_entry_last_line = True
-            continue
+        else:
+            # Making the new flow statement
+            def make_flow_lines() -> list[str]:
+                found_flows: list[tuple[str, int, PhysFlowValues]] = []
+                any_missing = False
+                for map, bits in block_bits.items():
+                    flows = phys_flows.get(map, {})
+                    if len(flows.keys()) == 0: continue
+                    for bit in bits:
+                        found = flows.get(str(bit))
+                        if found is None:
+                            line_warn(f"No flows are present in the physics.toml for '{map} {bit}'. Skipping")
+                            any_missing = True
+                        else:
+                            found_flows.append((map, bit, found))
 
-        # Making the new flow statement
-        def make_flow_lines() -> list[str]:
-            found_flows: list[tuple[str, int, PhysFlowValues]] = []
-            any_missing = False
-            for map, bits in block_bits.items():
-                flows = phys_flows.get(map, {})
-                for bit in bits:
-                    found = flows.get(str(bit))
-                    if found is None:
-                        line_warn(f"No flows are present in the physics.toml for '{map} {bit}'. Skipping")
-                        any_missing = True
-                    else:
-                        found_flows.append((map, bit, found))
+                if any_missing:
+                    return []
+                if len(found_flows) == 0:
+                    line_warn("No bits found in block")
+                    return []
 
-            if any_missing:
-                return []
-            if len(found_flows) == 0:
-                line_warn("No bits found in block")
-                return []
+                preferred = found_flows[0]
+                for entry in found_flows:
+                    if entry[0] == "rae":
+                        preferred = entry
+                        break
 
-            preferred = found_flows[0]
-            for entry in found_flows:
-                if entry[0] == "rae":
-                    preferred = entry
-                    break
+                for map, bit, other_flow in found_flows:
+                    if other_flow != preferred[2]:
+                        line_warn(f"'{map} {bit}' has a different flow than '{preferred[0]} {preferred[1]}', using '{preferred[0]} {preferred[1]}'")
+                        break
 
-            for map, bit, other_flow in found_flows:
-                if other_flow != preferred[2]:
-                    line_warn(f"'{map} {bit}' has a different flow than '{preferred[0]} {preferred[1]}', using '{preferred[0]} {preferred[1]}'")
-                    break
+                # Building the string
+                flow: PhysFlowValues = preferred[2]
+                out: list[str] = [f"flow speed in:{flow["flow_in"]} out:{flow["flow_out"]}"]
 
-            # Building the string
-            flow: PhysFlowValues = preferred[2]
-            out: list[str] = [f"flow speed in:{flow["flow_in"]} out:{flow["flow_out"]}"]
+                accel: list[str] = []
+                if "gravity_in" in flow:
+                    accel.append(f"in:{flow["gravity_in"]}")
+                if "gravity_out" in flow:
+                    accel.append(f"out:{flow["gravity_out"]}")
+                if accel:
+                    out.append(f"flow accel {' '.join(accel)}")
 
-            accel: list[str] = []
-            if "gravity_in" in flow:
-                accel.append(f"in:{flow["gravity_in"]}")
-            if "gravity_out" in flow:
-                accel.append(f"out:{flow["gravity_out"]}")
-            if accel:
-                out.append(f"flow accel {' '.join(accel)}")
+                smash: list[str] = []
+                if "smash_in" in flow:
+                    smash.append(f"in:{flow["smash_in"]}")
+                if "smash_out" in flow:
+                    smash.append(f"out:{flow["smash_out"]}")
+                if smash:
+                    out.append(f"flow smash {' '.join(smash)}")
 
-            smash: list[str] = []
-            if "smash_in" in flow:
-                smash.append(f"in:{flow["smash_in"]}")
-            if "smash_out" in flow:
-                smash.append(f"out:{flow["smash_out"]}")
-            if smash:
-                out.append(f"flow smash {' '.join(smash)}")
+                smash_speed: list[str] = []
+                if "smash_in_speed" in flow:
+                    smash_speed.append(f"in:{flow["smash_in_speed"]}")
+                if "smash_out_speed" in flow:
+                    smash_speed.append(f"out:{flow["smash_out_speed"]}")
+                if smash_speed:
+                    out.append(f"flow smash_speed {' '.join(smash_speed)}")
+                
+                out.reverse()
+                return out
 
-            smash_speed: list[str] = []
-            if "smash_in_speed" in flow:
-                smash_speed.append(f"in:{flow["smash_in_speed"]}")
-            if "smash_out_speed" in flow:
-                smash_speed.append(f"out:{flow["smash_out_speed"]}")
-            if smash_speed:
-                out.append(f"flow smash_speed {' '.join(smash_speed)}")
-            
-            return out
+            # Finding the flow
+            if line_strip.startswith("flow"):
+                flow_lines = make_flow_lines()
+                if len(flow_lines) > 0:
+                    for flow_line in flow_lines:
+                        lines.append((' ' * 4) + flow_line)
+                    bot_info(f"Found old flow '{line_strip}', replacing")
+                    block_entry_last_line = False
+                    continue
+            elif block_entry_last_line:
+                flow_lines = make_flow_lines()
+                if len(flow_lines) > 0:
+                    for flow_line in flow_lines:
+                        lines.append((' ' * 4) + flow_line)
+                    block_entry_last_line = False
+                    bot_info(f"Adding new flow statement")
 
-        # Finding the flow
-        if line_strip.startswith("flow:"):
-            new = make_flow_lines()
-            if len(new) == 0: continue
-            for i in range(0, len(new)):
-                lines.insert(line_index, (' ' * 4) + new[i])
-            bot_info(f"Found old flow '{line_strip}', replacing")
-        elif block_entry_last_line:
-            new = make_flow_lines()
-            if len(new) == 0: continue
-            for i in range(0, len(new)):
-                lines.insert(line_index, (' ' * 4) + new[i])
-            block_entry_last_line = False
-            bot_info(f"Adding new flow statement")
+        lines.append(line)
 
     path.write_text('\n'.join(lines))
 
 
 def convert_bot(dir: Path):
+    if dir.name != "wolfman": return  # test
+
     physics_file = dir / "physics.toml"
     update_physics(physics_file)
 
