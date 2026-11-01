@@ -1,83 +1,111 @@
 set rae billy_bob
 
 rae 213 {
-    flow 0.3
+    flow speed in:0.24 out:0.3
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.08
     rotate "Torso" x:10
     wigglemul 2.0
 }
 
 rae 211 {
-    flow 0.3
+    flow speed in:0.24 out:0.3
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Torso" y:25
 }
 
 rae 212 {
-    flow 0.3
+    flow speed in:0.24 out:0.3
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Torso" y:-25
 }
 
 rae 205 {
-    flow 0.8
+    flow speed in:0.64 out:0.8
+    flow accel in:1.0 out:1.0
+    flow smash in:0.39 out:0.67
     rotate "Head3" x:15
     wigglemul 3.0
 }
 
 rae 201 {
-    flow 0.2
+    flow speed in:0.4 out:0.4
+    flow accel in:1.0 out:1.0
+    flow smash in:1.0 out:1.0
     rotate "Head" y:35
     wigglemul 3.0
 }
 
 rae 202 {
-    flow 0.2
+    flow speed in:0.4 out:0.4
+    flow accel in:1.0 out:1.0
+    flow smash in:1.0 out:1.0
     rotate "Head" y:-35
     wigglemul 3.0
 }
 
 rae 203 {
-    flow 0.4
+    flow speed in:0.32 out:0.4
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Head4" z:15
 }
 
 rae 204 {
-    flow 0.4
+    flow speed in:0.32 out:0.4
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Head4" z:-15
 }
 
 # arms
 
 rae 206 {
-    flow 0.2
+    flow speed in:0.3 out:0.27
+    flow accel in:1.0 out:1.0
+    flow smash in:0.06 out:0.07
     rotate "ArmR" z:90
     wigglemul 1.5
 }
 
 # This is left arm raise but it's using the right arm bone???
 rae 207 {
-    flow 0.25
+    flow speed in:0.2 out:0.25
+    flow accel in:1.0 out:1.0
+    flow smash in:0.09 out:0.13
     rotate "ArmR" x:60
     wigglemul 1.5
 }
 
 rae 208 {  # guitar strum
-    flow 2.5
+    flow speed in:0.2 out:0.25
+    flow accel in:1.0 out:1.0
+    flow smash in:0.09 out:0.13
     rotate "Arm2R" x:-60
     wigglemul 1.5
 }
 
 rae 189 {
-    flow 0.6
+    flow speed in:0.48 out:0.6
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "ArmL" x:-15
 }
 
 rae 209 {
-    flow 0.6
+    flow speed in:0.7 out:0.8
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.38
     rotate "HandR" z:80
     wigglemul 2.0
 }
 
 rae 190 {
-    flow 0.6
+    flow speed in:0.48 out:0.6
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Banjo" z:-15
     rotate "ArmL" y:-20
 }
@@ -85,32 +113,44 @@ rae 190 {
 # legs
 
 rae 194 {
-    flow 0.5
+    flow speed in:0.4 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "ToesL" x:20
 }
 
 # face
 
 rae 196 {
-    flow 1.4
+    flow speed in:1.12 out:1.4
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Jaw" x:-30
     rotate "Snout" x:5
 }
 
 rae 199 {
-    flow 0.5
+    flow speed in:0.4 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "Eyes" x:0.5
 }
 rae 200 {
-    flow 0.5
+    flow speed in:0.4 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "Eyes" x:-0.5
 }
 
 rae 197 {
-    flow 0.8
+    flow speed in:0.64 out:0.8
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "EyeLidL" y:0.5
 }
 rae 198 {
-    flow 0.8
+    flow speed in:0.64 out:0.8
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "EyeLidR" y:0.5
 }

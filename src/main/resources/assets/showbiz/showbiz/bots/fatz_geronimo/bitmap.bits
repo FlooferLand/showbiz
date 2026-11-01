@@ -1,74 +1,106 @@
 set rae fatz
 
 rae 45 {
-    flow 1.5
+    flow speed in:2.0 out:2.0
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "Jaw" x:-45
 }
 rae 58 {
-    flow 0.7
+    flow speed in:0.8 out:0.5
+    flow accel in:0.45 out:0.6
+    flow smash in:0.0 out:0.0
     rotate "Right Arm" y:25
 }
 rae 60 {
-    flow 0.7
+    flow speed in:0.65 out:1.3
+    flow accel in:0.55 out:0.5
+    flow smash in:0.0 out:0.0
     rotate "Right Elbow" x:-25
 }
 rae 55 {
-    flow ease-in 0.28
+    flow speed in:0.54 out:0.6
+    flow accel in:0.45 out:0.45
+    flow smash in:0.0 out:0.0
     rotate "Head" y:-25
     wigglemul 2.0
 }
 rae 52 {
-    flow ease-in 0.28
+    flow speed in:0.8 out:0.8
+    flow accel in:0.6 out:0.6
+    flow smash in:0.0 out:0.0
     rotate "Head" z:-18
 }
 rae 57 {
-    flow 0.7
+    flow speed in:0.8 out:0.5
+    flow accel in:0.45 out:0.6
+    flow smash in:0.0 out:0.0
     rotate "Left Arm" y:-25
 }
 rae 59 {
-    flow 0.7
+    flow speed in:0.65 out:1.3
+    flow accel in:0.55 out:0.5
+    flow smash in:0.0 out:0.0
     rotate "Left Elbow" x:-25
 }
 rae 54 {
-    flow ease-in 0.28
+    flow speed in:0.52 out:0.6
+    flow accel in:0.45 out:0.45
+    flow smash in:0.0 out:0.0
     rotate "Head" y:25
     wigglemul 2.0
 }
 rae 51 {
-    flow ease-in 0.28
+    flow speed in:0.8 out:0.8
+    flow accel in:0.6 out:0.6
+    flow smash in:0.0 out:0.0
     rotate "Head" z:15
 }
 rae 53 {
-    flow ease-in 0.28
+    flow speed in:1.3 out:0.2
+    flow accel in:0.3 out:1.65
+    flow smash in:0.0 out:0.0
     rotate "Head" x:15
     wigglemul 2.5
 }
 rae 62 {
-    flow 0.3
+    flow speed in:0.6 out:0.3
+    flow accel in:0.6 out:0.6
+    flow smash in:0.5 out:0.3
     rotate "Waist" x:12
     rotate "Right Elbow" x:-12
     rotate "Left Elbow" x:-12
     wigglemul 2.0
 }
 rae 43 {
-    flow 0.8
+    flow speed in:2.0 out:2.0
+    flow accel in:0.45 out:0.4
+    flow smash in:0.0 out:0.0
     move "Left Eye" x:0.5
     move "Right Eye" x:0.5
 }
 rae 44 {
-    flow 0.8
+    flow speed in:2.0 out:2.0
+    flow accel in:0.45 out:0.4
+    flow smash in:0.0 out:0.0
     move "Left Eye" x:-0.5
     move "Right Eye" x:-0.5
 }
 rae 41 {
-    flow 3.0
+    flow speed in:2.0 out:2.0
+    flow accel in:0.7 out:0.7
+    flow smash in:0.0 out:0.0
     move "Left Eyelid" y:-1.3
 }
 rae 42 {
-    flow 3.0
+    flow speed in:2.0 out:2.0
+    flow accel in:0.7 out:0.7
+    flow smash in:0.0 out:0.0
     move "Right Eyelid" y:-1.3
 }
 rae 61 {
-    flow 0.7
+    flow speed in:2.0 out:2.0
+    flow accel in:1.2 out:0.6
+    flow smash in:0.0 out:0.0
     rotate "Foot" x:10
 }

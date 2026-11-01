@@ -4,16 +4,21 @@ format = 1
 dual_pressure_bit = 211
 dual_pressure_scale = 0.75
 
-[bits.rae]
-171 = { flow_in = 0.8, flow_out = 0.8,  gravity_in = 0.54, gravity_out = 0.54, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-172 = { flow_in = 0.63, flow_out = 0.65, gravity_in = 0.19, gravity_out = 0.19, smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-167 = { flow_in = 1.2, flow_out = 1.2,  gravity_in = 1.25,  gravity_out = 1.25,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-191 = { flow_in = 1.8, flow_out = 1.8,  gravity_in = 0.9,  gravity_out = 0.9,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-192 = { flow_in = 1.8, flow_out = 1.8,  gravity_in = 0.9,  gravity_out = 0.9,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
-193 = { flow_in = 1.6, flow_out = 1.6,  gravity_in = 0.55, gravity_out = 0.5,  smash_in = 0.0, smash_out = 0.0, smash_speed_in = 0.0, smash_speed_out = 0.0 }
+[dynbones.looney]
+damping = 0.1
+elasticity = 0.08
+freeze_x = false
 
-# Converted from the old wigglemul.
-[dynbones]
-"looney" = { damping = 0.1, elasticity = 0.08, freeze_x = false }
-"head" = { damping = 0.021, elasticity = 0.032, stiffness = 0.0, update_rate = 60, freeze_x = true, gravity = [0.0195, 0.0195, -0.0195] }
-"leaf" = { damping = 0.005, elasticity = 0.06, freeze_x = false, gravity = [0.005, 0.005, -0.005]  }
+[dynbones.head]
+damping = 0.021
+elasticity = 0.032
+stiffness = 0.0
+update_rate = 60
+freeze_x = true
+gravity = [ 0.0195, 0.0195, -0.0195,]
+
+[dynbones.leaf]
+damping = 0.005
+elasticity = 0.06
+freeze_x = false
+gravity = [ 0.005, 0.005, -0.005,]

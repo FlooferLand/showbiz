@@ -1,6 +1,8 @@
 set rae props
 
 rae 50 {
+    flow speed in:0.54 out:0.54
+    flow accel in:0.65 out:0.65
     move "Body" y:6.7
     rotate "Body" x:2.5
 }

@@ -150,7 +150,6 @@ def update_bitmap(path: Path):
                 if smash_speed:
                     out.append(f"flow smash_speed {' '.join(smash_speed)}")
                 
-                out.reverse()
                 return out
 
             # Finding the flow
@@ -176,8 +175,6 @@ def update_bitmap(path: Path):
 
 
 def convert_bot(dir: Path):
-    if dir.name != "wolfman": return  # test
-
     physics_file = dir / "physics.toml"
     update_physics(physics_file)
 

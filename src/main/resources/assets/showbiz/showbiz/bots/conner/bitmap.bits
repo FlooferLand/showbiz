@@ -2,48 +2,66 @@ set faz bonnie
 set rae beach_bear
 
 faz 46, rae 155 {
-    flow 0.3
+    flow speed in:0.24 out:0.3
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "upper_arm_l" z:-15
 }
 
 faz 43, rae 161 {
-    flow 0.2
+    flow speed in:0.16 out:0.2
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "upper_arm_r" z:10
 }
 
 faz 52, rae 156 {
-    flow 1.0
+    flow speed in:0.8 out:1.0
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "head" y:15
 }
 
 faz 51, rae 157 {
-    flow 1.0
+    flow speed in:0.8 out:1.0
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "head" y:-15
 }
 
 faz 34, rae 158 {
-    flow 0.7
+    flow speed in:0.56 out:0.7
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "head" x:15
 }
 
 faz 55, rae 165 {
-    flow 0.8
+    flow speed in:0.64 out:0.8
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     anim "body_tilt"
 }
 
 faz 33, rae 166 {
-    flow 1.5
+    flow speed in:1.2 out:1.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     rotate "jaw" x:-30
 }
 
 faz 36, rae 151 {
-    flow 0.6
+    flow speed in:0.48 out:0.6
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "left_eye" x:1
     move "right_eye" x:1
 }
 
 faz 35, rae 152 {
-    flow 0.6
+    flow speed in:0.48 out:0.6
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
     move "left_eye" x:-1
     move "right_eye" x:-1
 }
