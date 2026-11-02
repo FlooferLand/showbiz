@@ -5,6 +5,7 @@ rae 1 {
     flow speed in:2.0 out:2.0
     flow accel in:1.0 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "jaw" x:-35
     rotate "snout" x:5
 }
@@ -12,48 +13,56 @@ rae 36 {
     flow speed in:1.8 out:2.0
     flow accel in:0.8 out:0.8
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "earl_jaw" x:40
 }
 rae 4 {
     flow speed in:2.0 out:2.0
     flow accel in:0.45 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "eyes" x:0.5
 }
 rae 5 {
     flow speed in:2.0 out:2.0
     flow accel in:0.45 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "eyes" x:-0.5
 }
 rae 2 {
     flow speed in:2.0 out:2.0
     flow accel in:0.8 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "eyelid_l" y:-1.5
 }
 rae 3 {
     flow speed in:2.0 out:2.0
     flow accel in:0.8 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "eyelid_r" y:-1.5
 }
 rae 37 {
     flow speed in:1.45 out:1.45
     flow accel in:0.9 out:0.9
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "earl_eyebrow" y:1.5
 }
 rae 9 {
     flow speed in:2.0 out:2.0
     flow accel in:0.5 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "ear_l" x:25
 }
 rae 10 {
     flow speed in:2.0 out:2.0
     flow accel in:0.5 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "ear_r" x:25
 }
 
@@ -63,6 +72,7 @@ rae 6 {
     flow speed in:1.0 out:0.9
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "head" y:40
     wigglemul 2.5
 }
@@ -71,6 +81,7 @@ rae 7 {
     flow speed in:1.0 out:0.9
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "head" y:-40
     wigglemul 2.5
 }
@@ -79,6 +90,7 @@ rae 8 {
     flow speed in:1.0 out:1.5
     flow accel in:0.7 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "head" x:13
     wigglemul 2.5
 }
@@ -87,6 +99,7 @@ rae 14 {
     flow speed in:0.5 out:0.9
     flow accel in:0.4 out:0.5
     flow smash in:0.4 out:0.4
+    flow smash_speed in:0.2 out:0.4
     rotate "torso" y:20
     wigglemul 2.0
 }
@@ -95,6 +108,7 @@ rae 15 {
     flow speed in:0.5 out:0.9
     flow accel in:0.4 out:0.5
     flow smash in:0.4 out:0.4
+    flow smash_speed in:0.2 out:0.4
     rotate "torso" y:-20
     wigglemul 2.0
 }
@@ -103,6 +117,7 @@ rae 16 {
     flow speed in:0.6 out:0.7
     flow accel in:0.6 out:0.3
     flow smash in:0.4 out:0.4
+    flow smash_speed in:0.2 out:0.4
     rotate "torso" x:-6
     wigglemul 2.0
 }
@@ -113,6 +128,7 @@ rae 11 {
     flow speed in:0.7 out:0.45
     flow accel in:0.25 out:0.52
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "arm_l_up_pivot" z:-70
     wigglemul 1.5
 }
@@ -121,6 +137,7 @@ rae 12 {
     flow speed in:1.0 out:0.7
     flow accel in:0.25 out:0.25
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "ArmL" y:60
     wigglemul 1.5
 }
@@ -128,6 +145,7 @@ rae 13 {
     flow speed in:1.2 out:0.4
     flow accel in:0.6 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "ArmL2" x:-60
     wigglemul 1.5
 }
@@ -136,6 +154,7 @@ rae 17 {
     flow speed in:0.6 out:0.35
     flow accel in:0.25 out:0.55
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "arm_r" z:50
     wigglemul 1.5
 }
@@ -144,6 +163,7 @@ rae 18 {
     flow speed in:0.55 out:0.48
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "arm_r" y:22
     wigglemul 1.5
 }
@@ -152,6 +172,7 @@ rae 19 {
     flow speed in:0.65 out:0.56
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "arm_r_inner" y:-75
     wigglemul 1.5
 }
@@ -160,6 +181,7 @@ rae 20 {
     flow speed in:0.78 out:0.78
     flow accel in:0.65 out:0.6
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "earl_head" z:-25
     wigglemul 1.5
 }

@@ -4,6 +4,7 @@ rae 66 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top Blue" z:-1
     type effect
 }
@@ -11,6 +12,7 @@ rae 67 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top Red" z:-1
     type effect
 }
@@ -18,6 +20,7 @@ rae 68 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top Amber" z:-1
     type effect
 }
@@ -25,6 +28,7 @@ rae 69 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top Green" z:-1
     type effect
 }
@@ -32,6 +36,7 @@ rae 71 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Leg Top" z:-1
     type effect
 }
@@ -39,6 +44,7 @@ rae 72 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Leg Mid" z:-1
     type effect
 }
@@ -46,6 +52,7 @@ rae 73 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Leg Bottom" z:-1
     type effect
 }
@@ -53,6 +60,7 @@ rae 75 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top White" z:-1
     type effect
 }
@@ -60,6 +68,7 @@ rae 74 {
     flow speed in:1.0 out:1.0
     flow accel in:50.0 out:50.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "Top White" z:-1
     type effect
 }

@@ -4,34 +4,40 @@ rae 30 {
     flow speed in:2.5 out:2.5
     flow accel in:1.0 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "jaw" x:-30
 }
 rae 34 {
     flow speed in:3.0 out:3.0
     flow accel in:0.7 out:0.7
     flow smash in:0.5 out:0.0
+    flow smash_speed in:0.5 out:0.0
     rotate "Right Arm" y:-45
 }
 rae 33 {
     flow speed in:3.0 out:3.0
     flow accel in:0.9 out:0.9
     flow smash in:0.5 out:0.0
+    flow smash_speed in:0.5 out:0.0
 	# Should probably move the arm up while switching between the snare and hat
     flow speed in:3.0 out:3.0
     flow accel in:0.9 out:0.9
     flow smash in:0.5 out:0.0
+    flow smash_speed in:0.5 out:0.0
     rotate "Left Arm" y:38 z:-5
 }
 rae 63 {
     flow speed in:1.36 out:1.7
     flow accel in:1.0 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     rotate "Right Foot" x:-15
 }
 rae 31 {
     flow speed in:0.6 out:1.4
     flow accel in:0.7 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "RightElbow" x:-44
     wigglemul 0.3
 }
@@ -39,6 +45,7 @@ rae 35 {
     flow speed in:0.8 out:1.8
     flow accel in:0.8 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "LeftElbow" x:-44
     wigglemul 0.3
 }
@@ -46,6 +53,7 @@ rae 22 {
     flow speed in:0.9 out:0.7
     flow accel in:0.5 out:0.8
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "Head" x:25
     wigglemul 2.0
 }
@@ -53,6 +61,7 @@ rae 32 {
     flow speed in:2.0 out:2.0
     flow accel in:0.8 out:1.0
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "Left Foot" x:-15
     anim "hihat"
 }
@@ -60,6 +69,7 @@ rae 21 {
     flow speed in:0.55 out:0.55
     flow accel in:0.42 out:0.45
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "Head" y:-40
     wigglemul 2.0
 }
@@ -67,6 +77,7 @@ rae 25 {
     flow speed in:0.55 out:0.55
     flow accel in:0.42 out:0.45
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "Head" y:40
     wigglemul 2.0
 }
@@ -74,6 +85,7 @@ rae 64 {
     flow speed in:0.47 out:0.43
     flow accel in:0.65 out:0.6
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     rotate "Waist" x:10
     rotate "RightElbow" x:-10
     rotate "LeftElbow" x:-10
@@ -83,6 +95,7 @@ rae 23 {
     flow speed in:1.5 out:2.0
     flow accel in:1.0 out:1.0
     flow smash in:0.39 out:0.67
+    flow smash_speed in:0.1 out:0.1
     rotate "EarL" z:-55
     wigglemul 3.0
 }
@@ -90,6 +103,7 @@ rae 24 {
     flow speed in:1.5 out:2.0
     flow accel in:1.0 out:1.0
     flow smash in:0.39 out:0.67
+    flow smash_speed in:0.1 out:0.1
     rotate "EarR" z:55
     wigglemul 3.0
 }
@@ -97,6 +111,7 @@ rae 28 {
     flow speed in:2.0 out:2.0
     flow accel in:0.55 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "Left Eye" x:0.4
     move "Right Eye" x:0.4
 }
@@ -104,6 +119,7 @@ rae 29 {
     flow speed in:2.0 out:2.0
     flow accel in:0.55 out:0.5
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "Left Eye" x:-0.4
     move "Right Eye" x:-0.4
 }
@@ -111,11 +127,13 @@ rae 26 {
     flow speed in:2.0 out:2.0
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "Left Eyelid" y:0.6
 }
 rae 27 {
     flow speed in:2.0 out:2.0
     flow accel in:0.4 out:0.4
     flow smash in:0.0 out:0.0
+    flow smash_speed in:0.0 out:0.0
     move "Right Eyelid" y:0.6
 }

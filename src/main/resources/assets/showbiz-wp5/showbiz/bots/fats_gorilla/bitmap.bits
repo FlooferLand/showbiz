@@ -2,25 +2,37 @@ set rae fatz
 set wp5 fats
 
 wp5 23, rae 57 { # Left arm swing (horizontal)
-    flow 0.5
+    flow speed in:0.4 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     rotate "ArmL" x:-25
     move "ArmL" z:2  # Fixes a shoulder gap
 }
 
 wp5 22, rae 59 { # Left elbow keypress
-    flow 0.5
+    flow speed in:0.6 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.32 out:0.48
+    flow smash_speed in:0.1 out:0.1
     rotate "ElbowL3" z:-20
     wigglemul 3.0
 }
 
 wp5 24, rae 60 { # Right elbow keypress
-    flow 0.5
+    flow speed in:0.6 out:0.5
+    flow accel in:1.0 out:1.0
+    flow smash in:0.32 out:0.48
+    flow smash_speed in:0.1 out:0.1
     rotate "ElbowR3" z:20
     wigglemul 3.0
 }
 
 wp5 25, rae 62 { # Body lean
-    flow 0.25
+    flow speed in:0.2 out:0.25
+    flow accel in:1.0 out:1.0
+    flow smash in:0.12 out:0.18
+    flow smash_speed in:0.1 out:0.1
     rotate "Waist" x:8
     move "ElbowR" y:0.4
     move "ElbowL" y:0.4
@@ -30,30 +42,45 @@ wp5 25, rae 62 { # Body lean
 }
 
 wp5 20, rae 54 { # Head left
-    flow 0.35
+    flow speed in:0.3 out:0.3
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     rotate "Head_Turn" x:3 y:70
     move "Head_Turn" z:-1
     wigglemul 0.0
 }
 wp5 21, rae 51 { # Head tilt left
-    flow 0.4
+    flow speed in:0.32 out:0.4
+    flow accel in:1.0 out:1.0
+    flow smash in:0.19 out:0.2
+    flow smash_speed in:0.1 out:0.1
     rotate "Head_Tilt" z:13
     move "Head_Tilt" y:0.25
     wigglemul 2.0
 }
 
 wp5 17, rae 45 { # Mouth
-    flow 0.6
+    flow speed in:0.9 out:1.4
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     rotate "jaw" x:-45
 }
 
 wp5 18, rae 41 { # Left eyelid
-    flow 2.0
+    flow speed in:0.5 out:0.7
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "EyelidL" y:-1.25
 }
 
 wp5 19, rae 42 { # Right eyelid
-    flow 2.0
+    flow speed in:0.5 out:0.7
+    flow accel in:1.0 out:1.0
+    flow smash in:0.0 out:0.0
+    flow smash_speed in:0.1 out:0.1
     move "EyelidR" y:-1.25
 }
 
@@ -61,5 +88,6 @@ wp5 26, rae 61 {
     flow speed in:0.64 out:0.8
     flow accel in:1.0 out:1.0
     flow smash in:0.1 out:0.0
+    flow smash_speed in:0.1 out:0.1
     rotate "Foot" x:15
 }
