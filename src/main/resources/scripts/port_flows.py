@@ -22,8 +22,8 @@ class PhysFlowValues(TypedDict):
     gravity_out: NotRequired[float]
     smash_in: NotRequired[float]
     smash_out: NotRequired[float]
-    smash_in_speed: NotRequired[float]
-    smash_out_speed: NotRequired[float]
+    smash_speed_in: NotRequired[float]
+    smash_speed_out: NotRequired[float]
 
 MappedBits = dict[MapName, list[Bit]]
 MappedPhysFlows = dict[MapName, dict[BitStr, PhysFlowValues]]
@@ -131,7 +131,7 @@ def update_bitmap(path: Path):
                     accel.append(f"in:{flow["gravity_in"]}")
                 if "gravity_out" in flow:
                     accel.append(f"out:{flow["gravity_out"]}")
-                if accel:
+                if len(accel) > 0:
                     out.append(f"flow accel {' '.join(accel)}")
 
                 smash: list[str] = []
@@ -139,15 +139,15 @@ def update_bitmap(path: Path):
                     smash.append(f"in:{flow["smash_in"]}")
                 if "smash_out" in flow:
                     smash.append(f"out:{flow["smash_out"]}")
-                if smash:
+                if len(smash) > 0:
                     out.append(f"flow smash {' '.join(smash)}")
 
                 smash_speed: list[str] = []
-                if "smash_in_speed" in flow:
-                    smash_speed.append(f"in:{flow["smash_in_speed"]}")
-                if "smash_out_speed" in flow:
-                    smash_speed.append(f"out:{flow["smash_out_speed"]}")
-                if smash_speed:
+                if "smash_speed_in" in flow:
+                    smash_speed.append(f"in:{flow["smash_speed_in"]}")
+                if "smash_speed_out" in flow:
+                    smash_speed.append(f"out:{flow["smash_speed_out"]}")
+                if len(smash_speed) > 0:
                     out.append(f"flow smash_speed {' '.join(smash_speed)}")
                 
                 return out
