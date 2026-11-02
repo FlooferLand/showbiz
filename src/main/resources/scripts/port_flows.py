@@ -35,6 +35,8 @@ phys_flows: MappedPhysFlows = {}
 
 def update_physics(path: Path):
     global phys_flows
+    phys_flows = {}
+
     if not path.exists():
         warn(f"Physics is missing at path: {path}")
         return
@@ -62,7 +64,7 @@ def update_bitmap(path: Path):
     block_bits: MappedBits = { }
     block_entry_last_line = False
     for line_num, line in enumerate(path.read_text().splitlines()):
-        line_strip: str = line.strip()
+        line_strip: str = line.split('#')[0].strip()
         def line_warn(msg): warn(f"[{bot_id}] Line {line_num}: {msg}")
         def line_err(msg): err(f"[{bot_id}] Line {line_num}: {msg}")
 
@@ -90,6 +92,9 @@ def update_bitmap(path: Path):
                     block_bits[current_map].append(bit)
             block_entry_last_line = True
         else:
+            if line_strip.endswith('}'):
+                block_bits.clear()
+
             # Making the new flow statement
             def make_flow_lines() -> list[str]:
                 found_flows: list[tuple[str, int, PhysFlowValues]] = []
