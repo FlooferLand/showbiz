@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.screens.widgets
 
+import net.minecraft.*
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.gui.components.*
@@ -75,10 +76,11 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
         val extLabel = StringWidget(Component.empty(), font)
             .also {
                 val color = Showbiz.charts.getColorExt(ext)
-                it.message = Component.literal(ext.firstOrNull()?.toString() ?: ext).withColor(color)
-                it.tooltip = Tooltip.create(Component.literal(ext).withColor(color))
+                val unknown = if (Showbiz.charts.extensionToId[ext] == null) Component.literal("?").withStyle(ChatFormatting.DARK_GRAY) else Component.empty()
+                it.message = Component.literal(ext.firstOrNull()?.toString() ?: "").withColor(color).append(unknown)
+                it.tooltip = Tooltip.create(Component.literal(ext).withColor(color).append(unknown))
             }
-            .alignLeft()!!
+            .alignRight()!!
 
         val videoLabel = StringWidget(Component.empty(), font)
             .also {
@@ -96,7 +98,7 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
             with(extLabel) {
                 this.width = font.width(message) * 2
                 this.height = font.lineHeight
-                x = button.x - this.width
+                x = button.x - this.width - 4
                 y = button.y + (font.lineHeight / 2)
                 render(guiGraphics, mouseX, mouseY, partialTick)
             }

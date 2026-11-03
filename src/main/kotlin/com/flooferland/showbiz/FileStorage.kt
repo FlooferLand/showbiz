@@ -21,8 +21,8 @@ object FileStorage {
         }
     }
 
-    val cachedShowPaths = hashMapOf<String, Path>()
-    val cachedShowInfo = hashMapOf<String, ShowFileInfo>()
+    private val cachedShowPaths = hashMapOf<String, Path>()
+    private val cachedShowInfo = hashMapOf<String, ShowFileInfo>()
 
     fun getShowVideo(showPath: Path): Path? {
         var videoPath = runCatching {
@@ -39,6 +39,7 @@ object FileStorage {
         ShowFileInfo(id, videoPath != null)
     }.sortedBy { it.id }
 
+    @Suppress("SameReturnValue")
     fun fetchShowPaths(recache: Boolean = false): Map<String, Path> {
         if (!recache && cachedShowPaths.isNotEmpty()) return cachedShowPaths
 

@@ -20,7 +20,9 @@ import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Sounds
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.util.UUID
 import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
@@ -62,7 +64,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var loading = false
     var isLoaded = false
 
-    fun getFilePath(filename: String) = FileStorage.cachedShowPaths[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
+    fun getFilePath(filename: String) = FileStorage.fetchShowPaths()[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isNotLoaded() = !isLoaded
     fun isEmpty() = audio.size == 0
     fun approxByteSize(): Long {
@@ -88,10 +90,18 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
             Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
             val path = getFilePath(filename)
-            val loaded = run {
-                val out = runCatching { Files.newInputStream(path).use { RshowFormat().read(it) } }
+            val loaded: RawShowData = run {
+                val file: InputStream = try { Files.newInputStream(path) }
+                catch (_: NoSuchFileException) {
+                    error("No file found at '$path'")
+                }
+                catch (throwable: Throwable) {
+                    error("Failed to read '$path': $throwable")
+                }
+
+                val out = file.use { runCatching { RshowFormat().read(it) } }
                 out.onFailure { throwable ->
-                    Showbiz.log.error("BizlibNative failed to load '${path}'. Using fallback Java-based reader", throwable)
+                    Showbiz.log.error("BizlibNative failed to load '$path'. Using fallback Java-based reader", throwable)
                 }
                 out.getOrNull() ?: LegacyRshowFormat().readFile(path)
             }
