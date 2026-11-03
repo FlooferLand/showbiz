@@ -7,7 +7,9 @@ import net.minecraft.sounds.*
 import net.minecraft.util.*
 import net.minecraft.world.entity.*
 import net.minecraft.world.level.block.entity.*
-import com.flooferland.bizlib.bits.*
+import com.flooferland.bizlib.bits.AnimCommand
+import com.flooferland.bizlib.bits.BitMappingData
+import com.flooferland.bizlib.bits.Easing
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.AddonBot
@@ -51,7 +53,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         var cylinderClock: Double = 0.0
         val cymbalStates = mutableMapOf<String, CymbalState>()
         var ownerBotId: ResourceId? = null
-        var generation: Int = -1
         var lastFrameTime = -1.0
         var chains: List<ChainSolver> = emptyList()
         var chainsFor: ChainLayout? = null
@@ -68,10 +69,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
-        val showMapping = animatable.show?.data?.mapping
+        val showMapping = animatable.show?.data?.mapping ?: "any"
         val showPlaying = animatable.show?.data?.playing == true
-        val bitmapBits = bot.bitmap.bits[showMapping] ?: mutableMapOf()
-        if (bitmapBits.isEmpty()) resetAll()
+        val bitmapBits = bot.bitmap.bits[showMapping] ?: mapOf()
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
@@ -82,26 +82,23 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
-                animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
+                animManager.animationControllers.values.forEach { it.stop() }
             }
         }
 
         // Resetting animations
         if (!showPlaying) {
-            for ((bit, data) in bitmapBits) {
+            for ((_, data) in bitmapBits) {
                 for (anim in data.anim) {
                     animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
                     animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
                 }
             }
-            animManager.animationControllers.forEach { (_, controller) -> controller.stop() }
+            animManager.animationControllers.values.forEach { it.stop() }
         }
 
         // Getting bot storage & show playing guard
         val storage = localStorage.getOrPut(animatable) { LocalBotStorage() }
-
-        // May be null since bot.getId doesn't always mean the movement (ex: 'rolfe' on the bitmap doesn't match the bot id 'rolfe_dewolfe')
-        val movements = showMapping?.let { BitUtils.readBitmap(it) }?.get(bot.getId())
 
         // Driving animation
         val delta = run {
@@ -117,7 +114,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             val deltaTicks = (currentFrameTime - lastFrameTime).coerceIn(0.0..1.25)
             deltaTicks.toFloat()
         }
-        driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, model, movements, showMapping)
+        driveMotion(bitmapBits, animatable, animManager, storage, delta, bot, model, showMapping)
         driveCollideParts(animatable, model, storage, state.partialTick)
         driveChains(animatable, model, storage, bot)
     }
@@ -175,9 +172,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
     }
 
-    private fun driveMotion(bitmapBits: MutableMap<UShort, BitMappingData>, animatable: T,
+    private fun driveMotion(bitmapBits: Map<UShort, BitMappingData>, animatable: T,
                             animManager: AnimatableManager<GeoAnimatable>?, storage: LocalBotStorage, delta: Float, bot: AddonBot,
-                            model: BotModelData, movements: Movements?, showMapping: String?) {
+                            model: BotModelData, showMapping: String?) {
         val supply = showMapping?.let { bot.physics?.cylinders?.get(it) } ?: PneumaticValve.Supply.DEFAULT
         val hits = showMapping?.let { bot.physics?.hits?.get(it) }
         val dynBones = bot.physics?.dynbones
@@ -264,7 +261,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     }
 
     // Laying the bitmap's rotates and moves over the rest pose, each valve at [at] of its travel, floppy parts back at rest
-    private fun poseBits(bitmapBits: MutableMap<UShort, BitMappingData>, storage: LocalBotStorage, model: BotModelData, at: (PneumaticValve) -> Float) {
+    private fun poseBits(bitmapBits: Map<UShort, BitMappingData>, storage: LocalBotStorage, model: BotModelData, at: (PneumaticValve) -> Float) {
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue

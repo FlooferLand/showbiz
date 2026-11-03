@@ -1,5 +1,7 @@
 package com.flooferland.showbiz.types
 
+import com.flooferland.showbiz.Showbiz
+
 class BitChartStore {
     val ids = mutableListOf<String>()
     val extensions = mutableListOf<String>()
@@ -36,8 +38,16 @@ class BitChartStore {
         }
     }
 
-    fun getColor(id: String? = null, ext: String? = null): Int =
-        id?.let { idsToInfo[it]?.color } ?: ext?.let { extensionToInfo[it]?.color } ?: 0xFFFFFFFF.toInt()
+    fun getColorId(id: String? = null): Int =
+        id?.let { idsToInfo[it]?.color } ?: 0xFFFFFFFF.toInt()
+
+    fun getColorExt(ext: String? = null): Int =
+        ext?.let { extensionToInfo[it]?.color } ?: 0xFFFFFFFF.toInt()
+
+    fun checkExtension(ext: String): Boolean {
+        if (Showbiz.charts.extensionToId[ext] != null) return true
+        return ext.endsWith("shw") && ext != "shw"
+    }
 
     data class BitChartInfo(val extensions: List<String>, val color: Int) {
         constructor(extension: String, color: Int) : this(listOf(extension), color)

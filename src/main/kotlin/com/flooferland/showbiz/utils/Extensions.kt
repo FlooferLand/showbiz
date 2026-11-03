@@ -188,6 +188,7 @@ object Extensions {
     }
 
     fun String.count(substring: String) = windowed(substring.length) { if (it == substring) 1 else 0 }.sum()
+    fun String.getFileExtension() = if (contains('.')) substringAfterLast('.') else null
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
     fun String.alwaysEndsWith(suffixes: Collection<String>): String {
         if (suffixes.any { this.endsWith(it) } || suffixes.isEmpty()) return this

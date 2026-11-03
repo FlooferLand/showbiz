@@ -74,7 +74,7 @@ class ShowFileListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObj
 
         val extLabel = StringWidget(Component.empty(), font)
             .also {
-                val color = Showbiz.charts.getColor(ext = ext)
+                val color = Showbiz.charts.getColorExt(ext)
                 it.message = Component.literal(ext.firstOrNull()?.toString() ?: ext).withColor(color)
                 it.tooltip = Tooltip.create(Component.literal(ext).withColor(color))
             }

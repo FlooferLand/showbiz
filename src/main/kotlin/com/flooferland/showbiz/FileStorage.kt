@@ -24,25 +24,6 @@ object FileStorage {
     val cachedShowPaths = hashMapOf<String, Path>()
     val cachedShowInfo = hashMapOf<String, ShowFileInfo>()
 
-    private fun addRecursive(dir: File, shows: HashMap<String, Path>) {
-        val list = runCatching { dir.listFiles() }
-        for (file in list.getOrNull() ?: arrayOf()) {
-            if (!file.isDirectory && !Showbiz.charts.extensions.contains(file.extension)) continue
-            if (file.isDirectory) {
-                addRecursive(file, shows)
-            } else {
-                val file = file.toPath()
-                var chosenName = file.name
-                var i = 2
-                while (chosenName in shows) {
-                    chosenName = "${file.nameWithoutExtension} ($i).${file.extension}"
-                    i += 1
-                }
-                shows[chosenName] = file
-            }
-        }
-    }
-
     fun getShowVideo(showPath: Path): Path? {
         var videoPath = runCatching {
             showPath.parent.listDirectoryEntries()
@@ -65,11 +46,34 @@ object FileStorage {
         runCatching {
             val dir = File(SHOWS_DIR.toString())
             if (!dir.exists()) runCatching { dir.createNewFile() }
-            addRecursive(dir, shows)
+            addShowsRecursive(dir, shows)
         }
 
         cachedShowPaths.clear()
         cachedShowPaths.putAll(shows)
         return cachedShowPaths
+    }
+
+    private fun addShowsRecursive(dir: File, shows: HashMap<String, Path>) {
+        val list = runCatching { dir.listFiles() }
+        for (file in list.getOrNull() ?: arrayOf()) {
+            val extension = file.extension
+            val validExtension = Showbiz.charts.extensions.contains(extension)
+                    || (extension.endsWith("shw") && extension != "shw")
+            if (!file.isDirectory && !validExtension) continue
+
+            if (file.isDirectory) {
+                addShowsRecursive(file, shows)
+            } else {
+                val file = file.toPath()
+                var chosenName = file.name
+                var i = 2
+                while (chosenName in shows) {
+                    chosenName = "${file.nameWithoutExtension} ($i).${extension}"
+                    i += 1
+                }
+                shows[chosenName] = file
+            }
+        }
     }
 }

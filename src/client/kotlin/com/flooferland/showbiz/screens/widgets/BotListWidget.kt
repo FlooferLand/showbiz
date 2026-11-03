@@ -128,8 +128,8 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 if (bot == null) return@runCatching
 
                 val supported = Component.empty()
-                if (bot.accepts.rockafire) supported.append(Component.literal("r").withColor(Showbiz.charts.getColor(id = BitChartStore.RAE_ID)))
-                if (bot.accepts.fnaf1) supported.append(Component.literal("f").withColor(Showbiz.charts.getColor(id = BitChartStore.FAZ_ID)))
+                if (bot.accepts.rockafire) supported.append(Component.literal("r").withColor(Showbiz.charts.getColorId(BitChartStore.RAE_ID)))
+                if (bot.accepts.fnaf1) supported.append(Component.literal("f").withColor(Showbiz.charts.getColorId(BitChartStore.FAZ_ID)))
 
                 val (w, h) = Pair(font.width(supported), font.lineHeight / 2)
                 val (x, y) = Pair(button.x - 15, button.y + (button.height * 0.25).roundToInt())

@@ -13,6 +13,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getFileExtension
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
@@ -79,12 +80,11 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         val exceptionHandler = CoroutineExceptionHandler { context, throwable ->  }
         loadJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
             mapping = run {
-                val ext = if (filename.contains('.')) filename.substringAfterLast('.') else run {
-                    error("The file is missing a file extension")
+                val ext = filename.getFileExtension() ?: error("The file is missing a file extension")
+                if (!Showbiz.charts.checkExtension(ext)) {
+                    error("Unknown extension '${ext}'. Valid: [${Showbiz.charts.extensions.joinToString()}, *shw]")
                 }
-                Showbiz.charts.extensionToId[ext] ?: run {
-                    error("Format '${ext}' was not among: [${Showbiz.charts.extensions.joinToString()}]")
-                }
+                Showbiz.charts.extensionToId[ext]
             }
             Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
             val path = getFilePath(filename)
