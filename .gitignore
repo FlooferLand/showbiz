@@ -1,6 +1,8 @@
 **/.cache
 versions/**/bin
 versions/**/build
+versions/**/run
+versions/**/src
 
 # Python stuff
 **/__pycache__/

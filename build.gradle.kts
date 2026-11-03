@@ -1,4 +1,3 @@
-
 import java.awt.Desktop
 import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -32,6 +31,7 @@ stonecutter {
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+    idea
     id("com.google.devtools.ksp") version "2.3.4"
     id("dev.kikugie.stonecutter")
     id("fabric-loom")
@@ -172,6 +172,10 @@ dependencies {
     // Useful dev tools (not included in the mod, helps me ensure mod compatibility and other things)
     modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")
     modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("devonly.sodium")}-$loader")
+}
+
+idea.module {
+    file("versions").listFiles()?.forEach { excludeDirs.add(File(it, "src")) }
 }
 
 tasks.shadowJar {
