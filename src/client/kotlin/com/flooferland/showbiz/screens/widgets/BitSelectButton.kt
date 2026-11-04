@@ -1,20 +1,22 @@
 package com.flooferland.showbiz.screens.widgets
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.narration.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
-import net.minecraft.util.*
 import com.flooferland.bizlib.bits.BitUtils
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.show.BitId
 import com.flooferland.showbiz.show.toBitId
 import com.flooferland.showbiz.types.MappedBits
 import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.*
+import net.minecraft.client.gui.narration.NarratedElementType
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.FastColor
 import kotlin.math.max
 
 // Welcome to hell
@@ -213,7 +215,7 @@ class BitSelectButton(x: Int, y: Int, width: Int, height: Int = 15) : AbstractWi
                     val list = mutableListOf<String>()
                     for ((fixture, movements) in bitChart?.entries ?: emptyList()) {
                         for ((name, moveBit) in movements)
-                            if (moveBit in bits) list += "$fixture.$name"
+                            if (moveBit in bits) list += "$fixture.$name ($moveBit)"
                     }
                     list
                 }

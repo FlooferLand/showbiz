@@ -115,8 +115,10 @@ object AutoConnection {
             }
             "Show selector added"
         }
-        is ReelToReelBlockEntity if first is ProgrammerBlockEntity -> {
-            val (reelToReel, programmer) = Pair(last, first)
+
+        // Programmer
+        is ProgrammerBlockEntity if first is ReelToReelBlockEntity -> {
+            val (programmer, reelToReel) = Pair(last, first)
             reelToReel.applyChange(true) {
                 show.bindListener(programmer)
             }
@@ -125,10 +127,6 @@ object AutoConnection {
             }
             "Programmer connected"
         }
-
-
-        // Programmer
-
         is ProgrammerBlockEntity if first is ShowParserBlockEntity -> {
             val (programmer, showParser) = Pair(last, first)
             programmer.applyChange(true) {
@@ -137,6 +135,13 @@ object AutoConnection {
             "Programmer connected"
         }
         is ProgrammerBlockEntity if first is StagedBotBlockEntity -> {
+            val (programmer, bot) = Pair(last, first)
+            programmer.applyChange(true) {
+                show.bindListener(bot)
+            }
+            "Programmer connected"
+        }
+        is ProgrammerBlockEntity if first is BotEntity -> {
             val (programmer, bot) = Pair(last, first)
             programmer.applyChange(true) {
                 show.bindListener(bot)

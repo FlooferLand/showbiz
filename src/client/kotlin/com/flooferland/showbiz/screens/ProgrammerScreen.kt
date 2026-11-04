@@ -1,16 +1,18 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.StringWidget
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
 import kotlin.math.roundToInt
 
 class ProgrammerScreen : Screen(Component.literal("Programmer")) {
@@ -34,9 +36,9 @@ class ProgrammerScreen : Screen(Component.literal("Programmer")) {
             val height = 15
             val name = "Key ${i+1}"
             val leftSpace = font.width(name)
-            val input = BitSelectButton(0, 0, 80, height)
+            val input = BitSelectButton(0, 0, 150, height)
             input.values = mappedBits
-            val x = textureX + (input.width / 2) + leftSpace + (spacing * 2)
+            val x = textureX + (input.width / 2) + leftSpace
             val y = textureY + 10 + (size * 0.2f).toInt() + (i * spacing)
             run {
                 val nameWidget = StringWidget(x, y, leftSpace, height, Component.literal(name), font).alignLeft()

@@ -37,7 +37,7 @@ class PneumaticValve {
     private var lastState: Boolean = false
 
     // Stepping once. [dt60] is the step length in 60 fps frames, 1 at 60 steps a second
-    fun step(on: Boolean, dt60: Float, psi: Float, dualScale: Float, params: Params) {
+    fun step(on: Boolean, held: Boolean, dt60: Float, psi: Float, dualScale: Float, params: Params) {
         lastPos = pos
         var next = pos
         val drive = psi / 1050f * params.psiScale * dt60 * dualScale
@@ -53,9 +53,10 @@ class PneumaticValve {
             smashSpeed = params.smashSpeedOut
         } else {
             //retracting
+            val hold = if (held) 0f else 1f
             heavyIn = minOf(heavyIn + params.flowIn * params.flowIn / 2f, 1f + (1f - params.flowIn) * 0.3f)
             heavyOut = 0f
-            next -= drive * params.flowIn * heavyIn * params.gravityIn * invert
+            next -= drive * params.flowIn * heavyIn * params.gravityIn * invert * hold
             smash = params.smashIn
             smashSpeed = params.smashSpeedIn
         }
@@ -79,10 +80,11 @@ class PneumaticValve {
         pos = minOf(maxOf(next, 0f), 1f)
     }
 
-    fun stepFlow(on: Boolean, dt60: Float, speed: Float) {
+    fun stepFlow(on: Boolean, held: Boolean, dt60: Float, speed: Float) {
         lastPos = pos
         hit = 0f
-        val t = (speed * 0.1f * dt60).coerceIn(0f, 10f)
+        val hold = if (!on && held) 0f else 1f
+        val t = (speed * 0.1f * dt60 * hold).coerceIn(0f, 10f)
         val next = pos * (1f - t) + (if (on) 1f else 0f) * t
         pos = if (next.isFinite()) next.coerceIn(0f, 1f) else 0f
     }

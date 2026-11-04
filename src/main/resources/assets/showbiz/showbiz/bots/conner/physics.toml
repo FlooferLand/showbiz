@@ -1,16 +1,20 @@
 format = 1
 
+[cylinders.rae]
+dual_pressure_bit = 211
+dual_pressure_scale = 0.75
+
 [dynbones.upper_arm_l]
-damping = 0.15
-elasticity = 0.1
+damping = 0.4
+elasticity = 0.5
 freeze_x = false
 
 [dynbones.upper_arm_r]
-damping = 0.15
-elasticity = 0.1
+damping = 0.4
+elasticity = 0.5
 freeze_x = false
 
 [dynbones.head]
-damping = 0.15
-elasticity = 0.1
+damping = 0.4
+elasticity = 0.5
 freeze_x = false

@@ -22,23 +22,25 @@ faz 43, rae 161 {
 
 # head turn l
 faz 52, rae 156 {
-    flow speed in:0.6 out:0.6
+    flow speed in:0.8 out:0.8
     flow accel in:1.0 out:1.0
     rotate "head" y:25
+    hold yes
 }
 
 # head turn r
 faz 51, rae 157 {
-    flow speed in:0.6 out:0.6
+    flow speed in:0.8 out:0.8
     flow accel in:1.0 out:1.0
     rotate "head" y:-25
+    hold yes
 }
 
 # head up
 faz 34, rae 158 {
-    flow speed in:0.56 out:0.7
-    flow accel in:1.0 out:1.0
-    rotate "head" x:15
+    flow speed in:0.3 out:0.5
+    flow accel in:0.8 out:0.8
+    rotate "head" x:10
 }
 
 # body lean

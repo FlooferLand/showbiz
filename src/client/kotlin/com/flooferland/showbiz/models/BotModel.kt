@@ -1,14 +1,8 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.client.multiplayer.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.sounds.*
-import net.minecraft.util.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.block.entity.*
 import com.flooferland.bizlib.bits.AnimCommand
 import com.flooferland.bizlib.bits.BitMappingData
+import com.flooferland.bizlib.bits.BooleanType
 import com.flooferland.bizlib.bits.Easing
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
@@ -32,7 +26,14 @@ import com.flooferland.showbiz.types.physics.ChainSolver
 import com.flooferland.showbiz.types.physics.DynBone
 import com.flooferland.showbiz.types.pneumatic.PneumaticValve
 import com.mojang.blaze3d.Blaze3D
-import java.util.WeakHashMap
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundSource
+import net.minecraft.util.Mth
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.level.block.entity.BlockEntity
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimatableManager
@@ -42,6 +43,7 @@ import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.constant.DataTickets
 import software.bernie.geckolib.util.ClientUtil
+import java.util.*
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -196,10 +198,17 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         repeat(steps) {
             for ((bit, data) in bitmapBits) {
                 val valve = storage.valves.getOrPut(bit) { PneumaticValve() }
+                val held = data.hold == BooleanType.Yes
+                        && animatable.show?.data?.playing == true
+                        && bitmapBits.none { (otherBit, otherData) ->
+                            otherBit != bit && frame.frameHas(otherBit)
+                                    && (otherData.rotates.any { rotate -> data.rotates.any { it.bone == rotate.bone } }
+                                    || otherData.moves.any { move -> data.moves.any { it.bone == move.bone } })
+                        }
 
                 // Fallback for the old flows
                 if (data.flow == null) {
-                    valve.stepFlow(frame.frameHas(bit), 60f / supply.rate, data.oldFlow?.speed?.toFloat() ?: 1.0f)
+                    valve.stepFlow(frame.frameHas(bit), held, 60f / supply.rate, data.oldFlow?.speed?.toFloat() ?: 1.0f)
                     continue
                 }
 
@@ -208,7 +217,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 // val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) cylinder.dualPressureScale ?: supply.dualPressureScale else 1f
                 val dualBit = supply.dualPressureBit
                 val dualScale = if (dualBit != 0 && frame.frameHas(dualBit)) supply.dualPressureScale else 1f
-                valve.step(frame.frameHas(bit), 60f / supply.rate, supply.psi, dualScale, PneumaticValve.Params.from(data))
+                valve.step(frame.frameHas(bit), held, 60f / supply.rate, supply.psi, dualScale, PneumaticValve.Params.from(data))
                 if (hits != null && valve.hit > 0f) playHit(animatable, hits, bit, valve.hit, valve.pos >= 1f)
             }
             if (storage.dynBones.isNotEmpty()) {
