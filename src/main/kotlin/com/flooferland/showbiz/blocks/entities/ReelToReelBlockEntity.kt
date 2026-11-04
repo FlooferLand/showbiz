@@ -1,18 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.*
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
@@ -38,6 +25,24 @@ import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.ChatFormatting
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.Container
+import net.minecraft.world.WorldlyContainer
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import kotlin.math.roundToInt
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
@@ -160,7 +165,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (runningShow) {
             // Audio
             val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
-            if (audioBytesWritten < targetBytes && audioBytesWritten < showData.audio.size) {
+            val lookaheadBytes = getFormat().sampleRate.toInt() * getFormat().frameSize / 2
+            if (audioBytesWritten < targetBytes + lookaheadBytes && audioBytesWritten < showData.audio.size) {
                 var toWrite = aBufferSize
                 toWrite -= toWrite % getFormat().frameSize
 
@@ -197,7 +203,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
             // Setting playing to false when the show ends
             // TODO: Unload the show data as well; currently makes the reel item vanish though
-            if (audioBytesWritten >= showData.audio.size - 1 && !recording) {
+            if (audioBytesWritten >= showData.audio.size && !recording) {
                 setPlaying(false)
                 hasFinished = true
                 // showData.unload()
@@ -242,6 +248,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val format = getFormat()
         val alignedBytes = (seconds * format.sampleRate).toLong() * format.frameSize
         audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+        audio.sendTrigger(PackedAudioData.Action.Stop)
         stateDirty = true
     }
     fun resetPlayback() {

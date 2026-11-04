@@ -1,9 +1,10 @@
 package com.flooferland.showbiz.audio
 
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.types.FriendlyAudioFormat
+import net.minecraft.client.Minecraft
+import net.minecraft.world.phys.Vec3
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL11.*
 import org.lwjgl.openal.ALC10.alcGetCurrentContext
@@ -70,14 +71,14 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         if (paused) return
         updatePosition()
 
+        val tickRate = Minecraft.getInstance().level?.tickRateManager()?.tickrate() ?: 20f
+        handleAL { alSourcef(source, AL_PITCH, tickRate / 20f) }
+
         // Checking chunk order
-        if (packet.id <= lastReceivedChunkId && packet.id > 1) {
+        if (packet.id in 2..lastReceivedChunkId) {
             Showbiz.log.warn("Found out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
         }
         lastReceivedChunkId = packet.id
-
-        // Hard reset
-        handleAL { alSourceStop(source) }
 
         // Cleaning buffers
         val processedCount = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
