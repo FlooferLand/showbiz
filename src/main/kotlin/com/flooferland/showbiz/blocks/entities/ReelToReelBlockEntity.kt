@@ -209,6 +209,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
 
             // Setting playing to false when the show ends
+            // TODO: Make shows unload data when they finish, the item keeps vanishing for some reason
             if (seek >= endTime && !recording) {
                 setPlaying(false)
                 hasFinished = true
