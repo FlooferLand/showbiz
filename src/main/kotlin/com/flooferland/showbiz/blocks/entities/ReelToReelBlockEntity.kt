@@ -20,6 +20,7 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
@@ -74,6 +75,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         get() = 50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
     val aBufferSize: Int
         get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
+    val endTime: Double
+        get() = showData.audio.size.toDouble() / (getFormat().sampleRate * getFormat().frameSize)
 
     public var recording: Boolean = false
     public var showData: ShowData = ShowData(this)
@@ -206,16 +209,16 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
 
             // Setting playing to false when the show ends
-            // TODO: Unload the show data as well; currently makes the reel item vanish though
-            if (audioBytesWritten >= showData.audio.size && !recording) {
+            if (seek >= endTime && !recording) {
                 setPlaying(false)
                 hasFinished = true
                 // showData.unload()
+                markDirtyNotifyAll()
             }
         }
 
         // Saving the seek every once in a while
-        if (runningShow && level.gameTime % 2.secsToTicks() == 0L) {
+        if (runningShow && level.gameTime % 10.secsToTicks() == 0L) {
             level.blockEntityChanged(blockPos)
         }
     }
@@ -247,7 +250,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         stateDirty = true
     }
     fun seekTo(seconds: Double) {
-        val seconds = seconds.coerceAtLeast(0.0)
+        val seconds = seconds.coerceIn(0.0, endTime)
         this.seek = seconds
 
         val format = getFormat()
@@ -301,19 +304,18 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun getInteractionMapping() = mapOf(
         "record" to 0,
-        "seek_forward" to 1,
-        "seek_backward" to 2
+        "seek_backward" to 1,
+        "seek_forward" to 2
     )
 
     override fun getNameMapping() = mapOf(
         0 to if (recording) "Recording" else "Not recording",
-        1 to "Seek forward",
-        2 to "Seek backward",
+        1 to "Seek backward",
+        2 to "Seek forward"
     )
 
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
-        val seekSecs = 2
         when (key) {
             0 -> { // Record
                 if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
@@ -341,13 +343,16 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                     Sounds.bad(player)
                 }
             }
-            1 -> {  // Seek forward
-                seekTo(seek + seekSecs)
-                player.displayClientMessage(Component.literal(seek.seconds.toShortString()), true)
-            }
-            2 -> {  // Seek backward
-                seekTo(seek - seekSecs)
-                player.displayClientMessage(Component.literal(seek.seconds.toShortString()), true)
+            1, 2 -> {  // Seek
+                val seekSecs = if (player.isCrouching) 3 else 10
+                val mul = if (key == 1) -1 else 1
+                seekTo(seek + (seekSecs * mul))
+
+                val text = Component.literal(seek.seconds.toShortString())
+                    .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(endTime.seconds.toShortString()))
+                player.displayClientMessage(text, true)
+                Sounds.click(player)
             }
         }
     }
@@ -451,7 +456,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
     override fun getSlotsForFace(side: Direction) = intArrayOf(0)
     override fun canPlaceItemThroughFace(index: Int, stack: ItemStack, direction: Direction?) =
-        stack.item is ReelItem && (isEmpty || hasFinished)
+        stack.item is ReelItem && isEmpty
     override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction) =
         !isEmpty && hasFinished && !playing
     // endregion

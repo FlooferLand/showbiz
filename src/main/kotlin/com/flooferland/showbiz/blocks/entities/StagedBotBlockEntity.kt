@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -8,7 +9,6 @@ import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
@@ -48,25 +48,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     override val botPos get() = blockPos.above().bottomCenter!!
 
     override val collidePartInstance = CollidePartManager.create(this) {
-        val botId = botId ?: return@create
-        when {
-            botId.matches("showbiz:rolfe_dewolfe") -> {
-                map("cymbal", CollidePartId.Cymbal)
-                map("stickInner", CollidePartId.Stick)
-            }
-            botId.matches("showbiz-wp5:mini_mozzarella") -> {
-                map("Booper", CollidePartId.Boop)
-            }
-            botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
-                map("LeftStickCollision", CollidePartId.LeftStick)
-                map("RightStickCollision", CollidePartId.RightStick)
-                map("HiHatCollision", CollidePartId.HiHat)
-                map("CymbalCollision", CollidePartId.Cymbal)
-                map("KickFootCollision", CollidePartId.KickFoot)
-                map("Kick", CollidePartId.Kick)
-                map("Snare", CollidePartId.Snare)
-            }
-        }
+        BotEntity.bonePrepare(this, this@StagedBotBlockEntity)
     }
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit

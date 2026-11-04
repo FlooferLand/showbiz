@@ -56,7 +56,7 @@ object StatShowsCommand : Command("shows") {
         }
 
         val comp = Component.empty()
-        comp.append(Component.literal("Note that values starting with a tilde are an estimate\n"))
+        comp.append(Component.literal("Note that values starting with a tilde are an estimate\n").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
         comp.append(Component.literal("RAM Used: ~${totalByteSize.bytesToFriendlySize()}\n"))
         comp.append(Component.literal("Shows:\n"))
         if (list.isNotEmpty()) {

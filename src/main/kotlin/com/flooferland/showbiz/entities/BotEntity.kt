@@ -13,6 +13,7 @@ import com.flooferland.showbiz.types.IBotAttachment
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.CollidePartInstance
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.ConnectionManager
@@ -80,26 +81,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
         }
 
     override val collidePartInstance = CollidePartManager.create(this) {
-        val botId = this@BotEntity.botId ?: return@create
-        when {
-            botId.matches("showbiz:rolfe_dewolfe") -> {
-                map("cymbal", CollidePartId.Cymbal)
-                map("stick", CollidePartId.Stick)
-            }
-
-            botId.matches("showbiz-wp5:mini_mozzarella") -> {
-                map("Booper", CollidePartId.Boop)
-            }
-            botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
-                map("LeftStickCollision", CollidePartId.LeftStick)
-                map("RightStickCollision", CollidePartId.RightStick)
-                map("HiHatCollision", CollidePartId.HiHat)
-                map("CymbalCollision", CollidePartId.Cymbal)
-                map("KickFootCollision", CollidePartId.KickFoot)
-                map("Kick", CollidePartId.Kick)
-                map("Snare", CollidePartId.Snare)
-            }
-        }
+        bonePrepare(this, this@BotEntity)
     }
 
     private var prevBotId: ResourceId? = null
@@ -219,5 +201,26 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     companion object {
         var soundHandler: IBotAttachment? = null
         var decor: IBotAttachment? = null
+        val bonePrepare: CollidePartInstance.BonePrepare.(IBot) -> Unit = bonePrepare@ {
+            val botId = it.botId ?: return@bonePrepare
+            when {
+                botId.matches("showbiz:rolfe_dewolfe") -> {
+                    map("cymbal", CollidePartId.Cymbal)
+                    map("stickInner", CollidePartId.Stick)
+                }
+                botId.matches("showbiz-wp5:mini_mozzarella") || botId.matches("showbiz-wp5:queenie") -> {
+                    map("Booper", CollidePartId.Boop)
+                }
+                botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
+                    map("LeftStickCollision", CollidePartId.LeftStick)
+                    map("RightStickCollision", CollidePartId.RightStick)
+                    map("HiHatCollision", CollidePartId.HiHat)
+                    map("CymbalCollision", CollidePartId.Cymbal)
+                    map("KickFootCollision", CollidePartId.KickFoot)
+                    map("Kick", CollidePartId.Kick)
+                    map("Snare", CollidePartId.Snare)
+                }
+            }
+        }
     }
 }
