@@ -23,6 +23,7 @@ import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import com.flooferland.showbiz.utils.Extensions.toShortString
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.ChatFormatting
@@ -44,6 +45,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
     override val connectionManager = ConnectionManager(this)
@@ -93,6 +95,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.1, 0.1, 0.15))
+        addPart("seek_backward", Vec3(-0.22, 0.13, -0.2), Vec3(0.2, 0.2, 0.15))
+        addPart("seek_forward", Vec3(-0.05, 0.13, -0.2), Vec3(0.2, 0.2, 0.15))
     }
     private var audioBytesWritten = 0
     private var stateDirty = false
@@ -243,6 +247,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         stateDirty = true
     }
     fun seekTo(seconds: Double) {
+        val seconds = seconds.coerceAtLeast(0.0)
         this.seek = seconds
 
         val format = getFormat()
@@ -294,36 +299,56 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun getFormat() = showData.format ?: showData.targetFormat
 
-    override fun getInteractionMapping() = mapOf("record" to 0)
+    override fun getInteractionMapping() = mapOf(
+        "record" to 0,
+        "seek_forward" to 1,
+        "seek_backward" to 2
+    )
 
-    override fun getNameMapping() = mapOf(0 to if (recording) "Recording" else "Not recording")
+    override fun getNameMapping() = mapOf(
+        0 to if (recording) "Recording" else "Not recording",
+        1 to "Seek forward",
+        2 to "Seek backward",
+    )
 
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
-        if (key != 0) return
-        if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
-            applyChange(true) {
-                if (recording) {
-                    recording = false
-                    showData.saveToDisk(player)
-                    Sounds.exit(player)
-                } else if (playing) {
-                    if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
-                        player.displayClientMessage(
-                            Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW),
-                            true
-                        )
+        val seekSecs = 2
+        when (key) {
+            0 -> { // Record
+                if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
+                    applyChange(true) {
+                        if (recording) {
+                            recording = false
+                            showData.saveToDisk(player)
+                            Sounds.exit(player)
+                        } else if (playing) {
+                            if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
+                                player.displayClientMessage(
+                                    Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW),
+                                    true
+                                )
+                            }
+                            recording = true
+                            Sounds.enter(player)
+                        } else {
+                            player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+                            Sounds.bad(player)
+                        }
                     }
-                    recording = true
-                    Sounds.enter(player)
                 } else {
-                    player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
+                    player.notifyPermissionError(Permissions.WriteReels)
                     Sounds.bad(player)
                 }
             }
-        } else {
-            player.notifyPermissionError(Permissions.WriteReels)
-            Sounds.bad(player)
+            1 -> {  // Seek forward
+                seekTo(seek + seekSecs)
+                player.displayClientMessage(Component.literal(seek.seconds.toShortString()), true)
+            }
+            2 -> {  // Seek backward
+                seekTo(seek - seekSecs)
+                player.displayClientMessage(Component.literal(seek.seconds.toShortString()), true)
+            }
         }
     }
 

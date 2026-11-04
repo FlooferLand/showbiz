@@ -1,5 +1,6 @@
 package com.flooferland.showbiz
 
+import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.registry.ModSounds
@@ -7,6 +8,7 @@ import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.sounds.SoundSource
@@ -44,9 +46,16 @@ object ServerPackets {
                 return@listen
             }
 
-            val blockEntity = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@listen
-            val key = blockEntity.getInteractionMapping()[packet.name] ?: return@listen
-            blockEntity.onInteract(key, level, player)
+
+            val blockEntity = level.getBlockEntity(packet.parent) ?: return@listen
+            if (!player.mayInteractWith(blockEntity)) {
+                player.notifyPermissionError()
+                return@listen
+            }
+
+            val interactable = blockEntity as? IModelPartInteractable ?: return@listen
+            val key = interactable.getInteractionMapping()[packet.name] ?: return@listen
+            interactable.onInteract(key, level, player)
         }
 
         ServerPackets.listen(BotListSelectPacket.type) { packet, ctx ->

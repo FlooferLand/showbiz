@@ -36,6 +36,7 @@ import java.util.*
 import kotlin.enums.enumEntries
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
+import kotlin.time.Duration
 
 
 @Suppress("unused")
@@ -229,4 +230,12 @@ object Extensions {
 
     fun Number.formatDecimal(precision: Int = 3) =
         runCatching { "%.${precision}f".format(this) }.getOrDefault(toString())
+
+    fun Duration.toShortString() = toComponents { h, m, s, _ ->
+        listOfNotNull(
+            if (h > 0) "${h}h" else null,
+            if (m > 0 || h > 0) "${m}m" else null,
+            "${s}s"
+        ).joinToString(" ")
+    }
 }
