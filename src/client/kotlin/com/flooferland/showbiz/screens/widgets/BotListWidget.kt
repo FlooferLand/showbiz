@@ -1,16 +1,18 @@
 package com.flooferland.showbiz.screens.widgets
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.renderer.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.ResourceId
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.ContainerObjectSelectionList
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.renderer.Rect2i
+import net.minecraft.network.chat.Component
 import kotlin.math.roundToInt
 
 /** Lists bots mainly for [com.flooferland.showbiz.screens.BotSelectScreen] (or anything that requires a bot selection list) */
@@ -18,6 +20,9 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
     var visibleCategories = mutableSetOf<String>()
     var onHover: (ResourceId?) -> Unit = {}
     var selected: ResourceId? = null
+
+    val excluded = listOf(ResourceId(Showbiz.MOD_ID, "conner"))
+    var showExcluded = false
 
     init {
         setPosition(x, y)
@@ -41,9 +46,10 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
         val grouped = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }
         selected?.let { visibleCategories.add(it.namespace) }
 
-        // All visible if you have no addons
+        // Setting all visible if you have no addons
         if (grouped.keys.all { it == MOD_ID }) visibleCategories = grouped.keys.toMutableSet()
 
+        // Adding the entries
         grouped.forEach { (namespace, botEntries) ->
             val category = BotEntry(category = namespace) {
                 if (namespace !in visibleCategories) {
@@ -55,7 +61,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             }
             addEntry(category)
             if (namespace in visibleCategories) botEntries.sortedBy { it.value.name }.forEach { (botId, bot) ->
-                if (botId.toString() == "showbiz:conner") return@forEach
+                if (!showExcluded && excluded.contains(botId)) return@forEach
                 addEntry(BotEntry(botId, bot) { click(botId) })
             }
         }
@@ -84,6 +90,13 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                     it.active = false
                     it.message = Component.literal(it.message.string).withStyle(ChatFormatting.GRAY)
                     it.tooltip = Tooltip.create(Component.literal("Already selected"))
+                }
+
+                if (botId in excluded) {
+                    it.message = it.message.copy()
+                        .append(
+                            Component.literal(" (hidden)").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
+                        )
                 }
             }
 

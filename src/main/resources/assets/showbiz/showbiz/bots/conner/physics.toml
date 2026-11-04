@@ -1,7 +1,5 @@
 format = 1
 
-[cylinders.faz]
-
 [dynbones.upper_arm_l]
 damping = 0.15
 elasticity = 0.1

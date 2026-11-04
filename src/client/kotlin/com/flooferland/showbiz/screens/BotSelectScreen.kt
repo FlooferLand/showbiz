@@ -1,13 +1,5 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.client.gui.screens.inventory.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.menus.BotSelectMenu
@@ -17,6 +9,15 @@ import com.flooferland.showbiz.screens.widgets.BotListWidget
 import com.flooferland.showbiz.screens.widgets.BotPreviewWidget
 import com.flooferland.showbiz.types.ResourceId
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.StringWidget
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.screens.inventory.MenuAccess
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Inventory
 import org.lwjgl.glfw.GLFW
 
 class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title: Component) : Screen(title), MenuAccess<BotSelectMenu> {
@@ -72,11 +73,14 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, searchBarHeight, Component.literal("Search") )
         searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
         searchBar.setResponder { name ->
+            val name = name.trim()
             fun set(bots: Map<ResourceId, AddonBotEntry>) {
                 botListWidget.setBots(bots) { botSelected(it) }
                 botListWidget.scrollAmount = 0.0
                 botPreview.bots = bots
             }
+            botListWidget.showExcluded = botListWidget.excluded.any { name == it.toString() || name == it.path }
+
             if (name.isBlank()) {
                 botListWidget.visibleCategories = mutableSetOf()
                 set(bots)
