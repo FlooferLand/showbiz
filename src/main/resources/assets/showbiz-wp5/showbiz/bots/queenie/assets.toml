@@ -1,2 +1,7 @@
 [variants.default]
+model = "queenie"
 texture = "queenie"
+
+[variants.iappa]
+model = "queenie_iappa"
+texture = "queenie_iappa"

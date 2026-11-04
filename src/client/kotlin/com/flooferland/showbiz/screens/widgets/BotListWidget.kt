@@ -2,24 +2,32 @@ package com.flooferland.showbiz.screens.widgets
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
+import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.types.BitChartStore
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.ResourceId
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.ContainerObjectSelectionList
+import net.minecraft.client.gui.components.CycleButton
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.renderer.Rect2i
 import net.minecraft.network.chat.Component
 import kotlin.math.roundToInt
 
+private typealias OnChange = (botId: ResourceId?, variant: String) -> Unit
+
 /** Lists bots mainly for [com.flooferland.showbiz.screens.BotSelectScreen] (or anything that requires a bot selection list) */
 class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSelectionList<BotListWidget.BotEntry>(Minecraft.getInstance(), width, height, y, 18) {
     var visibleCategories = mutableSetOf<String>()
-    var onHover: (ResourceId?) -> Unit = {}
-    var selected: ResourceId? = null
+    var onHover: (botId: ResourceId?) -> Unit = {}
+    var onChange: OnChange = { _, _ -> }
+
+    var selectedBot: ResourceId? = null
+    var selectedVariant: String = IBot.DEFAULT_VARIANT
 
     val excluded = listOf(ResourceId(Showbiz.MOD_ID, "conner"))
     var showExcluded = false
@@ -36,38 +44,47 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
     }
 
+    override fun getRowWidth(): Int {
+        return (width - 50) - SCROLLBAR_WIDTH
+    }
+
     override fun getScrollbarPosition(): Int {
         return x + width - 5
     }
 
-    public fun setBots(bots: Map<ResourceId, AddonBotEntry>, click: (id: ResourceId) -> Unit) {
+    public fun setBots(bots: Map<ResourceId, AddonBotEntry>) {
         clearEntries()
 
         val grouped = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }
-        selected?.let { visibleCategories.add(it.namespace) }
+        selectedBot?.let { visibleCategories.add(it.namespace) }
 
         // Setting all visible if you have no addons
         if (grouped.keys.all { it == MOD_ID }) visibleCategories = grouped.keys.toMutableSet()
 
         // Adding the entries
         grouped.forEach { (namespace, botEntries) ->
-            val category = BotEntry(category = namespace) {
+            val category = BotEntry(category = namespace) { _, _ ->
                 if (namespace !in visibleCategories) {
                     visibleCategories.add(namespace)
                 } else {
                     visibleCategories.remove(namespace)
                 }
-                setBots(bots, click)
+                setBots(bots)
             }
             addEntry(category)
             if (namespace in visibleCategories) botEntries.sortedBy { it.value.name }.forEach { (botId, bot) ->
-                if (!showExcluded && excluded.contains(botId)) return@forEach
-                addEntry(BotEntry(botId, bot) { click(botId) })
+                if (!showExcluded && excluded.contains(botId) && botId != selectedBot) return@forEach
+                val entry = BotEntry(botId, bot) { botId, variant ->
+                    selectedBot = botId
+                    selectedVariant = variant
+                    onChange(botId, variant)
+                }
+                addEntry(entry)
             }
         }
     }
 
-    inner class BotEntry(val botId: ResourceId? = null, val bot: AddonBotEntry? = null, val category: String? = null, val click: (BotEntry) -> Unit) : Entry<BotEntry>() {
+    inner class BotEntry(val botId: ResourceId? = null, val bot: AddonBotEntry? = null, val category: String? = null, val click: OnChange) : Entry<BotEntry>() {
         val name = bot?.name
         val authorString = bot?.authors?.joinToString(", ")
         val nameComp = run {
@@ -81,24 +98,23 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             }
             comp
         }
-        val button = Button.builder(nameComp) { click(this) }.size(width - 70, itemHeight)
+
+        val variantButton: CycleButton<String> = CycleButton.builder<String>() { Component.literal(it) }
+            .withValues(botId?.let { ShowbizClient.bots[it]?.variants?.keys } ?: setOf(selectedVariant))
+            .withInitialValue(selectedVariant)
+            .displayOnlyValue()
+            .withTooltip { Tooltip.create(Component.literal("Variant")) }
+            .create(Component.empty()) { _, variant ->
+                selectedVariant = variant
+                click(selectedBot, selectedVariant)
+            }
+
+        val button = Button.builder(nameComp) {
+                selectedBot = botId
+                click(selectedBot, selectedVariant)
+            }
             .tooltip(Tooltip.create(Component.literal("By $authorString")))
             .build()!!
-            .also {
-                it.active = true
-                if (selected == botId && category == null) {
-                    it.active = false
-                    it.message = Component.literal(it.message.string).withStyle(ChatFormatting.GRAY)
-                    it.tooltip = Tooltip.create(Component.literal("Already selected"))
-                }
-
-                if (botId in excluded) {
-                    it.message = it.message.copy()
-                        .append(
-                            Component.literal(" (hidden)").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
-                        )
-                }
-            }
 
         override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
             val font = Minecraft.getInstance().font
@@ -107,9 +123,9 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             category?.let { category ->
                 val pad = 4
                 val rect = Rect2i(
-                    left + (width - button.width) / 2,
+                    left,
                     top + (height / 2) - pad,
-                    button.width,
+                    width,
                     font.lineHeight + (pad * 2)
                 )
                 val open = category in visibleCategories
@@ -123,14 +139,34 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 val compColor = if (open) ChatFormatting.WHITE else ChatFormatting.GRAY
                 val comp = Component.literal(category).withStyle(compColor, ChatFormatting.BOLD)
                 guiGraphics.drawCenteredString(font, comp, left + (width / 2), top + (height / 2), 0xfff)
+                return
             }
 
             // Bot / category button
-            button.x = left + (width - button.width) / 2
-            button.y = top
+            val selected = selectedBot == botId
+            val variants = botId?.let { ShowbizClient.bots[it]?.variants?.keys } ?: setOf(IBot.DEFAULT_VARIANT)
+            val showVariant = selected && variants.size > 1
+            val variantWidth = if (showVariant) variants.maxOf { font.width(it) + 20 } else 0
+
+            button.setPosition(left, top)
+            button.setSize(width - variantWidth, itemHeight)
+            button.message = (if (selected) Component.literal(name ?: "").withStyle(ChatFormatting.GRAY) else nameComp.copy())
+                .let {
+                    if (botId in excluded) it.append(
+                        Component.literal(" (hidden)").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
+                    ) else it
+                }
+            button.tooltip = Tooltip.create(Component.literal(if (selected) "Already selected" else "By $authorString"))
+
+            if (showVariant) {
+                variantButton.setPosition(button.right, top)
+                variantButton.setSize(variantWidth, itemHeight)
+            }
+            button.active = !selected
             if (bot != null && botId != null) {
                 button.render(guiGraphics, mouseX, mouseY, partialTick)
-                if (botId == selected && !button.isHoveredOrFocused) {
+                if (showVariant) variantButton.render(guiGraphics, mouseX, mouseY, partialTick)
+                if (selected && !button.isHoveredOrFocused) {
                     guiGraphics.renderOutline(button.x - 1, button.y - 1, button.width + 1, button.height + 1, 0xDDFFFFFF.toInt())
                 }
                 if (button.isHoveredOrFocused) onHover(botId)
@@ -153,11 +189,16 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
             }
         }
 
-        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int) =
-            this.button.mouseClicked(mouseX, mouseY, button)
+        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+            if (category != null) {
+                click(selectedBot, selectedVariant)
+                return true
+            }
+            return listOf(this.button, this.variantButton).any { it.mouseClicked(mouseX, mouseY, button) }
+        }
 
-        override fun children() = listOf(button)
-        override fun narratables() = listOf(button)
+        override fun children() = if (selectedBot == botId) listOf(button, variantButton) else listOf(button)
+        override fun narratables() = if (selectedBot == botId) listOf(button, variantButton) else listOf(button)
 
         override fun setFocused(focused: Boolean) { button.isFocused = focused }
         override fun isFocused() = button.isFocused

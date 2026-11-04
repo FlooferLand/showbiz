@@ -1,10 +1,16 @@
 package com.flooferland.showbiz
 
-import net.minecraft.network.protocol.common.custom.*
+import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
+import com.flooferland.showbiz.registry.ModSounds
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.level.block.entity.BlockEntity
 
 /** Prevents Fabric's broken as hell packet system from silently not registering receivers on the same packet */
 object ServerPackets {
@@ -41,6 +47,20 @@ object ServerPackets {
             val blockEntity = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@listen
             val key = blockEntity.getInteractionMapping()[packet.name] ?: return@listen
             blockEntity.onInteract(key, level, player)
+        }
+
+        ServerPackets.listen(BotListSelectPacket.type) { packet, ctx ->
+            val bot = packet.bot.grabConnectable(ctx.player().level()) as? IBot ?: return@listen
+            fun hash() = bot.botId.hashCode() + bot.botVariant.hashCode()
+
+            val before = hash()
+            bot.botId = packet.botId
+            bot.botVariant = packet.botVariant
+            if (bot is BlockEntity) bot.markDirtyNotifyAll()
+
+            if (before != hash()) {
+                ctx.player().playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
+            }
         }
     }
 }

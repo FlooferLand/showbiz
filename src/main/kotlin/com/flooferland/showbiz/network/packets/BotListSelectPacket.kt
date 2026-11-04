@@ -1,13 +1,13 @@
 package com.flooferland.showbiz.network.packets
 
-import net.minecraft.network.*
-import net.minecraft.network.codec.*
-import net.minecraft.network.protocol.common.custom.*
-import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.codec.StreamCodec
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
-class BotListSelectPacket(val bot: OwnerId, val id: ResourceId?) : CustomPacketPayload {
+class BotListSelectPacket(val bot: OwnerId, val botId: ResourceId?, val botVariant: String) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -15,12 +15,14 @@ class BotListSelectPacket(val bot: OwnerId, val id: ResourceId?) : CustomPacketP
         val codec = StreamCodec.of<FriendlyByteBuf, BotListSelectPacket>(
             { buf, packet ->
                 packet.bot.encode(buf)
-                buf.writeNullable(packet.id, ResourceId::encode)
+                buf.writeNullable(packet.botId, ResourceId::encode)
+                buf.writeUtf(packet.botVariant)
             },
             { buf ->
                 BotListSelectPacket(
                     bot = OwnerId.decode(buf),
-                    id = buf.readNullable { ResourceId.decode(it) }
+                    botId = buf.readNullable { ResourceId.decode(it) },
+                    botVariant = buf.readUtf()
                 )
             }
         )!!

@@ -1,18 +1,5 @@
 package com.flooferland.showbiz.entities
 
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.damagesource.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.item.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.inventory.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.entities.base.BasePropEntity
@@ -35,6 +22,25 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.entity.EntityDimensions
+import net.minecraft.world.entity.Pose
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
@@ -67,6 +73,11 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             field = value
             if (level() is ServerLevel) updatePersistentData { it.putString("bot_id", value?.toString() ?: "") }
         }
+    override var botVariant: String = IBot.DEFAULT_VARIANT
+        set(value) {
+            field = value
+            if (level() is ServerLevel) updatePersistentData { it.putString("bot_variant", value) }
+        }
 
     override val collidePartInstance = CollidePartManager.create(this) {
         val botId = this@BotEntity.botId ?: return@create
@@ -92,6 +103,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     }
 
     private var prevBotId: ResourceId? = null
+    private var prevBotVariant: String = botVariant
     private var killDelayTicks = 0
     private val pendingShow = PackedShowData()
 
@@ -123,11 +135,13 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             }
         }
 
+        // Updating stuff when the bot switches
         val id = OwnerId.of(this)
         if (id != null) collidePartInstance.tick(level, id)
-        if (botId != prevBotId) {
+        if (botId != prevBotId || botVariant != prevBotVariant) {
             if (id != null) collidePartInstance.refresh(level, id)
             prevBotId = botId
+            prevBotVariant = botVariant
         }
     }
 
@@ -179,7 +193,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
                     val player = player as? ServerPlayer ?: return null
                     return BotSelectMenu(containerId, getScreenOpeningData(player))
                 }
-                override fun getScreenOpeningData(player: ServerPlayer) = BotListSelectPacket(id, botId)
+                override fun getScreenOpeningData(player: ServerPlayer) = BotListSelectPacket(id, botId, botVariant)
             })
         }
         return InteractionResult.SUCCESS
@@ -191,11 +205,13 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
 
     override fun addAdditionalSaveData(tag: CompoundTag) {
         tag.putString("bot_id", botId?.toString() ?: "")
+        tag.putString("bot_variant", botVariant)
         super.addAdditionalSaveData(tag)
         connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
         botId = tag.getStringOrNull("bot_id")?.let { if (it.isNotBlank()) ResourceId.of(it) else null }
+        tag.getStringOrNull("bot_variant")?.let { if (it.isNotBlank()) botVariant = it }
         super.readAdditionalSaveData(tag)
         connectionManager.load(tag)
     }

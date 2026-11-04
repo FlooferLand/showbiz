@@ -6,7 +6,6 @@
 	},
 	"name": "queenie",
 	"model_identifier": "",
-	"front_gui_light": false,
 	"visible_box": [4, 3.5, 1.25],
 	"variable_placeholders": "",
 	"multi_file_ruleset": "",
@@ -4950,7 +4949,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5250,7 +5249,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "Item",
@@ -5295,7 +5294,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5318,7 +5317,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5341,7 +5340,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		}
 	],
@@ -5352,7 +5351,7 @@
 			"children": [
 				{
 					"uuid": "a39c9220-2604-9780-306e-2e159d724bdf",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						{
 							"uuid": "bfc5e82e-c1ca-af8d-aeb0-1c2f050a5ec7",
@@ -5405,7 +5404,7 @@
 						},
 						{
 							"uuid": "c321a5f7-643f-3068-19a0-47a01de9f56d",
-							"isOpen": true,
+							"isOpen": false,
 							"children": [
 								"4cf1ed44-b60d-fe13-4f87-68998d3da0fc",
 								"0c8a3680-2490-1f64-cfcc-df4a24d611fb",
@@ -5560,12 +5559,12 @@
 				},
 				{
 					"uuid": "4254069e-bd94-7435-0f67-afcfa93b6adb",
-					"isOpen": true,
+					"isOpen": false,
 					"children": ["ad2675b1-e9a0-7b31-2841-25ea5624bccc", "bf4f2f38-410f-dad4-b315-4681415166e3", "e7185baa-7fdf-fed5-6281-6f91c574d8c8"]
 				},
 				{
 					"uuid": "bebd0708-c7ca-028d-1c56-4e7eefd59c6a",
-					"isOpen": true,
+					"isOpen": false,
 					"children": ["7b39e446-2e9a-2bfb-1ac9-0384adeb68b5", "41eebda5-2add-a3d9-6228-48abbd4875b2", "23e4ce00-069e-8c86-1668-3eabe0d15f3c"]
 				}
 			]

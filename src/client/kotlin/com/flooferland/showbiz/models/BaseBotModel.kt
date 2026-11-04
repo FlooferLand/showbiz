@@ -1,13 +1,13 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.client.*
-import net.minecraft.resources.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
+import net.minecraft.client.Minecraft
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -17,6 +17,7 @@ import software.bernie.geckolib.model.GeoModel
  * Handles lower-level stuff, separated so it doesn't bloat up the main model file.
  */
 open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
+    protected var currentVariant: String = IBot.DEFAULT_VARIANT
     protected var currentModel: BotModelData? = null
 
     enum class Error {
@@ -45,13 +46,14 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     }
 
     override fun getModelResource(animatable: T): ResourceLocation {
+        currentVariant = animatable.botVariant
         val botId = animatable.botId ?: return emptyModel
         val bot = ShowbizClient.bots[botId] ?: run {
             val context = "Failed to get model for bot $botId. This error usually occurs when your files aren't structured properly"
             addError(Error.MissingBot, animatable, context)
             return emptyModel
         }
-        return bot.getDefaultModel()
+        return bot.variants[currentVariant]?.model ?: bot.getDefaultModel()
     }
 
     override fun getTextureResource(animatable: T): ResourceLocation {
@@ -62,16 +64,13 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
             )
             return emptyTexture
         }
-        return bot.getDefaultTexture()
+        return bot.variants[currentVariant]?.texture ?: bot.getDefaultTexture()
     }
 
     // TODO: QUICK: Make this cache the animation based on the bot ID, loading the cached version if cached
     override fun getAnimationResource(animatable: T): ResourceLocation? {
         val botId = animatable.botId ?: return null
-        ShowbizClient.bots[botId]?.let { bot ->
-            bot.animations?.let { anims -> return anims }
-        }
-        return null
+        return ShowbizClient.bots[botId]?.variants[animatable.botVariant]?.animations
     }
 
     // Caching each texture's _glowmask lookup, cleared when a resource reload swaps the bot map
@@ -96,7 +95,8 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     // For some reason GeckoLib seems to require setting the active model every single time?
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel {
         if (location == null) return super.getBakedModel(emptyModel)
-        val model = ShowbizClient.botModels[location] ?: return super.getBakedModel(emptyModel)
+        val variants = ShowbizClient.botModels[location]
+        val model = variants?.get(currentVariant) ?: variants?.get(IBot.DEFAULT_VARIANT) ?: return super.getBakedModel(emptyModel)
 
         if (model != currentModel) {
             currentModel = model
@@ -110,7 +110,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
             addError(Error.MissingAnimation, animatable, "Couldn't find animation file for animation '$name'")
             null
         }
-        return ShowbizClient.animations[res]?.getAnimation(name) ?: run {
+        return ShowbizClient.botAnimations[res]?.get(animatable.botVariant)?.getAnimation(name) ?: run {
             addError(Error.MissingAnimation, animatable, "Couldn't find animation '$name' in '$res'")
             null
         }

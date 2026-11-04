@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.utils.Extensions.count
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.ResourceLocation
 import kotlin.math.roundToInt
 
 /** Creates a [ResourceLocation] using the [MOD_ID] namespace */
@@ -23,7 +24,8 @@ fun rlCustom(namespace: String, path: String): ResourceLocation {
 }
 
 /** Creates a [ResourceLocation] from a `namespace:path` string */
-fun rlString(string: String): ResourceLocation {
+fun rlString(string: String, namespace: String? = null): ResourceLocation {
+    if (!string.contains(':')) return rlCustom(namespace ?: "minecraft", string)
     return ResourceLocation.bySeparator(string, ':')
 }
 

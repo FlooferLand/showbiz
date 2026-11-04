@@ -1,15 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.inventory.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.menus.BotSelectMenu
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
@@ -27,6 +17,18 @@ import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -40,6 +42,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override var botId: ResourceId? = null
+    override var botVariant: String = IBot.DEFAULT_VARIANT
     override val botOwnerId get() = OwnerId.ofEntity(this)
     override val botLevel get() = level
     override val botPos get() = blockPos.above().bottomCenter!!
@@ -96,7 +99,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         return getScreenOpeningData(player)?.let { BotSelectMenu(i, it) }
     }
     override fun getScreenOpeningData(player: ServerPlayer): BotListSelectPacket? =
-        OwnerId.of(this)?.let { BotListSelectPacket(it, botId) }
+        OwnerId.of(this)?.let { BotListSelectPacket(it, botId, botVariant) }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
@@ -105,6 +108,7 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
         if (level?.isClientSide == false) {
             botId?.let { tag.putString("bot_id", it.toString()) }
+            botVariant.let { tag.putString("bot_variant", it) }
         }
     }
 
@@ -120,6 +124,9 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
                 Showbiz.log.debug("Converted old bot '{}' to the new resource id '{}'", botId, id)
             }
             this.botId = id
+        }
+        tag.getStringOrNull("bot_variant")?.let { botVariant ->
+            this.botVariant = botVariant
         }
     }
 

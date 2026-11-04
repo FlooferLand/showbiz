@@ -27,7 +27,8 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
     override fun getMenu() = selectMenu
     override fun isPauseScreen() = false
 
-    val selected get() = menu.data.id
+    var selectedBot = menu.data.botId
+    var selectedVariant = menu.data.botVariant
     var searchText: String = ""
 
     override fun init() {
@@ -38,11 +39,6 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
     fun botFilter(bot: Map.Entry<ResourceId, AddonBotEntry>) =
         bot.value.name.contains(searchText, ignoreCase = true)
 
-    fun botSelected(botId: ResourceId) {
-        ClientPlayNetworking.send(BotListSelectPacket(selectMenu.data.bot, botId))
-        Minecraft.getInstance().setScreen(null)
-    }
-
     fun refresh() {
         clearWidgets()
         val searchBarHeight = 20
@@ -50,8 +46,9 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val maxHeight = (height * 0.9).toInt() - searchBarHeight
 
         // Bot preview
-        val botPreview = BotPreviewWidget((width - maxWidth) / 2, (height - maxHeight) / 2, 130, 200)
-        botPreview.botId = selected
+        val botPreview = BotPreviewWidget((width - maxWidth) / 2, (height - maxHeight) / 2, 150, 150)
+        botPreview.botId = selectedBot
+        botPreview.botVariant = selectedVariant
         botPreview.bots = bots
         addRenderableWidget(botPreview)
 
@@ -59,53 +56,64 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val botListWidget = BotListWidget(
             botPreview.right + 4, (height - maxHeight) / 2, maxWidth - botPreview.width, maxHeight
         )
-        botListWidget.selected = selected
+        botListWidget.selectedBot = selectedBot
+        botListWidget.selectedVariant = selectedVariant
         botListWidget.onHover = { if (it != null) botPreview.botId = it }
-        botListWidget.setBots(bots) { botSelected(it) }
+        botListWidget.onChange = { botId, variant ->
+            selectedBot = botId
+            selectedVariant = variant
+        }
+        botListWidget.setBots(bots)
         addRenderableWidget(botListWidget)
 
         // Title
         addRenderableWidget(
-            StringWidget(botListWidget.x, botListWidget.y - 20, botListWidget.width, 20, Component.literal("Select a bot"), font).alignCenter()
+            StringWidget(
+                botListWidget.x,
+                botListWidget.y - 20,
+                botListWidget.width,
+                20,
+                Component.literal("Select a bot"),
+                font
+            ).alignCenter()
         )
 
         // Search bar
         val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, searchBarHeight, Component.literal("Search") )
         searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
         searchBar.setResponder { name ->
-            val name = name.trim()
-            fun set(bots: Map<ResourceId, AddonBotEntry>) {
-                botListWidget.setBots(bots) { botSelected(it) }
-                botListWidget.scrollAmount = 0.0
-                botPreview.bots = bots
-            }
-            botListWidget.showExcluded = botListWidget.excluded.any { name == it.toString() || name == it.path }
+            searchText = name.trim()
+            botListWidget.showExcluded =
+                botListWidget.excluded.any { searchText == it.toString() || searchText == it.path }
 
-            if (name.isBlank()) {
+            if (searchText.isBlank()) {
                 botListWidget.visibleCategories = mutableSetOf()
-                set(bots)
                 botPreview.bots = emptyMap()
-                return@setResponder
+            } else {
+                val filtered = bots.filter { botFilter(it) }
+                botListWidget.visibleCategories = filtered.keys.map { it.namespace }.toMutableSet()
+                botPreview.bots = filtered
             }
-
-            searchText = name;
-            val bots = bots.filter { botFilter(it) }
-            val categories = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }.keys.toMutableSet()
-            botListWidget.visibleCategories = categories
-            set(bots)
+            botListWidget.setBots(if (searchText.isBlank()) bots else bots.filter { botFilter(it) })
         }
-        searchBar.isFocused = true
-        searchBar.setCanLoseFocus(true)
         addRenderableWidget(searchBar)
-        this.focused = searchBar
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == GLFW.GLFW_KEY_ENTER && this.focused is EditBox) {
-            val handled = bots.filter { botFilter(it) }.keys.firstOrNull()?.let { botSelected(it); true } ?: false
+            val handled = bots.filter { botFilter(it) }.keys.firstOrNull()?.let { selectedBot = it; closeScreen(); true } ?: false
             return handled
         }
         return super.keyPressed(keyCode, scanCode, modifiers)
+    }
+
+    override fun onClose() {
+        ClientPlayNetworking.send(BotListSelectPacket(selectMenu.data.bot, selectedBot, selectedVariant))
+        super.onClose()
+    }
+
+    fun closeScreen() {
+        Minecraft.getInstance().setScreen(null)
     }
 
     fun updateBots(elements: Map<ResourceId, AddonBotEntry>) {

@@ -1,23 +1,25 @@
 package com.flooferland.showbiz.screens.widgets
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.narration.*
-import net.minecraft.client.renderer.*
-import net.minecraft.client.resources.sounds.*
-import net.minecraft.client.sounds.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.BotPreviewAnimatable
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.ResourceId
 import com.mojang.blaze3d.platform.Lighting
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.renderer.LightTexture
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.network.chat.Component
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.renderer.GeoRenderer
 
@@ -26,6 +28,7 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
 
     var bots = mapOf<ResourceId, AddonBotEntry>()
     var botId: ResourceId? = null
+    var botVariant: String = IBot.DEFAULT_VARIANT
     var scale = 40f
     var rotation = 0f
     val previewBotAnimatable = BotPreviewAnimatable(null)
@@ -39,13 +42,14 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         override fun updateAnimatedTextureFrame(animatable: BotPreviewAnimatable?) {}
     }
 
-    fun renderBot(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+    fun renderBot(guiGraphics: GuiGraphics, width: Int, height: Int, mouseX: Int, mouseY: Int, partialTick: Float) {
         if (botId == null) return
         val delta = ShowbizClient.getDeltaTime()
         val model = previewBotModel
         val renderer = previewBotRenderer
         val animatable = previewBotAnimatable
         animatable.botId = botId
+        animatable.botVariant = botVariant
 
         guiGraphics.enableScissor(x, y, x + width, y + height)
         guiGraphics.fill(x, y, x + width, y + height, 0x88000000.toInt())
@@ -64,7 +68,7 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         }
 
         val depth = 100.0
-        val heightOffset = 0.3f * height
+        val heightOffset = 0.2f * height
         val poseStack = guiGraphics.pose()
         poseStack.pushPose()
         poseStack.translate(x.toDouble() + (width / 2), y.toDouble() + (height) - heightOffset + 10, depth)
@@ -87,27 +91,26 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
     override fun renderWidget(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val font = Minecraft.getInstance()?.font ?: return
 
-        val result = runCatching { renderBot(guiGraphics, mouseX, mouseY, partialTick) }
-        result.onFailure { Showbiz.log.error("Failed to render bot in preview", it) }
-
+        var yOffset = y + height + 30
         bots[botId]?.let { botEntry ->
-            var yOffset = 1
-
             val title = Component.literal(botEntry.name)
             font.split(title, width).forEach { line ->
-                guiGraphics.drawCenteredString(font, line, x + (width / 2), y + height + (font.lineHeight * yOffset), 0xFFFFFFFF.toInt())
-                yOffset += 1
+                guiGraphics.drawCenteredString(font, line, x + (width / 2), yOffset, 0xFFFFFFFF.toInt())
+                yOffset += font.lineHeight
             }
 
-            yOffset += 1
-            guiGraphics.drawCenteredString(font, "Authors", x + (width / 2), y + height + (font.lineHeight * yOffset), 0xFFBABABA.toInt())
-            yOffset += 1
+            yOffset += font.lineHeight
+            guiGraphics.drawCenteredString(font, "Authors", x + (width / 2), yOffset, 0xFFBABABA.toInt())
+            yOffset += font.lineHeight
 
             botEntry.authors.forEach { author ->
-                guiGraphics.drawCenteredString(font, author, x + (width / 2), y + height + (font.lineHeight * yOffset), 0xFFFFFFFF.toInt())
-                yOffset += 1
+                guiGraphics.drawCenteredString(font, author, x + (width / 2), yOffset, 0xFFFFFFFF.toInt())
+                yOffset += font.lineHeight
             }
         }
+
+        val result = runCatching { renderBot(guiGraphics, width, height, mouseX, mouseY, partialTick) }
+        result.onFailure { Showbiz.log.error("Failed to render bot in preview", it) }
     }
 
     override fun playDownSound(handler: SoundManager) {

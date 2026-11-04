@@ -1,2 +1,2 @@
-[variants.default]
-texture = "conner"
+[variants.test]
+texture = "conner_test"

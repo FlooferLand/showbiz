@@ -1,10 +1,5 @@
 package com.flooferland.showbiz.addons
 
-import net.minecraft.client.*
-import net.minecraft.resources.*
-import net.minecraft.server.packs.*
-import net.minecraft.server.packs.resources.*
-import net.minecraft.util.profiling.*
 import com.akuleshov7.ktoml.Toml
 import com.flooferland.bizlib.bits.BitsMap
 import com.flooferland.bizlib.bits.BotBitmapFile
@@ -13,12 +8,13 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.PassivePlan
 import com.flooferland.showbiz.screens.AddonNoticeScreen
+import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
 import com.flooferland.showbiz.types.math.Vec3fc
 import com.flooferland.showbiz.types.physics.ChainRig
-import com.flooferland.showbiz.types.toPath
 import com.flooferland.showbiz.utils.Extensions.getAllBones
+import com.flooferland.showbiz.utils.Extensions.isSnakeCase
 import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
@@ -27,6 +23,13 @@ import kotlinx.serialization.decodeFromString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
+import net.minecraft.client.Minecraft
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.packs.PackResources
+import net.minecraft.server.packs.PackType
+import net.minecraft.server.packs.resources.ResourceManager
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener
+import net.minecraft.util.profiling.ProfilerFiller
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.json.raw.Model
@@ -39,8 +42,13 @@ import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 data class LoadedAssets(
     var addons: List<AddonAssets> = mutableListOf(),
-    val models: MutableMap<ResourceLocation, BakedGeoModel> = mutableMapOf(),
-    val animations: MutableMap<ResourceLocation, BakedAnimations> = mutableMapOf()
+    val bots: MutableMap<ResourceLocation, MutableMap<String, LoadedVariant>> = mutableMapOf(),
+)
+
+data class LoadedVariant(
+    val model: BakedGeoModel,
+    val animation: BakedAnimations? = null,
+    val animationFile: ResourceLocation? = null
 )
 
 @Environment(EnvType.CLIENT)
@@ -87,7 +95,8 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     if (botId in physicsData) return physicsData[botId]
                     val path = rlCustom(namespace, "${Showbiz.MOD_ID}/bots/$botId/$PHYSICS_TOML_NAME")
                     val physics = getResAsString(path)?.let { text ->
-                        runCatching { PhysicsData.readOrThrow(text) }.onFailure { err(AddonErr.FailedToParse(path.toString()), it) }.getOrNull()
+                        runCatching { PhysicsData.readOrThrow(text) }
+                            .onFailure { err(AddonErr.FailedToParse(path.toString()), it) }.getOrNull()
                     }
                     physicsData[botId] = physics
                     return physics
@@ -104,60 +113,65 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                     Showbiz.log.info("Loading addon '${namespace}'")
                 }
 
-                // Finding assets
-                data class BotLoadAssets(
+                // Finding bots
+                data class FoundBot(
                     var rootPath: ResourcePath? = null,
-                    var model: ResourceLocation? = null,
-                    var animations: ResourceLocation? = null
+                    var models: MutableSet<Pair<ResourceLocation, BakedGeoModel?>> = mutableSetOf(),
+                    var textures: MutableSet<ResourceLocation> = mutableSetOf(),
+                    var animations: MutableSet<Pair<ResourceLocation, BakedAnimations?>> = mutableSetOf()
                 )
 
-                val botAssets = mutableMapOf<String, BotLoadAssets>()
+                val botsIntro = "${Showbiz.MOD_ID}/bots/"
+                val foundBots = mutableMapOf<String, FoundBot>()
+                val allResources = mutableSetOf<ResourceLocation>()
                 val onList = PackResources.ResourceOutput() { location, stream ->
-                    val botsIntro = "${Showbiz.MOD_ID}/bots/"
+                    allResources += location
+
+                    // Found a bot maybe..
                     if (!location.path.startsWith(botsIntro)) return@ResourceOutput
                     val botId = location.path.replace(botsIntro, "").split('/').firstOrNull() ?: return@ResourceOutput
+                    foundBots.computeIfAbsent(botId) { FoundBot(rootPath = ResourcePath(location.namespace, botsIntro + botId)) }
+
+                    // Reading whatever file was found
                     val string = stream.get()?.readAllBytes()?.decodeToString()
 
                     // Models
                     if (location.path.endsWith(".geo.json")) {
-                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
-                        assets.model = location
                         val model = string?.let { ShowbizUtils.loadBakedModel(location, it, chainTransform(botId)) }
-                        if (model != null) out.models[location] = model
+                        foundBots[botId]?.models?.add(Pair(location, model))
+                    }
+
+                    // Textures
+                    if (location.path.endsWith(".png")) {
+                        foundBots[botId]?.textures?.add(location)
                     }
 
                     // Animations
                     if (location.path.endsWith(".animation.json")) {
-                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
-                        assets.animations = location
                         val anim = string?.let { ShowbizUtils.loadBakedAnimation(location, it) }
-                        if (anim != null) out.animations[location] = anim
-                    }
-
-                    // assets.toml
-                    if (location.path.endsWith("/$ASSETS_TOML_NAME")) {
-                        val assets = botAssets.getOrPut(botId) { BotLoadAssets() }
-                        assets.rootPath = location.toPath().parent
+                        foundBots[botId]?.animations?.add(Pair(location, anim))
                     }
                 }
                 pack.listResources(PackType.CLIENT_RESOURCES, namespace, Showbiz.MOD_ID, onList)
-                for ((botId, botAsset) in botAssets) {
-                    if (botAsset.model == null) err(AddonErr.BotMissingAsset(botId, "No model was found"))
-                    if (botAsset.rootPath == null) err(AddonErr.BotMissingAsset(botId, "No root path was found (missing assets.toml?)"))
-                }
 
                 // Finding toml def files
                 val bots = mutableMapOf<String, AddonBot?>()
-                for ((id, bot) in botAssets) {
-                    bots[id] = null
-                    if (bot.rootPath == null || bot.model == null) {
-                        err(AddonErr.Other("Failed to load root path or model for '${id}'"))
+                for ((botId, bot) in foundBots) {
+                    bots[botId] = null
+                    if (bot.rootPath == null) {
+                        err(AddonErr.Other("Failed to find a bot for '${botId}'"))
                         continue
                     }
+                    if (!botId.isSnakeCase()) {
+                        err(AddonErr.IdWrongCase(botId, botId, "bot"))
+                    }
 
-                    fun <T> getToml(filename: String, fetchToml: (String) -> T?): T? {
+                    fun <T> getToml(filename: String, optional: Boolean = false, fetchToml: (String) -> T?): T? {
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
-                        val res = getResAsString(path) ?: run { err(AddonErr.FailedToFind("$path")); return null }
+                        val res = getResAsString(path) ?: run {
+                            if (!optional) err(AddonErr.FailedToFind("$path"))
+                            return null
+                        }
                         val toml = runCatching { fetchToml(res) }
                         toml.exceptionOrNull()?.let { throwable -> err(AddonErr.FailedToParse("$path"), throwable) }
                         return toml.getOrNull()
@@ -167,15 +181,60 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                         val path = bot.rootPath!!.toLocation().withSuffix("/$filename")
                         val res = getResAsString(path) ?: run { err(AddonErr.FailedToFind("$path")); return null }
                         val format = BitsMap()
-                        format.warnHandler = { bitmapWarnHandler(id, it) }
+                        format.warnHandler = { bitmapWarnHandler(botId, it) }
                         val bits = runCatching { format.load(res.byteInputStream()) }
                         bits.exceptionOrNull()?.let { throwable -> err(AddonErr.FailedToParse("$path"), throwable) }
                         return bits.getOrNull()
                     }
 
-                    val assets = getToml(ASSETS_TOML_NAME) { Toml.decodeFromString<BotAssetsFile>(it) } ?: continue
+                    // Parsing assets
+                    val assets = getToml(ASSETS_TOML_NAME, optional = true) { Toml.decodeFromString<BotAssetsFile>(it) }
+                        ?: BotAssetsFile(mutableMapOf(IBot.DEFAULT_VARIANT to BotAssetsFile.Variant()))
+                    assets.variants.computeIfAbsent(IBot.DEFAULT_VARIANT) { BotAssetsFile.Variant() }
+                    for ((id, variant) in assets.variants) {
+                        variant.model = variant.model ?: botId
+                        variant.texture = variant.texture ?: botId
+                        if (variant.animations == null) {
+                            val defaultAnim = BotAssetsFile.animationLocation(bot.rootPath!!, botId)
+                            if (defaultAnim in allResources) {
+                                variant.animations = variant.animations ?: botId
+                            }
+                        }
+                        if (!id.isSnakeCase()) {
+                            err(AddonErr.IdWrongCase(botId, id, "variant"))
+                        }
+                    }
+
+                    val variants = assets.variants.mapValues { it.value.real(bot.rootPath!!) }
+                    for ((id, variant) in variants) {
+                        if (bot.models.none { it.first == variant.model }) {
+                            err(AddonErr.BotMissingVariant(botId, id, variant.model, "model"))
+                        }
+                        if (bot.textures.none { it == variant.texture }) {
+                            err(AddonErr.BotMissingVariant(botId, id, variant.texture, "texture"))
+                        }
+                        val anims = variant.animations ?: continue
+                        if (bot.animations.none { it.first == anims }) {
+                            err(AddonErr.BotMissingVariant(botId, id, variant.animations, "animation file"))
+                        }
+                    }
+                    if (assets.variants[IBot.DEFAULT_VARIANT]?.model == null) {
+                        err(AddonErr.BotMissingVariant(botId, IBot.DEFAULT_VARIANT, null, "model"))
+                    }
+                    if (assets.variants[IBot.DEFAULT_VARIANT]?.texture == null) {
+                        err(AddonErr.BotMissingVariant(botId, IBot.DEFAULT_VARIANT, null, "texture"))
+                    }
+
+                    // Parsing bits
                     val bitmap = getBits(BITMAP_BITS_NAME) ?: continue
-                    bots[id] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, model = bot.model!!, animations = bot.animations, physics = getPhysics(id))
+
+                    // Adding the bot
+                    bots[botId] = AddonBot(assets, bitmap, resPath = bot.rootPath!!, variants = variants, physics = getPhysics(botId))
+                    for ((id, variant) in variants) {
+                        val model = bot.models.firstOrNull { it.first == variant.model }?.second ?: continue
+                        val anim = bot.animations.firstOrNull { it.first == variant.animations }?.second
+                        out.bots.getOrPut(variant.model!!) { mutableMapOf() }[id] = LoadedVariant(model, anim, variant.animations)
+                    }
                 }
 
                 if (bots.isNotEmpty()) {
@@ -211,45 +270,57 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         ShowbizClient.bots = bots
 
         // TODO: Add these to GeckoLib cache, and compare the existing assets with the loaded ones to tell what to remove/add to the Gecko cache
-        val models = mutableMapOf<ResourceLocation, BotModelData>()
-        for ((id, model) in loaded.models) {
-            val initBoneRots = mutableMapOf<String, Vec3fc>()
-            val initBoneMoves = mutableMapOf<String, Vec3fc>()
-            for (bone in model.getAllBones()) {
-                initBoneRots[bone.name] = Vec3fc(
-                    bone.rotX,
-                    bone.rotY,
-                    bone.rotZ
-                )
-                initBoneMoves[bone.name] = Vec3fc(
-                    bone.posX,
-                    bone.posY,
-                    bone.posZ
-                )
-            }
+        val models = mutableMapOf<ResourceLocation, MutableMap<String, BotModelData>>()
+        for ((botId, variants) in loaded.bots) {
+            for ((variantId, variant) in variants) {
+                val initBoneRots = mutableMapOf<String, Vec3fc>()
+                val initBoneMoves = mutableMapOf<String, Vec3fc>()
+                for (bone in variant.model.getAllBones()) {
+                    initBoneRots[bone.name] = Vec3fc(
+                        bone.rotX,
+                        bone.rotY,
+                        bone.rotZ
+                    )
+                    initBoneMoves[bone.name] = Vec3fc(
+                        bone.posX,
+                        bone.posY,
+                        bone.posZ
+                    )
+                }
 
-            // Ordered walk, so parentIndex[i] is always less than i
-            val order = ArrayList<String>()
-            val parents = ArrayList<Int>()
-            fun walk(bone: GeoBone, parent: Int) {
-                val index = order.size
-                order += bone.name
-                parents += parent
-                bone.childBones.forEach { walk(it, index) }
-            }
-            model.topLevelBones.forEach { walk(it, -1) }
+                // Ordered walk, so parentIndex[i] is always less than i
+                val order = ArrayList<String>()
+                val parents = ArrayList<Int>()
+                fun walk(bone: GeoBone, parent: Int) {
+                    val index = order.size
+                    order += bone.name
+                    parents += parent
+                    bone.childBones.forEach { walk(it, index) }
+                }
+                variant.model.topLevelBones.forEach { walk(it, -1) }
 
-            models[id] = BotModelData(
-                initBoneRots = initBoneRots,
-                initBoneMoves = initBoneMoves,
-                bakedModel = model
-            ).also {
-                it.passivePlan = PassivePlan(order.toTypedArray(), parents.toIntArray())
-                it.chainLayout = ChainRig.layout(model)
+                val model = models.getOrPut(botId) { mutableMapOf() }
+                model[variantId] = BotModelData(
+                    initBoneRots = initBoneRots,
+                    initBoneMoves = initBoneMoves,
+                    bakedModel = variant.model
+                ).also {
+                    it.passivePlan = PassivePlan(order.toTypedArray(), parents.toIntArray())
+                    it.chainLayout = ChainRig.layout(variant.model)
+                }
             }
         }
+
+        val animations = mutableMapOf<ResourceLocation, MutableMap<String, BakedAnimations>>()
+        for ((_, variants) in loaded.bots) {
+            for ((variantId, variant) in variants) {
+                val file = variant.animationFile ?: continue
+                animations.getOrPut(file) { mutableMapOf() }[variantId] = variant.animation ?: continue
+            }
+        }
+
         ShowbizClient.botModels = models
-        ShowbizClient.animations = loaded.animations
+        ShowbizClient.botAnimations = animations
 
         // Displaying the notice screen
         if (AddonClientNotices.shouldShowScreen()) {

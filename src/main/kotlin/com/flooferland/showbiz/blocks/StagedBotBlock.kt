@@ -1,25 +1,24 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.*
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.context.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
-import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.GigaDirectionProperty
-import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.Extensions.handleEditScreen
-import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.mojang.serialization.MapCodec
+import net.minecraft.core.BlockPos
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.BaseEntityBlock
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.StateDefinition
+import net.minecraft.world.phys.BlockHitResult
 import kotlin.math.roundToInt
 
 class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
@@ -57,14 +56,5 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
 
     companion object {
         val facing = GigaDirectionProperty("facing")
-
-        init {
-            ServerPackets.listen(BotListSelectPacket.type) { packet, ctx ->
-                val bot = packet.bot.grabConnectable(ctx.player().level()) as? IBot ?: return@listen
-                bot.botId = packet.id
-                if (bot is BlockEntity) bot.markDirtyNotifyAll()
-                ctx.player().playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
-            }
-        }
     }
 }

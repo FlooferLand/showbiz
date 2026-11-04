@@ -1,16 +1,5 @@
 package com.flooferland.showbiz
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.client.multiplayer.*
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.core.registries.*
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
-import net.minecraft.server.packs.*
-import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.addons.*
 import com.flooferland.showbiz.addons.data.BotModelData
@@ -38,7 +27,6 @@ import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.MainClientUtils
 import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.tc
-import java.nio.file.Files
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -48,17 +36,33 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.screens.MenuScreens
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.packs.PackType
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityType
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.loading.`object`.BakedAnimations
 import software.bernie.geckolib.renderer.GeoItemRenderer
+import java.nio.file.Files
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.max
 
 object ShowbizClient : ClientModInitializer {
     var addons: List<AddonAssets> = emptyList()
     var bots: Map<ResourceId, AddonBot> = emptyMap()
-    var botModels: Map<ResourceLocation, BotModelData> = emptyMap()
-    var animations: Map<ResourceLocation, BakedAnimations> = emptyMap()
+
+    // Ugly but these are mainly for quick lookup while rendering
+    var botModels: Map<ResourceLocation, Map<String, BotModelData>> = emptyMap()
+    var botAnimations: Map<ResourceLocation, Map<String, BakedAnimations>> = emptyMap()
 
     override fun onInitializeClient() {
         // Loading the mod

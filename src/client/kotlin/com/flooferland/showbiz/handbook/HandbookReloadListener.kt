@@ -1,13 +1,15 @@
 package com.flooferland.showbiz.handbook
 
-import net.minecraft.resources.*
-import net.minecraft.server.packs.resources.*
-import net.minecraft.util.profiling.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.handbook.Handbook.cache
 import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
+import net.minecraft.resources.FileToIdConverter
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.packs.resources.ResourceManager
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener
+import net.minecraft.util.profiling.ProfilerFiller
 import nl.adaptivity.xmlutil.QName
 import nl.adaptivity.xmlutil.serialization.XML
 
@@ -15,6 +17,9 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
     const val DIRECTORY = "handbook"
     override fun getFabricId() = rl("handbook")
 
+    fun debug(text: String) {
+        Showbiz.log.debug("Handbook: $text")
+    }
     fun info(text: String) {
         Showbiz.log.info("Handbook: $text")
     }
@@ -69,7 +74,7 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
             }
         }
 
-        info("Loaded ${cache.items.size} item entries")
-        info("Loaded ${cache.bots.size} bot entries")
+        debug("Loaded ${cache.items.size} item entries")
+        debug("Loaded ${cache.bots.size} bot entries")
     }
 }

@@ -1,29 +1,38 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.core.*
-import net.minecraft.core.component.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
-import net.minecraft.server.level.*
-import net.minecraft.util.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
 import com.flooferland.showbiz.items.WandItem
-import java.util.Locale
-import java.util.UUID
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponentPatch
+import net.minecraft.core.component.DataComponentType
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.FastColor
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.Vec3
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
+import java.util.*
 import kotlin.enums.enumEntries
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
@@ -194,6 +203,8 @@ object Extensions {
         if (suffixes.any { this.endsWith(it) } || suffixes.isEmpty()) return this
         return this + suffixes.first()
     }
+    fun String.isSnakeCase() =
+        isNotEmpty() && split('_').all { it.isNotEmpty() && it.all { char -> (char.isLowerCase() && char.isLetter()) || char.isDigit() } }
 
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
 

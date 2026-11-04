@@ -251,7 +251,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                         val animation = getAnimation(animatable, animId)
                         if (animation == null) {
                             if (!triggeredBadAnimationError)
-                                Showbiz.log.error("Failed to play animation '$animId' (file=${ShowbizClient.bots[animatable.botId]?.animations})")
+                                Showbiz.log.error("Failed to play animation '$animId' (file=${ShowbizClient.bots[animatable.botId]?.variants?.get(animatable.botVariant)?.animations})")
                             triggeredBadAnimationError = true
                             return@runCatching
                         } else {

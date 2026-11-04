@@ -1,7 +1,5 @@
 package com.flooferland.showbiz.commands.stat
 
-import net.minecraft.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.ServerStats
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.types.commands.Command
@@ -9,6 +7,8 @@ import com.flooferland.showbiz.types.commands.CommandContext
 import com.flooferland.showbiz.utils.Extensions.bytesToFriendlySize
 import com.flooferland.showbiz.utils.Extensions.hover
 import com.flooferland.showbiz.utils.Extensions.withTeleport
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
 
 object StatShowsCommand : Command("shows") {
     override fun description() = Component.literal("Gives you a list of running shows and whatnot")!!
@@ -30,6 +30,7 @@ object StatShowsCommand : Command("shows") {
         var totalByteSize = 0L
         for (entity in reelToReels) {
             val showName = entity.showData.name ?: continue
+            if (showName.isEmpty()) continue
             val (status, color) =
                 if (entity.playing && !entity.paused)
                     "Playing" to ChatFormatting.GREEN
