@@ -4,31 +4,27 @@ set rae beach_bear
 wp5 38, rae 166 {
     flow speed in:0.7 out:1.0
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "Jaw" x:-35
     rotate "Snout" x:7.5
 }
 wp5 39, rae 153 {
     flow speed in:0.8 out:1.0
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "IrisR" x:0.5
     move "IrisL" x:-0.5
 }
 wp5 40, rae 151 {
     flow speed in:0.8 out:0.4
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "EyelidL" y:0.6
 }
 wp5 41, rae 152 {
     flow speed in:0.8 out:0.4
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "EyelidR" y:0.6
 }
 wp5 42, rae 158 {
@@ -58,16 +54,14 @@ wp5 44, rae 157 {
 wp5 45, rae 155 {  # Raise
     flow speed in:0.48 out:0.6
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "Guitar" z:-10
     rotate "ElbowL" x:18 z:-2.5
 }
 wp5 46, rae 154 {  # Slide
     flow speed in:0.48 out:0.6
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "HandL" x:-4
     rotate "ArmL" z:28
     rotate "ElbowL" x:8
@@ -91,7 +85,6 @@ wp5 48, rae 165 {
 wp5 49 {
     flow speed in:0.8 out:1.0
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "Foot" x:20
 }

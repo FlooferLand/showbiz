@@ -12,16 +12,14 @@ rae 213 {
 rae 211 {
     flow speed in:0.16 out:0.2
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "torso" y:25
 }
 
 rae 212 {
     flow speed in:0.16 out:0.2
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "torso" y:-25
 }
 
@@ -55,16 +53,14 @@ rae 202 {
 rae 203 {
     flow speed in:0.24 out:0.3
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "head" z:10
 }
 
 rae 204 {
     flow speed in:0.24 out:0.3
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "head" z:-10
 }
 
@@ -82,8 +78,7 @@ rae 206 {
 rae 207 {
     flow speed in:0.104 out:0.13
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "arm_r" x:90
     wigglemul 1.5
 }
@@ -100,8 +95,7 @@ rae 208 {  # guitar strum
 rae 189 {
     flow speed in:0.32 out:0.4
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "arm_l" x:-15
 }
 
@@ -117,8 +111,7 @@ rae 209 {
 rae 190 {
     flow speed in:0.32 out:0.4
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "banjo" z:-15
     rotate "arm_l" y:-20
 }
@@ -128,8 +121,7 @@ rae 190 {
 rae 194 {
     flow speed in:0.32 out:0.4
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "toes_r" x:20
 }
 
@@ -138,8 +130,7 @@ rae 194 {
 rae 196 {
     flow speed in:0.96 out:1.2
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "jaw" x:-15
     rotate "snout" x:5
 }
@@ -147,23 +138,20 @@ rae 196 {
 rae 199 {
     flow speed in:0.4 out:0.5
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "eyes" x:1
 }
 
 rae 200 {
     flow speed in:0.4 out:0.5
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     move "eyes" x:-1
 }
 
 rae 197, rae 198 {
     flow speed in:0.64 out:0.8
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     anim "eyelids"
 }

@@ -4,23 +4,17 @@ set wp5 dingo
 wp5 27, rae 30 {
     flow speed in:0.7 out:1.0
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
     rotate "Jaw" x:-35
     rotate "Snout" x:7.5
 }
 wp5 28, rae 28 {
     flow speed in:0.4 out:0.6
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
     move "EyelidL" y:0.6
 }
 wp5 29, rae 29 {
     flow speed in:0.4 out:0.6
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
     move "EyelidR" y:0.6
 }
 wp5 30, rae 23 {

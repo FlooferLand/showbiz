@@ -29,8 +29,7 @@ rae 33 {
 rae 63 {
     flow speed in:1.36 out:1.7
     flow accel in:1.0 out:1.0
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "Right Foot" x:-15
 }
 rae 31 {

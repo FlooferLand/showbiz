@@ -12,8 +12,7 @@ rae 165 {
 rae 166 {
     flow speed in:2.0 out:2.0
     flow accel in:0.8 out:0.67
-    flow smash in:0.0 out:0.0
-    flow smash_speed in:0.1 out:0.1
+    
     rotate "Jaw" x:-30
     rotate "Snout" x:8
 }
