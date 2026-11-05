@@ -1,15 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.core.component.*
-import net.minecraft.nbt.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
@@ -23,6 +13,17 @@ import com.flooferland.showbiz.types.connection.data.PackedControlData
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponents
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -92,7 +93,7 @@ class ShowSelectorBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mo
     }
 
     override fun getNameMapping() = hashMapOf<Int, String>().also { map ->
-        (0..12).forEach { map[it] = slotNames[it] ?: "?" }
+        (0..12).forEach { map[it] = slotNames[it] ?: ".." }
     }
 
     override fun onInteract(key: Int, level: Level, player: Player) {

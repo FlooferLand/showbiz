@@ -1,12 +1,19 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.texture.*
-import net.minecraft.util.*
-import net.minecraft.world.phys.*
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
+import com.mojang.blaze3d.vertex.*
+import com.mojang.math.Axis
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.renderer.GameRenderer
+import net.minecraft.client.renderer.LightTexture
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.network.chat.Component
+import net.minecraft.util.FastColor
+import net.minecraft.util.Mth
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.joml.Vector3f
 
@@ -111,5 +118,63 @@ object DrawUtils {
                 addVertex(matrix, minX, minY, maxZ, 0f, depth, 0f, -1f, 0f)
             }
         }
+    }
+
+    fun drawText(
+        poseStack: PoseStack,
+        buffer: MultiBufferSource.BufferSource,
+        worldPos: Vec3,
+        text: Component,
+        scale: Float = 1.0f,
+        backgroundColor: Int = 0xCC_00_00_00.toInt(),
+        maxWidth: Int = 150,
+        drawCentered: Boolean = true,
+        drawBackground: Boolean = true
+    ) {
+        val minecraft = Minecraft.getInstance() ?: return
+        val font = minecraft.font ?: return
+        val camera = minecraft.gameRenderer?.mainCamera ?: return
+
+        poseStack.pushPose()
+        poseStack.translate(worldPos.x, worldPos.y, worldPos.z)
+        poseStack.mulPose(camera.rotation())
+        poseStack.mulPose(Axis.XP.rotation(Mth.PI))
+        poseStack.scale(scale * 0.01f, scale * 0.01f, scale * 0.01f)
+        val matrix = poseStack.last().pose()
+        val lines = font.split(text, maxWidth)
+
+        val lineOffset = font.lineHeight + 4
+        val yOffset = if (drawCentered) -(font.lineHeight * lines.count()).toFloat() else 0f
+
+        if (drawBackground) {
+            RenderSystem.disableDepthTest()
+            RenderSystem.disableCull()
+            RenderSystem.enableBlend()
+            RenderSystem.defaultBlendFunc()
+            RenderSystem.setShader(GameRenderer::getPositionColorShader)
+            val builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
+            var bgY = yOffset
+            for (line in lines) {
+                val x0 = -(font.width(line) / 2f) - 2f
+                val x1 = -x0
+                val y0 = bgY - 2f
+                val y1 = bgY + font.lineHeight + 2f
+                builder.addVertex(matrix, x0, y0, 0f).setColor(backgroundColor)
+                builder.addVertex(matrix, x0, y1, 0f).setColor(backgroundColor)
+                builder.addVertex(matrix, x1, y1, 0f).setColor(backgroundColor)
+                builder.addVertex(matrix, x1, y0, 0f).setColor(backgroundColor)
+                bgY += lineOffset
+            }
+            BufferUploader.drawWithShader(builder.buildOrThrow())
+            RenderSystem.enableCull()
+            RenderSystem.enableDepthTest()
+        }
+
+        var textY = yOffset
+        for (line in lines) {
+            font.drawInBatch(line, -font.width(line) / 2f, textY, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT)
+            textY += lineOffset
+        }
+        poseStack.popPose()
     }
 }

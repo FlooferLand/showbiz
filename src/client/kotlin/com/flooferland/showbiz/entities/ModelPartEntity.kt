@@ -1,32 +1,37 @@
 package com.flooferland.showbiz.entities
 
-import net.minecraft.client.multiplayer.*
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.syncher.*
-import net.minecraft.world.*
-import net.minecraft.world.damagesource.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.registry.ModClientEntities
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.utils.Extensions.divide
-import java.util.concurrent.atomic.AtomicInteger
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityDimensions
+import net.minecraft.world.entity.Pose
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Similar to Minecraft's InteractionEntity / DisplayEntity. <br/>
  * Simple light-weight entityType to register physical interactions. <br/>
  * Spawned and filled out by [com.flooferland.showbiz.types.ClientModelPartInstance]
  */
-class ModelPartEntity(level: Level, val partId: String? = null, val displayName: String? = null, pos: Vec3? = null, var size: Vec3? = null, val parent: BlockPos? = null) : Entity(ModClientEntities.ModelPart.type, level) {
+class ModelPartEntity(level: Level, val partId: String? = null, pos: Vec3? = null, var size: Vec3? = null, val parent: BlockPos? = null) : Entity(ModClientEntities.ModelPart.type, level) {
     override fun defineSynchedData(builder: SynchedEntityData.Builder) = Unit
     override fun readAdditionalSaveData(compound: CompoundTag) = Unit
     override fun addAdditionalSaveData(compound: CompoundTag) = Unit
+
+    var displayName: String? = null
 
     init {
         id = nextEntityId.getAndDecrement()

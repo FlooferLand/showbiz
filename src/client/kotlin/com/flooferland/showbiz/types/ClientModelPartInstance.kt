@@ -1,16 +1,5 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.*
-import net.minecraft.client.multiplayer.*
-import net.minecraft.core.*
-import net.minecraft.resources.*
-import net.minecraft.util.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.entities.ModelPartEntity
@@ -18,6 +7,17 @@ import com.flooferland.showbiz.network.packets.ModelPartNamesPacket
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPart
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import net.minecraft.client.Minecraft
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.Mth
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.properties.BlockStateProperties
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.renderer.GeoBlockRenderer
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.cos
@@ -27,7 +27,7 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
     val interactableParts = mutableMapOf<String, ModelPart>()
     val interactionMapping = owner.getInteractionMapping()
     var nameMapping = owner.getNameMapping()
-    val trackedEntities = mutableListOf<Int>()
+    val trackedEntities = mutableMapOf<Int, ModelPartEntity>()
 
     val ownerEntity get() = owner as BlockEntity
 
@@ -75,17 +75,17 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
                     part.pos.x * sin(angle) + part.pos.z * cos(angle)
                 )
             } ?: part.pos
-            val displayName = (interactionMapping[partId]?.let { nameMapping[it] }) ?: partId
-            val entity = ModelPartEntity(level, partId, displayName, pos, part.size, ownerEntity.blockPos)
+            val entity = ModelPartEntity(level, partId, pos, part.size, ownerEntity.blockPos)
             level.addEntity(entity)
-            trackedEntities.add(entity.id)
+            trackedEntities[entity.id] = entity
         }
+        updateEntities()
     }
 
     // Killing al the entities
     override fun kill() {
         val level = ownerEntity.level as? ClientLevel ?: return
-        for (id in trackedEntities) {
+        for (id in trackedEntities.keys) {
             level.removeEntity(id, Entity.RemovalReason.DISCARDED)
         }
         trackedEntities.clear()
@@ -101,9 +101,17 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
         val distance = player.distanceToSqr(pos.center)
         val reach = ModelPartManager.getMaxReach(player)
         if (distance <= reach * reach) {
-            spawn()
+            if (trackedEntities.isEmpty())
+                spawn()
         } else {
             kill()
+        }
+    }
+
+    private fun updateEntities() {
+        for (entity in trackedEntities.values) {
+            val partId = entity.partId ?: continue
+            entity.displayName = (interactionMapping[partId]?.let { nameMapping[it] }) ?: partId
         }
     }
 
@@ -115,6 +123,7 @@ class ClientModelPartInstance(val owner: IModelPartInteractable, val baseResourc
                 val owner = level.getBlockEntity(packet.parent) as? IModelPartInteractable ?: return@listen
                 val self = owner.modelPartInstance.clientInstance as? ClientModelPartInstance ?: return@listen
                 self.nameMapping = packet.names
+                self.updateEntities()
             }
         }
     }

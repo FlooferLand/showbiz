@@ -1,34 +1,28 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.multiplayer.*
-import net.minecraft.client.player.*
-import net.minecraft.client.renderer.*
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.util.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.JukeboxLyricPacket
+import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.math.Axis
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.minecraft.ChatFormatting
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.player.LocalPlayer
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.world.level.ClipContext
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity
+import net.minecraft.world.phys.HitResult
+import kotlin.math.sin
 
 object JukeboxLyricRenderer {
     data class JukeboxData(val entity: JukeboxBlockEntity, var lyric: String)
     val jukeboxes = mutableMapOf<BlockPos, JukeboxData>()
     val playerMaxDistSqr = 16.0f.let { it * it }
 
-    fun render(level: ClientLevel, player: LocalPlayer, buffer: MultiBufferSource.BufferSource, pose: PoseStack) {
-        val minecraft = Minecraft.getInstance() ?: return
-        val font = minecraft.font ?: return
-        val camera = minecraft.gameRenderer?.mainCamera ?: return
-
+    fun render(level: ClientLevel, player: LocalPlayer, buffer: MultiBufferSource.BufferSource, poseStack: PoseStack) {
         for ((blockPos, data) in jukeboxes) {
             val (entity, lyric) = data
             if (lyric.isEmpty()) continue
@@ -36,7 +30,8 @@ object JukeboxLyricRenderer {
 
             val text = Component.literal(lyric).withStyle(ChatFormatting.ITALIC)
             val textBlockPos = blockPos.above()
-            val textPos = textBlockPos.center
+            val textWobble = sin(level.gameTime * 0.5) * 0.03f
+            val textPos = textBlockPos.center.add(0.0, textWobble, 0.0)
 
             // Rendering lyrics as a hotbar message if not visible
             val clip = ClipContext(player.eyePosition, textPos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, player).let { level.clip(it) }
@@ -46,31 +41,7 @@ object JukeboxLyricRenderer {
             }
 
             // Lyric text
-            pose.pushPose()
-            pose.translate(textPos.x, textPos.y, textPos.z)
-            pose.mulPose(camera.rotation())
-            pose.mulPose(Axis.XP.rotation(Mth.PI))
-            pose.scale(0.015f, 0.015f, 0.015f)
-            val matrix = pose.last().pose()
-            val maxWidth = 130
-            val lines = font.split(text, maxWidth)
-            var yOffset = 0f
-            for (line in lines) {
-                val lineWidth = font.width(line)
-                val xOffset = -lineWidth / 2f
-
-                val padding = 2
-                val backgroundColor = 0x80_00_00_00.toInt()
-                val background = buffer.getBuffer(RenderType.textBackground())
-                background.addVertex(matrix, xOffset - padding, yOffset - padding, 0f).setColor(backgroundColor).setLight(LightTexture.FULL_BRIGHT)
-                background.addVertex(matrix, xOffset - padding, yOffset + font.lineHeight + padding, 0f).setColor(backgroundColor).setLight(LightTexture.FULL_BRIGHT)
-                background.addVertex(matrix, xOffset + lineWidth + padding, yOffset + font.lineHeight + padding, 0f).setColor(backgroundColor).setLight(LightTexture.FULL_BRIGHT)
-                background.addVertex(matrix, xOffset + lineWidth + padding, yOffset - padding, 0f).setColor(backgroundColor).setLight(LightTexture.FULL_BRIGHT)
-                font.drawInBatch(line, xOffset, yOffset, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, Font.DisplayMode.SEE_THROUGH, 0,  LightTexture.FULL_BRIGHT)
-
-                yOffset += font.lineHeight + 4
-            }
-            pose.popPose()
+            DrawUtils.drawText(poseStack, buffer, textPos, text, scale = 1.5f)
         }
     }
 

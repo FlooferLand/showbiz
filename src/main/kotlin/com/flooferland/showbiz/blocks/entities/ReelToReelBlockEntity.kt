@@ -97,7 +97,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private val recordQueue = mutableListOf<SignalFrame>()
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
-        addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.1, 0.1, 0.15))
+        addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.08, 0.08, 0.13))
         addPart("seek_backward", Vec3(-0.22, 0.13, -0.2), Vec3(0.2, 0.2, 0.15))
         addPart("seek_forward", Vec3(-0.05, 0.13, -0.2), Vec3(0.2, 0.2, 0.15))
     }
@@ -219,7 +219,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
 
         // Saving the seek every once in a while
-        if (runningShow && level.gameTime % 10.secsToTicks() == 0L) {
+        if (runningShow && level.gameTime % 5.secsToTicks() == 0L) {
             level.blockEntityChanged(blockPos)
         }
     }
@@ -306,13 +306,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getInteractionMapping() = mapOf(
         "record" to 0,
         "seek_backward" to 1,
-        "seek_forward" to 2
+        "seek_forward" to 2,
     )
 
     override fun getNameMapping() = mapOf(
-        0 to if (recording) "Recording" else "Not recording",
-        1 to "Seek backward",
-        2 to "Seek forward"
+        0 to if (recording) "Stop recording" else "Start recording",
+        1 to "Rewind",
+        2 to "Skip",
     )
 
     override fun onInteract(key: Int, level: Level, player: Player) {

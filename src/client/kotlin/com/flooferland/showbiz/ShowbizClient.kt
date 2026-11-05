@@ -172,17 +172,23 @@ object ShowbizClient : ClientModInitializer {
             val player = mc.player ?: return@register
             val level = player.clientLevel ?: return@register
             val partialTick = ctx.tickCounter().getGameTimeDeltaPartialTick(true)
-            val view = ctx.camera()?.position ?: return@register
+            val cam = ctx.camera() ?: return@register
 
-            val pose = ctx.matrixStack() ?: return@register
-            pose.pushPose()
-            pose.translate(-view.x, -view.y, -view.z)
-            JukeboxLyricRenderer.render(level, player, mc.renderBuffers().bufferSource(), pose)
-            ConnectionRenderer.draw(player, mc.renderBuffers().bufferSource(), partialTick)
-            ConnectionRenderer.renderDeferred(pose)
-            pose.popPose()
-
-            DecorEntity.moveAll(ctx)
+            val poseStack = ctx.matrixStack() ?: return@register
+            val buffer = mc.renderBuffers().bufferSource()
+            poseStack.pushPose()
+            poseStack.translate(-cam.position.x, -cam.position.y, -cam.position.z)
+            try {
+                JukeboxLyricRenderer.render(level, player, buffer, poseStack)
+                ModelPartEntityRenderer.render(mc, buffer, poseStack)
+                ConnectionRenderer.draw(player, buffer, partialTick)
+                ConnectionRenderer.renderDeferred(poseStack)
+                DecorEntity.moveAll(ctx)
+            } catch (throwable: Throwable) {
+                Showbiz.log.error("Render error", throwable)
+            }
+            buffer.endBatch()
+            poseStack.popPose()
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
             if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
