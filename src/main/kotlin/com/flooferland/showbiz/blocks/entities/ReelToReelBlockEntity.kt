@@ -232,6 +232,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
         audio.data.mono = chunk
         audio.data.chunkId++
+        audio.data.lead = startIndex.toDouble() / (getFormat().sampleRate * getFormat().frameSize) - seek
         audio.send()
     }
 

@@ -1,6 +1,5 @@
 package com.flooferland.showbiz.audio
 
-import net.minecraft.core.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackAudioStatePacket
@@ -8,6 +7,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.minecraft.core.BlockPos
 
 @Environment(EnvType.CLIENT)
 object ShowbizShowAudio {
@@ -43,6 +43,7 @@ object ShowbizShowAudio {
             gamePaused = paused
             for (source in sources.values) {
                 if (paused) source.pause() else source.resume()
+                source.tick()
             }
         }
 

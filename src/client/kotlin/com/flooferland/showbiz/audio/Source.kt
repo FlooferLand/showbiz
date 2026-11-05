@@ -6,8 +6,10 @@ import com.flooferland.showbiz.types.FriendlyAudioFormat
 import net.minecraft.client.Minecraft
 import net.minecraft.world.phys.Vec3
 import org.lwjgl.BufferUtils
+import org.lwjgl.openal.AL
 import org.lwjgl.openal.AL11.*
 import org.lwjgl.openal.ALC10.alcGetCurrentContext
+import org.lwjgl.openal.EXTSourceRadius
 
 // TODO: Should probably avoid sending stereo audio to this cuz an extra channel means extra network bandwidth
 //       OpenAL can only do mono (without exploding)
@@ -24,7 +26,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             else -> error("Unsupported format: $friendlyFormat")
         }
     }
-    val maxDistance = 48f
+
     val paused get() = getState() == AL_PAUSED
     var lastReceivedChunkId = -1
     var source = 0
@@ -41,11 +43,8 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         if (isValidSource()) close()
         source = handleAL { alGenSources() }
         sourceContext = handleAL { alcGetCurrentContext() }
-        handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
-        handleAL { alDistanceModel(AL_LINEAR_DISTANCE) }
-        handleAL { alSourcef(source, AL_MAX_DISTANCE, maxDistance) }
-        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, maxDistance / 2f) }
         lastReceivedChunkId = -1
+        updateAttenuation()
     }
     fun close() {
         if (isValidSource()) {
@@ -68,8 +67,12 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     fun write(packet: PlaybackAudioChunkPacket) {
         if (!isValidSource()) return
+        if (packet.id != lastReceivedChunkId + 1) {
+            handleALBasic { alSourceStop(source) }
+        }
         if (paused) return
         updatePosition()
+        updateAttenuation()
 
         val tickRate = Minecraft.getInstance().level?.tickRateManager()?.tickrate() ?: 20f
         handleAL { alSourcef(source, AL_PITCH, tickRate / 20f) }
@@ -88,10 +91,25 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             handleAL { alDeleteBuffers(oldBuffers) }
         }
 
+        // Shifting the chunk when a song isn't already playing
+        var audio = packet.audioChunk
+        if (getState() != AL_PLAYING) {
+            val bits = friendlyFormat.sampleBits
+            val frameSize = bits / 8 * (if (friendlyFormat.stereo) 2 else 1)
+            val frames = (packet.lead * packet.format.sampleRate).toInt()
+            audio = if (frames >= 0) {
+                // 8 bit PCM silence is 128
+                ByteArray(frames * frameSize) { if (bits == 8) 128.toByte() else 0 } + audio
+            } else {
+                audio.copyOfRange(minOf(-frames * frameSize, audio.size), audio.size)
+            }
+        }
+        if (audio.isEmpty()) return
+
         // Creating a new buffer
         val newBufId = handleAL { alGenBuffers() }
-        val data = BufferUtils.createByteBuffer(packet.audioChunk.size)
-            .put(packet.audioChunk)
+        val data = BufferUtils.createByteBuffer(audio.size)
+            .put(audio)
             .flip()
         handleAL { alBufferData(newBufId, format, data, packet.format.sampleRate) }
 
@@ -121,6 +139,26 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
     }
 
+    fun tick() {
+        val player = Minecraft.getInstance()?.gameRenderer?.mainCamera?.position ?: return
+        handleALBasic { alListener3f(AL_POSITION, player.x.toFloat(), player.y.toFloat(), player.z.toFloat()) }
+        updatePosition()
+        updateAttenuation()
+    }
+
+    fun updateAttenuation() {
+        handleAL { alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED) }
+        handleAL { alSourcef(source, AL_ROLLOFF_FACTOR, 24f) }
+        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 8f) }
+        handleAL { alSourcef(source, AL_MAX_DISTANCE, 128f) }  // WHY THE FUCK IS THIS BACKWARDS
+        handleAL { alSourcef(source, AL_MAX_GAIN, 0.5f) }
+        handleAL { alSourcef(source, AL_MIN_GAIN, 0f) }
+        handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
+
+        val caps = handleALBasic { AL.getCapabilities() }
+        if (caps.AL_EXT_SOURCE_RADIUS)
+            handleAL { alSourcef(source, EXTSourceRadius.AL_SOURCE_RADIUS, 8.0f) }
+    }
     fun updatePosition() {
         val pos = position
         if (pos != null) {
