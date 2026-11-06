@@ -21,12 +21,12 @@ rae 5 {
     move "Eyes" x:-0.55
 }
 wp5 3, rae 2 {
-    flow speed in:0.4 out:0.6
+    flow speed in:0.9 out:0.4
     flow accel in:1.0 out:1.0
     move "Eyelid L" y:-1.6
 }
 wp5 4, rae 3 {
-    flow speed in:0.4 out:0.6
+    flow speed in:0.9 out:0.4
     flow accel in:1.0 out:1.0
     move "Eyelid R" y:-1.6
 }
@@ -75,7 +75,7 @@ wp5 13, rae 14 {
 
 # head
 wp5 7, rae 8 {
-    flow speed in:0.4 out:0.5
+    flow speed in:0.3 out:0.4
     flow accel in:0.8 out:0.8
     flow smash in:0.0 out:0.38
     flow smash_speed in:0.1 out:0.1
@@ -83,7 +83,7 @@ wp5 7, rae 8 {
     wigglemul 2.5
 }
 wp5 8 {
-    flow speed in:0.4 out:0.5
+    flow speed in:0.3 out:0.4
     flow accel in:1.0 out:1.0
     flow smash in:0.0 out:0.38
     flow smash_speed in:0.1 out:0.1

@@ -16,12 +16,17 @@ elasticity = 0.2
 freeze_x = false
 
 [dynbones.Waist]
-damping = 0.075
+damping = 0.02
 elasticity = 0.1
 freeze_x = true
 
+[dynbones.Head]
+damping = 0.02
+elasticity = 0.1
+freeze_x = false
+
 [dynbones.Head_Tilt]
-damping = 0.075
+damping = 0.02
 elasticity = 0.1
 freeze_x = false
 

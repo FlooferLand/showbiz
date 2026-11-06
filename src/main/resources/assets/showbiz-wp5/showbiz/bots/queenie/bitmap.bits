@@ -8,12 +8,12 @@ wp5 50, rae 185 {
     rotate "Snout" x:7.5
 }
 wp5 51, rae 181 {
-    flow speed in:0.6 out:0.3
+    flow speed in:0.8 out:0.4
     flow accel in:1.0 out:1.0
     move "EyelidL" y:-1.5
 }
 wp5 52, rae 182 {
-    flow speed in:0.6 out:0.3
+    flow speed in:0.8 out:0.4
     flow accel in:1.0 out:1.0
     move "EyelidR" y:-1.5
 }
@@ -36,17 +36,17 @@ wp5 55, rae 180 {
     flow accel in:1.0 out:1.0
     flow smash in:0.05 out:0.42
     flow smash_speed in:0.1 out:0.1
-    rotate "Head" x:15
+    rotate "Head" x:12
 }
 wp5 56, rae 178 {
-    flow speed in:0.56 out:0.7
+    flow speed in:0.4 out:0.6
     flow accel in:1.0 out:1.0
     flow smash in:0.05 out:0.42
     flow smash_speed in:0.1 out:0.1
     rotate "Head" y:15
 }
 wp5 57, rae 179 {
-    flow speed in:0.56 out:0.7
+    flow speed in:0.4 out:0.6
     flow accel in:1.0 out:1.0
     flow smash in:0.05 out:0.42
     flow smash_speed in:0.1 out:0.1
@@ -95,7 +95,7 @@ wp5 63, rae 170 {
     rotate "ArmR3" x:20
 }
 wp5 64, rae 188 {
-    flow speed in:0.24 out:0.3
+    flow speed in:0.15 out:0.2
     flow accel in:1.0 out:1.0
     flow smash in:0.0 out:0.08
     flow smash_speed in:0.1 out:0.1
@@ -103,12 +103,12 @@ wp5 64, rae 188 {
     rotate "Waist" x:-3
 }
 wp5 65, rae 187 {
-    flow speed in:0.4 out:0.5
+    flow speed in:0.3 out:0.4
     flow accel in:1.0 out:1.0
     rotate "Waist" y:-15
 }
 rae 186 {
-    flow speed in:0.4 out:0.5
+    flow speed in:0.3 out:0.4
     flow accel in:1.0 out:1.0
     rotate "Waist" y:15
 }

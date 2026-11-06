@@ -59,23 +59,20 @@ wp5 21, rae 51 { # Head tilt left
 }
 
 wp5 17, rae 45 { # Mouth
-    flow speed in:0.9 out:1.4
+    flow speed in:1.1 out:1.6
     flow accel in:1.0 out:1.0
-    
     rotate "jaw" x:-45
 }
 
 wp5 18, rae 41 { # Left eyelid
-    flow speed in:0.5 out:0.7
+    flow speed in:1.0 out:0.5
     flow accel in:1.0 out:1.0
-    
     move "EyelidL" y:-1.25
 }
 
 wp5 19, rae 42 { # Right eyelid
-    flow speed in:0.5 out:0.7
+    flow speed in:1.0 out:0.5
     flow accel in:1.0 out:1.0
-    
     move "EyelidR" y:-1.25
 }
 

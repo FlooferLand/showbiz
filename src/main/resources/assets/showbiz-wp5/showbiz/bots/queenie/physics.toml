@@ -11,7 +11,7 @@ elasticity = 0.1
 freeze_x = true
 
 [dynbones.Head]
-damping = 0.075
+damping = 0.05
 elasticity = 0.1
 freeze_x = false
 

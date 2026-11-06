@@ -1082,12 +1082,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [6.7, 29.025, 4.05],
-			"to": [7.7, 29.975, 4.95],
+			"from": [6.7, 28.975, 4.15],
+			"to": [7.7, 29.725, 4.85],
 			"autouv": 0,
 			"color": 5,
 			"rotation": [0, 90, 0],
-			"origin": [0, 0, 3],
+			"origin": [0, -0.15, 3],
 			"uv_offset": [41, 54],
 			"faces": {
 				"north": {
@@ -1126,12 +1126,12 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [6.8, 29.95, 3.4],
-			"to": [7.8, 32.35, 5.6],
+			"from": [6.8, 29.7, 3.4],
+			"to": [7.8, 32.1, 5.6],
 			"autouv": 0,
 			"color": 5,
 			"rotation": [0, 90, 0],
-			"origin": [0, -0.05, 3],
+			"origin": [0, -0.3, 3],
 			"uv_offset": [36, 62],
 			"faces": {
 				"north": {
@@ -1256,13 +1256,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-7.7, 29.05, 4.05],
-			"to": [-6.7, 29.95, 4.95],
+			"from": [-7.7, 29, 4.15],
+			"to": [-6.7, 29.7, 4.85],
 			"autouv": 0,
 			"color": 5,
 			"mirror_uv": true,
 			"rotation": [0, -90, 0],
-			"origin": [0, 0, 3],
+			"origin": [0, -0.15, 3],
 			"uv_offset": [41, 54],
 			"faces": {
 				"north": {
@@ -1301,13 +1301,13 @@
 			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
-			"from": [-7.8, 29.95, 3.4],
-			"to": [-6.8, 32.35, 5.6],
+			"from": [-7.8, 29.7, 3.4],
+			"to": [-6.8, 32.1, 5.6],
 			"autouv": 0,
 			"color": 5,
 			"mirror_uv": true,
 			"rotation": [0, -90, 0],
-			"origin": [0, -0.05, 3],
+			"origin": [0, -0.3, 3],
 			"uv_offset": [36, 62],
 			"faces": {
 				"north": {
@@ -4606,7 +4606,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -4675,7 +4675,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -4690,7 +4690,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [1.5, 29.5, -4.2],
+			"origin": [1.5, 29.35, -4.2],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -4713,7 +4713,7 @@
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [-1.5, 29.5, -4.2],
+			"origin": [-1.5, 29.35, -4.2],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -4744,7 +4744,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -5073,7 +5073,7 @@
 	"outliner": [
 		{
 			"uuid": "b174f08a-49f5-aa90-ef8a-a26e5021ca3d",
-			"isOpen": false,
+			"isOpen": true,
 			"children": [
 				"ce81703e-3803-2d42-265d-1b4284a193cd",
 				"9d06d825-7fb2-38ab-84e1-a1b4436de354",
@@ -5123,12 +5123,12 @@
 										},
 										{
 											"uuid": "ff5dcb0b-5d01-0482-14e8-562cfe55d821",
-											"isOpen": false,
+											"isOpen": true,
 											"children": ["60373236-d818-6ddb-0ca5-ec0de2ac4e3a"]
 										},
 										{
 											"uuid": "66202897-dcb5-ef13-7e84-a5e2e3c85104",
-											"isOpen": false,
+											"isOpen": true,
 											"children": ["db5b2bea-5e5c-cdf3-cbb7-78564a30d957"]
 										},
 										{
