@@ -36,18 +36,23 @@ elasticity = 0.08
 freeze_x = true
 
 [dynbones.Chest]
-damping = 0.05
+damping = 0.02
+elasticity = 0.1
+freeze_x = false
+
+[dynbones.Waist]
+damping = 0.02
 elasticity = 0.1
 freeze_x = false
 
 [dynbones.Skirt]
-damping = 0.05
+damping = 0.02
 elasticity = 0.05
 freeze_x = false
 
 [dynbones.Tail]
-damping = 0.04
-elasticity = 0.02
+damping = 0.01
+elasticity = 0.1
 freeze_x = false
 
 [dynbones.Item]

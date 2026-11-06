@@ -148,16 +148,16 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
 
     fun updateAttenuation() {
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED) }
-        handleAL { alSourcef(source, AL_ROLLOFF_FACTOR, 24f) }
-        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 8f) }
-        handleAL { alSourcef(source, AL_MAX_DISTANCE, 128f) }  // WHY THE FUCK IS THIS BACKWARDS
-        handleAL { alSourcef(source, AL_MAX_GAIN, 0.5f) }
+        handleAL { alSourcef(source, AL_ROLLOFF_FACTOR, 8f) }
+        handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 15f) }
+        handleAL { alSourcef(source, AL_MAX_DISTANCE, 96f) }  // WHY THE FUCK IS THIS BACKWARDS
+        handleAL { alSourcef(source, AL_MAX_GAIN, 1f) }
         handleAL { alSourcef(source, AL_MIN_GAIN, 0f) }
         handleAL { alSourcei(source, AL_LOOPING, AL_FALSE) }
 
         val caps = handleALBasic { AL.getCapabilities() }
         if (caps.AL_EXT_SOURCE_RADIUS)
-            handleAL { alSourcef(source, EXTSourceRadius.AL_SOURCE_RADIUS, 8.0f) }
+            handleAL { alSourcef(source, EXTSourceRadius.AL_SOURCE_RADIUS, 4.0f) }
     }
     fun updatePosition() {
         val pos = position
