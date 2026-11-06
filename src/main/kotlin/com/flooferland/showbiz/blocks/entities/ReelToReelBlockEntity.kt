@@ -45,7 +45,6 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
@@ -72,9 +71,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     val aFrameMs: Int
-        get() = 50 * (if (getFormat().channels == 1) 50 * 2 else 50 * 4)
+        get() = 200
     val aBufferSize: Int
-        get() = (getFormat().sampleRate.toInt() * aFrameMs) / 1_000
+        get() {
+            val format = getFormat()
+            val frameSize = format.frameSize
+            val bytes = (format.sampleRate * aFrameMs / 1_000).toInt()
+            return bytes - (bytes % frameSize)
+        }
     val endTime: Double
         get() = showData.audio.size.toDouble() / (getFormat().sampleRate * getFormat().frameSize)
 
@@ -90,11 +94,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         public get private set
     var hasFinished = false
         public get private set
-    private val tickDelta = (50 * 0.001) // ms
     private val fps = 60  // Tied to rshw
     private var seekInt = 0
     private var lastVideoFrameIndex = 0
     private val recordQueue = mutableListOf<SignalFrame>()
+    private var lastPlaybackNanos = 0L
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.08, 0.08, 0.13))
@@ -126,8 +130,16 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Playback stuff
         if (playing && !paused) {
-            seek += tickDelta
-            seekInt = (seek * fps).roundToInt()
+            val time = System.nanoTime()
+            if (lastPlaybackNanos != 0L) {
+                val elapsed = (time - lastPlaybackNanos) / 1_000_000_000.0
+                val nextSeek = seek + elapsed
+                seek = if (level.isClientSide) nextSeek else nextSeek.coerceAtMost(endTime)
+            }
+            lastPlaybackNanos = time
+            seekInt = (seek * fps).toInt()
+        } else {
+            lastPlaybackNanos = 0L
         }
         if (level.isClientSide) return
 
@@ -171,17 +183,29 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         if (runningShow) {
             // Audio
-            val targetBytes = (seek * getFormat().sampleRate * getFormat().frameSize).toInt()
-            val lookaheadBytes = getFormat().sampleRate.toInt() * getFormat().frameSize / 2
+            val format = getFormat()
+            val frameSize = format.frameSize
+            val targetBytes = (seek * format.sampleRate * frameSize).toInt()
+            val lookaheadBytes = format.sampleRate.toInt() * frameSize / 2
+
+            val earliestBytes = ((targetBytes - lookaheadBytes).coerceAtLeast(0) / frameSize) * frameSize
+            if (audioBytesWritten < earliestBytes) {
+                audioBytesWritten = earliestBytes
+                audio.sendTrigger(PackedAudioData.Action.Stop)
+            }
+
             if (audioBytesWritten < targetBytes + lookaheadBytes && audioBytesWritten < showData.audio.size) {
                 var toWrite = aBufferSize
-                toWrite -= toWrite % getFormat().frameSize
+                toWrite -= toWrite % frameSize
 
                 val remain = showData.audio.size - audioBytesWritten
                 if (toWrite > remain) toWrite = remain
 
                 if (toWrite > 0) {
-                    val chunk = showData.audio.copyOfRange(audioBytesWritten, audioBytesWritten + toWrite)
+                    val chunk = showData.audio.copyOfRange(
+                        audioBytesWritten,
+                        audioBytesWritten + toWrite
+                    )
                     sendChunk(chunk, audioBytesWritten)
                     audioBytesWritten += toWrite
                 }
@@ -252,12 +276,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         stateDirty = true
     }
     fun seekTo(seconds: Double) {
-        val seconds = seconds.coerceIn(0.0, endTime)
-        this.seek = seconds
+        seek = seconds.coerceIn(0.0, endTime)
+        seekInt = (seek * fps).toInt()
+        lastPlaybackNanos = 0L
 
         val format = getFormat()
-        val alignedBytes = (seconds * format.sampleRate).toLong() * format.frameSize
+        val alignedBytes = (seek * format.sampleRate).toLong() * format.frameSize
         audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+
         audio.sendTrigger(PackedAudioData.Action.Stop)
         stateDirty = true
     }
@@ -281,9 +307,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
     /** Client-side only !! */
     fun clientApplyPlaybackState(packet: ShowPlaybackStatePacket) {
-        this.playing = packet.playing
-        this.paused = packet.paused
-        this.seek = packet.seek
+        playing = packet.playing
+        paused = packet.paused
+        seek = packet.seek
+        lastPlaybackNanos = 0L
     }
     // endregion
 

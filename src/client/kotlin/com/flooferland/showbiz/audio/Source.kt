@@ -78,8 +78,15 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         handleAL { alSourcef(source, AL_PITCH, tickRate / 20f) }
 
         // Checking chunk order
-        if (packet.id in 2..lastReceivedChunkId) {
-            Showbiz.log.warn("Found out of order audio chunk (${packet.id} <= $lastReceivedChunkId)")
+        if (lastReceivedChunkId >= 0) {
+            if (packet.id <= lastReceivedChunkId) {
+                Showbiz.log.warn("Ignoring stale audio chunk (${packet.id} <= $lastReceivedChunkId)")
+                return
+            }
+            if (packet.id != lastReceivedChunkId + 1) {
+                Showbiz.log.warn("Audio chunk gap ($lastReceivedChunkId -> ${packet.id}). Clearing queued chunks")
+                clearQueuedBuffers()
+            }
         }
         lastReceivedChunkId = packet.id
 
@@ -146,7 +153,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         updateAttenuation()
     }
 
-    fun updateAttenuation() {
+    private fun updateAttenuation() {
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED) }
         handleAL { alSourcef(source, AL_ROLLOFF_FACTOR, 8f) }
         handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 15f) }
@@ -159,7 +166,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         if (caps.AL_EXT_SOURCE_RADIUS)
             handleAL { alSourcef(source, EXTSourceRadius.AL_SOURCE_RADIUS, 4.0f) }
     }
-    fun updatePosition() {
+    private fun updatePosition() {
         val pos = position
         if (pos != null) {
             handleAL { alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE) }
@@ -167,6 +174,18 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         } else {
             handleAL { alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE) }
             handleAL { alSource3f(source, AL_POSITION, 0F, 0F, 0F) }
+        }
+    }
+    private fun clearQueuedBuffers() {
+        if (!isValidSource()) return
+
+        handleALBasic { alSourceStop(source) }
+
+        val queued = handleALBasic { alGetSourcei(source, AL_BUFFERS_QUEUED) }
+        if (queued > 0) {
+            val buffers = BufferUtils.createIntBuffer(queued)
+            handleALBasic { alSourceUnqueueBuffers(source, buffers) }
+            handleALBasic { alDeleteBuffers(buffers) }
         }
     }
 
