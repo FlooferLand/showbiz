@@ -181,6 +181,7 @@ object ShowbizClient : ClientModInitializer {
             try {
                 JukeboxLyricRenderer.render(level, player, buffer, poseStack)
                 ModelPartEntityRenderer.render(mc, buffer, poseStack)
+                CurtainBlockEntityRenderer.render(mc, buffer, poseStack)
                 ConnectionRenderer.draw(player, buffer, partialTick)
                 ConnectionRenderer.renderDeferred(poseStack)
                 DecorEntity.moveAll(ctx)

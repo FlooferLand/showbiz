@@ -122,10 +122,10 @@ object DrawUtils {
 
     fun drawText(
         poseStack: PoseStack,
-        buffer: MultiBufferSource.BufferSource,
         worldPos: Vec3,
         text: Component,
         scale: Float = 1.0f,
+        buffer: MultiBufferSource.BufferSource? = null,
         backgroundColor: Int = 0xCC_00_00_00.toInt(),
         maxWidth: Int = 150,
         drawCentered: Boolean = true,
@@ -134,6 +134,7 @@ object DrawUtils {
         val minecraft = Minecraft.getInstance() ?: return
         val font = minecraft.font ?: return
         val camera = minecraft.gameRenderer?.mainCamera ?: return
+        val buffer = buffer ?: minecraft.renderBuffers().bufferSource()
 
         poseStack.pushPose()
         poseStack.translate(worldPos.x, worldPos.y, worldPos.z)

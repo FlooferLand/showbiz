@@ -1,14 +1,5 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.multiplayer.*
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.util.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
 import com.flooferland.showbiz.utils.DrawUtils
@@ -16,7 +7,19 @@ import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.voxelSnap
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
-import com.mojang.math.Axis
+import net.minecraft.client.GraphicsStatus
+import net.minecraft.client.Minecraft
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
+import net.minecraft.util.FastColor
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.BlockHitResult
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sin
@@ -41,29 +44,10 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         return (level.getBlockEntity(neighborPos) as? CurtainBlockEntity)?.bottom ?: Double.MAX_VALUE
     }
 
-    override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, pose: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+    override fun render(blockEntity: CurtainBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val level = blockEntity.level as? ClientLevel ?: return
         val minecraft = Minecraft.getInstance() ?: return
         val fastGraphics = minecraft.options?.graphicsMode()?.get() == GraphicsStatus.FAST
-
-        if (minecraft.player?.isCrouching == true) {
-            val hitResult = minecraft.hitResult
-            val hovering = hitResult is BlockHitResult && hitResult.blockPos == blockEntity.blockPos
-            val curtains = blockEntity.findConnectedCurtains(ignoreGroups = true, affectWorld = false)
-            if (hovering || curtains.any { hitResult is BlockHitResult && hitResult.blockPos == it }) {
-                val text = Component.literal("Group ${blockEntity.group}").withColor(blockEntity.getGroupColor())
-                pose.pushPose()
-                pose.translate(0.5, 0.8, 0.5)
-                pose.mulPose(minecraft.gameRenderer.mainCamera.rotation())
-                pose.mulPose(Axis.XP.rotation(Mth.PI))
-                pose.scale(0.01f, 0.01f, 0.01f)
-                val yOffset = 10f
-                for ((i, line) in arrayOf(Component.literal("/\\"), text, Component.literal("\\/")).withIndex()) {
-                    minecraft.font.drawInBatch(line, -minecraft.font.width(line) / 2f, (i * yOffset) - (yOffset / 2f), 0xFFFFFFFF.toInt(), false, pose.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT)
-                }
-                pose.popPose()
-            }
-        }
 
         val rails = blockEntity.connectedCurtains
         val center = blockEntity.centerCurtain
@@ -97,7 +81,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
             val camera = Minecraft.getInstance().gameRenderer.mainCamera
             if (camera.position.y >= worldBox.maxY) {
                 DrawUtils.drawBox(
-                    pose, bufferSource.getBuffer(curtainRenderType),
+                    poseStack, bufferSource.getBuffer(curtainRenderType),
                     box,
                     packedLight = packedLight,
                     packedOverlay = packedOverlay,
@@ -110,8 +94,8 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
 
         // Open curtain
         if (isOpen) {
-            pose.pushPose()
-            pose.translate(0f, 0.0f, 0f)
+            poseStack.pushPose()
+            poseStack.translate(0f, 0.0f, 0f)
 
             var lower = 0.0
             if (!fastGraphics) {
@@ -119,7 +103,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                 lower = lower.coerceIn(0.1, 0.4)
             }
             renderCurtainSection(
-                pose, bufferSource,
+                poseStack, bufferSource,
                 box = AABB(0.0, 0.5, 0.0, 1.0, 1.0, 1.0),
                 packedLight = packedLight,
                 blockEntity = blockEntity,
@@ -130,16 +114,16 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                 cuts = cuts,
                 lower = lower
             )
-            pose.popPose()
+            poseStack.popPose()
             return
         }
 
         // Lowered curtain
         val length = blockEntity.findLength() - 1.0
         val box = AABB(0.0, 1.0, 0.0, 1.0, (length * -1f), 1.0)
-        pose.pushPose()
+        poseStack.pushPose()
         renderCurtainSection(
-            pose,
+            poseStack,
             bufferSource,
             blockEntity = blockEntity,
             packedLight = packedLight,
@@ -150,7 +134,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
             cuts = cuts,
             box = box
         )
-        pose.popPose()
+        poseStack.popPose()
     }
 
     fun renderCurtainSection(
@@ -234,5 +218,38 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         }
 
         draw(bufferSource.getBuffer(endRenderType), endBox, endColor, sidesOnly = true, sideCuts = endCuts)
+    }
+
+    companion object {
+        var zoom = 0f
+
+        // Drawing group text
+        // Rendered as in the world last render event otherwise curtains draw over it
+        fun render(mc: Minecraft, buffer: MultiBufferSource.BufferSource, poseStack: PoseStack) {
+            val level = mc.level ?: return
+            val blockEntity = run {
+                if (mc.player?.isCrouching != true) return@run null
+                val hitResult = mc.hitResult ?: return@run null
+                val blockPos = (hitResult as? BlockHitResult)?.blockPos ?: return@run null
+                level.getBlockEntity(blockPos) as? CurtainBlockEntity ?: return@run null
+            }
+            if (blockEntity == null) {
+                zoom = 0.15f
+                return
+            }
+            if (zoom > 0f) {
+                zoom = (zoom - (mc.timer.realtimeDeltaTicks * 0.08f)).coerceAtLeast(0f)
+            }
+
+            val curtains = blockEntity.findConnectedCurtains(ignoreGroups = true, affectWorld = false)
+            for (curtainPos in curtains) {
+                val curtain = level.getBlockEntity(curtainPos) as? CurtainBlockEntity ?: continue
+                val text = Component.literal("+").append("\n")
+                    .append(Component.literal("Group ${curtain.group}\n").withColor(curtain.getGroupColor()))
+                    .append(Component.literal("-"))
+
+                DrawUtils.drawText(poseStack, curtainPos.bottomCenter, text, scale = 0.9f - zoom, buffer = buffer)
+            }
+        }
     }
 }
