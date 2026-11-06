@@ -99,6 +99,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var lastVideoFrameIndex = 0
     private val recordQueue = mutableListOf<SignalFrame>()
     private var lastPlaybackNanos = 0L
+    private var lastPlaybackClockEpoch = playbackClockEpoch
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.08, 0.08, 0.13))
@@ -130,16 +131,21 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         // Playback stuff
         if (playing && !paused) {
-            val time = System.nanoTime()
-            if (lastPlaybackNanos != 0L) {
-                val elapsed = (time - lastPlaybackNanos) / 1_000_000_000.0
+            val now = System.nanoTime()
+            val epoch = playbackClockEpoch
+
+            if (lastPlaybackNanos != 0L && lastPlaybackClockEpoch == epoch) {
+                val elapsed = (now - lastPlaybackNanos) / 1_000_000_000.0
                 val nextSeek = seek + elapsed
                 seek = if (level.isClientSide) nextSeek else nextSeek.coerceAtMost(endTime)
             }
-            lastPlaybackNanos = time
+
+            lastPlaybackNanos = now
+            lastPlaybackClockEpoch = epoch
             seekInt = (seek * fps).toInt()
         } else {
             lastPlaybackNanos = 0L
+            lastPlaybackClockEpoch = playbackClockEpoch
         }
         if (level.isClientSide) return
 
@@ -254,9 +260,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
+        val format = getFormat()
         audio.data.mono = chunk
         audio.data.chunkId++
-        audio.data.lead = startIndex.toDouble() / (getFormat().sampleRate * getFormat().frameSize) - seek
+        audio.data.lead = startIndex.toDouble() / (format.sampleRate * format.frameSize) - seek
         audio.send()
     }
 
@@ -267,6 +274,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         show.send(PackedShowData(playing, signal, showData.mapping))
         audio.sendTrigger(if (playing) PackedAudioData.Action.None else PackedAudioData.Action.Stop)
         stateDirty = true
+        lastPlaybackNanos = 0
     }
     fun setPaused(paused: Boolean) {
         this.playing = !paused
@@ -274,6 +282,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         show.send(PackedShowData(playing, signal, showData.mapping))
         audio.sendTrigger(if (paused) PackedAudioData.Action.Pause else PackedAudioData.Action.Unpause)
         stateDirty = true
+        lastPlaybackNanos = 0
     }
     fun seekTo(seconds: Double) {
         seek = seconds.coerceIn(0.0, endTime)
@@ -291,6 +300,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         seek = 0.0
         seekInt = 0
         audioBytesWritten = 0
+        lastPlaybackNanos = 0
         audio.data.clear()
         if (playing) setPlaying(false)
         recordQueue.clear()
@@ -489,4 +499,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction) =
         !isEmpty && hasFinished && !playing
     // endregion
+
+    companion object {
+        @Volatile var playbackClockEpoch = 0L
+    }
 }

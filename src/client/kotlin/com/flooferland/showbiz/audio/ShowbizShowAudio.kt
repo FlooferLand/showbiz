@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.audio
 
 import com.flooferland.showbiz.ClientPackets
+import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackAudioStatePacket
 import net.fabricmc.api.EnvType
@@ -40,7 +41,10 @@ object ShowbizShowAudio {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val paused = client.isPaused
             if (paused == gamePaused) return@register
+
             gamePaused = paused
+            ReelToReelBlockEntity.playbackClockEpoch += 1
+
             for (source in sources.values) {
                 if (paused) source.pause() else source.resume()
                 source.tick()

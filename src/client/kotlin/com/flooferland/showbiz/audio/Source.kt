@@ -88,6 +88,10 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
                 clearQueuedBuffers()
             }
         }
+        if (paused) {
+            lastReceivedChunkId = packet.id
+            return
+        }
         lastReceivedChunkId = packet.id
 
         // Cleaning buffers
