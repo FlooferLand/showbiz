@@ -10,7 +10,6 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
-import com.flooferland.showbiz.utils.Extensions.handItem
 import com.flooferland.showbiz.utils.Extensions.setInventoryChanged
 import com.flooferland.showbiz.utils.Sounds
 import com.flooferland.showbiz.utils.tc
@@ -90,24 +89,20 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
-            if (heldStack.item is ReelItem && entity.showData.isNotLoaded()) {
+            if (heldStack.item is ReelItem && entity.showData.isNotLoaded() && Permissions.SwitchReels.testAndNotify(player)) {
+                // Adding a reel
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
                     player.displayClientMessage(Component.literal("Loading.."), true)
                     Sounds.play(player, ModSounds.ReelEnter)
 
                     // Playback
-                    if (player is ServerPlayer && Permissions.SwitchReels.testAndNotify(player)) {
-                        val stackCopy = heldStack.copy()
+                    if (player is ServerPlayer) {
                         player.setItemInHand(hand, Items.AIR.defaultInstance)
-
                         entity.resetPlayback()
                         entity.showData.load(filename) { _, err ->
                             if (player.isRemoved) return@load
-                            if (err != null) {  // Error happened, giving back the reel
-                                player.handItem(stackCopy)
-                                player.displayClientMessage(err, true)
-                            } else player.displayClientMessage(Component.empty(), true)
+                            if (err != null) player.displayClientMessage(err, true) else player.displayClientMessage(Component.empty(), true)
                             Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
                             player.setInventoryChanged()
                         }
@@ -117,16 +112,15 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         tc("message", "empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.showData.isNotLoaded() && player is ServerPlayer) {  // Removing
-                if (Permissions.SwitchReels.testAndNotify(player)) {
-                    val showName = entity.showData.name
-                    showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
-                    Sounds.play(player, ModSounds.ReelExit)
-                    entity.applyChange(true) {
-                        entity.setPlaying(false)
-                        entity.showData.unload(player)
-                        player.setInventoryChanged()
-                    }
+            } else if (heldStack.isEmpty && !entity.showData.isNotLoaded() && player is ServerPlayer && Permissions.SwitchReels.testAndNotify(player)) {
+                // Removing
+                val showName = entity.showData.name
+                showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+                Sounds.play(player, ModSounds.ReelExit)
+                entity.applyChange(true) {
+                    entity.setPlaying(false)
+                    entity.showData.unload(player)
+                    player.setInventoryChanged()
                 }
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
