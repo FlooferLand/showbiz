@@ -1,15 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.inventory.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.menus.ShowParserEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.ShowParserEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -21,8 +11,23 @@ import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getEnumOrNull
 import com.flooferland.showbiz.utils.Extensions.putEnum
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.DiodeBlock
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 
-class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, EditScreenOwner<ShowParserEditPacket>, IVersionMigrator {
+class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ShowParser.entityType!!, pos, blockState), IConnectable, EditScreenOwner<ShowParserEditPacket> {
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
@@ -30,13 +35,15 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
-    override val migrator = IVersionMigrator.makeTemporaryTransition(this, DataMigrationSteps.showParser)
 
     enum class Mode { Bits, Playing }
 
     val bitFilter = MappedBits()
     var mode = Mode.Bits
     var invert = false
+
+    // From 0.5.x to 0.6.0
+    var migrateFacing = false
 
     override fun getDisplayName() = Component.literal("Show Parser")!!
     override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu? {
@@ -47,7 +54,7 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         ShowParserEditPacket(EditScreenMenu.EditScreenBuf(OwnerId.of(worldPosition)), bitFilter, mode, invert)
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        migrator.load(tag)
+        migrateFacing = !tag.contains("mode") && !tag.contains("invert") && !tag.contains("data_version")
         connectionManager.load(tag)
         bitFilter.load(tag, "bit_filter")
         tag.getEnumOrNull<Mode>("mode")?.let { mode = it }
@@ -55,7 +62,6 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
-        migrator.save(tag)
         connectionManager.save(tag)
         bitFilter.save(tag, "bit_filter")
         tag.putEnum("mode", mode)
@@ -64,7 +70,19 @@ class ShowParserBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun setLevel(level: Level) {
         super.setLevel(level)
-        migrator.setLevel(this)
+        if (migrateFacing && level is ServerLevel) {
+            VersionMigrator.queuedMigrations.add {
+                if (isRemoved) return@add
+                val state = blockState
+                level.setBlock(
+                    blockPos,
+                    state.setValue(DiodeBlock.FACING, state.getValue(DiodeBlock.FACING).opposite),
+                    Block.UPDATE_ALL
+                )
+                setChanged()
+            }
+            migrateFacing = false
+        }
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {

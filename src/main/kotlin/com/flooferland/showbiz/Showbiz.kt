@@ -1,8 +1,5 @@
 package com.flooferland.showbiz
 
-import net.minecraft.server.level.*
-import net.minecraft.server.packs.*
-import net.minecraft.world.*
 import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
@@ -14,8 +11,8 @@ import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.FFmpeg
-import com.flooferland.showbiz.types.IVersionMigrator
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.VersionMigrator
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.ShowbizEnv
@@ -25,6 +22,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.packs.PackType
+import net.minecraft.world.InteractionResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -68,7 +68,7 @@ object Showbiz : ModInitializer {
             UpdateChecker
             ServerPackets.init()
             ServerStats.init()
-            IVersionMigrator.register()
+            VersionMigrator.register()
         }
 
         // Services
