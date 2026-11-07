@@ -463,6 +463,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             setPlaying(false)
             showData.unload()
         }
+        showData.name = null
         setChanged()
         return item ?: ItemStack.EMPTY
     }

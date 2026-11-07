@@ -1,9 +1,5 @@
 package com.flooferland.showbiz.show
 
-import net.minecraft.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.entity.player.*
 import com.flooferland.bizlib.RawShowData
 import com.flooferland.bizlib.formats.LegacyRshowFormat
 import com.flooferland.bizlib.formats.RshowFormat
@@ -18,17 +14,22 @@ import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Sounds
+import kotlinx.coroutines.*
+import net.minecraft.ChatFormatting
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.world.Containers
+import net.minecraft.world.entity.player.Player
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
-import java.util.UUID
+import java.util.*
 import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
-import kotlinx.coroutines.*
 import kotlin.io.path.Path
 import kotlin.time.Duration
 
@@ -160,7 +161,18 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 .append(Component.translatable("message.showbiz.show_load_fail"))
                 .append(Component.literal(": ${err?.message}"))
                 .withStyle(ChatFormatting.RED)
+
             onLoadOrErr.invoke(null, errComp)
+
+            // Dropping the reel in case it's broken
+            val stack = owner.getItem(0)
+            if (!stack.isEmpty) {
+                val pos = owner.blockPos.center.add(0.0, 0.5, 0.0)
+                Containers.dropItemStack(owner.level!!, pos.x, pos.y, pos.z, stack)
+                owner.removeItem(0, 1)
+            }
+
+            owner.resetPlayback()
             owner.markDirtyNotifyAll()
         } }
     }
