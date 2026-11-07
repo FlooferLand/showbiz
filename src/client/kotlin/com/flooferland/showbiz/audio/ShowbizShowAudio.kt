@@ -22,6 +22,7 @@ object ShowbizShowAudio {
                 if (payload.playing) {
                     if (!source.isOpen()) source.open()
                     source.write(payload)
+                    context.client().execute { Source.startPending() }
                 }
             }
         }
@@ -47,6 +48,7 @@ object ShowbizShowAudio {
                     if (paused) source.pause() else source.resume()
                 }
             }
+            if (!paused) Source.startPending()
             for (source in sources.values) {
                 source.tick()
             }

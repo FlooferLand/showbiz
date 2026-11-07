@@ -47,6 +47,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         updateAttenuation()
     }
     fun close() {
+        pending.remove(this)
         if (isValidSource()) {
             if (getState() == AL_PLAYING) handleALBasic { alSourcePause(source) }
             handleALBasic { alSourceStop(source) }
@@ -94,6 +95,9 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
         lastReceivedChunkId = packet.id
 
+        if (this in pending)
+            clearQueuedBuffers()
+
         // Cleaning buffers
         val processedCount = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
         if (processedCount > 0) {
@@ -133,9 +137,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
 
         handleAL { alSourceQueueBuffers(source, newBufId) }
-        if (getState() != AL_PLAYING && !paused) {
-            handleAL { alSourcePlay(source) }
-        }
+        if (getState() != AL_PLAYING) pending.add(this)
     }
     fun pause() {
         if (!isValidSource()) return
@@ -181,6 +183,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
     }
     private fun clearQueuedBuffers() {
+        pending.remove(this)
         if (!isValidSource()) return
 
         handleALBasic { alSourceStop(source) }
@@ -224,6 +227,17 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
 
     companion object {
-        const val MAX_QUEUED_CHUNKS = 3
+        val pending = mutableListOf<Source>()
+        fun startPending() {
+            val ready = pending.filter { it.isValidSource() && it.getState() != AL_PLAYING }
+            pending.clear()
+            if (ready.isEmpty()) return
+            val sources = BufferUtils.createIntBuffer(ready.size).apply {
+                ready.forEach { put(it.source) }
+                flip()
+            }
+            alSourcePlayv(sources)
+            alGetError()
+        }
     }
 }
