@@ -40,13 +40,14 @@ object ShowbizShowAudio {
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val paused = client.isPaused
-            if (paused == gamePaused) return@register
-
-            gamePaused = paused
-            ReelToReelBlockEntity.playbackClockEpoch += 1
-
+            if (paused != gamePaused) {
+                gamePaused = paused
+                ReelToReelBlockEntity.playbackClockEpoch += 1
+                for (source in sources.values) {
+                    if (paused) source.pause() else source.resume()
+                }
+            }
             for (source in sources.values) {
-                if (paused) source.pause() else source.resume()
                 source.tick()
             }
         }

@@ -67,9 +67,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     fun write(packet: PlaybackAudioChunkPacket) {
         if (!isValidSource()) return
-        if (packet.id != lastReceivedChunkId + 1) {
-            handleALBasic { alSourceStop(source) }
-        }
         if (paused) return
         updatePosition()
         updateAttenuation()
@@ -87,6 +84,9 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
                 Showbiz.log.warn("Audio chunk gap ($lastReceivedChunkId -> ${packet.id}). Clearing queued chunks")
                 clearQueuedBuffers()
             }
+        }
+        if (packet.id != lastReceivedChunkId + 1) {
+            handleALBasic { alSourceStop(source) }
         }
         if (paused) {
             lastReceivedChunkId = packet.id
@@ -221,5 +221,9 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         AL_INVALID_NAME -> "Invalid name"
         AL_INVALID_VALUE -> "Invalid value"
         else -> "OpenAL error ID '$error'"
+    }
+
+    companion object {
+        const val MAX_QUEUED_CHUNKS = 3
     }
 }
