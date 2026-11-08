@@ -111,7 +111,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
 
         // Shifting the chunk when a song isn't already playing
         var audio = packet.audioChunk
-        if (getState() != AL_PLAYING) {
+        if (handleAL { alGetSourcei(source, AL_BUFFERS_QUEUED) } <= 0) {
             val bits = friendlyFormat.sampleBits
             val frames = (packet.lead * packet.format.sampleRate).toInt()
             audio = if (frames >= 0) {

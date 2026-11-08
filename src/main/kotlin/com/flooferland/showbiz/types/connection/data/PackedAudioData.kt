@@ -108,7 +108,7 @@ data class PackedAudioData(
     }
 
     companion object {
-        val MAX_DISTANCE get() = 32f
+        val MAX_DISTANCE get() = 48f
         val MAX_DISTANCE_SQR get() = MAX_DISTANCE * MAX_DISTANCE
     }
 }
