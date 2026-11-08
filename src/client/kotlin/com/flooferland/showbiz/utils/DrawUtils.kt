@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.network.chat.Component
 import net.minecraft.util.FastColor
+import net.minecraft.util.FormattedCharSequence
 import net.minecraft.util.Mth
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -128,7 +129,9 @@ object DrawUtils {
         buffer: MultiBufferSource.BufferSource? = null,
         backgroundColor: Int = 0xCC_00_00_00.toInt(),
         maxWidth: Int = 150,
-        drawCentered: Boolean = true,
+        wrapPad: Int = 3,
+        linePad: Int = 6,
+        vAlign: Float = 0.5f,
         drawBackground: Boolean = true
     ) {
         val minecraft = Minecraft.getInstance() ?: return
@@ -142,10 +145,19 @@ object DrawUtils {
         poseStack.mulPose(Axis.XP.rotation(Mth.PI))
         poseStack.scale(scale * 0.01f, scale * 0.01f, scale * 0.01f)
         val matrix = poseStack.last().pose()
-        val lines = font.split(text, maxWidth)
 
-        val lineOffset = font.lineHeight + 4
-        val yOffset = if (drawCentered) -(font.lineHeight * lines.count()).toFloat() else 0f
+        var height = 0f
+        val lines = mutableListOf<Pair<FormattedCharSequence, Float>>()
+        for ((blockIndex, block) in text.string.split("\n").withIndex()) {
+            // Separating via maxWidth
+            for ((lineIndex, line) in font.split(Component.literal(block).withStyle(text.style), maxWidth).withIndex()) {
+                if (blockIndex > 0 || lineIndex > 0)
+                    height += if (lineIndex == 0) linePad else wrapPad
+                lines.add(line to height)
+                height += font.lineHeight
+            }
+        }
+        val yOffset = -height * vAlign
 
         if (drawBackground) {
             RenderSystem.disableDepthTest()
@@ -154,27 +166,23 @@ object DrawUtils {
             RenderSystem.defaultBlendFunc()
             RenderSystem.setShader(GameRenderer::getPositionColorShader)
             val builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-            var bgY = yOffset
-            for (line in lines) {
+            for ((line, ly) in lines) {
                 val x0 = -(font.width(line) / 2f) - 2f
                 val x1 = -x0
-                val y0 = bgY - 2f
-                val y1 = bgY + font.lineHeight + 2f
+                val y0 = yOffset + ly - 2f
+                val y1 = yOffset + ly + font.lineHeight + 2f
                 builder.addVertex(matrix, x0, y0, 0f).setColor(backgroundColor)
                 builder.addVertex(matrix, x0, y1, 0f).setColor(backgroundColor)
                 builder.addVertex(matrix, x1, y1, 0f).setColor(backgroundColor)
                 builder.addVertex(matrix, x1, y0, 0f).setColor(backgroundColor)
-                bgY += lineOffset
             }
             BufferUploader.drawWithShader(builder.buildOrThrow())
             RenderSystem.enableCull()
             RenderSystem.enableDepthTest()
         }
 
-        var textY = yOffset
-        for (line in lines) {
-            font.drawInBatch(line, -font.width(line) / 2f, textY, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT)
-            textY += lineOffset
+        for ((line, ly) in lines) {
+            font.drawInBatch(line, -font.width(line) / 2f, yOffset + ly, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT)
         }
         poseStack.popPose()
     }

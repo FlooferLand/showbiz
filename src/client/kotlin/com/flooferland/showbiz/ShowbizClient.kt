@@ -180,8 +180,10 @@ object ShowbizClient : ClientModInitializer {
             poseStack.translate(-cam.position.x, -cam.position.y, -cam.position.z)
             try {
                 JukeboxLyricRenderer.render(level, player, buffer, poseStack)
+                CollidePartEntityRenderer.render(mc, buffer, poseStack)
                 ModelPartEntityRenderer.render(mc, buffer, poseStack)
                 CurtainBlockEntityRenderer.render(mc, buffer, poseStack)
+                BotEntityRenderer.render(mc, buffer, poseStack)
                 ConnectionRenderer.draw(player, buffer, partialTick)
                 ConnectionRenderer.renderDeferred(poseStack)
                 DecorEntity.moveAll(ctx)
