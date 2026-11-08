@@ -97,9 +97,6 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
         lastReceivedChunkId = packet.id
 
-        // Clearing piled up buffers
-        if (this in pending) clearQueuedBuffers()
-
         // Cleaning buffers
         val processedCount = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
         if (processedCount > 0) {
