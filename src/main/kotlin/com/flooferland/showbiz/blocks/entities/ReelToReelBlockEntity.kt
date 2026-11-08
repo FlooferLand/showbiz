@@ -223,7 +223,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 val fps = stream.output.fps
                 val videoFrameIndex = (seek * fps).toInt()
 
-                if (videoFrameIndex > lastVideoFrameIndex) {
+                if (videoFrameIndex != lastVideoFrameIndex) {
                     val skippedFrames = (videoFrameIndex - lastVideoFrameIndex - 1).coerceAtLeast(0)
                     repeat(skippedFrames) { stream.nextFrame() }
 
@@ -293,6 +293,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val alignedBytes = (seek * format.sampleRate).toLong() * format.frameSize
         audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
 
+        showData.video?.let { lastVideoFrameIndex = (seek * it.output.fps).toInt() - 1 }
+        showData.video?.seek(seek.seconds)
         audio.sendTrigger(PackedAudioData.Action.Stop)
         stateDirty = true
     }

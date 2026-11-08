@@ -1,14 +1,14 @@
 package com.flooferland.showbiz.types
 
 import com.flooferland.showbiz.Showbiz
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.withContext
 import kotlin.io.path.absolutePathString
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -21,7 +21,7 @@ object FFmpeg {
     data class Settings(val outputFormat: String, val audio: AudioSettings)
     data class VideoInfo(val path: Path, val width: Int, val height: Int, val fps: Double)
     class VideoStream(private var process: Process, val input: VideoInfo, val output: VideoInfo) : AutoCloseable {
-        private val stdout = process.inputStream
+        private val stdout get() = process.inputStream
         val colorChannels = 3
         val frameSize = output.width * output.height * colorChannels
 
@@ -40,9 +40,10 @@ object FFmpeg {
 
         /** Creates a new process because FFmpeg doesn't seem to support seeking */
         fun seek(seek: Duration) {
-            FFmpeg.openVideoStream(input, output, seek)?.let {
-                process.destroy()
-                process = it.process
+            FFmpeg.openVideoStream(input, output, seek)?.let { new ->
+                runCatching { process.inputStream.close() }
+                process.destroyForcibly()
+                process = new.process
             }
         }
         override fun close() = process.destroy()
