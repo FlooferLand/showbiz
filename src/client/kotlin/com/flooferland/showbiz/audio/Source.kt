@@ -28,9 +28,10 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
 
     val paused get() = getState() == AL_PAUSED
-    var lastReceivedChunkId = -1
     var source = 0
     var sourceContext = 0L
+    var lastReceivedChunkId = -1
+    var queuedFrames = 0
 
     private fun getState(): Int {
         if (!isValidSource()) return -1
@@ -44,6 +45,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         source = handleAL { alGenSources() }
         sourceContext = handleAL { alcGetCurrentContext() }
         lastReceivedChunkId = -1
+        queuedFrames = 0
         updateAttenuation()
     }
     fun close() {
@@ -73,7 +75,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         updateAttenuation()
 
         val tickRate = Minecraft.getInstance().level?.tickRateManager()?.tickrate() ?: 20f
-        handleAL { alSourcef(source, AL_PITCH, tickRate / 20f) }
+        val frameSize = friendlyFormat.sampleBits / 8 * (if (friendlyFormat.stereo) 2 else 1)
 
         // Checking chunk order
         if (lastReceivedChunkId >= 0) {
@@ -95,22 +97,25 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
         lastReceivedChunkId = packet.id
 
-        if (this in pending)
-            clearQueuedBuffers()
+        // Clearing piled up buffers
+        if (this in pending) clearQueuedBuffers()
 
         // Cleaning buffers
         val processedCount = handleAL { alGetSourcei(source, AL_BUFFERS_PROCESSED) }
         if (processedCount > 0) {
             val oldBuffers = BufferUtils.createIntBuffer(processedCount)
             handleAL { alSourceUnqueueBuffers(source, oldBuffers) }
+            for (i in 0 until processedCount) queuedFrames -= alGetBufferi(oldBuffers.get(i), AL_SIZE) / frameSize
             handleAL { alDeleteBuffers(oldBuffers) }
         }
+
+        // Pitching with the tick rate
+        handleAL { alSourcef(source, AL_PITCH, tickRate / 20f) }
 
         // Shifting the chunk when a song isn't already playing
         var audio = packet.audioChunk
         if (getState() != AL_PLAYING) {
             val bits = friendlyFormat.sampleBits
-            val frameSize = bits / 8 * (if (friendlyFormat.stereo) 2 else 1)
             val frames = (packet.lead * packet.format.sampleRate).toInt()
             audio = if (frames >= 0) {
                 // 8 bit PCM silence is 128
@@ -137,6 +142,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
         }
 
         handleAL { alSourceQueueBuffers(source, newBufId) }
+        queuedFrames += audio.size / frameSize
         if (getState() != AL_PLAYING) pending.add(this)
     }
     fun pause() {
@@ -184,6 +190,7 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
     }
     private fun clearQueuedBuffers() {
         pending.remove(this)
+        queuedFrames = 0
         if (!isValidSource()) return
 
         handleALBasic { alSourceStop(source) }
