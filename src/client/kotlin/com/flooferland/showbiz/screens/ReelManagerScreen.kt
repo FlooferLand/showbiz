@@ -1,12 +1,5 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.item.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.FileStorage
 import com.flooferland.showbiz.items.ReelItem
@@ -16,6 +9,16 @@ import com.flooferland.showbiz.screens.widgets.ShowFileListWidget
 import com.flooferland.showbiz.types.ShowFileInfo
 import com.flooferland.showbiz.utils.ShowbizEnv
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.MultiLineTextWidget
+import net.minecraft.client.gui.components.StringWidget
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.ItemStack
 import kotlin.io.path.pathString
 
 class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Reel Manager")) {
@@ -55,7 +58,6 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         addRenderableWidget(fileListWidget)
 
         // Additional
-        updateBottomBar(fileListWidget.x + 4, fileListWidget.y + fileListWidget.height + 4)
         addRenderableWidget(
             StringWidget(fileListWidget.x, fileListWidget.y - 20, fileListWidget.width, 20, Component.literal("Reel Manager"), font).alignCenter()
         )
@@ -79,12 +81,11 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
                     ).setCentered(true).setMaxWidth(maxWidth).also { it.setPosition((width - it.width) / 2, height / 2 - 20) }
                 )
             }
-            updateBottomBar(width / 2, height / 2 + 20, center = true)
-            return
         }
+        updateBottomBar(fileListWidget.x + 4, fileListWidget.y + fileListWidget.height + 4)
     }
 
-    fun updateBottomBar(x: Int, y: Int, center: Boolean = false) {
+    fun updateBottomBar(x: Int, y: Int) {
         bottomBarButtons.removeIf { removeWidget(it); true }
         var offsetX = x
         val pad = 4
@@ -109,26 +110,26 @@ class ReelManagerScreen(val reelStack: ItemStack) : Screen(Component.literal("Re
         }
 
         // Search bar
-        val searchBar = EditBox(font, offsetX, y, width - offsetX - 70, 20, Component.literal("Search") )
-        searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
-        searchBar.setSuggestion("Search..")
-        searchBar.setResponder { name ->
-            if (name.isBlank()) {
+        if (files.isNotEmpty()) {
+            val searchBar = EditBox(font, offsetX, y, width - offsetX - 70, 20, Component.literal("Search"))
+            searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
+            searchBar.setSuggestion("Search..")
+            searchBar.setResponder { name ->
+                if (name.isBlank()) {
+                    fileListWidget.setFiles(files, ::onFileSelected)
+                    searchBar.setSuggestion("Search..")
+                    return@setResponder
+                }
+                searchBar.setSuggestion(null)
+
+                val files = files.filter { it.id.contains(name, ignoreCase = true) }
                 fileListWidget.setFiles(files, ::onFileSelected)
-                searchBar.setSuggestion("Search..")
-                return@setResponder
             }
-            searchBar.setSuggestion(null)
-
-            val files = files.filter { it.id.contains(name, ignoreCase = true) }
-            fileListWidget.setFiles(files, ::onFileSelected)
+            searchBar.isFocused = true
+            searchBar.setCanLoseFocus(true)
+            addRenderableWidget(searchBar)
+            this.focused = searchBar
         }
-        searchBar.isFocused = true
-        searchBar.setCanLoseFocus(true)
-        addRenderableWidget(searchBar)
-        this.focused = searchBar
-
-        if (center) updateBottomBar(x - (offsetX / 2), y)
     }
 
     fun isLocalServer() = Minecraft.getInstance().isLocalServer
