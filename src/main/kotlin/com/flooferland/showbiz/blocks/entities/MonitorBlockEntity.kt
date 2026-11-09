@@ -1,20 +1,24 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedVideoData
 import com.flooferland.showbiz.types.math.Color4
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 
 class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Monitor.entityType!!, pos, blockState), IConnectable {
     override val connectionManager = ConnectionManager(this)
-    val video = connectionManager.port("video", PackedVideoData(), PortDirection.In)
+    val video = connectionManager.port("video", PackedVideoData(), PortDirection.In) /*{
+        val elapsedMillis = (System.nanoTime() - it.timestamp).nanoseconds.toString(DurationUnit.MILLISECONDS, 2)
+        Showbiz.log.debug("Video frame transit time: $elapsedMillis (size = ${it.bytes.size.bytesToFriendlySize()})")
+    }*/
     var colorAverage = Color4()
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {

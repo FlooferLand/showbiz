@@ -1,21 +1,23 @@
 package com.flooferland.showbiz.types.connection.data
 
-import net.minecraft.network.*
-import net.minecraft.server.level.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity.Companion.VIDEO_DIST_SQUARE
 import com.flooferland.showbiz.types.connection.ConnectionData
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.phys.Vec3
 
 data class PackedVideoData(
     var bytes: ByteArray = byteArrayOf(),
     var width: Int = 0,
     var height: Int = 0,
-    var channels: Int = 3
+    var channels: Int = 3,
+    var timestamp: Long = 0L
 ) : ConnectionData<PackedVideoData>("video") {
     override fun encode(buf: FriendlyByteBuf) {
         buf.writeInt(width)
         buf.writeInt(height)
         buf.writeInt(channels)
+        buf.writeLong(timestamp)
         buf.writeByteArray(bytes)
     }
 
@@ -23,6 +25,7 @@ data class PackedVideoData(
         width = buf.readInt()
         height = buf.readInt()
         channels = buf.readInt()
+        timestamp = buf.readLong()
         bytes = buf.readByteArray(width * height * channels)
     }
 
@@ -45,6 +48,7 @@ data class PackedVideoData(
         if (width != other.width) return false
         if (height != other.height) return false
         if (channels != other.channels) return false
+        if (timestamp != other.timestamp) return false
         if (!bytes.contentEquals(other.bytes)) return false
         return true
     }
@@ -53,6 +57,7 @@ data class PackedVideoData(
         var result = width
         result = 31 * result + height
         result = 31 * result + channels
+        result = 31 * result + timestamp.hashCode()
         result = 31 * result + bytes.contentHashCode()
         return result
     }

@@ -74,5 +74,6 @@
     "config.prop.permissions.writeReels": "Who can record to show reels",
     "config.prop.permissions.editServerShowBridge": "Who can edit the server's Show Bridge (serial port access)",
     "config.prop.addons.showNoticeScreen": "Show the notice screen more (you can't escape it)",
-    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)"
+    "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)",
+    "config.prop.other.serverHighResVideo": "High resolution video (server toggle)"
 }

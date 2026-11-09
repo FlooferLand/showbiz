@@ -1,11 +1,5 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.client.renderer.texture.*
-import net.minecraft.resources.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
@@ -14,30 +8,49 @@ import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
-import java.util.WeakHashMap
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.renderer.LightTexture
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.client.renderer.texture.DynamicTexture
+import net.minecraft.resources.ResourceLocation
+import java.awt.image.DataBufferByte
+import java.util.*
+import java.util.concurrent.Executors
+import javax.imageio.ImageIO
+
+data class MonitorState(
+    val texture: DynamicTexture,
+    val id: ResourceLocation,
+    var lastFrame: Long = 0L,
+    @Volatile var decoding: Boolean = false,
+    @Volatile var pending: NativeImage? = null
+)
 
 class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : BlockEntityRenderer<MonitorBlockEntity> {
-    private val textures = WeakHashMap<MonitorBlockEntity, Pair<DynamicTexture, ResourceLocation>>()
+    private val states = WeakHashMap<MonitorBlockEntity, MonitorState>()
+    private val decoder = Executors.newSingleThreadExecutor { Thread(it, "showbiz-video").apply { isDaemon = true } }
+    init { ImageIO.setUseCache(false) }
 
-    private fun getOrCreateTexture(entity: MonitorBlockEntity, width: Int, height: Int): Pair<DynamicTexture, ResourceLocation> {
+    private fun getOrCreateState(entity: MonitorBlockEntity, width: Int, height: Int): MonitorState {
         val id = rl("showbiz_video_${entity.blockPos.x}_${entity.blockPos.y}")
-        val existing = textures[entity]
+        val existing = states[entity]
         if (existing != null) {
-            val texture = existing.first
-            if (texture.pixels?.width != width || texture.pixels?.height != height) {
-                textures.remove(entity)
+            if (existing.texture.pixels?.width != width || existing.texture.pixels?.height != height) {
+                states.remove(entity)
                 Minecraft.getInstance().textureManager.release(id)
-                return getOrCreateTexture(entity, width, height)
+                return getOrCreateState(entity, width, height)
             }
             return existing
         }
 
         val texture = DynamicTexture(NativeImage(width, height, false))
-        texture.setFilter(true, false)
+        texture.setFilter(false, false)
         Minecraft.getInstance().textureManager.register(id, texture)
-        val out = Pair(texture, id)
-        textures[entity] = out
-        return out
+        return MonitorState(texture, id).also { states[entity] = it }
     }
 
     override fun render(entity: MonitorBlockEntity, partialTick: Float, poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
@@ -59,28 +72,55 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
             return
         }
 
-        val bytes = entity.video.data.bytes
-        val width = entity.video.data.width
-        val height = entity.video.data.height
-        val channels = entity.video.data.channels
-        if (width == 0 || height == 0 || bytes.isEmpty()) {
+        val data = entity.video.data
+        val width = data.width
+        val height = data.height
+        if (width == 0 || height == 0 || data.bytes.isEmpty()) {
             entity.colorAverage = Color4.ZERO
             return
         }
 
-        val (texture, id) = getOrCreateTexture(entity, width, height)
-        val image = texture.pixels ?: return
-        entity.colorAverage = Color4.ZERO
-        for (i in 0 until width * height) {
-            val r = (bytes[i * channels].toInt() and 0xFF).coerceIn(10, 255)
-            val g = (bytes[i * channels + 1].toInt() and 0xFF).coerceIn(10, 255)
-            val b = (bytes[i * channels + 2].toInt() and 0xFF).coerceIn(10, 255)
-            val a = if (channels == 4) bytes[i * channels + 3].toInt() and 0xFF else 0xFF
-            image.setPixelRGBA(i % width, i / width, (a shl 24) or (b shl 16) or (g shl 8) or r)
-            entity.colorAverage += Color4(r, g, b)
+        val state = getOrCreateState(entity, width, height)
+        if (data.timestamp != state.lastFrame && !state.decoding) {
+            state.lastFrame = data.timestamp
+            state.decoding = true
+            val bytes = data.bytes
+            decoder.execute {
+                try {
+                    val raw = bytes.size == width * height * 3
+                    val src = if (raw) bytes else {
+                        val jpg = ImageIO.read(bytes.inputStream()) ?: return@execute
+                        (jpg.raster.dataBuffer as DataBufferByte).data  // BGR bytes
+                    }
+                    val ro = if (raw) 0 else 2
+                    val image = NativeImage(width, height, false)
+                    var sumR = 0
+                    var sumG = 0
+                    var sumB = 0
+                    for (i in 0 until width * height) {
+                        val r = src[i * 3 + ro].toInt() and 0xFF
+                        val g = src[i * 3 + 1].toInt() and 0xFF
+                        val b = src[i * 3 + 2 - ro].toInt() and 0xFF
+                        image.setPixelRGBA(i % width, i / width, (0xFF shl 24) or (b shl 16) or (g shl 8) or r)
+                        if (i % 8 == 0) {
+                            sumR += r.coerceAtLeast(10)
+                            sumG += g.coerceAtLeast(10)
+                            sumB += b.coerceAtLeast(10)
+                        }
+                    }
+                    val count = (width * height + 7) / 8
+                    entity.colorAverage = Color4(sumR / count, sumG / count, sumB / count)
+                    state.pending = image
+                } finally {
+                    state.decoding = false
+                }
+            }
         }
-        entity.colorAverage /= width * height
-        texture.upload()
+        state.pending?.let {
+            state.pending = null
+            state.texture.setPixels(it)
+            state.texture.upload()
+        }
 
         poseStack.pushPose()
         poseStack.translate(0.5, 0.5, 0.5)
@@ -89,7 +129,7 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
 
         // What i gotta do just to get this aligned :sob:
         // Reverse winding order + flipping the pose backward
-        val consumer = buffer.getBuffer(RenderType.beaconBeam(id, false))
+        val consumer = buffer.getBuffer(RenderType.beaconBeam(state.id, false))
         val matrix = poseStack.last()
         fun vert(x: Float, y: Float, z: Float, u: Float, v: Float) =
             consumer.addVertex(matrix, x, y, z).setColor(-1).setUv(u, v).setOverlay(packedOverlay).setLight(LightTexture.FULL_BRIGHT).setNormal(matrix, 0f, 0f, -1f)

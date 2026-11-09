@@ -232,6 +232,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                         video.data.bytes = raw
                         video.data.width = stream.output.width
                         video.data.height = stream.output.height
+                        video.data.timestamp = System.nanoTime()
                         video.send()
                         lastVideoFrameIndex = videoFrameIndex
                     }

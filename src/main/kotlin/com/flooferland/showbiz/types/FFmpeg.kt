@@ -4,12 +4,14 @@ import com.flooferland.showbiz.Showbiz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -19,7 +21,7 @@ import kotlin.time.DurationUnit
 object FFmpeg {
     data class AudioSettings(val codec: String, val channels: Int, val sampleRate: Int)
     data class Settings(val outputFormat: String, val audio: AudioSettings)
-    data class VideoInfo(val path: Path, val width: Int, val height: Int, val fps: Double)
+    data class VideoInfo(val path: Path, val width: Int, val height: Int, val fps: Double = 20.0, val raw: Boolean = false)
     class VideoStream(private var process: Process, val input: VideoInfo, val output: VideoInfo) : AutoCloseable {
         private val stdout get() = process.inputStream
         val colorChannels = 3
@@ -28,14 +30,21 @@ object FFmpeg {
         // TODO: Make sure FFmpeg can't block or pause the thread
         fun nextFrame(): ByteArray? {
             if (!process.isAlive) return null
-            val buffer = ByteArray(frameSize)
-            var offset = 0
-            while (offset < frameSize) {
-                val read = stdout.read(buffer, offset, frameSize - offset)
-                if (read == -1) return null
-                offset += read
+            if (output.raw) return stdout.readNBytes(frameSize).takeIf { it.size == frameSize }
+
+            val out = ByteArrayOutputStream()
+            var prev = 0
+            while (true) {
+                val byte = stdout.read()
+                if (byte == -1) return null
+                if (out.size() == 0) {
+                    if (prev == 0xFF && byte == 0xD8) { out.write(0xFF); out.write(0xD8) }
+                } else {
+                    out.write(byte)
+                    if (prev == 0xFF && byte == 0xD9) return out.toByteArray()
+                }
+                prev = byte
             }
-            return buffer
         }
 
         /** Creates a new process because FFmpeg doesn't seem to support seeking */
@@ -165,14 +174,24 @@ object FFmpeg {
         VideoInfo(path, parts[0].toInt(), parts[1].toInt(), num / den)
     }
 
-    fun openVideoStream(input: VideoInfo, output: VideoInfo = input, seek: Duration): VideoStream? {
+    fun openVideoStream(input: VideoInfo, output: VideoInfo = input, seek: Duration = Duration.ZERO): VideoStream? {
         val ffmpeg = mainFile?.absolutePath ?: run { setError("FFmpeg not found"); return null }
         val process = startProcess(
             ffmpeg,
             "-ss", seek.toDouble(DurationUnit.SECONDS).toString(),
             "-i", input.path.absolutePathString(),
-            "-f", "rawvideo",
-            "-pix_fmt", "rgb24",
+            *(if (!output.raw) {
+                var quality = ((output.width * output.height) / 100_000.0).roundToInt()
+                if (output.width < 300 || output.height < 300)
+                    quality = (quality * 0.25).roundToInt()
+                else
+                    quality *= quality / 2
+                quality = quality.coerceIn(2, 30)
+                Showbiz.log.debug("Found JPEG quality $quality")
+                arrayOf("-f", "image2pipe", "-c:v", "mjpeg", "-q:v", quality.toString())
+            } else {
+                arrayOf("-f", "rawvideo", "-pix_fmt", "rgb24")
+            }),
             "-r", output.fps.toString(),
             "-vf", "scale=${output.width}:${output.height}",
             "-an",

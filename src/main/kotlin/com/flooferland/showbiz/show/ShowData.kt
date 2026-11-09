@@ -31,7 +31,6 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import kotlin.io.path.Path
-import kotlin.time.Duration
 
 // TODO: Ensure the file is saved correctly,
 //       even when the user spams the record button and does whatever weird things users do
@@ -137,8 +136,15 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             val videoPath = getShowVideo(path)
             if (videoPath != null && FFmpeg.localAvailable) {
                 val result = CoroutineScope(Dispatchers.IO).launch {
-                    this@ShowData.videoInputInfo = FFmpeg.probeVideo(videoPath)
-                    this@ShowData.video = FFmpeg.openVideoStream(videoInputInfo!!, FFmpeg.VideoInfo(videoPath, 128, 128, 24.0), Duration.ZERO)
+                    val probe = FFmpeg.probeVideo(videoPath)!!
+                    val fps = 20.0
+                    val output = if (Showbiz.config.other.serverHighResVideo)
+                        FFmpeg.VideoInfo(videoPath, probe.width, probe.height, fps)
+                    else
+                        FFmpeg.VideoInfo(videoPath, 128, 128, fps)
+
+                    this@ShowData.videoInputInfo = probe
+                    this@ShowData.video = FFmpeg.openVideoStream(probe, output)
                 }
                 result.invokeOnCompletion {
                     if (it != null || videoInputInfo == null)
