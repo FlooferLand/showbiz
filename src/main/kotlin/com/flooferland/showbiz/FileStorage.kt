@@ -2,10 +2,10 @@ package com.flooferland.showbiz
 
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.types.ShowFileInfo
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import kotlin.io.path.*
 
 /** NOTE: This should only be called on the server */
@@ -14,7 +14,7 @@ object FileStorage {
     val SHOWS_DIR = SHOWBIZ_DIR / "shows"
 
     init {
-        Files.createDirectories(SHOWS_DIR)
+        runCatching { Files.createDirectories(SHOWS_DIR) }
         ServerLifecycleEvents.SERVER_STARTED.register { _ ->
             cachedShowPaths.clear()
             cachedShowInfo.clear()
@@ -45,7 +45,7 @@ object FileStorage {
 
         val shows = hashMapOf<String, Path>()
         runCatching {
-            val dir = File(SHOWS_DIR.toString())
+            val dir = SHOWS_DIR.toFile()
             if (!dir.exists()) runCatching { dir.createNewFile() }
             addShowsRecursive(dir, shows)
         }
