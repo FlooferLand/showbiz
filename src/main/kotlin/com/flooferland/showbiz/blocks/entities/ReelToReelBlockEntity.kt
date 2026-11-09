@@ -310,11 +310,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         hasFinished = false
         signal.reset()
         lastVideoFrameIndex = 0
+        showData.videoInputInfo = null
         showData.video?.let {
             video.data.tempReset()
             video.send()
             it.close()
         }
+        showData.video = null
         stateDirty = true
         setChanged()
     }

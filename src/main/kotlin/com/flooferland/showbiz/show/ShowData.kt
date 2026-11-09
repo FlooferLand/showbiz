@@ -272,6 +272,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         mapping = null
         videoInputInfo = null
         video?.close()
+        video = null
         System.gc()
     }
 }

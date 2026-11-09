@@ -22,14 +22,16 @@ object FFmpeg {
     data class AudioSettings(val codec: String, val channels: Int, val sampleRate: Int)
     data class Settings(val outputFormat: String, val audio: AudioSettings)
     data class VideoInfo(val path: Path, val width: Int, val height: Int, val fps: Double = 20.0, val raw: Boolean = false)
-    class VideoStream(private var process: Process, val input: VideoInfo, val output: VideoInfo) : AutoCloseable {
-        private val stdout get() = process.inputStream
+    class VideoStream(process: Process, val input: VideoInfo, val output: VideoInfo) : AutoCloseable {
+        private var process: Process? = process
+        private val stdout get() = process?.inputStream
         val colorChannels = 3
         val frameSize = output.width * output.height * colorChannels
 
         // TODO: Make sure FFmpeg can't block or pause the thread
         fun nextFrame(): ByteArray? {
-            if (!process.isAlive) return null
+            if (process?.isAlive != true) return null
+            val stdout = stdout ?: return null
             if (output.raw) return stdout.readNBytes(frameSize).takeIf { it.size == frameSize }
 
             val out = ByteArrayOutputStream()
@@ -50,12 +52,15 @@ object FFmpeg {
         /** Creates a new process because FFmpeg doesn't seem to support seeking */
         fun seek(seek: Duration) {
             FFmpeg.openVideoStream(input, output, seek)?.let { new ->
-                runCatching { process.inputStream.close() }
-                process.destroyForcibly()
+                runCatching { process?.inputStream?.close() }
+                process?.destroyForcibly()
                 process = new.process
             }
         }
-        override fun close() = process.destroy()
+        override fun close() {
+            process?.destroyForcibly()
+            process = null
+        }
     }
 
     val videoExtensions = setOf("mp4", "webm", "mkv", "avi", "mov")
