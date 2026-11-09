@@ -4,6 +4,7 @@ import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.utils.ShowbizEnv
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -71,9 +72,9 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
     }
 
     companion object {
-        val toml = Toml(
+        val toml get() = Toml(
             inputConfig = TomlInputConfig(ignoreUnknownNames = true),
-            outputConfig = TomlOutputConfig(ignoreDefaultValues = true)
+            outputConfig = TomlOutputConfig(ignoreDefaultValues = !ShowbizEnv.isDedicatedServer())
         )
 
         fun getCommonPath(): Path = FabricLoader.getInstance().configDir.resolve("${Showbiz.MOD_ID}.toml")

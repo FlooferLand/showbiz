@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.*
 import com.flooferland.showbiz.Showbiz
+import net.fabricmc.api.EnvType
+import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.Util
 import java.net.URI
 import java.nio.file.Path
-import net.fabricmc.loader.api.FabricLoader
 
 /** Environment/system utilities */
 object ShowbizEnv {
@@ -40,6 +41,11 @@ object ShowbizEnv {
         FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
     fun hasIRLights() =
         FabricLoader.getInstance()?.getModContainer("irl-redactor")?.isPresent == true
+    //endregion
+
+    //region Game stuff
+    fun isDedicatedServer() =
+        FabricLoader.getInstance()?.environmentType == EnvType.SERVER
     //endregion
 
     //region Dev stuff
