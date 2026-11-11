@@ -6,6 +6,8 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.AddonNotice.Side
+import com.flooferland.showbiz.addons.data.AddonDataReloadListener
+import com.flooferland.showbiz.addons.data.AddonManifest
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.PassivePlan
 import com.flooferland.showbiz.types.IBot
@@ -20,6 +22,7 @@ import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.serializer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
@@ -241,11 +244,17 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
                     }
                 }
 
+                // Manifest might not exist if the asset and datapack are separate
+                val manifest = pack.getResource(PackType.SERVER_DATA, rlCustom(namespace, AddonDataReloadListener.MANIFEST_NAME))
+                    ?.get()?.readAllBytes()?.decodeToString()
+                    ?.let { runCatching { Toml.decodeFromString(serializer<AddonManifest>(), it) }.getOrNull() }
+
                 if (bots.isNotEmpty()) {
                     bots.entries.removeIf { (botId, bot) -> botId.isEmpty() || bot == null }
                     out.packs.getOrPut(pack.packId()) { mutableSetOf() } += addonId
                     addons[addonId] = AddonAssets(
                         bots = bots.mapKeys { (key, _) -> ResourceId(addonId, key) }.mapValues { (_, v) -> v!! },
+                        manifest = manifest
                     )
                 }
             }
@@ -326,9 +335,7 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
         ShowbizClient.botAnimations = animations
 
         // Documenting addon packs
-        for ((packId, addons) in loaded.packs) {
-            Showbiz.addonPacks[packId] = addons
-        }
+        Showbiz.addonPacks = loaded.packs
 
         // Displaying the notice screen
         if (AddonNotices.shouldShowScreen(Side.Assets)) {
@@ -336,15 +343,23 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
         }
     }
 
-    fun reloadPack(packId: String) {
+    fun reloadPacks(packIds: Set<String>) {
         val minecraft = Minecraft.getInstance()
         minecraft.resourcePackRepository.reload()
 
-        val pack = minecraft.resourcePackRepository.getPack(packId) ?: return
-        MultiPackResourceManager(PackType.CLIENT_RESOURCES, listOf(pack.open())).use { manager ->
+        val packs = packIds.mapNotNull { minecraft.resourcePackRepository.getPack(it)?.open() }
+        if (packs.isEmpty()) {
+            minecraft.reloadResourcePacks()
+            return
+        }
+        MultiPackResourceManager(PackType.CLIENT_RESOURCES, packs).use { manager ->
             val loaded = prepare(manager, InactiveProfiler.INSTANCE)
             apply(loaded, manager, InactiveProfiler.INSTANCE)
             minecraft.levelRenderer.allChanged()
+        }
+
+        if (AddonNotices.shouldShowScreen()) {
+            AddonNotices.showScreen()
         }
     }
 }

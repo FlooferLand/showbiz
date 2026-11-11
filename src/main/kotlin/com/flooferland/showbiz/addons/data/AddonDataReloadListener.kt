@@ -26,12 +26,12 @@ import kotlin.jvm.optionals.getOrNull
 
 // TODO: Should move to addons being placed inside assets/showbiz instead of assets/<their_namespace>/showbiz
 
-internal data class LoadedData(
+data class LoadedData(
     val packs: MutableMap<String, MutableSet<String>> = mutableMapOf(),
     var data: MutableMap<String, AddonData> = mutableMapOf()
 )
 
-internal object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), IdentifiableResourceReloadListener {
+object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), IdentifiableResourceReloadListener {
     const val MANIFEST_NAME = "showbiz.addon.toml"
 
     override fun getFabricId(): ResourceLocation = rl("data")
@@ -119,10 +119,8 @@ internal object AddonDataReloadListener : SimplePreparableReloadListener<LoadedD
         Showbiz.bots = bots
 
         // Documenting addon packs
-        for ((packId, addons) in loaded.packs) {
-            Showbiz.addonPacks[packId] = addons
-        }
-
+        Showbiz.addonPacks = loaded.packs
+        
         // Displaying the notice screen
         if (AddonNotices.shouldShowScreen(Side.Data)) {
             AddonNotices.showScreen()

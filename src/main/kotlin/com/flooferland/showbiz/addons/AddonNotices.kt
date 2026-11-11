@@ -7,8 +7,10 @@ import net.minecraft.network.chat.Component
 object AddonNotices {
     private val inner = hashMapOf<String, MutableList<AddonNotice>>()
     var clientShowScreen = {}
+    var quickReloading = false
 
     fun shouldShowScreen(side: AddonNotice.Side? = null): Boolean {
+        if (quickReloading) return false
         val severities = inner.flatMap { notices -> notices.value.map { it.severity } }
         val hasProblems = severities.any { it.ordinal > AddonNotice.Severity.Info.ordinal }
         val hasErrors = severities.any { it == AddonNotice.Severity.Error }

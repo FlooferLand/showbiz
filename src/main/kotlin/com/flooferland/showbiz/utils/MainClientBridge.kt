@@ -10,6 +10,5 @@ import java.util.*
  */
 object MainClientBridge {
     var getEntityByUuid: (level: Level, uuid: UUID) -> Entity? = { level, uuid -> null }
-    var reloadSpecificPack: (String) -> Unit = {}
-    var reloadPacks = {}
+    var reloadPacks: (Set<String>) -> Unit = {}
 }

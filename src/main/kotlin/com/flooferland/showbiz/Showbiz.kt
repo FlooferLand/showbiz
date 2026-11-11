@@ -31,7 +31,7 @@ object Showbiz : ModInitializer {
     val log: Logger = LoggerFactory.getLogger(MOD_ID)
 
     var playerPrefs = mutableMapOf<UUID, ClientCapabilitiesPacket>()
-    var addonPacks = mutableMapOf<String, Set<String>>()  // Packs to addon IDs
+    var addonPacks = mapOf<String, Set<String>>()  // Packs to addon IDs
     var addons = mapOf<String, AddonData>()
     var config = ModConfig()
     val charts = BitChartStore()

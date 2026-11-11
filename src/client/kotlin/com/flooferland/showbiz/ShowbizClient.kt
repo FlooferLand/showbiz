@@ -252,13 +252,9 @@ object ShowbizClient : ClientModInitializer {
 
         // DARN YOU SPLIT SOURCESETS
         MainClientBridge.getEntityByUuid = { level, uuid -> (level as? ClientLevel)?.entitiesForRendering()?.firstOrNull { it.uuid == uuid } }
-        MainClientBridge.reloadPacks = {
+        MainClientBridge.reloadPacks = { packIds ->
             val minecraft = Minecraft.getInstance()
-            minecraft.execute { minecraft.reloadResourcePacks() }
-        }
-        MainClientBridge.reloadSpecificPack = { packId ->
-            val minecraft = Minecraft.getInstance()
-            minecraft.execute { AddonAssetsReloadListener.reloadPack(packId) }
+            minecraft.execute { AddonAssetsReloadListener.reloadPacks(packIds) }
         }
         AddonNotices.clientShowScreen = {
             val minecraft = Minecraft.getInstance()

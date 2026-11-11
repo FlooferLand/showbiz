@@ -14,7 +14,7 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
-data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<String, SemVer>) : CustomPacketPayload {
+data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<String, SemVer?>) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -32,13 +32,22 @@ data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<Strin
                 if (config != null) buf.writeUtf(config)
 
                 // Saving the addon list
-                buf.writeMap(packet.addons, { buf, key -> buf.writeUtf(key) }, { buf, value -> buf.writeUtf(value.toString()) })
+                buf.writeMap(
+                    packet.addons,
+                    { buf, key ->
+                        buf.writeUtf(key)
+                    },
+                    { buf, value ->
+                        buf.writeBoolean(value != null)
+                        if (value != null) buf.writeUtf(value.toString())
+                    }
+                )
             },
             { buf ->
                 val config = if (buf.readBoolean()) toml.decodeFromString<ModConfig>(buf.readUtf()) else null
                 ClientCapabilitiesPacket(
                     config = config ?: Showbiz.config.clone(),
-                    addons = buf.readMap({ it.readUtf() }, { SemVer(it.readUtf()) })
+                    addons = buf.readMap({ it.readUtf() }, { buf -> if (buf.readBoolean()) SemVer(buf.readUtf()) else null })
                 )
             }
         )!!

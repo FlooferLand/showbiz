@@ -51,7 +51,6 @@ object ServerPackets {
                 return@listen
             }
 
-
             val blockEntity = level.getBlockEntity(packet.parent) ?: return@listen
             if (!player.mayInteractWith(blockEntity)) {
                 player.notifyPermissionError()
@@ -79,20 +78,23 @@ object ServerPackets {
 
         ServerPackets.listen(ClientCapabilitiesPacket.type) { packet, ctx ->
             val player = ctx.player() ?: return@listen
-            Showbiz.playerPrefs[player.uuid] = packet
-            Showbiz.log.debug("Player '${player.name.string}' preferences: ${packet.toString()}")
-
             val playerAddons = packet.addons
             for ((addonId, addon) in Showbiz.addons) {
-                // Getting versions
-                val serverVersion = SemVer(addon.manifest.version)
-                val playerVersion = playerAddons[addonId] ?: run {
+                // Checking presence
+                if (!playerAddons.containsKey(addonId)) {
                     val reason = Component.literal("Missing Showbiz addon ").append(Component.literal("$addonId v${addon.manifest.version}").withStyle(ChatFormatting.YELLOW))
                         .append(Component.literal("\n\n").withStyle(ChatFormatting.RESET))
                         .append(Component.literal("Installed addons:\n").append("[${playerAddons.keys.sorted().joinToString(", ")}]\n\n"))
                         .append(Component.literal("Server addons:\n").append("[${Showbiz.addons.keys.sorted().joinToString(", ")}]\n\n"))
                     player.connection.send(ClientboundDisconnectPacket(reason))
                     return@listen
+                }
+
+                // Getting the versions (skips if null cuz the manifest might be missing on the client)
+                val serverVersion = SemVer(addon.manifest.version)
+                val playerVersion = playerAddons[addonId] ?: run {
+                    Showbiz.log.warn("Couldn't find a version for the addon '$addonId'")
+                    continue
                 }
 
                 // Comparing
@@ -108,6 +110,10 @@ object ServerPackets {
                     player.sendSystemMessage(Component.literal("Showbiz addon '${addonId}' version mismatch ($playerVersion != $serverVersion)"))
                 }
             }
+
+            // Saving the capabilities
+            Showbiz.playerPrefs[player.uuid] = packet
+            Showbiz.log.debug("Player '${player.name.string}' preferences: ${packet.toString()}")
         }
     }
 }
