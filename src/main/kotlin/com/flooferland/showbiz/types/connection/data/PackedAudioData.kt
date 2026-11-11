@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.phys.Vec3
 
 fun ConnectionPort<PackedAudioData>.sendTrigger(action: Action) {
     data.tempReset()
@@ -54,6 +56,9 @@ data class PackedAudioData(
         triggerAction = other.triggerAction
         return true
     }
+
+    override fun canReach(origin: Vec3, player: ServerPlayer): Boolean =
+        player.distanceToSqr(origin) < MAX_DISTANCE_SQR
 
     // region | Public stuff
     fun tick(level: ServerLevel, source: BlockPos) {

@@ -138,7 +138,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 val result = CoroutineScope(Dispatchers.IO).launch {
                     val probe = FFmpeg.probeVideo(videoPath)!!
                     val fps = 20.0
-                    val output = if (Showbiz.config.other.serverHighResVideo)
+                    val output = if (Showbiz.config.video.highResVideo)
                         FFmpeg.VideoInfo(videoPath, probe.width, probe.height, fps)
                     else
                         FFmpeg.VideoInfo(videoPath, 128, 128, fps)

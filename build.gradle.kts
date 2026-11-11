@@ -1,8 +1,9 @@
-import java.awt.Desktop
+
 import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.awt.Desktop
 
 fun vers(name: String): String = project.property("vers.${name}") as String
 fun dep(name: String): String = project.property("deps.${name}") as String
@@ -230,7 +231,8 @@ tasks.withType<ProcessResources>().configureEach {
     filesMatching("fabric.mod.json") { expand(properties) }
     filesMatching("$modId.client.mixins.json") { expand(properties) }
     filesMatching("$modId.mixins.json") { expand(properties) }
-    filesMatching("data/showbiz/showbiz.addon.toml")  { expand(properties) }
+    filesMatching("data/showbiz/showbiz.addon.toml") { expand(properties) }
+    filesMatching("data/showbiz-wp5/showbiz.addon.toml") { expand(properties) }
 }
 tasks.register("giveMeTheJarFile") {
     description = "Builds the mod and opens up a file manager"

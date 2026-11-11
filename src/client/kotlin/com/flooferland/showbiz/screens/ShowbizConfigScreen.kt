@@ -1,14 +1,16 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.network.chat.*
+import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.registry.ModConfig
 import com.flooferland.showbiz.registry.PermissionSelector
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.components.*
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 typealias Category = String
@@ -31,6 +33,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
             for (categoryClass in ModConfig::class.nestedClasses) {
                 when (categoryClass) {
                     ModConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
+                    ModConfig.Video::class -> categoryAddWidgets("Video", config.video)
                     ModConfig.Permissions::class -> categoryAddWidgets("Permissions", config.permissions)
                     ModConfig.Addons::class -> categoryAddWidgets("Addons", config.addons)
                     ModConfig.Other::class -> categoryAddWidgets("Other", config.other)
@@ -110,14 +113,14 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 is Boolean -> Checkbox.builder(Component.literal("Enable").withStyle(ChatFormatting.GRAY), font)
                     .selected(propValue)
                     .onValueChange { _, bool ->
-                        (prop as? KMutableProperty1<T, Boolean>)?.set(category, bool) ?: Showbiz.log.error("Failed to set '${propName.string}'")
+                        setProp(prop, propName, category, bool)
                     }
                     .build()
                 is PermissionSelector -> CycleButton.builder<PermissionSelector> { Component.literal(it.name) }
                     .withInitialValue(propValue)
                     .withValues(PermissionSelector.entries)
                     .create(Component.literal("Minimum")) { b, value ->
-                        (prop as? KMutableProperty1<T, PermissionSelector>)?.set(category, value) ?: Showbiz.log.error("Failed to set '${propName.string}'")
+                        setProp(prop, propName, category, value)
                     }
                 else -> { Showbiz.log.error("Prop of this type does not exist for ${propName.string}"); return@forEach }
             }
@@ -127,9 +130,15 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
         }
     }
 
+    private inline fun <reified T: Any, V> setProp(prop: KProperty1<T, *>, propName: Component, category: T, value: V) {
+        @Suppress("UNCHECKED_CAST")
+        (prop as? KMutableProperty1<T, V>)?.set(category, value) ?: Showbiz.log.error("Failed to set '${propName.string}'")
+    }
+
     override fun removed() {
         Showbiz.config = config
         Showbiz.config.save()
+        ClientPackets.sendCapabilities()
         super.removed()
     }
 

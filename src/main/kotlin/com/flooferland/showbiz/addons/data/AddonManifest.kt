@@ -21,7 +21,7 @@ data class AddonManifest(
     @Comment("The description of the addon, ex: \"Adds the Rock-afire Explosion\"")
     val description: String,
 
-    @Comment("The version of your addon. Doesn't really do anything")
+    @Comment("The version of your addon. Increase it any time you make a change (see https://semver.org)")
     val version: String,
 
     @Comment("""

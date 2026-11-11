@@ -1,14 +1,16 @@
 package com.flooferland.showbiz
 
-import net.minecraft.client.multiplayer.*
-import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
+import com.flooferland.showbiz.network.packets.ClientCapabilitiesPacket
 import com.flooferland.showbiz.network.packets.OpenClientConfigPacket
 import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
 import com.flooferland.showbiz.screens.ShowbizConfigScreen
 import com.flooferland.showbiz.types.FFmpeg
+import com.flooferland.showbiz.types.SemVer
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /** Prevents Fabric's broken as hell packet system from silently not registering receivers on the same packet */
 object ClientPackets {
@@ -26,6 +28,13 @@ object ClientPackets {
                     (it as ClientPlayNetworking.PlayPayloadHandler<CustomPacketPayload>).receive(packet, context)
                 }
             }
+        }
+    }
+
+    fun sendCapabilities() {
+        val addons = Showbiz.addons.mapValues { SemVer(it.value.manifest.version) }
+        if (ClientPlayNetworking.canSend(ClientCapabilitiesPacket.type)) {
+            ClientPlayNetworking.send(ClientCapabilitiesPacket(Showbiz.config, addons))
         }
     }
 

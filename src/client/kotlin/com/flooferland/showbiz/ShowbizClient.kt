@@ -1,7 +1,10 @@
 package com.flooferland.showbiz
 
 import com.flooferland.showbiz.Showbiz.MOD_ID
-import com.flooferland.showbiz.addons.*
+import com.flooferland.showbiz.addons.AddonAssets
+import com.flooferland.showbiz.addons.AddonAssetsReloadListener
+import com.flooferland.showbiz.addons.AddonBot
+import com.flooferland.showbiz.addons.AddonNotices
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.audio.ShowbizShowAudio
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
@@ -24,7 +27,7 @@ import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
-import com.flooferland.showbiz.utils.MainClientUtils
+import com.flooferland.showbiz.utils.MainClientBridge
 import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.tc
 import net.fabricmc.api.ClientModInitializer
@@ -57,7 +60,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.max
 
 object ShowbizClient : ClientModInitializer {
-    var addons: List<AddonAssets> = emptyList()
+    var addons: Map<String, AddonAssets> = emptyMap()
     var bots: Map<ResourceId, AddonBot> = emptyMap()
 
     // Ugly but these are mainly for quick lookup while rendering
@@ -225,26 +228,17 @@ object ShowbizClient : ClientModInitializer {
                                         "Expect the mod's blocks, items, and other things to vanish or break when you update the mod.\n"
                             ).withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
                     )
-            if (AddonClientNotices.shouldShowScreen()) {
-                val addonIds = AddonClientNotices.getAddonIds()
-                val errors = addonIds.filter { addonId -> AddonClientNotices.getAddon(addonId).any { it.severity == AddonNotice.Severity.Error } }
-                val warnings = addonIds.filter { addonId -> AddonClientNotices.getAddon(addonId).any { it.severity == AddonNotice.Severity.Warning } }
-                if (errors.isNotEmpty() || warnings.isNotEmpty()) {
-                    text.append(Component.literal("\n").withStyle(ChatFormatting.RESET))
-                    if (errors.isNotEmpty()) text.append(
-                        Component.literal("Addons with errors: ${errors.joinToString(", ")}\n"
-                    ).withStyle(ChatFormatting.RED))
-                    if (warnings.isNotEmpty()) text.append(
-                        Component.literal("Addons with warnings: ${warnings.joinToString(", ")}\n"
-                    ).withStyle(ChatFormatting.YELLOW))
-                }
+            if (AddonNotices.shouldShowScreen()) {
+                text.append(AddonNotices.getText())
             }
-
             player.displayClientMessage(text, false)
 
             // Version check
-            if (UpdateChecker.newerVersion != null)
+            if (UpdateChecker.shouldNotify())
                 minecraft.player?.displayClientMessage(UpdateChecker.getMessage(), false)
+
+            // Capabilities
+            ClientPackets.sendCapabilities()
         }
 
         // Handbook ponder
@@ -257,8 +251,23 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // DARN YOU SPLIT SOURCESETS
-        MainClientUtils.getEntityByUuid = { level, uuid -> (level as? ClientLevel)?.entitiesForRendering()?.firstOrNull { it.uuid == uuid } }
-        ReelItem.openScreenClient = { stack -> Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
+        MainClientBridge.getEntityByUuid = { level, uuid -> (level as? ClientLevel)?.entitiesForRendering()?.firstOrNull { it.uuid == uuid } }
+        MainClientBridge.reloadPacks = {
+            val minecraft = Minecraft.getInstance()
+            minecraft.execute { minecraft.reloadResourcePacks() }
+        }
+        MainClientBridge.reloadSpecificPack = { packId ->
+            val minecraft = Minecraft.getInstance()
+            minecraft.execute { AddonAssetsReloadListener.reloadPack(packId) }
+        }
+        AddonNotices.clientShowScreen = {
+            val minecraft = Minecraft.getInstance()
+            minecraft.execute { minecraft.setScreen(AddonNoticeScreen(minecraft.screen)) }
+        }
+        ReelItem.openScreenClient = { stack ->
+            val minecraft = Minecraft.getInstance()
+            minecraft.execute { Minecraft.getInstance()?.setScreen(ReelManagerScreen(stack)) }
+        }
         ModelPartManager.clientInstancer = { owner, block, customParts -> ClientModelPartInstance(owner, block.id, customParts) }
         CollidePartManager.clientInstancer = { owner -> ClientCollidePartInstance(owner) }
         StagedBotBlockEntity.decor = DecorEntity.decorTick

@@ -1,11 +1,5 @@
 package com.flooferland.showbiz.types.connection
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.*
-import net.minecraft.server.level.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.block.entity.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.types.IPacketable
@@ -19,6 +13,13 @@ import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.core.BlockPos
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.level.block.entity.BlockEntity
 import org.jetbrains.annotations.NotNull
 
 enum class PortDirection {
@@ -158,7 +159,11 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
 
             if (level is ServerLevel && bytes != null) {
                 val packet = ConnectionDataPacket(ownerId, id, bytes)
-                for (player in playersAffected(level, connectable)) ServerPlayNetworking.send(player, packet)
+                for (player in playersAffected(level, connectable)) {
+                    if (!data.canReach(connectable.grabCenterPos() ?: continue, player)) continue
+                    if (!data.canSendTo(ownerId, player)) continue
+                    ServerPlayNetworking.send(player, packet)
+                }
             }
         }
     }

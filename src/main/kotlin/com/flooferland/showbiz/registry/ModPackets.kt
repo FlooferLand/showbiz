@@ -1,13 +1,13 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.network.*
-import net.minecraft.network.codec.*
-import net.minecraft.network.protocol.common.custom.*
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.network.packets.editscreen.*
 import com.flooferland.showbiz.registry.ModPackets.PacketRegistryWay.*
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.codec.StreamCodec
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 sealed class ModPackets<T: CustomPacketPayload> {
     data object PlaybackAudioChunk : ModPackets<PlaybackAudioChunkPacket>(ServerToClient, PlaybackAudioChunkPacket.type, PlaybackAudioChunkPacket.codec)
@@ -33,10 +33,11 @@ sealed class ModPackets<T: CustomPacketPayload> {
     data object ProgrammerPlayerUpdate: ModPackets<ProgrammerPlayerUpdatePacket>(ClientToServer, ProgrammerPlayerUpdatePacket.type, ProgrammerPlayerUpdatePacket.codec)
     data object JukeboxLyric: ModPackets<JukeboxLyricPacket>(ServerToClient, JukeboxLyricPacket.type, JukeboxLyricPacket.codec)
     data object ServerInfo: ModPackets<ServerCapabilitiesPacket>(ServerToClient, ServerCapabilitiesPacket.type, ServerCapabilitiesPacket.codec)
+    data object ClientInfo: ModPackets<ClientCapabilitiesPacket>(ClientToServer, ClientCapabilitiesPacket.type, ClientCapabilitiesPacket.codec)
     data object ConnectionData: ModPackets<ConnectionDataPacket>(ServerToClient, ConnectionDataPacket.type, ConnectionDataPacket.codec)
     data object OpenClientConfig: ModPackets<OpenClientConfigPacket>(ServerToClient, OpenClientConfigPacket.type, OpenClientConfigPacket.codec)
 
-    constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>) {
+    constructor(way: PacketRegistryWay, type: CustomPacketPayload.Type<T>, codec: StreamCodec<FriendlyByteBuf, T>, configuration: Boolean = false) {
         when (way) {
             ServerToClient -> PayloadTypeRegistry.playS2C().register(type, codec)
             ClientToServer -> PayloadTypeRegistry.playC2S().register(type, codec)
@@ -44,6 +45,9 @@ sealed class ModPackets<T: CustomPacketPayload> {
                 PayloadTypeRegistry.playS2C().register(type, codec)
                 PayloadTypeRegistry.playC2S().register(type, codec)
             }
+        }
+        if (configuration) {
+            PayloadTypeRegistry.configurationC2S().register(type, codec)
         }
     }
 

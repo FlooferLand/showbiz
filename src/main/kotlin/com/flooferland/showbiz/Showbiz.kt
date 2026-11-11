@@ -4,10 +4,7 @@ import com.flooferland.showbiz.addons.data.AddonBotEntry
 import com.flooferland.showbiz.addons.data.AddonData
 import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.items.WandItem
-import com.flooferland.showbiz.network.packets.BotListPacket
-import com.flooferland.showbiz.network.packets.ProgrammerKeyPressPacket
-import com.flooferland.showbiz.network.packets.ProgrammerPlayerUpdatePacket
-import com.flooferland.showbiz.network.packets.ServerCapabilitiesPacket
+import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.types.BitChartStore
 import com.flooferland.showbiz.types.FFmpeg
@@ -27,15 +24,18 @@ import net.minecraft.server.packs.PackType
 import net.minecraft.world.InteractionResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
 
 object Showbiz : ModInitializer {
     const val MOD_ID = "showbiz"
     val log: Logger = LoggerFactory.getLogger(MOD_ID)
 
-    var addons = listOf<AddonData>()
-    var bots = mapOf<ResourceId, AddonBotEntry>()
-    val charts = BitChartStore()
+    var playerPrefs = mutableMapOf<UUID, ClientCapabilitiesPacket>()
+    var addonPacks = mutableMapOf<String, Set<String>>()  // Packs to addon IDs
+    var addons = mapOf<String, AddonData>()
     var config = ModConfig()
+    val charts = BitChartStore()
+    var bots = mapOf<ResourceId, AddonBotEntry>()
 
     override fun onInitialize() {
         // Loading config
@@ -111,6 +111,7 @@ object Showbiz : ModInitializer {
         ServerPlayerEvents.LEAVE.register { player ->
             PlayerProgrammingData.resetPlayerState(player)
             FileServer.serverPlayerUploads.remove(player.id)
+            playerPrefs.remove(player.uuid)
         }
         ServerPlayerEvents.AFTER_RESPAWN.register { oldPlayer, newPlayer, alive ->
             val data = PlayerProgrammingData.getFromPlayer(oldPlayer)

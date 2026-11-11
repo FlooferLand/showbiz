@@ -1,5 +1,13 @@
 package com.flooferland.showbiz
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -9,14 +17,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.concurrent.Executors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import net.fabricmc.loader.api.FabricLoader
 import kotlin.jvm.optionals.getOrNull
 
 object UpdateChecker {
@@ -40,6 +40,12 @@ object UpdateChecker {
             .getOrNull() ?: currentVersion
     }
 
+    fun isEnabled() =
+        Showbiz.config.other.checkForUpdates
+
+    fun shouldNotify() =
+        newerVersion != null && isEnabled()
+
     fun getMessage(): MutableComponent = when {
         newerVersion == null -> Component.literal("Showbiz is up to date")
         else -> Component.literal("Showbiz version '$newerVersion' is available!").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
@@ -59,6 +65,10 @@ object UpdateChecker {
         }
 
         Showbiz.log.info("Checking for updates..")
+        if (!isEnabled()) {
+            Showbiz.log.info("Update checker is disabled")
+            return
+        }
         CoroutineScope(Dispatchers.IO).launch {
             val request = fetch()
             request.onSuccess { body ->

@@ -32,11 +32,24 @@ enum class PermissionSelector(private val rank: Int) {
 }
 
 @Serializable
-data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = Permissions(), val addons: Addons = Addons(), val other: Other = Other()) : Cloneable {
+data class ModConfig(
+    val audio: Audio = Audio(),
+    val video: Video = Video(),
+    val permissions: Permissions = Permissions(),
+    val addons: Addons = Addons(),
+    val other: Other = Other()
+) : Cloneable {
     @Serializable
     data class Audio(
         var playPneumaticSounds: Boolean = true,
         var playBotEffects: Boolean = true
+    )
+
+    @Serializable
+    data class Video(
+        var playVideo: Boolean = true,
+        var highResVideo: Boolean = false,
+        var devFastVideoRender: Boolean = false
     )
 
     @Serializable
@@ -56,7 +69,7 @@ data class ModConfig(val audio: Audio = Audio(), val permissions: Permissions = 
     @Serializable
     data class Other(
         var forceVanillaLighting: Boolean = false,
-        var serverHighResVideo: Boolean = false
+        var checkForUpdates: Boolean = true
     )
 
     public override fun clone() = super.clone() as ModConfig

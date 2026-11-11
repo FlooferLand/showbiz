@@ -1,10 +1,10 @@
 package com.flooferland.showbiz.commands
 
-import net.minecraft.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.commands.Command
 import com.flooferland.showbiz.types.commands.CommandContext
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
 
 object RootCommand : Command(Showbiz.MOD_ID) {
     override val showHelpOnRun = true
@@ -14,7 +14,8 @@ object RootCommand : Command(Showbiz.MOD_ID) {
         BitmapCommand,
         WikiCommand,
         StatCommand,
-        ConfigCommand
+        ConfigCommand,
+        ReloadCommand
     )
     override fun run(ctx: CommandContext) = Response.empty()
 }

@@ -1,9 +1,11 @@
 package com.flooferland.showbiz.types.connection.data
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity.Companion.VIDEO_DIST_SQUARE
+import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.connection.ConnectionData
 import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.phys.Vec3
 
 data class PackedVideoData(
@@ -38,8 +40,13 @@ data class PackedVideoData(
         return true
     }
 
-    override fun canSend(level: ServerLevel, origin: Vec3) =
-        level.players().any { it.distanceToSqr(origin) < VIDEO_DIST_SQUARE }
+    override fun canReach(origin: Vec3, player: ServerPlayer): Boolean {
+        return player.distanceToSqr(origin) < VIDEO_DIST_SQUARE
+    }
+
+    override fun canSendTo(ownerId: OwnerId, player: ServerPlayer): Boolean {
+        return Showbiz.playerPrefs[player.uuid]?.config?.video?.playVideo ?: true
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

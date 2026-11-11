@@ -85,7 +85,7 @@ object Extensions {
     }
 
     //region Level
-    fun Level.getEntity(uuid: UUID) = (this as? ServerLevel)?.getEntity(uuid) ?: MainClientUtils.getEntityByUuid(this, uuid)
+    fun Level.getEntity(uuid: UUID) = (this as? ServerLevel)?.getEntity(uuid) ?: MainClientBridge.getEntityByUuid(this, uuid)
     fun Level.getNearbyPlayers(area: AABB) = this.players().filter { area.contains(it.position()) }
     //endregion
 

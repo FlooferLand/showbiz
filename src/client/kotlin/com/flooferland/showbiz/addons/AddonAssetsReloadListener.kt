@@ -5,9 +5,9 @@ import com.flooferland.bizlib.bits.BitsMap
 import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
+import com.flooferland.showbiz.addons.AddonNotice.Side
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.PassivePlan
-import com.flooferland.showbiz.screens.AddonNoticeScreen
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.ResourcePath
@@ -27,8 +27,10 @@ import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.PackResources
 import net.minecraft.server.packs.PackType
+import net.minecraft.server.packs.resources.MultiPackResourceManager
 import net.minecraft.server.packs.resources.ResourceManager
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener
+import net.minecraft.util.profiling.InactiveProfiler
 import net.minecraft.util.profiling.ProfilerFiller
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
@@ -40,8 +42,9 @@ import software.bernie.geckolib.loading.`object`.BakedAnimations
 
 // TODO: Should move to addons being placed inside assets/showbiz instead of assets/<their_namespace>/showbiz
 
-data class LoadedAssets(
-    var addons: List<AddonAssets> = mutableListOf(),
+internal data class LoadedAssets(
+    val packs: MutableMap<String, MutableSet<String>> = mutableMapOf(),
+    var assets: MutableMap<String, AddonAssets> = mutableMapOf(),
     val bots: MutableMap<ResourceLocation, MutableMap<String, LoadedVariant>> = mutableMapOf(),
 )
 
@@ -52,7 +55,7 @@ data class LoadedVariant(
 )
 
 @Environment(EnvType.CLIENT)
-object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(), IdentifiableResourceReloadListener {
+internal object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(), IdentifiableResourceReloadListener {
     const val ASSETS_TOML_NAME = "assets.toml"
     const val BITMAP_BITS_NAME = "bitmap.bits"
     const val PHYSICS_TOML_NAME = "physics.toml"
@@ -60,9 +63,9 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
     override fun getFabricId(): ResourceLocation = rl("assets")
 
     override fun prepare(manager: ResourceManager, profiler: ProfilerFiller): LoadedAssets {
-        AddonClientNotices.clear()
+        AddonNotices.clear(AddonNotice.Side.Assets)
         val out = LoadedAssets()
-        val addons = mutableListOf<AddonAssets>()
+        val addons = mutableMapOf<String, AddonAssets>()
         for (pack in manager.listPacks()) {
             if (pack.packId().let { it.startsWith("fabric-") || it == "minecraft" || it == "realms" }) continue
             val devIgnoreAddons = ShowbizEnv.isDev() && pack.packId() != Showbiz.MOD_ID
@@ -70,22 +73,23 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
             var warnings = 0
 
             namespace@ for (namespace in pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
+                val addonId = namespace
                 fun err(type: AddonErr, throwable: Throwable? = null) {
                     errors += 1
-                    AddonClientNotices.add(
-                        namespace,
-                        AddonNotice(AddonNotice.Severity.Error, type.getText(), throwable = throwable)
+                    AddonNotices.add(
+                        addonId,
+                        AddonNotice(AddonNotice.Severity.Error, AddonNotice.Side.Assets, type.getText(), throwable = throwable)
                     )
-                    Showbiz.log.error("Addon '$namespace': ${type.getText().string}\n", throwable)
+                    Showbiz.log.error("Addon '$addonId': ${type.getText().string}\n", throwable)
                 }
                 fun bitmapWarnHandler(id: String, message: BitsMap.LogMessage) {
                     warnings += 1
                     if (devIgnoreAddons) return
-                    AddonClientNotices.add(
-                        namespace,
-                        AddonNotice(AddonNotice.Severity.Warning, rlCustom(namespace, id), message)
+                    AddonNotices.add(
+                        addonId,
+                        AddonNotice(AddonNotice.Severity.Warning, AddonNotice.Side.Assets, rlCustom(addonId, id), message)
                     )
-                    Showbiz.log.warn("Bitmap '$namespace:$id': $message")
+                    Showbiz.log.warn("Bitmap '$addonId:$id': $message")
                 }
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
@@ -110,7 +114,7 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 }
 
                 if (pack.getResource(PackType.CLIENT_RESOURCES, rlCustom(namespace, "showbiz")) != null) {
-                    Showbiz.log.info("Loading addon '${namespace}'")
+                    Showbiz.log.info("Loading addon '${addonId}'")
                 }
 
                 // Finding bots
@@ -239,11 +243,10 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
 
                 if (bots.isNotEmpty()) {
                     bots.entries.removeIf { (botId, bot) -> botId.isEmpty() || bot == null }
-                    val assets = AddonAssets(
-                        id = namespace,
-                        bots = bots.mapKeys { (key, _) -> ResourceId(namespace, key) }.mapValues { (_, v) -> v!! }
+                    out.packs.getOrPut(pack.packId()) { mutableSetOf() } += addonId
+                    addons[addonId] = AddonAssets(
+                        bots = bots.mapKeys { (key, _) -> ResourceId(addonId, key) }.mapValues { (_, v) -> v!! },
                     )
-                    addons.add(assets)
                 }
             }
 
@@ -251,18 +254,18 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
                 if (warnings > 0 || errors > 0) Showbiz.log.warn("Pack '${pack.packId()}' had $warnings warnings and $errors errors")
             }
         }
-        out.addons = addons
+        out.assets = addons
         return out
     }
 
     override fun apply(loaded: LoadedAssets, manager: ResourceManager, profiler: ProfilerFiller) {
-        ShowbizClient.addons = loaded.addons
+        ShowbizClient.addons = loaded.assets
         ShowbizClient.resetAssetErrors()
 
         // Collecting bots
         val bots = mutableMapOf<ResourceId, AddonBot>()
-        for (addon in loaded.addons) {
-            Showbiz.log.info("Loaded addon '${addon.id}' (resource pack)")
+        for ((addonId, addon) in loaded.assets) {
+            Showbiz.log.info("Loaded addon '${addonId}' (resource pack)")
             for ((id, bot) in addon.bots) {
                 bots[id] = bot
             }
@@ -322,11 +325,26 @@ object AddonAssetsReloadListener : SimplePreparableReloadListener<LoadedAssets>(
         ShowbizClient.botModels = models
         ShowbizClient.botAnimations = animations
 
+        // Documenting addon packs
+        for ((packId, addons) in loaded.packs) {
+            Showbiz.addonPacks[packId] = addons
+        }
+
         // Displaying the notice screen
-        if (AddonClientNotices.shouldShowScreen()) {
-            val minecraft = Minecraft.getInstance()
-            val parent = minecraft.screen
-            minecraft.setScreen(AddonNoticeScreen(parent))
+        if (AddonNotices.shouldShowScreen(Side.Assets)) {
+            AddonNotices.showScreen()
+        }
+    }
+
+    fun reloadPack(packId: String) {
+        val minecraft = Minecraft.getInstance()
+        minecraft.resourcePackRepository.reload()
+
+        val pack = minecraft.resourcePackRepository.getPack(packId) ?: return
+        MultiPackResourceManager(PackType.CLIENT_RESOURCES, listOf(pack.open())).use { manager ->
+            val loaded = prepare(manager, InactiveProfiler.INSTANCE)
+            apply(loaded, manager, InactiveProfiler.INSTANCE)
+            minecraft.levelRenderer.allChanged()
         }
     }
 }

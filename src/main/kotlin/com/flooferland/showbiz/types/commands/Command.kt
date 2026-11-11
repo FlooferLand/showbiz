@@ -1,11 +1,13 @@
 package com.flooferland.showbiz.types.commands
 
-import net.minecraft.*
-import net.minecraft.commands.*
-import net.minecraft.network.chat.*
 import com.flooferland.showbiz.types.permissions.PermissionContext
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import net.minecraft.ChatFormatting
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.Commands
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 
 abstract class Command(val name: String) {
     abstract fun description(): MutableComponent?
@@ -131,6 +133,7 @@ abstract class Command(val name: String) {
         companion object {
             fun empty() = Response(Component.empty(), Type.None, ExitCodes.SUCCESS)
 
+            fun success() = Response(Component.empty(), Type.Success, ExitCodes.SUCCESS)
             fun success(text: Component) = Response(text, Type.Success, ExitCodes.SUCCESS)
             fun success(text: String) = success(Component.literal(text))
 

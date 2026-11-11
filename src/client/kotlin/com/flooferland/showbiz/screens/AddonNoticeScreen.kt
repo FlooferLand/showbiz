@@ -1,14 +1,17 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.network.chat.*
-import net.minecraft.util.*
-import com.flooferland.showbiz.addons.AddonClientNotices
 import com.flooferland.showbiz.addons.AddonNotice
+import com.flooferland.showbiz.addons.AddonNotices
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.ObjectSelectionList
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
+import net.minecraft.util.FormattedCharSequence
 
 class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("Showbiz Addon Notice")) {
     lateinit var addonList: SelectionList
@@ -20,7 +23,7 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
 
         val listTop = 32
         val listHeight = height - 60
-        val addonIds = AddonClientNotices.getAddonIds().toList()
+        val addonIds = AddonNotices.getAddonIds().toList()
 
         val nameWidthMax = addonIds.maxOfOrNull { font.width(it) } ?: 0
         val addonWidth = nameWidthMax + font.width(makeBadge(99, 99)) + 25
@@ -32,7 +35,7 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
         addonList = SelectionList(minecraft, addonWidth, listHeight, listTop, font.lineHeight + 5)
         addonList.place(10, listTop, addonWidth, listHeight)
         for (id in addonIds) {
-            val notices = AddonClientNotices.getAddon(id)
+            val notices = AddonNotices.getAddon(id)
             val errors = notices.count { it.severity == AddonNotice.Severity.Error }
             val warnings = notices.count { it.severity == AddonNotice.Severity.Warning }
             val row = AddonRow(id, errors, warnings) { setAddon(id) }
@@ -71,26 +74,30 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
     fun setAddon(addonId: String) {
         noticeList.clearRows()
         noticeList.scrollAmount = 0.0
-        for ((i, notice) in AddonClientNotices.getAddon(addonId).withIndex()) {
+        for ((i, notice) in AddonNotices.getAddon(addonId).withIndex()) {
             val backgroundColor = if (i % 2 == 0) 0x66000000 else 0x66404040
-            val (labelText, labelColor) = when (notice.severity) {
-                AddonNotice.Severity.Info -> Pair("Info", CommonColors.LIGHTER_GRAY)
-                AddonNotice.Severity.Warning -> Pair("Warning", CommonColors.YELLOW)
-                AddonNotice.Severity.Error -> Pair("Error", CommonColors.RED)
+            val labelText = when (notice.severity) {
+                AddonNotice.Severity.Info -> Component.literal("Info").withColor(CommonColors.LIGHTER_GRAY)
+                AddonNotice.Severity.Warning -> Component.literal("Warning").withColor(CommonColors.YELLOW)
+                AddonNotice.Severity.Error -> Component.literal("Error").withColor(CommonColors.RED)
             }
+            val side = when (notice.side) {
+                AddonNotice.Side.Assets -> "resource pack"
+                AddonNotice.Side.Data -> "data pack"
+            }.let { Component.literal(" - $it").withStyle(ChatFormatting.DARK_GRAY) }
 
-            val label = Component.literal(labelText)
+            val label = labelText.append(side)
             notice.title?.let { label.append(Component.literal(" : $it").withStyle(ChatFormatting.GRAY)) }
 
             val text = notice.text.copy()
             notice.throwable?.let { text.append(Component.literal("\n${it}\n").withStyle(ChatFormatting.GRAY)) }
 
             // Adding lines
-            noticeList.addRow(NoticeLine(label.visualOrderText, labelColor, backgroundColor, 4, true, text))
+            noticeList.addRow(NoticeLine(label.visualOrderText, backgroundColor, 4, true, text))
             font.split(text, wrapWidth).forEach { line ->
-                noticeList.addRow(NoticeLine(line, 0xFFFFFF, backgroundColor, 12, false, text))
+                noticeList.addRow(NoticeLine(line, backgroundColor, 12, false, text))
             }
-            noticeList.addRow(NoticeLine(FormattedCharSequence.EMPTY, CommonColors.WHITE, backgroundColor, 0, false, text))
+            noticeList.addRow(NoticeLine(FormattedCharSequence.EMPTY, backgroundColor, 0, false, text))
         }
     }
 
@@ -136,13 +143,13 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
         }
     }
 
-    inner class NoticeLine(val line: FormattedCharSequence, val color: Int, val backgroundColor: Int, val indent: Int, val topBorder: Boolean, val text: Component) : Row() {
+    inner class NoticeLine(val line: FormattedCharSequence, val backgroundColor: Int, val indent: Int, val topBorder: Boolean, val text: Component) : Row() {
         override fun getNarration() = text
         override fun render(graphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
             val fillTop = top - 4
             graphics.fill(left, fillTop, left + width, top + height, backgroundColor)
             if (topBorder) graphics.fill(left, fillTop, left + width, fillTop + 1, 0x66FFFFFF)
-            graphics.drawString(font, line, left + indent, top + (height - font.lineHeight) / 2, color, false)
+            graphics.drawString(font, line, left + indent, top + (height - font.lineHeight) / 2, CommonColors.WHITE, false)
         }
     }
     //endregion

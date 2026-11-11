@@ -68,6 +68,9 @@
 
     "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
     "config.prop.audio.playBotEffects": "Play custom bot effects",
+    "config.prop.video.playVideo": "Allow video playback",
+    "config.prop.video.highResVideo": "High resolution video (server toggle)",
+    "config.prop.video.devFastVideoRender": "Fast video render (DEV)",
     "config.prop.permissions.controlPlayback": "Who can control show playback",
     "config.prop.permissions.editScreenAccess": "Who can access edit screens on blocks/entities",
     "config.prop.permissions.switchReels": "Who can take out or switch show reels",
@@ -75,5 +78,5 @@
     "config.prop.permissions.editServerShowBridge": "Who can edit the server's Show Bridge (serial port access)",
     "config.prop.addons.showNoticeScreen": "Show the notice screen more (you can't escape it)",
     "config.prop.other.forceVanillaLighting": "Force vanilla lighting (even when shaders are on)",
-    "config.prop.other.serverHighResVideo": "High resolution video (server toggle)"
+    "config.prop.other.checkForUpdates": "Enable the update checker"
 }

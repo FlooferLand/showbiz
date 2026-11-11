@@ -2,14 +2,19 @@ package com.flooferland.showbiz
 
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
+import com.flooferland.showbiz.network.packets.ClientCapabilitiesPacket
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.IBot
+import com.flooferland.showbiz.types.SemVer
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.level.block.entity.BlockEntity
@@ -69,6 +74,39 @@ object ServerPackets {
 
             if (before != hash()) {
                 ctx.player().playNotifySound(ModSounds.Select.event, SoundSource.PLAYERS, 0.1f, 1.4f)
+            }
+        }
+
+        ServerPackets.listen(ClientCapabilitiesPacket.type) { packet, ctx ->
+            val player = ctx.player() ?: return@listen
+            Showbiz.playerPrefs[player.uuid] = packet
+            Showbiz.log.debug("Player '${player.name.string}' preferences: ${packet.toString()}")
+
+            val playerAddons = packet.addons
+            for ((addonId, addon) in Showbiz.addons) {
+                // Getting versions
+                val serverVersion = SemVer(addon.manifest.version)
+                val playerVersion = playerAddons[addonId] ?: run {
+                    val reason = Component.literal("Missing Showbiz addon ").append(Component.literal("$addonId v${addon.manifest.version}").withStyle(ChatFormatting.YELLOW))
+                        .append(Component.literal("\n\n").withStyle(ChatFormatting.RESET))
+                        .append(Component.literal("Installed addons:\n").append("[${playerAddons.keys.sorted().joinToString(", ")}]\n\n"))
+                        .append(Component.literal("Server addons:\n").append("[${Showbiz.addons.keys.sorted().joinToString(", ")}]\n\n"))
+                    player.connection.send(ClientboundDisconnectPacket(reason))
+                    return@listen
+                }
+
+                // Comparing
+                if (playerVersion.lesserThan(serverVersion) ?: false) {
+                    val reason = Component.literal("Showbiz addon out of date: ")
+                        .append(Component.literal(addonId).withStyle(ChatFormatting.GRAY))
+                        .append(" (v${playerVersion})\n")
+                        .append("v$serverVersion is installed on the server")
+                    player.connection.send(ClientboundDisconnectPacket(reason))
+                    return@listen
+                }
+                if (playerVersion.string != serverVersion.string) {
+                    player.sendSystemMessage(Component.literal("Showbiz addon '${addonId}' version mismatch ($playerVersion != $serverVersion)"))
+                }
             }
         }
     }

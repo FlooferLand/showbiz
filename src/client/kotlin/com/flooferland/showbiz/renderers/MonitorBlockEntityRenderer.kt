@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.renderers
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
@@ -72,14 +73,16 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
             return
         }
 
+        // Returning means we just render black rn since the interior of the TV is black
         val data = entity.video.data
         val width = data.width
         val height = data.height
-        if (width == 0 || height == 0 || data.bytes.isEmpty()) {
+        if (width == 0 || height == 0 || data.bytes.isEmpty() || !Showbiz.config.video.playVideo) {
             entity.colorAverage = Color4.ZERO
             return
         }
 
+        // Decompressing and uploading a frame
         val state = getOrCreateState(entity, width, height)
         if (data.timestamp != state.lastFrame && !state.decoding) {
             state.lastFrame = data.timestamp
@@ -88,28 +91,30 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
             decoder.execute {
                 try {
                     val raw = bytes.size == width * height * 3
-                    val src = if (raw) bytes else {
-                        val jpg = ImageIO.read(bytes.inputStream()) ?: return@execute
+                    val src = if (raw) bytes else bytes.inputStream().use {
+                        val jpg = ImageIO.read(it) ?: return@execute
                         (jpg.raster.dataBuffer as DataBufferByte).data  // BGR bytes
                     }
                     val ro = if (raw) 0 else 2
                     val image = NativeImage(width, height, false)
-                    var sumR = 0
-                    var sumG = 0
-                    var sumB = 0
-                    for (i in 0 until width * height) {
-                        val r = src[i * 3 + ro].toInt() and 0xFF
-                        val g = src[i * 3 + 1].toInt() and 0xFF
-                        val b = src[i * 3 + 2 - ro].toInt() and 0xFF
-                        image.setPixelRGBA(i % width, i / width, (0xFF shl 24) or (b shl 16) or (g shl 8) or r)
-                        if (i % 8 == 0) {
-                            sumR += r.coerceAtLeast(10)
-                            sumG += g.coerceAtLeast(10)
-                            sumB += b.coerceAtLeast(10)
+                    if (!Showbiz.config.video.devFastVideoRender) {
+                        var sumR = 0
+                        var sumG = 0
+                        var sumB = 0
+                        for (i in 0 until width * height) {
+                            val r = src[i * 3 + ro].toInt() and 0xFF
+                            val g = src[i * 3 + 1].toInt() and 0xFF
+                            val b = src[i * 3 + 2 - ro].toInt() and 0xFF
+                            image.setPixelRGBA(i % width, i / width, (0xFF shl 24) or (b shl 16) or (g shl 8) or r)
+                            if (i % 8 == 0) {
+                                sumR += r.coerceAtLeast(10)
+                                sumG += g.coerceAtLeast(10)
+                                sumB += b.coerceAtLeast(10)
+                            }
                         }
+                        val count = (width * height + 7) / 8
+                        entity.colorAverage = Color4(sumR / count, sumG / count, sumB / count)
                     }
-                    val count = (width * height + 7) / 8
-                    entity.colorAverage = Color4(sumR / count, sumG / count, sumB / count)
                     state.pending = image
                 } finally {
                     state.decoding = false
