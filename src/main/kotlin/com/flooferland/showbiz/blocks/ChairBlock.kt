@@ -1,26 +1,38 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.item.context.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.level.entity.*
-import net.minecraft.world.level.gameevent.*
-import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.entities.SeatEntity
 import com.flooferland.showbiz.types.ISeatBlock
 import com.flooferland.showbiz.utils.Extensions.generateHorizontal
 import com.flooferland.showbiz.utils.Extensions.getCachedOrRotate
-
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.MobSpawnType
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.SpawnEggItem
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.HorizontalDirectionalBlock
+import net.minecraft.world.level.block.Mirror
+import net.minecraft.world.level.block.Rotation
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.StateDefinition
+import net.minecraft.world.level.block.state.properties.BooleanProperty
+import net.minecraft.world.level.block.state.properties.DirectionProperty
+import net.minecraft.world.level.entity.EntityTypeTest
+import net.minecraft.world.level.gameevent.GameEvent
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.BooleanOp
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 
 class ChairBlock(props: Properties) : Block(props.dynamicShape()), ISeatBlock {
     init {
@@ -110,7 +122,7 @@ class ChairBlock(props: Properties) : Block(props.dynamicShape()), ISeatBlock {
         const val TUCK_OFFSET = 6 / 16.0
         val FACING: DirectionProperty = HorizontalDirectionalBlock.FACING
         val TUCKED: BooleanProperty = BooleanProperty.create("tucked")
-        val shapes: HashMap<Direction, VoxelShape> = run {
+        private val shapes: HashMap<Direction, VoxelShape> = run {
             var shape = Shapes.empty()
             shape = Shapes.join(shape, Shapes.box(0.75, 0.0, 0.75, 0.8125, 0.9375, 0.875), BooleanOp.OR)
             shape = Shapes.join(shape, Shapes.box(0.1875, 0.0, 0.75, 0.25, 0.9375, 0.875), BooleanOp.OR)
