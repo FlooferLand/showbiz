@@ -34,7 +34,7 @@ data class MonitorState(
 class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : BlockEntityRenderer<MonitorBlockEntity> {
     private val states = WeakHashMap<MonitorBlockEntity, MonitorState>()
     private val decoder = Executors.newSingleThreadExecutor { Thread(it, "showbiz-video").apply { isDaemon = true } }
-    init { ImageIO.setUseCache(false) }
+        .also { it.execute { ImageIO.setUseCache(false) } }
 
     private fun useCalloc() =
         !Showbiz.config.video.devFastVideoRender
