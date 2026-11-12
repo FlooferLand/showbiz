@@ -21,6 +21,9 @@ object StackPlacePreviewRenderer {
         val player = mc.player ?: return
         val level = mc.level ?: return
         val heldStack = player.getHeldItem { it.item is IStackPlacePreview } ?: run {
+            if (!lastStack.isEmpty && player.getHeldItem { it != lastStack } != null) {
+                player.displayClientMessage(Component.empty(), true)
+            }
             lastStack = ItemStack.EMPTY
             return
         }
