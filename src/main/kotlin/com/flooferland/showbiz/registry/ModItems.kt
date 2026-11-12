@@ -1,15 +1,18 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
-import net.minecraft.world.item.Item.*
 import com.flooferland.showbiz.components.FloodlightComponent
 import com.flooferland.showbiz.components.OptionBlockPos
 import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.components.PropComponent
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
 import com.flooferland.showbiz.items.*
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Items
 
 enum class ModItems {
     Wand(
@@ -38,6 +41,12 @@ enum class ModItems {
         "bot", ::BotItem,
         { stacksTo(1) },
         model = ItemModelId.Generated
+    ),
+    Prop(
+        "prop", ::PropItem,
+        { stacksTo(1).component(ModComponents.Prop.type, PropComponent(rl("moonshine"))) },
+        model = ItemModelId.Custom,
+        hideFromPlayer = true
     ),
     Floodlight(
         "floodlight", ::FloodlightItem,

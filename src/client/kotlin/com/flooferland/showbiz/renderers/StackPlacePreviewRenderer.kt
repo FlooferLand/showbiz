@@ -33,9 +33,9 @@ object StackPlacePreviewRenderer {
         val blockPos = hitResult.blockPos ?: return
 
         var entity = cachedEntity
-        if (entity == null || heldStack != lastStack) {
+        if (entity == null || heldStack != lastStack)
             entity = heldItem.getEntity(level, heldStack)
-        }
+        if (entity == null) return
         heldItem.placeEntity(entity, hitResult.location,  player)
         cachedEntity = entity
 

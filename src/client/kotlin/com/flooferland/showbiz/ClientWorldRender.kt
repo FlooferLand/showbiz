@@ -49,10 +49,13 @@ object ClientWorldRender {
         poseStack.translate(-cam.position.x, -cam.position.y, -cam.position.z)
         try {
             action(mc, level, player, buffer, poseStack, partialTick)
+            buffer.endBatch()
         } catch (throwable: Throwable) {
             Showbiz.log.error("Render error", throwable)
+            while (!poseStack.clear()) {
+                poseStack.popPose()
+            }
         }
-        buffer.endBatch()
         poseStack.popPose()
     }
 }

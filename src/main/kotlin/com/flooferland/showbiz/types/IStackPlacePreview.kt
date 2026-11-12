@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.round
 
 interface IStackPlacePreview {
-    fun getEntity(level: Level, stack: ItemStack): Entity
+    fun getEntity(level: Level, stack: ItemStack): Entity?
     fun placeEntity(entity: Entity, pos: Vec3, player: Player) {
         var pos = pos.voxelSnap()
         var yaw = (player.yRot + 180f)

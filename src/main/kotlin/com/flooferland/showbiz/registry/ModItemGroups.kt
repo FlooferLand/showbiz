@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.item.*
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.world.item.ItemStack
 
 enum class ModItemGroups {
     Main("main", ModRecipes.MitziPlush, { main, deco ->
@@ -17,14 +18,24 @@ enum class ModItemGroups {
         for (disc in ModMusicDiscs.entries) {
             main.add(disc.item.defaultInstance)
         }
+
+        // Plushies
         main.add(ModRecipes.MitziPlush.outputProvider())
         main.add(ModRecipes.MiniPlush.outputProvider())
         main.add(ModRecipes.DookPlush.outputProvider())
         main.add(ModRecipes.GullyDookPlush.outputProvider())
 
+        //region Deco
         for (entry in ModDecoBlocks.children) {
             deco.add(entry.item.defaultInstance)
         }
+
+        // Props
+        deco.add(ModRecipes.MoonshineProp.outputProvider())
+        deco.add(ModRecipes.LargeRockProp.outputProvider())
+        deco.add(ModRecipes.MediumRockProp.outputProvider())
+        deco.add(ModRecipes.SmallRockProp.outputProvider())
+        //endregion
     });
 
     enum class Section {

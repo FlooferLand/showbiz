@@ -1,16 +1,21 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.*
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.MobCategory
+import net.minecraft.world.level.Level
 
 @Suppress("unused")
 sealed class ModEntities<T : Entity> {
-    data object Plush : ModEntities<PlushEntity>("plush", ::PlushEntity);
+    data object Plush : ModEntities<PlushEntity>("plush", ::PlushEntity)
+    ;
 
     val id: ResourceLocation
     val key: ResourceKey<EntityType<*>>

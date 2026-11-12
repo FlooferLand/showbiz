@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
 import com.flooferland.showbiz.components.PlushComponent
+import com.flooferland.showbiz.components.PropComponent
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlString
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.ItemStack
 
 enum class ModRecipes {
     StagedBot(
@@ -173,6 +174,8 @@ enum class ModRecipes {
         ),
         outputItem = { ModItems.EnderEarl.item.defaultInstance }
     ),
+
+    // PLUSHIES
     MitziPlush(
         "WWW",
         "WDW",
@@ -213,6 +216,44 @@ enum class ModRecipes {
         id = "plush_gully_dook",
         outputItem = {
             ModItems.Plush.item.defaultInstance.apply { set(ModComponents.Plush.type, PlushComponent(rl("gully_dook"))) }
+        }
+    ),
+
+    // Props
+    MoonshineProp(
+        "W",
+        "B",
+        mapOf("W" to Ingredient(item="wheat"), "B" to Ingredient(item="barrel")),
+        id = "moonshine_prop",
+        outputItem = {
+            ModItems.Prop.item.defaultInstance.apply { set(ModComponents.Prop.type, PropComponent(rl("moonshine"))) }
+        }
+    ),
+    LargeRockProp(
+        "BBB",
+        "CCC",
+        mapOf("C" to Ingredient(item="cobblestone"), "B" to Ingredient(item="stone_button")),
+        id = "large_rock_prop",
+        outputItem = {
+            ModItems.Prop.item.defaultInstance.apply { set(ModComponents.Prop.type, PropComponent(rl("large_rock"))) }
+        }
+    ),
+    MediumRockProp(
+        "BB",
+        "CC",
+        mapOf("C" to Ingredient(item="cobblestone"), "B" to Ingredient(item="stone_button")),
+        id = "medium_rock_prop",
+        outputItem = {
+            ModItems.Prop.item.defaultInstance.apply { set(ModComponents.Prop.type, PropComponent(rl("medium_rock"))) }
+        }
+    ),
+    SmallRockProp(
+        "B",
+        "C",
+        mapOf("C" to Ingredient(item="cobblestone"), "B" to Ingredient(item="stone_button")),
+        id = "small_rock_prop",
+        outputItem = {
+            ModItems.Prop.item.defaultInstance.apply { set(ModComponents.Prop.type, PropComponent(rl("small_rock"))) }
         }
     ),
 

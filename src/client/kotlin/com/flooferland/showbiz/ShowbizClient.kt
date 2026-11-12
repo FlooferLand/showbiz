@@ -13,6 +13,7 @@ import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.handbook.Handbook
 import com.flooferland.showbiz.handbook.HandbookReloadListener
 import com.flooferland.showbiz.items.PlushItem
+import com.flooferland.showbiz.items.PropItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
@@ -125,13 +126,21 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Cymbal, ::CymbalBlockEntityRenderer)
             add(ModBlocks.ReelHolder, ::ReelHolderBlockEntityRenderer)
             add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
+
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.CollidePart.type, ::CollidePartEntityRenderer)
             EntityRendererRegistry.register(ModClientEntities.Decor.type, ::DecorEntityRenderer)
+
             EntityRendererRegistry.register(ModEntities.Plush.type, ::PlushEntityRenderer)
+
             EntityRendererRegistry.register(ModLivingEntities.Bot.type, ::BotEntityRenderer)
+            EntityRendererRegistry.register(ModLivingEntities.Prop.type, ::PropEntityRenderer)
             EntityRendererRegistry.register(ModLivingEntities.Floodlight.type, ::FloodlightEntityRenderer)
             EntityRendererRegistry.register(ModLivingEntities.Seat.type, ::SeatEntityRenderer)
+
+            /*mapOf(
+                ModDecoEntities.Moonshine to ::MoonshinePropEntityRenderer
+            ).forEach { (key, value) -> EntityRendererRegistry.register(key.type, value) }*/
         }
 
         // GeckoLib renderers
@@ -147,6 +156,13 @@ object ShowbizClient : ClientModInitializer {
             var renderer: PlushItemRenderer? = null
             override fun getGeoItemRenderer(): PlushItemRenderer {
                 if (renderer == null) renderer = PlushItemRenderer()
+                return renderer!!
+            }
+        }
+        (ModItems.Prop.item as PropItem).renderProviderHolder.value = object : GeoRenderProvider {
+            var renderer: PropItemRenderer? = null
+            override fun getGeoItemRenderer(): PropItemRenderer {
+                if (renderer == null) renderer = PropItemRenderer()
                 return renderer!!
             }
         }
