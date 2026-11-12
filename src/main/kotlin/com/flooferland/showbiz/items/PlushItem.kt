@@ -1,27 +1,29 @@
 package com.flooferland.showbiz.items
 
-import net.minecraft.network.chat.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.item.context.*
-import net.minecraft.world.level.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.entities.PlushEntity
 import com.flooferland.showbiz.registry.ModComponents
+import com.flooferland.showbiz.types.IStackPlacePreview
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import com.flooferland.showbiz.utils.rl
-import java.util.function.Consumer
+import net.minecraft.network.chat.Component
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.context.UseOnContext
+import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
 import org.apache.commons.lang3.mutable.MutableObject
 import software.bernie.geckolib.animatable.GeoItem
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
+import java.util.function.Consumer
 
-class PlushItem(properties: Properties) : Item(properties), GeoItem {
+class PlushItem(properties: Properties) : Item(properties), GeoItem, IStackPlacePreview {
     val renderProviderHolder = MutableObject<GeoRenderProvider>()
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
@@ -36,10 +38,13 @@ class PlushItem(properties: Properties) : Item(properties), GeoItem {
         return Component.translatable("item.${id.namespace}.plush.${id.path}");
     }
 
+    override fun getEntity(level: Level, stack: ItemStack) = PlushEntity(level, stack)
+
     override fun useOn(context: UseOnContext): InteractionResult {
         val level = context.level ?: return InteractionResult.SUCCESS
         val player = context.player ?: return InteractionResult.PASS
         if (level.isClientSide) return InteractionResult.SUCCESS
+
         val pos = context.clickedPos.above()
         val stack = context.itemInHand
         if (!player.mayPlaceAt(level, pos, stack)) return InteractionResult.FAIL
@@ -53,10 +58,11 @@ class PlushItem(properties: Properties) : Item(properties), GeoItem {
     }
 
     fun place(level: Level, player: Player, stack: ItemStack, pos: Vec3) {
+        if (!player.mayBuild()) return
         if (stack.isEmpty) return
+
         val entity = PlushEntity(level, stack)
-        entity.setPos(pos)
-        entity.yRot = 180f + player.yRot
+        placeEntity(entity, pos, player)
         level.addFreshEntity(entity)
         stack.shrink(1)
     }

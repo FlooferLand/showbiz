@@ -36,7 +36,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.ChatFormatting
@@ -80,6 +79,7 @@ object ShowbizClient : ClientModInitializer {
             ModClientLights.load()
             ClientConnections
             ClientPackets.init()
+            ClientWorldRender
             if (ShowbizEnv.hasIRLights()) run { IRLights.register() }
         }
         ShowbizShowAudio.init()
@@ -169,33 +169,6 @@ object ShowbizClient : ClientModInitializer {
         }
 
         // World
-        WorldRenderEvents.LAST.register { ctx ->
-            if (ctx == null) return@register
-            val mc = Minecraft.getInstance() ?: return@register
-            val player = mc.player ?: return@register
-            val level = player.clientLevel ?: return@register
-            val partialTick = ctx.tickCounter().getGameTimeDeltaPartialTick(true)
-            val cam = ctx.camera() ?: return@register
-
-            val poseStack = ctx.matrixStack() ?: return@register
-            val buffer = mc.renderBuffers().bufferSource()
-            poseStack.pushPose()
-            poseStack.translate(-cam.position.x, -cam.position.y, -cam.position.z)
-            try {
-                JukeboxLyricRenderer.render(level, player, buffer, poseStack)
-                CollidePartEntityRenderer.render(mc, buffer, poseStack)
-                ModelPartEntityRenderer.render(mc, buffer, poseStack)
-                CurtainBlockEntityRenderer.render(mc, buffer, poseStack)
-                BotEntityRenderer.render(mc, buffer, poseStack)
-                ConnectionRenderer.draw(player, buffer, partialTick)
-                ConnectionRenderer.renderDeferred(poseStack)
-                DecorEntity.moveAll(ctx)
-            } catch (throwable: Throwable) {
-                Showbiz.log.error("Render error", throwable)
-            }
-            buffer.endBatch()
-            poseStack.popPose()
-        }
         ClientTickEvents.END_WORLD_TICK.register { level ->
             if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
                 for ((_, err) in BaseBotModel.errorsTriggered) {

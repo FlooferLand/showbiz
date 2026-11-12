@@ -57,7 +57,7 @@ fun lerp(a: Float, b: Float, t: Float): Float {
     return a * (1.0f - t) + b * t
 }
 
-fun voxelSnap(value: Float, step: Float = 16f): Float {
+fun voxelSnap(value: Double, step: Double = 16.0): Double {
     val step = 1f / step
-    return (value / step).roundToInt().toFloat() * step
+    return (value / step).roundToInt().toDouble() * step
 }

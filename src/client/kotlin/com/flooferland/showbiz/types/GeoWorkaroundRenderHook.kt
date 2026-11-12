@@ -33,6 +33,7 @@ class GeoWorkaroundRenderHook() {
     }
     private val capturedBoneMatrices = mutableMapOf<String, Captured>()
     private var frame = 0
+
     // Physics: the bones a physics system reads a drawn pose from
     private var physicsPoses: MutableMap<String, Matrix4f>? = null
     private var physicsBones: Set<String> = emptySet()

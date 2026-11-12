@@ -155,7 +155,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         val camera = Minecraft.getInstance().gameRenderer.mainCamera
         val fastGraphics = Minecraft.getInstance()?.options?.graphicsMode()?.get() == GraphicsStatus.FAST
 
-        val lowerOffset = voxelSnap(randomY * 0.2f).toDouble() + lower
+        val lowerOffset = voxelSnap(randomY * 0.2) + lower
         val originalBox = box
         val box = if (fastGraphics) box else box.expandTowards(0.0, -lowerOffset, 0.0)
         val bottomBox = AABB(0.0, originalBox.bottomCenter.y, 0.0, 1.0, (originalBox.bottomCenter.y - lowerOffset), 1.0)

@@ -1,16 +1,6 @@
 package com.flooferland.showbiz.entities
 
-import net.minecraft.nbt.*
-import net.minecraft.network.syncher.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.damagesource.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.phys.*
+import com.flooferland.showbiz.Permissions.Companion.mayBuildAt
 import com.flooferland.showbiz.Permissions.Companion.mayHurt
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.items.PlushItem
@@ -23,6 +13,25 @@ import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.getOrNull
 import com.flooferland.showbiz.utils.Extensions.handItem
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityDimensions
+import net.minecraft.world.entity.MoverType
+import net.minecraft.world.entity.Pose
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
@@ -65,6 +74,7 @@ class PlushEntity(level: Level, defaultItem: ItemStack) : Entity(ModEntities.Plu
     }
 
     fun grab(player: Player): InteractionResult {
+        if (!player.mayBuildAt(blockPosition())) InteractionResult.FAIL
         player.handItem(itemStack.copyWithCount(1))
         remove(RemovalReason.DISCARDED)
         return InteractionResult.SUCCESS

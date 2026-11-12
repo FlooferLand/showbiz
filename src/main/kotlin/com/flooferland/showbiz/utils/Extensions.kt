@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.FastColor
 import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
+import net.minecraft.world.ItemInteractionResult
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -56,12 +56,13 @@ object Extensions {
         setChanged()
         level?.sendBlockUpdated(this.blockPos, blockState, blockState, Block.UPDATE_ALL)
     }
-    fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
-        val player = player as? ServerPlayer ?: return InteractionResult.PASS
-        if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return InteractionResult.FAIL
-        if (player.isHolding { it.item is WandItem }) return InteractionResult.PASS
-        player.openMenu(state.getMenuProvider(level, pos))
-        return InteractionResult.SUCCESS
+
+    /** Should be called in useItemOn */
+    fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
+        if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return ItemInteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return ItemInteractionResult.CONSUME
+        if (player is ServerPlayer) player.openMenu(state.getMenuProvider(level, pos))
+        return ItemInteractionResult.SUCCESS
     }
 
     fun Player.setInventoryChanged() {
@@ -207,7 +208,10 @@ object Extensions {
     fun String.isSnakeCase() =
         isNotEmpty() && split('_').all { it.isNotEmpty() && it.all { char -> (char.isLowerCase() && char.isLetter()) || char.isDigit() } }
 
+    //region Vec3
     fun Vec3.divide(factor: Double) = Vec3(x / factor, y / factor, z / factor)
+    fun Vec3.voxelSnap(step: Double = 16.0) = Vec3(voxelSnap(x, step), voxelSnap(y, step), voxelSnap(z, step))
+    //endregion
 
     // region Number conversion funkiness
     fun Int.secsToTicks(): Int = this * 20
