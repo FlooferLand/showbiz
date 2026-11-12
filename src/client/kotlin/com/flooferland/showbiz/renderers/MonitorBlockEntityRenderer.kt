@@ -36,6 +36,9 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
     private val decoder = Executors.newSingleThreadExecutor { Thread(it, "showbiz-video").apply { isDaemon = true } }
     init { ImageIO.setUseCache(false) }
 
+    private fun useCalloc() =
+        !Showbiz.config.video.devFastVideoRender
+
     private fun getOrCreateState(entity: MonitorBlockEntity, width: Int, height: Int): MonitorState {
         val id = rl("showbiz_video_${entity.blockPos.x}_${entity.blockPos.y}_${entity.blockPos.z}")
         val existing = states[entity]
@@ -48,7 +51,7 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
             return existing
         }
 
-        val texture = DynamicTexture(NativeImage(width, height, false))
+        val texture = DynamicTexture(NativeImage(width, height, useCalloc()))
         texture.setFilter(false, false)
         Minecraft.getInstance().textureManager.register(id, texture)
         return MonitorState(texture, id).also { states[entity] = it }
@@ -96,25 +99,23 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
                         (jpg.raster.dataBuffer as DataBufferByte).data  // BGR bytes
                     }
                     val ro = if (raw) 0 else 2
-                    val image = NativeImage(width, height, false)
-                    if (!Showbiz.config.video.devFastVideoRender) {
-                        var sumR = 0
-                        var sumG = 0
-                        var sumB = 0
-                        for (i in 0 until width * height) {
-                            val r = src[i * 3 + ro].toInt() and 0xFF
-                            val g = src[i * 3 + 1].toInt() and 0xFF
-                            val b = src[i * 3 + 2 - ro].toInt() and 0xFF
-                            image.setPixelRGBA(i % width, i / width, (0xFF shl 24) or (b shl 16) or (g shl 8) or r)
-                            if (i % 8 == 0) {
-                                sumR += r.coerceAtLeast(10)
-                                sumG += g.coerceAtLeast(10)
-                                sumB += b.coerceAtLeast(10)
-                            }
+                    val image = NativeImage(width, height, useCalloc())
+                    var sumR = 0
+                    var sumG = 0
+                    var sumB = 0
+                    for (i in 0 until width * height) {
+                        val r = src[i * 3 + ro].toInt() and 0xFF
+                        val g = src[i * 3 + 1].toInt() and 0xFF
+                        val b = src[i * 3 + 2 - ro].toInt() and 0xFF
+                        image.setPixelRGBA(i % width, i / width, (0xFF shl 24) or (b shl 16) or (g shl 8) or r)
+                        if (i % 8 == 0) {
+                            sumR += r.coerceAtLeast(10)
+                            sumG += g.coerceAtLeast(10)
+                            sumB += b.coerceAtLeast(10)
                         }
-                        val count = (width * height + 7) / 8
-                        entity.colorAverage = Color4(sumR / count, sumG / count, sumB / count)
                     }
+                    val count = (width * height + 7) / 8
+                    entity.colorAverage = Color4(sumR / count, sumG / count, sumB / count)
                     state.pending = image
                 } finally {
                     state.decoding = false
