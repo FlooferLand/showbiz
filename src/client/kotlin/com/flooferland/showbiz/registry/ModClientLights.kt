@@ -1,12 +1,5 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.client.multiplayer.*
-import net.minecraft.core.*
-import net.minecraft.util.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.lighting.*
-import net.minecraft.world.level.redstone.*
-import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.MonitorBlockEntity
@@ -17,12 +10,19 @@ import com.flooferland.showbiz.types.math.ColorMath.srgbToLinear
 import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.lerp
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import java.util.concurrent.ConcurrentHashMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
+import net.minecraft.util.FastColor
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.lighting.LightEngine
+import net.minecraft.world.level.redstone.Redstone
+import net.minecraft.world.phys.shapes.CollisionContext
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
 
 object ModClientLights {
@@ -157,9 +157,9 @@ object ModClientLights {
 
         val target = (if (entity.isLit) power else 0f) * entity.brightness
         val fadingOut = target < entity.value
-        val speed = 0.14f - (if (fadingOut) 0.03f else 0.0f)
+        val speed = 0.15f - (if (fadingOut) 0.13f else 0.0f)
         entity.value = lerp(entity.value, target, speed * delta)
-        entity.value = entity.value.coerceIn(0f, 1f)
+        entity.value = entity.value.coerceIn(if (entity.isLit) 0.5f else 0f, 1f)
 
         if (useVanillaLights()) {
             val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
@@ -204,9 +204,9 @@ object ModClientLights {
 
         val target = (if (entity.isLit) power else 0f) * entity.brightness
         val fadingOut = target < entity.value
-        val speed = 0.25f - (if (fadingOut) 0.03f else 0.0f)
+        val speed = 0.12f - (if (fadingOut) 0.1f else 0.0f)
         entity.value = lerp(entity.value, target, speed * delta)
-        entity.value = entity.value.coerceIn(0f, 1f)
+        entity.value = entity.value.coerceIn(if (entity.isLit) 0.1f else 0f, 1f)
 
         if (useVanillaLights()) {
             val blockLight = (entity.value * LightEngine.MAX_LEVEL).roundToInt().coerceAtMost(13)
