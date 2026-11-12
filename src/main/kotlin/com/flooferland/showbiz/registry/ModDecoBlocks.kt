@@ -1,21 +1,29 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.data.loot.*
-import net.minecraft.data.models.*
-import net.minecraft.data.models.blockstates.*
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.ChairBlock
 import com.flooferland.showbiz.blocks.base.ShowbizDoorBlock
+import com.flooferland.showbiz.blocks.base.ThinDecoBlock
 import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.utils.Extensions.blockPath
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.data.loot.BlockLootSubProvider
+import net.minecraft.data.models.BlockModelGenerators
+import net.minecraft.data.models.ItemModelGenerators
+import net.minecraft.data.models.blockstates.MultiVariantGenerator
+import net.minecraft.data.models.blockstates.Variant
+import net.minecraft.data.models.blockstates.VariantProperties
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.CarpetBlock
+import net.minecraft.world.level.block.SoundType
+import net.minecraft.world.level.block.state.BlockBehaviour
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 
 // NOTE: Could probably add the ability to pass in a datagen generator for making the model
 //       Ex: { g -> g.createDoor(it) }
@@ -39,7 +47,7 @@ sealed class ModDecoBlocks {
 
     // region | Base types
     sealed class BaseThinDeco(val id: String) : ModDecoBlocks() {
-        val entry = make(id, constructor = { CarpetBlock(it.sound(SoundType.EMPTY)) })
+        val entry = make(id, constructor = { ThinDecoBlock(it.sound(SoundType.EMPTY)) })
         override fun addBlockModels(g: BlockModelGenerators) {
             g.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(entry.block, rl(id).blockPath()))
         }
