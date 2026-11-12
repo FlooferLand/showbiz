@@ -37,7 +37,7 @@ class MonitorBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : Blo
     init { ImageIO.setUseCache(false) }
 
     private fun getOrCreateState(entity: MonitorBlockEntity, width: Int, height: Int): MonitorState {
-        val id = rl("showbiz_video_${entity.blockPos.x}_${entity.blockPos.y}")
+        val id = rl("showbiz_video_${entity.blockPos.x}_${entity.blockPos.y}_${entity.blockPos.z}")
         val existing = states[entity]
         if (existing != null) {
             if (existing.texture.pixels?.width != width || existing.texture.pixels?.height != height) {
