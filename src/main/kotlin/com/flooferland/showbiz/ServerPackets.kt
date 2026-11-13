@@ -82,7 +82,7 @@ object ServerPackets {
             for ((addonId, addon) in Showbiz.addons) {
                 // Checking presence
                 if (!playerAddons.containsKey(addonId)) {
-                    val reason = Component.literal("Missing Showbiz addon ").append(Component.literal("$addonId v${addon.manifest.version}").withStyle(ChatFormatting.YELLOW))
+                    val reason = Component.literal("Missing Showbiz addon ").append(Component.literal("$addonId v${addon.manifest.addon.version}").withStyle(ChatFormatting.YELLOW))
                         .append(Component.literal("\n\n").withStyle(ChatFormatting.RESET))
                         .append(Component.literal("Installed addons:\n").append("[${playerAddons.keys.sorted().joinToString(", ")}]\n\n"))
                         .append(Component.literal("Server addons:\n").append("[${Showbiz.addons.keys.sorted().joinToString(", ")}]\n\n"))
@@ -91,7 +91,7 @@ object ServerPackets {
                 }
 
                 // Getting the versions (skips if null cuz the manifest might be missing on the client)
-                val serverVersion = SemVer(addon.manifest.version)
+                val serverVersion = SemVer(addon.manifest.addon.version)
                 val playerVersion = playerAddons[addonId] ?: run {
                     Showbiz.log.warn("Couldn't find a version for the addon '$addonId'")
                     continue

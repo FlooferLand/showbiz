@@ -71,8 +71,8 @@ object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), I
                         err("Failed to parse $MANIFEST_NAME for addon '$addonId'", err)
                         continue
                     }
-                if (addonId != manifest.id) {
-                    err("Your addon's ID doesn't match its $MANIFEST_NAME manifest ID ($addonId != ${manifest.id})")
+                if (addonId != manifest.addon.id) {
+                    err("Your addon's ID doesn't match its $MANIFEST_NAME manifest ID ($addonId != ${manifest.addon.id})")
                 }
 
                 // Validating ID

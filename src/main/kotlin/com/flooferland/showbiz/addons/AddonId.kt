@@ -21,15 +21,15 @@ object AddonId {
             errors += 1
         }
 
-        val id = manifest.id.lowercase()
-        if (id != manifest.id) {
+        val id = manifest.addon.id.lowercase()
+        if (id != manifest.addon.id) {
             err("Manifest ID must be lowercase")
         }
         if (AddonId.isTooGeneric(id)) {
             err("Addon manifest ID '$id' is too generic of an ID and might be used by another addon. Please note the ID is NOT the same as your addon's name and it has to be unique.")
         }
 
-        if (packId !in listOf("showbiz", "showbiz-fnaf") && manifest.id.startsWith("showbiz-")) {
+        if (packId !in listOf("showbiz", "showbiz-fnaf") && manifest.addon.id.startsWith("showbiz-")) {
             warn("Please don't use addon IDs starting or ending with `showbiz` as your addon might break in the future. This prefix is reserved for built-in or official addons.")
         }
         if (AddonId.mightBeTooGeneric(id)) {

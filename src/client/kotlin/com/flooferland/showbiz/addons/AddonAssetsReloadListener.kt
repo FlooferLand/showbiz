@@ -6,7 +6,7 @@ import com.flooferland.bizlib.bits.BotBitmapFile
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.AddonNotice.Side
-import com.flooferland.showbiz.addons.data.AddonDataReloadListener
+import com.flooferland.showbiz.addons.data.AddonDataReloadListener.MANIFEST_NAME
 import com.flooferland.showbiz.addons.data.AddonManifest
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.PassivePlan
@@ -26,6 +26,7 @@ import kotlinx.serialization.serializer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.PackResources
@@ -39,6 +40,8 @@ import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import software.bernie.geckolib.loading.json.raw.Model
 import software.bernie.geckolib.loading.`object`.BakedAnimations
+import java.nio.file.Files
+import kotlin.jvm.optionals.getOrNull
 
 // TODO: Optimize this class loads.
 //       Currently loading and storing a ton of unnecessary models, and is not async
@@ -70,8 +73,9 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
         val out = LoadedAssets()
         val addons = mutableMapOf<String, AddonAssets>()
         for (pack in manager.listPacks()) {
-            if (pack.packId().let { it.startsWith("fabric-") || it == "minecraft" || it == "realms" }) continue
-            val devIgnoreAddons = ShowbizEnv.isDev() && pack.packId() != Showbiz.MOD_ID
+            val packId = pack.packId() ?: continue
+            if (packId.let { it.startsWith("fabric-") || it == "minecraft" || it == "realms" }) continue
+            val devIgnoreAddons = ShowbizEnv.isDev() && packId != Showbiz.MOD_ID
             var errors = 0
             var warnings = 0
 
@@ -244,14 +248,29 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
                     }
                 }
 
-                // Manifest might not exist if the asset and datapack are separate
-                val manifest = pack.getResource(PackType.SERVER_DATA, rlCustom(namespace, AddonDataReloadListener.MANIFEST_NAME))
-                    ?.get()?.readAllBytes()?.decodeToString()
-                    ?.let { runCatching { Toml.decodeFromString(serializer<AddonManifest>(), it) }.getOrNull() }
+                // Reading the addon manifest
+                // TODO: Make the addon manifest read from separate datapacks as well. Rn it only reads it from mods
+                val manifestText: String? = runCatching {
+                    val modId = packId
+                    val loader = FabricLoader.getInstance() ?: return@runCatching null
+                    if (!loader.isModLoaded(modId)) return@runCatching null
+                    loader.getModContainer(modId).getOrNull()?.let { mod ->
+                        val path = mod.findPath("data/${modId}/${MANIFEST_NAME}").getOrNull() ?: return@let
+                        return@runCatching Files.readString(path)
+                    }
+                    null
+                }.also { it.onFailure { err -> Showbiz.log.error("Failed to get manifest: $err") } }.getOrNull()
+                val manifest = manifestText?.let {
+                    val result = runCatching { Toml.decodeFromString(serializer<AddonManifest>(), it) }
+                    result.onFailure { throwable ->
+                        err(AddonErr.FailedToParse(MANIFEST_NAME), throwable)
+                    }
+                    result.getOrNull()
+                }
 
                 if (bots.isNotEmpty()) {
                     bots.entries.removeIf { (botId, bot) -> botId.isEmpty() || bot == null }
-                    out.packs.getOrPut(pack.packId()) { mutableSetOf() } += addonId
+                    out.packs.getOrPut(packId) { mutableSetOf() } += addonId
                     addons[addonId] = AddonAssets(
                         bots = bots.mapKeys { (key, _) -> ResourceId(addonId, key) }.mapValues { (_, v) -> v!! },
                         manifest = manifest
@@ -260,7 +279,7 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
             }
 
             if (devIgnoreAddons) {
-                if (warnings > 0 || errors > 0) Showbiz.log.warn("Pack '${pack.packId()}' had $warnings warnings and $errors errors")
+                if (warnings > 0 || errors > 0) Showbiz.log.warn("Pack '${packId}' had $warnings warnings and $errors errors")
             }
         }
         out.assets = addons

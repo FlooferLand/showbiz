@@ -7,8 +7,13 @@ import kotlinx.serialization.Serializable
 annotation class Comment(val text: String)
 
 @Serializable
-@Suppress("ArrayInDataClass")
 data class AddonManifest(
+    val addon: AddonManifestData
+)
+
+@Serializable
+@Suppress("ArrayInDataClass")
+data class AddonManifestData(
     @Comment("The ID of the addon. Make sure this is unique, avoid generic names like \"rae\" or \"fnaf\", or names that start with \"showbiz\"")
     val id: String,
 
