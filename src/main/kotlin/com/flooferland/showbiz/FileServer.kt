@@ -1,9 +1,5 @@
 package com.flooferland.showbiz
 
-import net.minecraft.*
-import net.minecraft.network.chat.*
-import net.minecraft.server.*
-import net.minecraft.server.level.*
 import com.flooferland.bizlib.RawShowData
 import com.flooferland.bizlib.formats.RshowFormat
 import com.flooferland.showbiz.FileStorage.fetchShowInfos
@@ -17,18 +13,22 @@ import com.flooferland.showbiz.types.FFmpeg.Settings
 import com.flooferland.showbiz.types.ServerPlayerFileUpload
 import com.flooferland.showbiz.types.WavHeader
 import com.flooferland.showbiz.utils.Extensions.getHeldItem
-import java.nio.file.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerPlayer
+import java.nio.file.*
 import kotlin.io.path.extension
 
 object FileServer {
     var serverPlayerUploads = mutableMapOf<Int, ServerPlayerFileUpload>()
     val showWatchService: WatchService by lazy {
         FileSystems.getDefault().newWatchService().also {
-            Files.createDirectories(FileStorage.SHOWS_DIR)
+            runCatching { Files.createDirectories(FileStorage.SHOWS_DIR) }
             FileStorage.SHOWS_DIR.register(
                 it,
                 StandardWatchEventKinds.ENTRY_CREATE,
