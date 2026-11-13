@@ -238,8 +238,8 @@ tasks.register("giveMeTheJarFile") {
     description = "Builds the mod and opens up a file manager"
     dependsOn("assemble")
 
+    val dir = layout.buildDirectory.dir("libs").get().asFile
     doLast {
-        val dir = layout.buildDirectory.get().asFile.resolve("libs")
         if (Desktop.isDesktopSupported()) {
             Desktop.getDesktop().open(dir)
         } else {
