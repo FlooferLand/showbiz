@@ -2,6 +2,7 @@ package com.flooferland.showbiz
 
 import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.renderers.*
+import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
 import com.mojang.blaze3d.vertex.PoseStack
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
@@ -12,6 +13,8 @@ import net.minecraft.client.renderer.MultiBufferSource
 
 object ClientWorldRender {
     init {
+        WorldRenderEvents.BEFORE_ENTITIES.register { GeoWorkaroundRenderHook.inWorldPass = true }
+        WorldRenderEvents.END.register { GeoWorkaroundRenderHook.inWorldPass = false }
         WorldRenderEvents.AFTER_ENTITIES.register { ctx ->
             render(ctx) { mc, _, _, buffer, poseStack, partialTick ->
                 StackPlacePreviewRenderer.render(mc, buffer, poseStack, partialTick)

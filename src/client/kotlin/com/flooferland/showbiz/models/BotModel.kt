@@ -17,7 +17,6 @@ import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.types.ClientCollidePartInstance
 import com.flooferland.showbiz.types.GeoWorkaroundRenderHook
 import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.types.ResourceId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.math.Vec3fc
@@ -54,7 +53,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         val valves = mutableMapOf<BitId, PneumaticValve>()
         var cylinderClock: Double = 0.0
         val cymbalStates = mutableMapOf<String, CymbalState>()
-        var ownerBotId: ResourceId? = null
+        var builtFor: BotModelData? = null
         var lastFrameTime = -1.0
         var chains: List<ChainSolver> = emptyList()
         var chainsFor: ChainLayout? = null
@@ -100,8 +99,8 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
 
         // Getting bot storage & show playing guard
-        val storage = localStorage.getOrPut(animatable) { LocalBotStorage() }
-
+        val storage = localStorage[animatable]?.takeIf { it.builtFor === model }
+            ?: LocalBotStorage().also { it.builtFor = model; localStorage[animatable] = it }
         // Driving animation
         val delta = run {
             // Doing the hardest thing in Minecraft modding.. Getting the delta time..

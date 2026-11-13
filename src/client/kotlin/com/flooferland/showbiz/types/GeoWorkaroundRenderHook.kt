@@ -42,6 +42,7 @@ class GeoWorkaroundRenderHook() {
     private var physicsOffsetZ: Float = 0f
 
     fun beforeRenderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
+        if (!inWorldPass) return
         val captured = capturedBoneMatrices.getOrPut(bone.name) { Captured() }
         captured.frame = frame
         val pose = captured.matrix.set(poseStack.last().pose())
@@ -53,7 +54,7 @@ class GeoWorkaroundRenderHook() {
         poses.getOrPut(bone.name) { Matrix4f() }.set(pose).setTranslation(pose.m30() + physicsOffsetX, pose.m31() + physicsOffsetY, pose.m32() + physicsOffsetZ)
     }
     fun beforePreRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        if (isReRender) return
+        if (isReRender || !inWorldPass) return
         frame++
 
         // Physics :)
@@ -71,7 +72,7 @@ class GeoWorkaroundRenderHook() {
     }
 
     fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        if (isReRender) return
+        if (isReRender || !inWorldPass) return
         if (animatable is IBot) run {
             val entities = DecorEntity.decorEntities[animatable] ?: return@run
             entities.forEach { entity ->
@@ -113,6 +114,7 @@ class GeoWorkaroundRenderHook() {
 
    companion object {
         val lastPoses: WeakHashMap<GeoAnimatable, MutableMap<String, Matrix4f>> = WeakHashMap()
+        var inWorldPass = false
     }
 
     private fun captured(name: String): Matrix4f? = capturedBoneMatrices[name]?.takeIf { it.frame == frame }?.matrix
