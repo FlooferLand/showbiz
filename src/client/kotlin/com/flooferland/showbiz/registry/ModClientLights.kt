@@ -157,7 +157,10 @@ object ModClientLights {
 
         val target = (if (entity.isLit) power else 0f) * entity.brightness
         val fadingOut = target < entity.value
-        val speed = 0.18f - (if (fadingOut) 0.13f else 0.0f)
+        val speed = if (useVanillaLights())
+            0.18f - (if (fadingOut) 0.13f else 0.0f)
+        else
+            0.2f - (if (fadingOut) 0.03f else 0.0f)
         entity.value = lerp(entity.value, target, speed * delta)
         entity.value = entity.value.coerceIn(if (entity.isLit) 0.5f else 0f, 1f)
 
@@ -204,7 +207,10 @@ object ModClientLights {
 
         val target = (if (entity.isLit) power else 0f) * entity.brightness
         val fadingOut = target < entity.value
-        val speed = 0.14f - (if (fadingOut) 0.1f else 0.0f)
+        val speed = if (useVanillaLights())
+            0.14f - (if (fadingOut) 0.1f else 0.0f)
+        else
+            0.25f - (if (fadingOut) 0.03f else 0.0f)
         entity.value = lerp(entity.value, target, speed * delta)
         entity.value = entity.value.coerceIn(if (entity.isLit) 0.1f else 0f, 1f)
 
