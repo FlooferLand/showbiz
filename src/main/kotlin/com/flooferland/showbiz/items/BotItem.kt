@@ -45,7 +45,7 @@ class BotItem(properties: Properties) : Item(properties), IStackPlacePreview {
             }
             player.setItemInHand(context.hand, ItemStack.EMPTY)
         }
-        return InteractionResult.PASS
+        return InteractionResult.SUCCESS
     }
 
     fun defaultBotId() = Showbiz.bots.keys
