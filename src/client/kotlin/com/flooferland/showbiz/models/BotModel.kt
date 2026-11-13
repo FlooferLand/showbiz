@@ -225,10 +225,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             }
         }
 
+        // Blockbench animation
         for ((bit, data) in bitmapBits) {
             val bitOn = frame.frameHas(bit)
-
-            // Animation
             for (anim in data.anim) {
                 val controllerKey = "ctrl_${bit}_${anim.id}"
 
@@ -264,12 +263,14 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 }
             }
         }
+
         poseBits(bitmapBits, storage, model) { it.drawn(alpha) }
         for (dynBone in storage.dynBones) dynBone.draw(animationProcessor::getBone, alpha)
     }
 
     // Laying the bitmap's rotates and moves over the rest pose, each valve at [at] of its travel, floppy parts back at rest
     private fun poseBits(bitmapBits: Map<UShort, BitMappingData>, storage: LocalBotStorage, model: BotModelData, at: (PneumaticValve) -> Float) {
+        // Resetting the bones
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
@@ -282,11 +283,25 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
             }
         }
+
+        // FOR SOME REASON THE BLOCK ABOVE DOESN'T RESET
+        for ((name, rot) in model.initBoneRots) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.rotX = rot.x; bone.rotY = rot.y; bone.rotZ = rot.z
+        }
+        for ((name, pos) in model.initBoneMoves) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.posX = pos.x; bone.posY = pos.y; bone.posZ = pos.z
+        }
+
+        // Resetting physics bones
         for (dynBone in storage.dynBones) for (name in dynBone.boneNames) {
             val bone = animationProcessor.getBone(name) ?: continue
             val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
         }
+
+        // Actually positioning the bonees
         for ((bit, data) in bitmapBits) {
             val flowEase = data.flow?.easing ?: data.oldFlow?.easing ?: Easing.Default
             val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
