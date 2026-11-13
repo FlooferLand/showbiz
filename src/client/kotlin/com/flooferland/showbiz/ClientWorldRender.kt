@@ -58,6 +58,7 @@ object ClientWorldRender {
             while (!poseStack.clear()) {
                 poseStack.popPose()
             }
+            return
         }
         poseStack.popPose()
     }

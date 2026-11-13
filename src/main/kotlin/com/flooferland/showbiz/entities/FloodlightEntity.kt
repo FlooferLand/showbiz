@@ -1,21 +1,6 @@
 package com.flooferland.showbiz.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.damagesource.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.entity.item.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.inventory.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions
-import com.flooferland.showbiz.Permissions.Companion.mayHurt
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.ServerPackets
 import com.flooferland.showbiz.components.FloodlightComponent
@@ -38,7 +23,21 @@ import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongOrNull
-import com.flooferland.showbiz.utils.Extensions.handItem
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.EntityDimensions
+import net.minecraft.world.entity.Pose
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
@@ -92,38 +91,11 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         if (yRot != turn.x) updateYaw(turn.x)
     }
 
-    override fun getPickResult() = makeItem()
     override fun getDefaultDimensions(pose: Pose): EntityDimensions =
         EntityDimensions.fixed(0.4f, 0.9f)
 
-    fun makeItem() = ItemStack(ModItems.Floodlight.item).also {
+    override fun makeItem() = ItemStack(ModItems.Floodlight.item).also {
         it.set(ModComponents.Floodlight.type, FloodlightComponent.from(this))
-    }
-
-    fun drop() {
-        val pos = position() ?: return
-        val level = level() ?: return
-        val item = ItemEntity(level, pos.x, pos.y + 0.5, pos.z, makeItem())
-        level.addFreshEntity(item)
-        remove(RemovalReason.DISCARDED)
-    }
-    fun grab(player: Player): InteractionResult {
-        player.handItem(makeItem())
-        remove(RemovalReason.DISCARDED)
-        return InteractionResult.SUCCESS
-    }
-
-    override fun hurt(source: DamageSource, amount: Float): Boolean {
-        if (isRemoved || isInvulnerableTo(source)) return false
-        val level = level() as? ServerLevel ?: return false
-        val player = source.entity as? Player ?: return false
-        if (!player.mayHurt(this)) return false
-
-        if (!source.isCreativePlayer)
-            Block.popResource(level, blockPosition(), makeItem())
-        level.playSound(null, x, y, z, SoundEvents.ARMOR_STAND_BREAK, soundSource, 1.0f, 1.0f)
-        remove(RemovalReason.KILLED)
-        return true
     }
 
     // region | LivingEntity stuff

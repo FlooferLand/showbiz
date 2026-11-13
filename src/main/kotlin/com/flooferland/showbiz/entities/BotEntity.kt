@@ -21,21 +21,15 @@ import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
-import com.flooferland.showbiz.utils.Extensions.handItem
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.SoundEvent
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
-import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityDimensions
 import net.minecraft.world.entity.Pose
-import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
@@ -86,7 +80,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
 
     private var prevBotId: ResourceId? = null
     private var prevBotVariant: String = botVariant
-    private var killDelayTicks = 0
     private val pendingShow = PackedShowData()
 
     init {
@@ -96,7 +89,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     }
 
     override fun getDefaultDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.6f, 2.0f)
-    override fun getPickResult() = makeItem()
 
     override fun tick() {
         super.tick()
@@ -107,14 +99,6 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             show.data.tempReset()
             show.data.merge(pendingShow)
             pendingShow.tempReset()
-        }
-        if (killDelayTicks > 0) {
-            killDelayTicks -= 1
-            if (killDelayTicks == 0) {
-                drop()
-                remove(RemovalReason.DISCARDED)
-                return
-            }
         }
 
         // Updating stuff when the bot switches
@@ -127,37 +111,8 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
         }
     }
 
-    fun makeItem() = ItemStack(ModItems.Bot.item).also {
+    override fun makeItem() = ItemStack(ModItems.Bot.item).also {
         it.set(ModComponents.BotId.type, botId)
-    }
-
-    fun drop() {
-        val pos = position() ?: return
-        val level = level() ?: return
-        val item = ItemEntity(level, pos.x, pos.y + 0.5, pos.z, makeItem())
-        level.addFreshEntity(item)
-    }
-    fun grab(player: Player): InteractionResult {
-        player.handItem(makeItem())
-        remove(RemovalReason.DISCARDED)
-        return InteractionResult.SUCCESS
-    }
-
-    override fun hurt(source: DamageSource, amount: Float): Boolean {
-        if (killDelayTicks > 0 || isRemoved) return false
-        val attacker = source.entity
-        fun playSound(sound: SoundEvent) {
-            level().playSound(null, blockPosition(), sound, SoundSource.NEUTRAL, 1.0f, 1.0f)
-        }
-        if (attacker !is Player) return false
-        if (isInvulnerableTo(source)) return false
-
-        val isClient = attacker.level().isClientSide
-        if (!isClient && amount > 0f) {
-            playSound(SoundEvents.ARMOR_STAND_BREAK)
-            killDelayTicks = 2
-        }
-        return true
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult? {

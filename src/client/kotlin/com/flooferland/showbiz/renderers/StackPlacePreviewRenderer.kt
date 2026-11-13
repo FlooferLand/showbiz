@@ -2,11 +2,13 @@ package com.flooferland.showbiz.renderers
 
 import com.flooferland.showbiz.types.IStackPlacePreview
 import com.flooferland.showbiz.utils.Extensions.getHeldItem
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.LevelRenderer
 import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.ItemStack
@@ -48,26 +50,30 @@ object StackPlacePreviewRenderer {
 
         // :3
         val texture = mc.entityRenderDispatcher.getRenderer(entity).getTextureLocation(entity)
-        val transType = net.minecraft.client.renderer.RenderType.entityTranslucent(texture)
-        val transBuffer = MultiBufferSource { _ ->
+        val transType = RenderType.entityTranslucent(texture)
+        val transBuffer = MultiBufferSource { type ->
+            if (type.format() != DefaultVertexFormat.NEW_ENTITY) return@MultiBufferSource buffer.getBuffer(type)
             val inner = buffer.getBuffer(transType)
             object : VertexConsumer by inner {
-                override fun setColor(r: Int, g: Int, b: Int, a: Int): com.mojang.blaze3d.vertex.VertexConsumer {
-                    return inner.setColor(r, g, b, (a * 0.5f).toInt())
+                override fun setColor(r: Int, g: Int, b: Int, a: Int): VertexConsumer {
+                    return inner.setColor(r, g, b, (a * 0.4f).toInt())
                 }
             }
         }
 
         poseStack.pushPose()
         poseStack.translate(entity.x, entity.y, entity.z)
-        mc.entityRenderDispatcher.render(
-            entity,
-            0.0, 0.0, 0.0,
-            0f,
-            partialTicks, poseStack, transBuffer,
-            LevelRenderer.getLightColor(level, blockPos.above())
-        )
-        poseStack.popPose()
+        try {
+            mc.entityRenderDispatcher.render(
+                entity,
+                0.0, 0.0, 0.0,
+                0f,
+                partialTicks, poseStack, transBuffer,
+                LevelRenderer.getLightColor(level, blockPos.above())
+            )
+        } finally {
+            poseStack.popPose()
+        }
         lastStack = heldStack
     }
 }

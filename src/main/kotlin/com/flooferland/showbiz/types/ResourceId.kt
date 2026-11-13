@@ -1,13 +1,12 @@
 package com.flooferland.showbiz.types
 
+import com.flooferland.showbiz.utils.rlCustom
+import com.mojang.serialization.Codec
+import com.mojang.serialization.DataResult
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.resources.ResourceLocation
-import com.flooferland.showbiz.components.PlushComponent
-import com.mojang.serialization.Codec
-import com.mojang.serialization.DataResult
-import com.mojang.serialization.codecs.RecordCodecBuilder
 
 /** Like [net.minecraft.resources.ResourceLocation] but safer and lighter weight */
 data class ResourceId(val namespace: String, val path: String) {
@@ -27,6 +26,8 @@ data class ResourceId(val namespace: String, val path: String) {
 
     fun matches(other: String) = other == toString()
     fun matches(other: ResourceLocation) = other.namespace == namespace && other.path == path
+
+    fun toLocation() = rlCustom(namespace, path)
 
     companion object {
         fun encode(buf: FriendlyByteBuf, ref: ResourceId) {

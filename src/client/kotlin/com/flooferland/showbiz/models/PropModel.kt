@@ -23,7 +23,7 @@ class PropModel<T : GeoAnimatable> : GeoModel<T>() {
     override fun getAnimationResource(animatable: T) = null
 
     private fun getPropId(animatable: T) = when (animatable) {
-        is PropEntity -> animatable.getComp()?.id
+        is PropEntity -> animatable.propId?.toLocation()
         is PropItem -> PropItemRenderer.currentStack?.get(ModComponents.Prop.type)?.id
         else -> null
     }

@@ -63,6 +63,7 @@ class PropItem(properties: Properties) : Item(properties), GeoItem, IStackPlaceP
 
         val entity = PropEntity(level, stack)
         placeEntity(entity, pos, player)
+        entity.playPlaceSound(player)
         level.addFreshEntity(entity)
         stack.shrink(1)
     }
