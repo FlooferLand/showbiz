@@ -1,13 +1,15 @@
 package com.flooferland.showbiz.components
 
-import net.minecraft.network.*
-import net.minecraft.network.codec.*
-import net.minecraft.util.*
 import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.types.MappedBits
 import com.flooferland.showbiz.types.math.Vec2f
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import net.minecraft.network.RegistryFriendlyByteBuf
+import net.minecraft.network.codec.ByteBufCodecs
+import net.minecraft.network.codec.StreamCodec
+import net.minecraft.util.CommonColors
+import net.minecraft.util.ExtraCodecs
 
 data class FloodlightComponent(var turn: Vec2f = Vec2f.ZERO, var angle: Float = 45f, var shadows: Boolean = false, var color: Int = CommonColors.WHITE, var bitFilter: MappedBits = MappedBits()) {
     companion object {
@@ -16,7 +18,7 @@ data class FloodlightComponent(var turn: Vec2f = Vec2f.ZERO, var angle: Float = 
             angle = entity.angle,
             shadows = entity.shadows,
             color = entity.color,
-            bitFilter = entity.bitFilter
+            bitFilter = entity.bitFilter.clone()
         )
 
         val CODEC: Codec<FloodlightComponent> = RecordCodecBuilder.create { instance ->
