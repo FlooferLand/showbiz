@@ -66,7 +66,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), I
                 val manifestString = getRes(MANIFEST_NAME)
                     ?.get()?.readAllBytes()?.decodeToString()
                     ?: continue
-                val manifest = runCatching { Toml.partiallyDecodeFromString(deserializer, manifestString, "addon") }
+                val manifest = runCatching { Toml.decodeFromString(deserializer, manifestString) }
                     .getOrElse { err ->
                         err("Failed to parse $MANIFEST_NAME for addon '$addonId'", err)
                         continue
