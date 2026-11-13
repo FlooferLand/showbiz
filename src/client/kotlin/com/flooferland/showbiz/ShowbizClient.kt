@@ -37,6 +37,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.ChatFormatting
@@ -50,6 +51,8 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.PackType
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import software.bernie.geckolib.animatable.client.GeoRenderProvider
@@ -237,6 +240,16 @@ object ShowbizClient : ClientModInitializer {
             if (!Handbook.cache.items.has(itemId)) return@register
             val comp = tc("other", "open_in_handbook", key)
             components.add(max(0, components.size - 2), comp)
+        }
+
+        // Hacks
+        UseBlockCallback.EVENT.register { player, level, hand, hitResult ->
+            val stack = player.getItemInHand(hand) ?: return@register InteractionResult.PASS
+            val item = stack.item ?: return@register InteractionResult.PASS
+            when (item) {
+                is PropItem -> { return@register item.useOn(UseOnContext(player, hand, hitResult)) }
+            }
+            InteractionResult.PASS
         }
 
         // DARN YOU SPLIT SOURCESETS
