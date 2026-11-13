@@ -1,7 +1,10 @@
-@file:Suppress("unused")
+
 
 package com.flooferland.showbiz.types
 
+import net.minecraft.client.*
+import net.minecraft.client.renderer.*
+import net.minecraft.world.phys.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.entities.SpotlightBlockEntity
 import com.flooferland.showbiz.entities.DecorEntity
@@ -10,15 +13,12 @@ import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.ClientExtensions.calculateBounds
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
-import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.joml.Vector4f
+import java.util.WeakHashMap
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
-import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
 /**
@@ -33,7 +33,6 @@ class GeoWorkaroundRenderHook() {
     }
     private val capturedBoneMatrices = mutableMapOf<String, Captured>()
     private var frame = 0
-
     // Physics: the bones a physics system reads a drawn pose from
     private var physicsPoses: MutableMap<String, Matrix4f>? = null
     private var physicsBones: Set<String> = emptySet()
@@ -42,6 +41,7 @@ class GeoWorkaroundRenderHook() {
     private var physicsOffsetZ: Float = 0f
 
     fun beforeRenderCubesOfBone(poseStack: PoseStack, bone: GeoBone, buffer: VertexConsumer?, packedLight: Int, packedOverlay: Int, colour: Int) {
+        if (!inWorldPass) return
         val captured = capturedBoneMatrices.getOrPut(bone.name) { Captured() }
         captured.frame = frame
         val pose = captured.matrix.set(poseStack.last().pose())
@@ -53,14 +53,14 @@ class GeoWorkaroundRenderHook() {
         poses.getOrPut(bone.name) { Matrix4f() }.set(pose).setTranslation(pose.m30() + physicsOffsetX, pose.m31() + physicsOffsetY, pose.m32() + physicsOffsetZ)
     }
     fun beforePreRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource?, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        if (isReRender) return
+        if (isReRender || !inWorldPass) return
         frame++
 
         // Physics :)
         physicsPoses = null
         val bot = animatable as? IBot ?: return
         val origin = bot.botPos ?: return
-        val layout = ShowbizClient.bots[bot.botId]?.variants[bot.botVariant]?.model?.let { ShowbizClient.botModels[it]?.get(bot.botVariant) }?.chainLayout ?: return
+        val layout = ShowbizClient.bots[bot.botId]?.model?.let { ShowbizClient.botModels[it] }?.chainLayout ?: return
         if (layout.size == 0) return
         val cam = Minecraft.getInstance().gameRenderer.mainCamera.position
         physicsOffsetX = (cam.x - origin.x).toFloat()
@@ -71,7 +71,7 @@ class GeoWorkaroundRenderHook() {
     }
 
     fun postRender(poseStack: PoseStack, animatable: GeoAnimatable, model: BakedGeoModel, bufferSource: MultiBufferSource, buffer: VertexConsumer?, isReRender: Boolean, partialTick: Float, packedLight: Int, packedOverlay: Int, colour: Int) {
-        if (isReRender) return
+        if (isReRender || !inWorldPass) return
         if (animatable is IBot) run {
             val entities = DecorEntity.decorEntities[animatable] ?: return@run
             entities.forEach { entity ->
@@ -113,6 +113,7 @@ class GeoWorkaroundRenderHook() {
 
    companion object {
         val lastPoses: WeakHashMap<GeoAnimatable, MutableMap<String, Matrix4f>> = WeakHashMap()
+        var inWorldPass = false
     }
 
     private fun captured(name: String): Matrix4f? = capturedBoneMatrices[name]?.takeIf { it.frame == frame }?.matrix
