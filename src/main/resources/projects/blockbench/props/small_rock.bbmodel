@@ -1,0 +1,166 @@
+{
+	"meta": {
+		"format_version": "5.0",
+		"model_format": "geckolib_model",
+		"box_uv": false
+	},
+	"name": "small_rock",
+	"model_identifier": "small_rock",
+	"front_gui_light": false,
+	"visible_box": [2, 1.5, 0.25],
+	"variable_placeholders": "",
+	"multi_file_ruleset": "",
+	"variable_placeholder_buttons": [],
+	"timeline_setups": [],
+	"unhandled_root_fields": {},
+	"geckolib_modid": "",
+	"geckolib_filepath_cache": {
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\prop_small_rock.geo.json"
+	},
+	"resolution": {
+		"width": 32,
+		"height": 32
+	},
+	"elements": [
+		{
+			"name": "cube",
+			"box_uv": true,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [-1.5, 0, -2],
+			"to": [2.5, 1, 1],
+			"autouv": 0,
+			"color": 3,
+			"origin": [1.5, 0, 2],
+			"uv_offset": [4, 2],
+			"faces": {
+				"north": {
+					"uv": [7, 5, 11, 6],
+					"texture": 0
+				},
+				"east": {
+					"uv": [4, 5, 7, 6],
+					"texture": 0
+				},
+				"south": {
+					"uv": [14, 5, 18, 6],
+					"texture": 0
+				},
+				"west": {
+					"uv": [11, 5, 14, 6],
+					"texture": 0
+				},
+				"up": {
+					"uv": [11, 5, 7, 2],
+					"texture": 0
+				},
+				"down": {
+					"uv": [15, 2, 11, 5],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "5dd32484-1326-0434-bc42-1afe3ae7a5f5"
+		}
+	],
+	"groups": [
+		{
+			"name": "bone",
+			"uuid": "5fbb75c9-32a3-d5b5-4dda-cef88792a98c",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [-8, 0, -8],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": false,
+			"primary_selected": false
+		}
+	],
+	"outliner": [
+		{
+			"uuid": "5fbb75c9-32a3-d5b5-4dda-cef88792a98c",
+			"isOpen": false,
+			"children": ["5dd32484-1326-0434-bc42-1afe3ae7a5f5"]
+		}
+	],
+	"textures": [
+		{
+			"name": "prop_small_rock.png",
+			"relative_path": "../../../assets/showbiz/textures/item/prop_small_rock.png",
+			"folder": "item",
+			"namespace": "showbiz",
+			"id": "0",
+			"group": "",
+			"scope": 0,
+			"width": 32,
+			"height": 32,
+			"uv_width": 32,
+			"uv_height": 32,
+			"particle": true,
+			"use_as_default": false,
+			"layers_enabled": false,
+			"sync_to_project": "",
+			"file_format": "png",
+			"render_mode": "default",
+			"render_sides": "auto",
+			"wrap_mode": "limited",
+			"pbr_channel": "color",
+			"fps": 7,
+			"force_translucent": false,
+			"frame_time": 1,
+			"frame_order_type": "loop",
+			"frame_order": "",
+			"frame_interpolate": false,
+			"visible": true,
+			"internal": true,
+			"saved": true,
+			"uuid": "d693f634-a4d8-93d9-baeb-5319751167fa",
+			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDklEQVR4AezW0W2EQAwE0DsqoIQtgSYogRIogWoogRJohhLo4JKHYoTQJkFEysdpTxrNeNbYxuzHVY/MbxiGV6Dv+113XfeCtm03piFT4rKVHWBd18f6hbqu92I8AW9Zlj2HdxfZATQIRGHNeVhz2lkwfQfZATRRLJjWSAw0j8Z/QXYABRU/Noo4PJxS2j6D/LuoXDIXCbt4+FxMMx5umuaRUtogTp/ac+DZYPlXUMWbSaYDEfvevIh/0s4C8q9gG8BDkvEZ3pJnEDlYTB/PeBHTzq+gmuf5OU3TcxzHjcXAg6MvjjM+nL2IrzSX8+0ldPgfKAOUDZQNlA2UDZQNlA2UDZQNlA28/wZ++2f9AQAA//+HicIUAAAABklEQVQDAF548UHLLovtAAAAAElFTkSuQmCC"
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 1.75, 2.5],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 1.75, 2.5],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"translation": [0, 4, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, -135, 0],
+			"translation": [0, 4, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 4.25, 0]
+		},
+		"gui": {
+			"rotation": [30, -135, 0],
+			"translation": [0, 1.75, 0]
+		}
+	},
+	"geckolib_model_type": "Item"
+}

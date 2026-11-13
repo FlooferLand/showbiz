@@ -1,0 +1,165 @@
+{
+	"meta": {
+		"format_version": "5.0",
+		"model_format": "geckolib_model",
+		"box_uv": false
+	},
+	"name": "large_rock",
+	"model_identifier": "prop_large_rock.geo",
+	"front_gui_light": false,
+	"visible_box": [2, 1.5, 0.25],
+	"variable_placeholders": "",
+	"multi_file_ruleset": "",
+	"variable_placeholder_buttons": [],
+	"timeline_setups": [],
+	"unhandled_root_fields": {},
+	"geckolib_modid": "",
+	"geckolib_filepath_cache": {
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\prop_large_rock.geo.json"
+	},
+	"resolution": {
+		"width": 32,
+		"height": 32
+	},
+	"elements": [
+		{
+			"name": "cube",
+			"box_uv": true,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [-3, 0, -2.5],
+			"to": [3, 3, 2.5],
+			"autouv": 1,
+			"color": 3,
+			"origin": [2, 0, 1.5],
+			"faces": {
+				"north": {
+					"uv": [5, 5, 11, 8],
+					"texture": 0
+				},
+				"east": {
+					"uv": [0, 5, 5, 8],
+					"texture": 0
+				},
+				"south": {
+					"uv": [16, 5, 22, 8],
+					"texture": 0
+				},
+				"west": {
+					"uv": [11, 5, 16, 8],
+					"texture": 0
+				},
+				"up": {
+					"uv": [11, 5, 5, 0],
+					"texture": 0
+				},
+				"down": {
+					"uv": [17, 0, 11, 5],
+					"texture": 0
+				}
+			},
+			"type": "cube",
+			"uuid": "81366230-47cb-fbcd-b145-dddd4168d02a"
+		}
+	],
+	"groups": [
+		{
+			"name": "bone",
+			"uuid": "3e933528-d5cd-26a2-d41e-2ad9e261ea8b",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [-8, 0, -8],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": false,
+			"primary_selected": false
+		}
+	],
+	"outliner": [
+		{
+			"uuid": "3e933528-d5cd-26a2-d41e-2ad9e261ea8b",
+			"isOpen": false,
+			"children": ["81366230-47cb-fbcd-b145-dddd4168d02a"]
+		}
+	],
+	"textures": [
+		{
+			"name": "prop_large_rock.png",
+			"relative_path": "../../../assets/showbiz/textures/item/prop_large_rock.png",
+			"folder": "item",
+			"namespace": "showbiz",
+			"id": "0",
+			"group": "",
+			"scope": 0,
+			"width": 32,
+			"height": 32,
+			"uv_width": 32,
+			"uv_height": 32,
+			"particle": true,
+			"use_as_default": false,
+			"layers_enabled": false,
+			"sync_to_project": "",
+			"file_format": "png",
+			"render_mode": "default",
+			"render_sides": "auto",
+			"wrap_mode": "limited",
+			"pbr_channel": "color",
+			"fps": 7,
+			"force_translucent": false,
+			"frame_time": 1,
+			"frame_order_type": "loop",
+			"frame_order": "",
+			"frame_interpolate": false,
+			"visible": true,
+			"internal": true,
+			"saved": true,
+			"uuid": "d693f634-a4d8-93d9-baeb-5319751167fa",
+			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDUlEQVR4AezW0W2EQAwE0DsqoIQtgSYogRIogWoogRJohhLo4JKHYoTQJkFEysdpkUYej722MftB9cg8wzC8An3f77zruhe0bbtZHDIlLkvZAdZ1faxfqOt6L0bj0JZl2XNod5EdQINAFNacxmqOi4XF7yA7gCbnYhrRARfH2b8gO4CCx+I4aAzibEpp+wz8u6hcMheJdfHYczHNaGzTNI+U0gZ++uTOgbNh5V9BFW8mGQ+E73vTwv+JiwXkX8E2gEOS2TO8Jc0gclg+fozRwsfFr6Ca5/k5TdNzHMfN8oEGR50fMTqctfCvNJfz7SUU/A+UAcoGygbKBsoGygbKBsoGygbKBt5/A7/9WX8AAAD//wPJHQoAAAAGSURBVAMA9xTuQXfa4bgAAAAASUVORK5CYII="
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 1.75, 2.5],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 1.75, 2.5],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"translation": [0, 4, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, -135, 0],
+			"translation": [0, 4, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 4.25, 0]
+		},
+		"gui": {
+			"rotation": [30, -135, 0],
+			"translation": [0, 1.75, 0]
+		}
+	},
+	"geckolib_model_type": "Item"
+}
