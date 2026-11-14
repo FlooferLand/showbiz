@@ -1,15 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.*
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.util.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.blocks.CurtainBlock
 import com.flooferland.showbiz.blocks.CurtainShadowBlock
 import com.flooferland.showbiz.registry.ModBlocks
@@ -22,6 +12,19 @@ import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Sounds
+import net.minecraft.ChatFormatting
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.util.FastColor
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -77,7 +80,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
                         if (state.block is CurtainShadowBlock)
                             level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
                     } else {  // Should close
-                        if (state.isAir && y < length)
+                        if (state.isAir && state == Blocks.AIR && !state.hasBlockEntity() && y < length)
                             level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
                     }
                 }
