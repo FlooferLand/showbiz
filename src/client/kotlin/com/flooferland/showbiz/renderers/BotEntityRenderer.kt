@@ -5,6 +5,7 @@ import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.BotModel
 import com.flooferland.showbiz.renderers.base.GeoFixedEntityRenderer
+import com.flooferland.showbiz.renderers.layers.BetterAutoGlowingGeoLayer
 import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
@@ -17,6 +18,9 @@ import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 
 class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRenderer<BotEntity>(ctx, BotModel()) {
+    val glow = BetterAutoGlowingGeoLayer(this)
+    init { addRenderLayer(glow) }
+
     override fun shouldShowName(entity: BotEntity) = false
     override fun shouldRender(livingEntity: BotEntity, camera: Frustum, camX: Double, camY: Double, camZ: Double): Boolean {
         // TODO: Figure out a better fix to solve Sodium cutting off entities early. Bad for performance.
@@ -41,6 +45,11 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
             poseStack.popPose()
             RenderSystem.enableDepthTest()
         } }
+
+        // Glow rendering
+        glow.shouldRender = (geoModel as? BotModel)?.hasGlowTexture(entity) ?: false
+
+        // Rendering
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight)
     }
 
