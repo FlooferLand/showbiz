@@ -80,7 +80,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
                         if (state.block is CurtainShadowBlock)
                             level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState())
                     } else {  // Should close
-                        if (state.isAir && state == Blocks.AIR && !state.hasBlockEntity() && y < length)
+                        if (state.isAir && state.canBeReplaced() && !state.canOcclude() && y < length)
                             level.setBlockAndUpdate(pos, ModBlocks.CurtainBlockShadow.block.defaultBlockState())
                     }
                 }

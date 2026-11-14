@@ -1,13 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
@@ -15,6 +7,16 @@ import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.Extensions.getIntArrayOrNull
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
@@ -22,7 +24,7 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.Both)
 
-    val operators = mutableListOf<Player>()
+    val operators = CopyOnWriteArrayList<Player>()
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
         // Cleaning up operators
@@ -46,8 +48,8 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         show.data.playing = true
         for (player in operators) {
             val data = PlayerProgrammingData.getFromPlayer(player)
-            for (i in 0 until data.heldKeys.size) {
-                if (!data.heldKeys[i]) continue
+            for ((i, heldKey) in data.heldKeys.withIndex()) {
+                if (!heldKey) continue
                 val mappedBits = data.mapKeyToBit(i) ?: continue
                 val (mapping, bit) = mappedBits.getFirstNotEmpty() ?: continue
                 show.data.mapping = mapping
