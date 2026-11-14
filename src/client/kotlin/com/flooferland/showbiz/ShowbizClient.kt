@@ -248,6 +248,7 @@ object ShowbizClient : ClientModInitializer {
             val item = stack.item ?: return@register InteractionResult.PASS
             when (item) {
                 is PropItem -> { return@register item.useOn(UseOnContext(player, hand, hitResult)) }
+                is PlushItem -> { return@register item.useOn(UseOnContext(player, hand, hitResult)) }
             }
             InteractionResult.PASS
         }
