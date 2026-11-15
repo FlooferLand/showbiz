@@ -1,0 +1,6 @@
+format = 1
+
+[dynbones.sun]
+damping = 0.1
+elasticity = 0.08
+freeze_x = false

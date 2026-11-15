@@ -1,0 +1,14 @@
+format = 1
+
+[dynbones.moon]
+damping = 0.1
+elasticity = 0.08
+freeze_x = false
+
+[dynbones.neck]
+damping = 0.021
+elasticity = 0.032
+stiffness = 0.0
+update_rate = 60
+freeze_x = false
+gravity = [ 0.0195, 0.0195, -0.0195, ]

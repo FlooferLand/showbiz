@@ -1,2 +1,7 @@
 [variants.default]
 texture = "dook_larue"
+model = "dook_larue"
+
+[variants.cursed]
+texture = "dook_larue"
+model = "dook_larue_cursed"
