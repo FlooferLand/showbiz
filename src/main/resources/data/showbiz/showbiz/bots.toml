@@ -87,3 +87,9 @@ name = "Moon (W.I.P)"
 authors = ["Creative Engineering", "CastIronSkillet"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[gas_pump]
+name = "Gas Pump"
+authors = ["Creative Engineering", "Monsterwaill"]
+accepts.rockafire = true
+accepts.fnaf1 = false

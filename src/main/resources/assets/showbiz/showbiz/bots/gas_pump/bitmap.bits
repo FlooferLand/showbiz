@@ -1,0 +1,5 @@
+set rae stage_lights
+
+rae 241 {
+    anim "light"
+}

@@ -14,7 +14,7 @@
 	"unhandled_root_fields": {},
 	"geckolib_modid": "",
 	"geckolib_filepath_cache": {
-		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\looney_bird\\models\\looney_bird.geo.json"
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\looney_bird\\models\\looney_bird_arms.geo.json"
 	},
 	"resolution": {
 		"width": 128,
@@ -895,7 +895,6 @@
 			"to": [3.5, 16, 2.75],
 			"autouv": 0,
 			"color": 7,
-			"visibility": false,
 			"inflate": 0.25,
 			"origin": [-0.5, 9, 0.75],
 			"uv_offset": [62, 0],
@@ -1543,7 +1542,7 @@
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [1, 6, -5.5],
-			"to": [6, 13, -5.5],
+			"to": [6, 13, -5.49],
 			"autouv": 0,
 			"color": 7,
 			"visibility": false,
@@ -1858,7 +1857,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -2498,7 +2497,7 @@
 		},
 		{
 			"uuid": "601687be-e655-dcb9-432f-46f192709934",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				"c9ec8e11-f032-0666-9626-07225ff79799",
 				"080a0736-e478-60a4-fb97-18a789b53728",
