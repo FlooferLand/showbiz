@@ -14,4 +14,6 @@ rae 46 {
     flow smash in:0.0 out:0.0
     flow smash_speed in:0.0 out:0.0
     rotate "jaw" z:-35
+    rotate "neck" z:-0.75
+    rotate "neck" x:-0.15
 }

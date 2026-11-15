@@ -13,5 +13,6 @@ rae 38 {
     flow accel in:1.13 out:1.11
     flow smash in:0.0 out:0.0
     flow smash_speed in:0.0 out:0.0
-    rotate "jaw" x:-25
+    rotate "jaw" x:-10
+    rotate "upper_lip" x:10
 }
