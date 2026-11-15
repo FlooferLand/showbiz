@@ -1,2 +1,7 @@
 [variants.default]
 texture = "choo_choo"
+model = "choo_choo"
+
+[variants.armless]
+texture = "choo_choo"
+model = "choo_choo_armless"

@@ -1583,7 +1583,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1679,7 +1679,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1703,7 +1703,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1727,7 +1727,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": false,
+			"isOpen": true,
 			"primary_selected": false
 		},
 		{
@@ -1896,7 +1896,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": false,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"name": "Arm2L",
@@ -2179,7 +2179,7 @@
 							"children": [
 								{
 									"uuid": "0ca9ec99-8809-2d99-6368-81bd39761d36",
-									"isOpen": false,
+									"isOpen": true,
 									"children": [
 										{
 											"uuid": "8ad2fd74-6503-75a3-a5bc-5fbb0bca49e2",
@@ -2201,19 +2201,19 @@
 												},
 												{
 													"uuid": "5d3b9e70-8012-146e-affe-c0dc9b12a66e",
-													"isOpen": false,
+													"isOpen": true,
 													"children": [
 														"e00d6976-70fa-e265-50a1-707eda0cec5b",
 														"34e441c5-180f-be44-c53a-7aa76158266e",
 														"b10470a6-0526-e333-04e8-d53dbaa00253",
 														{
 															"uuid": "11de8f1e-b5b0-d908-cb33-986e49138167",
-															"isOpen": false,
+															"isOpen": true,
 															"children": ["cad1c5aa-ee15-ff51-6c53-f9260ca03d41", "b48778fa-00d4-d906-04b2-017c2658e584"]
 														},
 														{
 															"uuid": "bc2cbd65-8768-95eb-88f7-153356e37fe3",
-															"isOpen": false,
+															"isOpen": true,
 															"children": ["049cdf27-6f5a-64cb-8e59-b9eb276e159a", "d6ac449c-c5ff-a104-5e8f-6805bfad5ee9"]
 														}
 													]

@@ -1,2 +1,7 @@
 [variants.default]
 texture = "looney_bird"
+model = "looney_bird"
+
+[variants.arms]
+texture = "looney_bird"
+model = "looney_bird_arms"

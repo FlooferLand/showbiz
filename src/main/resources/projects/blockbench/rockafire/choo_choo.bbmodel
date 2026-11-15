@@ -14,7 +14,7 @@
 	"unhandled_root_fields": {},
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
-		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\choo_choo\\models\\choo_choo.geo.json"
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\showbiz\\bots\\choo_choo\\models\\choo_choo_armless.geo.json"
 	},
 	"resolution": {
 		"width": 64,
@@ -907,6 +907,7 @@
 			"to": [6.5, 9, -4.5],
 			"autouv": 0,
 			"color": 4,
+			"visibility": false,
 			"origin": [0, 0, 0],
 			"uv_offset": [0, 53],
 			"faces": {
@@ -950,6 +951,7 @@
 			"to": [6.5, 9, -15.5],
 			"autouv": 0,
 			"color": 4,
+			"visibility": false,
 			"rotation": [0, -180, 0],
 			"origin": [0, 4.5, -5.5],
 			"uv_offset": [0, 53],
@@ -994,6 +996,7 @@
 			"to": [12, 9, 1],
 			"autouv": 0,
 			"color": 4,
+			"visibility": false,
 			"rotation": [0, 90, 0],
 			"origin": [0, 4.5, 5.5],
 			"uv_offset": [0, 53],
@@ -1038,6 +1041,7 @@
 			"to": [1, 9, 1],
 			"autouv": 0,
 			"color": 4,
+			"visibility": false,
 			"rotation": [0, -90, 0],
 			"origin": [0, 4.5, 5.5],
 			"uv_offset": [0, 53],
@@ -3032,7 +3036,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
-			"visibility": true,
+			"visibility": false,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -3070,6 +3074,29 @@
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
+		},
+		{
+			"name": "Arms",
+			"uuid": "7a5b2438-f806-a4f3-3bba-eaea82cb48c0",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [-1.5, 1.50532, -0.03744],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": true,
+			"primary_selected": true
 		}
 	],
 	"outliner": [
@@ -3087,6 +3114,17 @@
 			"uuid": "042b3fd0-f595-a5ed-7b51-d8d468796d79",
 			"isOpen": true,
 			"children": [
+				{
+					"uuid": "7a5b2438-f806-a4f3-3bba-eaea82cb48c0",
+					"isOpen": true,
+					"children": [
+						"df16d339-b96d-f724-ce53-50e9c4b9cff7",
+						"e4ed5036-a09a-8316-2821-354525f03f64",
+						"34f14223-371f-a49e-8d2a-450fb9d4f06c",
+						"d4e634bc-1d8c-6796-07f2-e335f9205bfc",
+						"ea65d512-2b9b-4160-4d0d-a92be56dd7da"
+					]
+				},
 				"f6738436-770e-049d-5011-e74f3697181d",
 				"c53221c1-2e93-a5a7-9efd-92b9106e2e3d",
 				"b32ed3a8-f313-4c8d-6a56-ab3172251d44",
@@ -3105,14 +3143,10 @@
 				"e2218b8f-f8d0-2602-cfa4-9597b4f5e527",
 				"470c304f-2a57-fd10-4595-62a9e558b710",
 				"69b9afd3-a7d1-18c3-5a57-51f6207556f9",
-				"ea65d512-2b9b-4160-4d0d-a92be56dd7da",
 				"e20b0caa-b565-d9d8-ac15-d73a76d5148f",
 				"310db20d-ac6f-0867-498f-decd2407f85f",
 				"16261f94-3aa7-cc3e-d8ab-93843c8b4791",
 				"83c81122-26dd-9847-7b46-9a72b4a0d904",
-				"34f14223-371f-a49e-8d2a-450fb9d4f06c",
-				"d4e634bc-1d8c-6796-07f2-e335f9205bfc",
-				"df16d339-b96d-f724-ce53-50e9c4b9cff7",
 				"def6b89a-0986-4aea-f6b5-23534bbf45cf",
 				"82b548c8-3a90-f552-d00a-656ac033211e",
 				"9c8a20d7-d9a0-d906-b7ec-75de68c65522",
@@ -3133,7 +3167,6 @@
 				"08f69e31-17a9-dc47-dd30-d801255c3ac6",
 				"b2814e18-8e7f-ab7a-a1ae-11efc44fd6e7",
 				"cfe889ff-ea60-45a2-0e91-58ca891cd40e",
-				"e4ed5036-a09a-8316-2821-354525f03f64",
 				"f2f6d5f2-9c64-150d-9d68-5f65b333a01f",
 				"85362144-ada7-992b-ae78-d70b953999a8",
 				"acbab624-99ca-a610-da68-78e8867df9dd",

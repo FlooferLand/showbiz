@@ -1927,7 +1927,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -2161,7 +2161,7 @@
 			"primary_selected": false
 		},
 		{
-			"name": "Hands",
+			"name": "hands",
 			"uuid": "7146630a-90c4-3435-5ab4-f0a61d1537b9",
 			"export": false,
 			"locked": false,
@@ -2378,7 +2378,7 @@
 				"a585f63d-e661-ad92-6a7d-01f7aeba02d1",
 				{
 					"uuid": "0a3b011f-957f-eac8-e169-8fd5ba00cef1",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						{
 							"uuid": "797a5cb0-8da2-830e-49db-08a2bd4354e5",

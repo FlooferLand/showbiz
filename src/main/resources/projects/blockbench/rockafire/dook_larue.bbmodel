@@ -6,7 +6,6 @@
 	},
 	"name": "dook_larue",
 	"model_identifier": "dook_larue",
-	"front_gui_light": false,
 	"visible_box": [5, 4.5, 1.75],
 	"variable_placeholders": "",
 	"multi_file_ruleset": "",
@@ -5653,7 +5652,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5676,7 +5675,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5692,29 +5691,6 @@
 				"temp_data": {}
 			},
 			"origin": [-2.9, 12, 0],
-			"rotation": [0, 0, 0],
-			"color": 0,
-			"children": [],
-			"reset": false,
-			"shade": true,
-			"mirror_uv": false,
-			"autouv": 0,
-			"isOpen": true,
-			"primary_selected": false
-		},
-		{
-			"name": "jaw2",
-			"uuid": "3dad6662-5a05-0e65-b885-62b219016c7b",
-			"export": true,
-			"locked": false,
-			"scope": 0,
-			"selected": false,
-			"visibility": true,
-			"_static": {
-				"properties": {},
-				"temp_data": {}
-			},
-			"origin": [0, 28.4, -1],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
@@ -5745,7 +5721,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5768,7 +5744,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5837,7 +5813,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5929,7 +5905,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -5952,7 +5928,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -6067,7 +6043,7 @@
 			"shade": true,
 			"mirror_uv": false,
 			"autouv": 0,
-			"isOpen": true,
+			"isOpen": false,
 			"primary_selected": false
 		},
 		{
@@ -6137,7 +6113,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		},
 		{
 			"name": "Snare",
@@ -6276,6 +6252,29 @@
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
+		},
+		{
+			"name": "jaw2",
+			"uuid": "3dad6662-5a05-0e65-b885-62b219016c7b",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [0, 28.4, -1],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": false,
+			"primary_selected": true
 		}
 	],
 	"outliner": [
@@ -6285,16 +6284,16 @@
 			"children": [
 				{
 					"uuid": "86f999fe-4325-ae85-5313-b9eb8c6787da",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						{
 							"uuid": "e237743a-655b-fa87-c9ea-9c098ad03e65",
-							"isOpen": true,
+							"isOpen": false,
 							"children": ["e5f8308a-707e-4d80-a5b6-dc781fd95185"]
 						},
 						{
 							"uuid": "89085dd4-2052-994b-bccb-66a205040e6b",
-							"isOpen": true,
+							"isOpen": false,
 							"children": ["8dfa829b-977f-99d9-e691-88eca45793c2"]
 						},
 						{
@@ -6406,7 +6405,7 @@
 				},
 				{
 					"uuid": "b31ddd69-6b3b-15a2-1dbc-98c8c8dbdf19",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						"43f860e7-b5a9-21dd-ba8b-0529ed7f6d06",
 						"82326190-4289-3c46-f3be-455e5e8edfcf",
@@ -6420,7 +6419,7 @@
 				},
 				{
 					"uuid": "6017fb43-7d1b-17aa-7d4e-ee078fd9a553",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						"f5fd3989-4289-ddde-ded1-110e96bf74b5",
 						{
@@ -6440,7 +6439,7 @@
 				},
 				{
 					"uuid": "c277f837-0c28-5fc2-beb3-69c6b18cdeb8",
-					"isOpen": true,
+					"isOpen": false,
 					"children": [
 						{
 							"uuid": "e7a6ae09-7b1e-9dd3-8db9-11622a9d73c7",
@@ -6462,7 +6461,7 @@
 		},
 		{
 			"uuid": "1787af51-636f-acb1-1051-0fca7c6bbe97",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				"89174bb9-4bf9-691f-28cd-ee6d5d8d94e6",
 				"ca394324-3ffa-cbf0-d3a9-0d4873a9355d",
@@ -6475,7 +6474,7 @@
 		},
 		{
 			"uuid": "178fe058-01cb-495a-aa7b-27ec197ba3a8",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				"77764706-7315-696e-dcd3-77abbaa524c1",
 				"10fa047f-cc07-f5a3-ec8f-63353de0a9f6",
@@ -6495,7 +6494,7 @@
 		},
 		{
 			"uuid": "5de0601c-6afc-477e-1114-7a4162fb6d51",
-			"isOpen": true,
+			"isOpen": false,
 			"children": [
 				{
 					"uuid": "436541d9-405a-4c9f-66a7-808b75a92b72",
@@ -6774,12 +6773,6 @@
 				},
 				"1787af51-636f-acb1-1051-0fca7c6bbe97": {
 					"name": "Left Leg",
-					"type": "bone",
-					"rotation_global": false,
-					"quaternion_interpolation": false
-				},
-				"3dad6662-5a05-0e65-b885-62b219016c7b": {
-					"name": "jaw2",
 					"type": "bone",
 					"rotation_global": false,
 					"quaternion_interpolation": false

@@ -29,7 +29,11 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
     var selectedBot: ResourceId? = null
     var selectedVariant: String = IBot.DEFAULT_VARIANT
 
-    val excluded = listOf(ResourceId(Showbiz.MOD_ID, "conner"))
+    val excluded = listOf(
+        ResourceId(Showbiz.MOD_ID, "conner"),
+        ResourceId(Showbiz.MOD_ID, "sun"),
+        ResourceId(Showbiz.MOD_ID, "moon"),
+    )
     var showExcluded = false
 
     init {

@@ -75,3 +75,15 @@ name = "Prop - Choo Choo"
 authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+[sun]
+name = "Sun (W.I.P)"
+authors = ["Creative Engineering", "CastIronSkillet"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[moon]
+name = "Moon (W.I.P)"
+authors = ["Creative Engineering", "CastIronSkillet"]
+accepts.rockafire = true
+accepts.fnaf1 = false
