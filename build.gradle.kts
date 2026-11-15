@@ -164,7 +164,7 @@ dependencies {
     compileOnly("com.github.quaIett:irl-core:${dep("irlights_core")}")
 
     // CC Tweaked
-    modCompileOnly("cc.tweaked:cc-tweaked-$minecraft-$loader-api:${dep("cctweaked")}")
+    compileOnly("cc.tweaked:cc-tweaked-1.21.1-common-api:${dep("cctweaked")}")
     modRuntimeOnly("cc.tweaked:cc-tweaked-$minecraft-$loader:${dep("cctweaked")}")
 
     // Modmenu
