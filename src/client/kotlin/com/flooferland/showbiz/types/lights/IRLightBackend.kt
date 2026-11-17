@@ -18,6 +18,9 @@ import kotlin.math.abs
 internal object IRLightBackend : BaseLightBackend() {
     private const val COOKIE_TEXTURE = "/assets/${Showbiz.MOD_ID}/textures/spotlight_cookie.png"
 
+    /** For some reason IRLight lights are slightly too far back */
+    private val spotOffset get() = -0.25
+
     override fun load() {
         try {
             val cookiesDir = FabricLoader.getInstance().configDir.resolve("irl-redactor").resolve("cookies")
@@ -59,8 +62,8 @@ internal object IRLightBackend : BaseLightBackend() {
         val cookie = IRLights.getCookie()
         val angle = light.angle * 2f
         val cone = LightMath.cone(angle, angle * 0.9f)
-        val pos = getPos(emitter, light) ?: return
         val dir = light.dir
+        val pos = getPos(emitter, light)?.add(dir.scale(spotOffset)) ?: return
         val (r, g, b) = light.color.toLinear()
         LightRegistry.registerSpot(
             pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
@@ -86,8 +89,8 @@ internal object IRLightBackend : BaseLightBackend() {
         if (!light.enabled || level == null) return
         val ownerId = OwnerId.ofLight(emitter) ?: return
 
-        val pos = getPos(emitter, light) ?: return
         val dir = light.dir.normalize()
+        val pos = getPos(emitter, light)?.add(dir.scale(spotOffset)) ?: return
 
         // Right/up vectors
         val ref = if (abs(dir.y) > 0.99) Vec3(0.0, 0.0, 1.0) else Vec3(0.0, 1.0, 0.0)

@@ -43,10 +43,14 @@ class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
 
         val facing = blockState.getValue(FacingEntityBlock.FACING) ?: return
 
-        light?.size = Vec2(0.8f, 0.8f)
+        val distance = 0.35
+        val down = 0.05
+        light?.size = Vec2(0.6f, 0.5f)
         light?.color = colorAverage.safe().saturate(2.5f)
-        light?.localPos = Vec3(facing.stepX * 0.5, facing.stepY * 0.5, facing.stepZ * 0.5)
+        light?.localPos = Vec3(facing.stepX * distance, facing.stepY * distance, facing.stepZ * distance).add(0.0, -down, 0.0)
         light?.dir = Vec3(facing.stepX.toDouble(), facing.stepY.toDouble(), facing.stepZ.toDouble())
+        light?.vanillaBackend = false
+        light?.shadows = false
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {

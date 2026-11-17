@@ -15,6 +15,8 @@ sealed class AbstractLight {
 
     var localPos: Vec3 = Vec3(0.0, 0.0, 0.0)
 
+    var vanillaBackend = true
+
     fun getLightLevel(): Int {
         val color = color.toLinear()
         val value = min(color.a.toDouble(), (color.luminance * 10.0)) * intensity.toDouble()

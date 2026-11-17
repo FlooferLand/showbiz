@@ -67,7 +67,7 @@ object VanillaLightBackend : BaseLightBackend() {
     override fun renderPointlight(emitter: ILightEmitter, light: PointLight) {
         val level = level ?: return
         val blockPos = OwnerId.ofLight(emitter)?.grabBlockPos(level) ?: return
-        if (!light.enabled) return
+        if (!light.enabled || !light.vanillaBackend) return
 
         val blockLight = light.getLightLevel()
         frameBlockLights[blockPos.asLong()] = blockLight
@@ -87,7 +87,7 @@ object VanillaLightBackend : BaseLightBackend() {
 
     private fun vanillaRenderLightBeam(emitter: ILightEmitter, light: AbstractLight, lightDir: Vec3, lightRange: Float) {
         val level = level ?: return
-        if (!light.enabled) return
+        if (!light.enabled || !light.vanillaBackend) return
         val blockPos = OwnerId.ofLight(emitter)?.grabBlockPos(level) ?: return
 
         val blockLight = light.getLightLevel().coerceAtMost(13)
