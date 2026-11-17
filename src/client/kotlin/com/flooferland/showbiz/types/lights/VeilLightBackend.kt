@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types.lights
 
+import com.flooferland.showbiz.registry.ModClientLights
 import com.flooferland.showbiz.types.light.*
 import foundry.veil.api.client.render.VeilRenderSystem
 import foundry.veil.api.client.render.light.data.AreaLightData
@@ -13,7 +14,7 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 
-internal object VeilLightBackend : BaseLightBackend() {
+internal object VeilLightBackend : BaseLightBackend(ModClientLights.BackendType.Veil) {
     val handles = ConcurrentHashMap<ILightEmitter, LightRenderHandle<*>>()
 
     init {

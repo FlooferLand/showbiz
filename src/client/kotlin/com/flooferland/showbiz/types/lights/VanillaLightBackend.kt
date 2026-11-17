@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types.lights
 
+import com.flooferland.showbiz.registry.ModClientLights
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.*
 import net.minecraft.client.multiplayer.ClientLevel
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 // TODO: Figure out a way to prevent flashing lights using vanilla's lighting from looking so bad
 
-object VanillaLightBackend : BaseLightBackend() {
+object VanillaLightBackend : BaseLightBackend(ModClientLights.BackendType.Vanilla) {
     private val lights = ConcurrentHashMap.newKeySet<ILightEmitter>()!!
     private val lightBonusOwners = ConcurrentHashMap<ILightEmitter, HashSet<Long>>()
     private val lightBonusMap = ConcurrentHashMap<Long, Int>()

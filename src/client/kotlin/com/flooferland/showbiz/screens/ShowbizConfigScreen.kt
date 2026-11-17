@@ -25,6 +25,8 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
     val categoryButtons = mutableListOf<Button>()
     var selectedCategory: String? = null
 
+    var backendName: StringWidget? = null
+
     override fun init() {
         categoryButtons.clear()
         configEntries.clear()
@@ -71,6 +73,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                             it.widget.visible = category == selectedCategory
                         }
                     }
+                    backendName?.visible = categoryName.lowercase() == "light"
                 }
                 .pos(20 + xAcc, 0)
                 .size(categoryWidth, 20)
@@ -100,6 +103,17 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 widget.visible = (selectedCategory == categoryName)
                 addRenderableWidget(widget)
             }
+        }
+
+        // Category specific
+        run {
+            val x = 10
+            val y = (height - font.lineHeight) - 10
+            val text = Component.literal("Current backend: ").append(Component.literal(ModClientLights.backend.type.name).withStyle(ChatFormatting.GOLD))
+            val backendWidget = StringWidget(x, y, width - x, font.lineHeight * 2, text, font).alignLeft()
+            backendWidget.visible = false
+            addRenderableWidget(backendWidget)
+            backendName = backendWidget
         }
     }
 

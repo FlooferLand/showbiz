@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types.lights
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.registry.ModClientLights
 import com.flooferland.showbiz.types.IRLights
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.AreaLight
@@ -15,7 +16,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.math.abs
 
-internal object IRLightBackend : BaseLightBackend() {
+internal object IRLightBackend : BaseLightBackend(ModClientLights.BackendType.IRLights) {
     private const val COOKIE_TEXTURE = "/assets/${Showbiz.MOD_ID}/textures/spotlight_cookie.png"
 
     /** For some reason IRLight lights are slightly too far back */

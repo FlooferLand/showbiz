@@ -25,6 +25,8 @@ object ModClientLights {
         public get
         private set
 
+    enum class BackendType { Vanilla, Veil, IRLights }
+
     fun findBackend(): BaseLightBackend {
         val config = Showbiz.config.light
         if (config.forceVanillaLighting) return VanillaLightBackend
@@ -32,21 +34,19 @@ object ModClientLights {
         val allowIRLights = ShowbizEnv.hasIRLights() && !com.flooferland.showbiz.types.IRLights.shadersDisabled()
         val allowVeil = ShowbizEnv.hasVeil()
 
-        fun loadError(thing: String, e: Throwable): BaseLightBackend? {
-            Showbiz.log.error("Failed to load $thing backend: ", e)
-            return null
-        }
+        fun get(type: BackendType, load: () -> BaseLightBackend): BaseLightBackend? =
+            runCatching { load() }.getOrElse { Showbiz.log.error("Failed to load the $type backend: ", it); null }
 
-        val found = when {
-            config.preferVeil && allowVeil -> runCatching { VeilLightBackend }.getOrElse { loadError("Veil", it) }
-            config.preferIRLights && allowIRLights -> runCatching { IRLightBackend }.getOrElse { loadError("IRLights", it) }
-            allowVeil -> runCatching { VeilLightBackend }.getOrElse { loadError("Veil", it) }
-            allowIRLights -> runCatching { IRLightBackend }.getOrElse { loadError("IRLights", it) }
+        val backend = when {
+            config.preferVeil && allowVeil -> get(BackendType.Veil) { VeilLightBackend }
+            config.preferIRLights && allowIRLights -> get(BackendType.IRLights) { IRLightBackend }
+            allowVeil -> get(BackendType.Veil) { VeilLightBackend }
+            allowIRLights -> get(BackendType.IRLights) { IRLightBackend }
             else -> null
         } ?: VanillaLightBackend
 
-        Showbiz.log.debug("Switching to light backend '{}'", found::class.simpleName)
-        return found
+        Showbiz.log.debug("Switching to light backend '{}'", backend::class.simpleName)
+        return backend
     }
 
     fun load() {

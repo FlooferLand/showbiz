@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types.lights
 
+import com.flooferland.showbiz.registry.ModClientLights
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.*
 import com.flooferland.showbiz.utils.ShowbizEnv
@@ -9,7 +10,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.level.redstone.Redstone
 import net.minecraft.world.phys.Vec3
 
-sealed class BaseLightBackend {
+sealed class BaseLightBackend(val type: ModClientLights.BackendType) {
     /** Called when the player switches to this backend */
     open fun load() {}
 
