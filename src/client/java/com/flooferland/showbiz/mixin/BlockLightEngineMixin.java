@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.mixin;
 
-import com.flooferland.showbiz.registry.ModClientLights;
+import com.flooferland.showbiz.types.lights.VanillaLightBackend;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +23,7 @@ abstract class BlockLightEngineMixin {
 	private void showbiz_getEmission(long packedPos, BlockState state, CallbackInfoReturnable<Integer> cir) {
 		if (!isClient((LayerLightEventListener) (Object) this)) return;
 
-		int light = cir.getReturnValue() + ModClientLights.INSTANCE.getLightLevel(packedPos);
+		int light = cir.getReturnValue() + VanillaLightBackend.INSTANCE.getLightLevel(packedPos);
 		cir.setReturnValue(Math.clamp(light, 0, LightEngine.MAX_LEVEL));
 	}
 

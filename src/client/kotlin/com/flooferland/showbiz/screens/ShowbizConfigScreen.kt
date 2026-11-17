@@ -2,6 +2,7 @@ package com.flooferland.showbiz.screens
 
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.registry.ModClientLights
 import com.flooferland.showbiz.registry.ModConfig
 import com.flooferland.showbiz.registry.PermissionSelector
 import net.minecraft.ChatFormatting
@@ -34,6 +35,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
                 when (categoryClass) {
                     ModConfig.Audio::class -> categoryAddWidgets("Audio", config.audio)
                     ModConfig.Video::class -> categoryAddWidgets("Video", config.video)
+                    ModConfig.Light::class -> categoryAddWidgets("Light", config.light)
                     ModConfig.Permissions::class -> categoryAddWidgets("Permissions", config.permissions)
                     ModConfig.Addons::class -> categoryAddWidgets("Addons", config.addons)
                     ModConfig.Other::class -> categoryAddWidgets("Other", config.other)
@@ -139,6 +141,7 @@ class ShowbizConfigScreen(val parent: Screen? = null) : Screen(Component.literal
         Showbiz.config = config
         Showbiz.config.save()
         ClientPackets.sendCapabilities()
+        ModClientLights.reload()
         super.removed()
     }
 

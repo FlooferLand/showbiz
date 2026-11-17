@@ -35,6 +35,7 @@ enum class PermissionSelector(private val rank: Int) {
 data class ModConfig(
     val audio: Audio = Audio(),
     val video: Video = Video(),
+    val light: Light = Light(),
     val permissions: Permissions = Permissions(),
     val addons: Addons = Addons(),
     val other: Other = Other()
@@ -53,6 +54,13 @@ data class ModConfig(
     )
 
     @Serializable
+    data class Light(
+        var preferIRLights: Boolean = false,
+        var preferVeil: Boolean = false,
+        var forceVanillaLighting: Boolean = false
+    )
+
+    @Serializable
     data class Permissions(
         var writeReels: PermissionSelector = PermissionSelector.Anyone,
         var switchReels: PermissionSelector = PermissionSelector.Anyone,
@@ -68,7 +76,6 @@ data class ModConfig(
 
     @Serializable
     data class Other(
-        var forceVanillaLighting: Boolean = false,
         var checkForUpdates: Boolean = true
     )
 

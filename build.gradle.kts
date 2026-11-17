@@ -7,6 +7,7 @@ import java.awt.Desktop
 
 fun vers(name: String): String = project.property("vers.${name}") as String
 fun dep(name: String): String = project.property("deps.${name}") as String
+fun depOpt(name: String): String? = if (project.hasProperty("deps.$name")) project.property("deps.$name") as String else null
 
 val kotlin = dep("kotlin")
 val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
@@ -47,8 +48,10 @@ repositories {
     maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") { name = "GeckoLib" }
     maven("https://www.jitpack.io") { name = "Jitpack" }
     maven("https://maven.terraformersmc.com/") { name = "Terraformers" }
-    maven("https://maven.blamejared.com") { name = "BlameJared Maven (CrT / Bookshelf)" }
     maven("https://maven.squiddev.cc") { content { includeGroup("cc.tweaked") } }
+
+    // Veil
+    maven("https://maven.blamejared.com") { name = "BlameJared Maven (CrT / Bookshelf)" }
 
     exclusiveContent {
         forRepository {
@@ -100,7 +103,10 @@ loom {
         configureEach {
             generateRunConfig.set(true)
             jvmArguments.addAll((project.property("net.minecraft.jvmargs") as String).split(" "))
-            if (name != "datagen") jvmArguments.add(project.property("net.minecraft.jvmargs.devonly") as String)
+            if (name != "datagen") {
+                val args = project.property("net.minecraft.jvmargs.devonly") as String
+                if (args.isNotEmpty()) jvmArguments.add(args)
+            }
         }
     }
     log4jConfigs.from(file("../../src/main/resources/log4j2.xml").absolutePath)
@@ -163,6 +169,16 @@ dependencies {
     // IRLights
     compileOnly("com.github.quaIett:irl-core:${dep("irlights_core")}")
 
+    // Veil
+    modCompileOnly("foundry.veil:veil-$loader-${minecraft}:${dep("veil")}") {
+        exclude(group = "maven.modrinth")
+        exclude(group = "me.fallenbreath")
+    }
+    depOpt("devruntime.sodium")?.let { sodium ->
+        if (!sodium.startsWith("0.6"))
+            modRuntimeOnly("maven.modrinth:veil:veil-$loader-${minecraft}:${dep("veil")}")
+    }
+
     // CC Tweaked
     compileOnly("cc.tweaked:cc-tweaked-1.21.1-common-api:${dep("cctweaked")}")
     modRuntimeOnly("cc.tweaked:cc-tweaked-$minecraft-$loader:${dep("cctweaked")}")
@@ -171,8 +187,16 @@ dependencies {
     modApi("com.terraformersmc:modmenu:${dep("modmenu")}")
 
     // Useful dev tools (not included in the mod, helps me ensure mod compatibility and other things)
-    modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devonly.dev_auth")}")
-    modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-${dep("devonly.sodium")}-$loader")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-$loader:${dep("devruntime.dev_auth")}")
+    depOpt("devruntime.sodium")?.let { sodium ->
+        modRuntimeOnly("maven.modrinth:sodium:mc$minecraft-$sodium-$loader")
+    }
+    depOpt("devruntime.iris")?.let { iris ->
+        modRuntimeOnly("maven.modrinth:iris:$iris+$minecraft-$loader")
+    }
+    depOpt("devruntime.irlights")?.let { irlights ->
+        modRuntimeOnly("maven.modrinth:irlights:$irlights+mc$minecraft")
+    }
 }
 
 idea.module {

@@ -1,16 +1,5 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.nbt.*
-import net.minecraft.network.chat.*
-import net.minecraft.network.protocol.game.*
-import net.minecraft.server.level.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.inventory.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.registry.ModBlocks
@@ -22,22 +11,44 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.light.ILightEmitter
+import com.flooferland.showbiz.types.light.LightManager
+import com.flooferland.showbiz.types.light.SpotLight
+import com.flooferland.showbiz.types.math.Color4
+import com.flooferland.showbiz.types.math.Kelvin
 import com.flooferland.showbiz.types.math.Vec2f
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
+import com.flooferland.showbiz.utils.lerp
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.redstone.Redstone
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Spotlight.entityType!!, pos, blockState), IConnectable, GeoBlockEntity, EditScreenOwner<SpotlightEditPacket> {
+class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Spotlight.entityType!!, pos, blockState), IConnectable, ILightEmitter, GeoBlockEntity, EditScreenOwner<SpotlightEditPacket> {
     override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.of(blockPos))
     override val connectionManager = ConnectionManager(this)
     val show = connectionManager.port("show", PackedShowData(), PortDirection.In) { show ->
         lit = bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
     }
+
+    override val lightManager = LightManager(this)
+    val light = lightManager.add(SpotLight())
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
     var value: Float = 0f  // Used for smoothing on the client
@@ -53,8 +64,8 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
     var brightness: Float = 1.0f
 
     private var lit: Boolean = false
-    var startPos = Vec3.ZERO!!
-    var endPos = Vec3.ZERO!!
+    var startPos = blockPos.center!!
+    var endPos = blockPos.center!!
 
     val geckoCache = GeckoLibUtil.createInstanceCache(this)!!
 
@@ -65,6 +76,26 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         if (show.data.playing || isLit) {
             markDirtyNotifyAll()
         }
+    }
+
+    override fun clientUpdateLights(delta: Float) {
+        val kelvinColor = Kelvin.toColor(kelvin)
+        val power = if (redstoneSignal > Redstone.SIGNAL_NONE) redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
+
+        val target = (if (isLit) power else 0f) * brightness
+        val fadingOut = target < value
+        val speed = 0.2f - (if (fadingOut) 0.03f else 0.0f)
+        value = lerp(value, target, speed * delta)
+        value = value.coerceIn(if (isLit) 0.5f else 0f, 1f)
+
+        light?.enabled = value >= 0f
+        light?.range = 20f
+        light?.angle = angle
+        light?.shadows = shadows
+        light?.intensity = value
+        light?.color = Color4.fromPacked(kelvinColor)
+        light?.localPos = endPos.subtract(blockPos.center)
+        light?.dir = endPos.subtract(startPos).normalize()
     }
 
     override fun getDisplayName() = Component.literal("Spotlight")!!

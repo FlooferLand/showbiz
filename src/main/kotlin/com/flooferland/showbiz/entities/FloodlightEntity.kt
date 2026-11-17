@@ -17,12 +17,17 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.light.ILightEmitter
+import com.flooferland.showbiz.types.light.LightManager
+import com.flooferland.showbiz.types.light.SpotLight
+import com.flooferland.showbiz.types.math.Color4
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getLongOrNull
+import com.flooferland.showbiz.utils.lerp
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
@@ -37,6 +42,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.redstone.Redstone
 import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoEntity
 import software.bernie.geckolib.animation.AnimatableManager
@@ -44,7 +50,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 // TODO: The connection/entity syncing logic is shared between both BotEntity and FloodlightEntity, should prob unify them somehow
 
-class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, EditScreenOwner<FloodlightEditPacket> {
+class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity(ModLivingEntities.Floodlight.type, level), GeoEntity, IConnectable, ILightEmitter, EditScreenOwner<FloodlightEditPacket> {
     constructor(level: Level) : this(level, FloodlightComponent()) {}
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
@@ -55,6 +61,9 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         lit = bitFilter.chartHasBit(show.mapping) { show.signal.frameHas(it) }
         if (!level().isClientSide) updatePersistentData { it.putBoolean("lit", lit) }
     }
+
+    override val lightManager = LightManager(this)
+    val light = lightManager.add(SpotLight())
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
     var value: Float = 0f  // Used for smoothing on the client
@@ -76,8 +85,8 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     var turn = comp.turn
 
     private var lit: Boolean = false
-    var startPos = Vec3.ZERO!!
-    var endPos = Vec3.ZERO!!
+    var startPos = position()!!
+    var endPos = position()!!
 
     init {
         updateYaw(turn.x)
@@ -89,6 +98,26 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         supportAbove = Block.canSupportCenter(level(), blockPosition().above(), Direction.DOWN)
         supportBelow = Block.canSupportCenter(level(), blockPosition().below(), Direction.UP)
         if (yRot != turn.x) updateYaw(turn.x)
+        redstoneSignal = level()?.getSignal(blockPosition().above(), Direction.UP) ?: 0
+    }
+
+    override fun clientUpdateLights(delta: Float) {
+        val power = if (redstoneSignal > Redstone.SIGNAL_NONE) redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
+
+        val target = (if (isLit) power else 0f) * brightness
+        val fadingOut = target < value
+        val speed = 0.15f - (if (fadingOut) 0.03f else 0.0f)
+        value = lerp(value, target, speed * delta)
+        value = value.coerceIn(if (isLit) 0.5f else 0f, 1f)
+
+        light?.enabled = value >= 0f
+        light?.range = 20f
+        light?.angle = angle
+        light?.shadows = shadows
+        light?.intensity = value
+        light?.color = Color4.fromPacked(color)
+        light?.localPos = endPos.subtract(position())
+        light?.dir = endPos.subtract(startPos).normalize()
     }
 
     override fun getDefaultDimensions(pose: Pose): EntityDimensions =
@@ -111,7 +140,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
 
         // Opening up the edit screen
         if (Permissions.EditScreenAccess.test(player)) {
-            val id = OwnerId.of(this)
+            val id = OwnerId.ofLight(this)
             if (id != null) player.openMenu(this)
             return InteractionResult.SUCCESS
         }

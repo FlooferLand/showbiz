@@ -61,7 +61,7 @@ object Showbiz : ModInitializer {
             ModPlayerSynchedData
             ModCommands.register()
             ModScreenHandlers
-            if (ShowbizEnv.hasComputerCraft()) run { ModPeripherals.register() }
+            if (ShowbizEnv.hasComputerCraft()) runCatching { ModPeripherals.register() }
             ServerConnections
             FileStorage
             FileServer

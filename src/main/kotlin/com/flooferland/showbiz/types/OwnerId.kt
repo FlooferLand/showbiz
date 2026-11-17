@@ -1,22 +1,26 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.core.*
-import net.minecraft.network.*
-import net.minecraft.network.codec.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.types.connection.IConnectable
+import com.flooferland.showbiz.types.light.ILightEmitter
 import com.flooferland.showbiz.utils.Extensions.getEntity
 import com.mojang.datafixers.util.Either
 import com.mojang.serialization.Codec
-import java.util.UUID
+import net.minecraft.core.BlockPos
+import net.minecraft.core.UUIDUtil
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.codec.StreamCodec
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.Vec3
+import java.util.*
 
 /** General class that can store either a block position or an entity UUID */
 sealed class OwnerId() {
+    abstract fun grabId(): Long
     abstract fun grabConnectable(level: Level): IConnectable?
+    abstract fun grabLightEmitter(level: Level): ILightEmitter?
     abstract fun grabBlockPos(level: Level): BlockPos?
     abstract fun grabPos(level: Level): Vec3?
     abstract fun isLoaded(level: Level): Boolean
@@ -26,8 +30,11 @@ sealed class OwnerId() {
     abstract fun isRemovedEntityWorkaround(level: Level): Boolean
 
     data class BlockId(val blockPos: BlockPos) : OwnerId() {
+        override fun grabId() = blockPos.asLong()
         override fun grabConnectable(level: Level) =
             if (level.isLoaded(blockPos)) level.getBlockEntity(blockPos) as? IConnectable else null
+        override fun grabLightEmitter(level: Level) =
+            if (level.isLoaded(blockPos)) level.getBlockEntity(blockPos) as? ILightEmitter else null
         override fun grabBlockPos(level: Level) = blockPos
         override fun grabPos(level: Level) = blockPos.center!!
         override fun isLoaded(level: Level): Boolean = grabBlockPos(level).let { level.isLoaded(it) }
@@ -38,7 +45,9 @@ sealed class OwnerId() {
     }
 
     class EntityId(val entityUuid: UUID, var entityLocalId: Int? = null) : OwnerId() {
+        override fun grabId() = entityUuid.mostSignificantBits
         override fun grabConnectable(level: Level) = grabEntity(level) as? IConnectable
+        override fun grabLightEmitter(level: Level) = grabEntity(level) as? ILightEmitter
         override fun grabBlockPos(level: Level) = grabEntity(level)?.blockPosition()
         override fun grabPos(level: Level) = grabEntity(level)?.position()
         override fun isLoaded(level: Level) = true  // TODO: Should figure out if the entity is loaded or not
@@ -81,11 +90,13 @@ sealed class OwnerId() {
                 EntityId(uuid, id)
             }
 
-        fun of(connectable: IConnectable) = when (connectable) {
-            is BlockEntity -> OwnerId.of(connectable.blockPos)
-            is Entity -> OwnerId.of(connectable.uuid, connectable.id)
+        private fun ofAny(thing: Any) = when (thing) {
+            is BlockEntity -> OwnerId.of(thing.blockPos)
+            is Entity -> OwnerId.of(thing.uuid, thing.id)
             else -> null
         }
+        fun of(connectable: IConnectable) = ofAny(connectable)
+        fun ofLight(lightEmitter: ILightEmitter) = ofAny(lightEmitter)
         fun ofEntity(entity: Entity) = of(entity.uuid, if (entity.level().isClientSide) entity.id else null)
         fun ofEntity(entity: BlockEntity) = of(entity.blockPos)
         fun of(pos: BlockPos) = BlockId(pos)

@@ -1,11 +1,15 @@
 package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedVideoData
+import com.flooferland.showbiz.types.light.AreaLight
+import com.flooferland.showbiz.types.light.ILightEmitter
+import com.flooferland.showbiz.types.light.LightManager
 import com.flooferland.showbiz.types.math.Color4
 import com.flooferland.showbiz.utils.Extensions.bytesToFriendlySize
 import net.minecraft.core.BlockPos
@@ -14,9 +18,11 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.Vec2
+import net.minecraft.world.phys.Vec3
 import kotlin.time.Duration.Companion.nanoseconds
 
-class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Monitor.entityType!!, pos, blockState), IConnectable {
+class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.Monitor.entityType!!, pos, blockState), IConnectable, ILightEmitter {
     override val connectionManager = ConnectionManager(this)
     val video = connectionManager.port("video", PackedVideoData(), PortDirection.In) {
         val elapsedMillis = (System.nanoTime() - it.timestamp).nanoseconds.inWholeMilliseconds
@@ -24,7 +30,24 @@ class MonitorBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
             Showbiz.log.warn("$blockPos video frame transit time: $elapsedMillis ms (size = ${it.bytes.size.bytesToFriendlySize()})")
         }
     }
+
+    override val lightManager = LightManager(this)
+    val light = lightManager.add(AreaLight())
+
     var colorAverage = Color4()
+
+    override fun clientUpdateLights(delta: Float) {
+        light?.enabled = false
+        if (video.data.bytes.isEmpty()) return
+        light?.enabled = true
+
+        val facing = blockState.getValue(FacingEntityBlock.FACING) ?: return
+
+        light?.size = Vec2(0.8f, 0.8f)
+        light?.color = colorAverage.safe().saturate(2.5f)
+        light?.localPos = Vec3(facing.stepX * 0.5, facing.stepY * 0.5, facing.stepZ * 0.5)
+        light?.dir = Vec3(facing.stepX.toDouble(), facing.stepY.toDouble(), facing.stepZ.toDouble())
+    }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)

@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.mixin;
 
+import com.flooferland.showbiz.Showbiz;
 import com.flooferland.showbiz.registry.ModClientLights;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,10 @@ public class GameRendererMixin {
 	private void showbiz_render(DeltaTracker deltaTracker, CallbackInfo ci) {
 		var level = Minecraft.getInstance().level;
 		if (level == null) return;
-		ModClientLights.INSTANCE.emit(level, deltaTracker.getGameTimeDeltaPartialTick(true));
+		try {
+			ModClientLights.INSTANCE.emit(level, deltaTracker.getGameTimeDeltaPartialTick(true));
+		} catch (Exception e) {
+			Showbiz.INSTANCE.getLog().error("Failed to render lights", e);
+        }
 	}
 }
