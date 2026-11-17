@@ -6,7 +6,6 @@ import com.flooferland.showbiz.FileStorage.fetchShowInfos
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.network.packets.FileUploadResponsePacket.ServerMessage
-import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.types.FFmpeg.AudioSettings
 import com.flooferland.showbiz.types.FFmpeg.Settings
@@ -42,14 +41,9 @@ object FileServer {
         // Show files
         ServerPackets.listen(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
         ServerPackets.listen(ShowFileSelectPacket.type) { packet, ctx ->
-            // Trying to debug something with this rn
-            val id = "!! ShowFileSelectPacket"
             val player = ctx.player()
             val reel = player.getHeldItem { it.item is ReelItem }
-            if (reel == null) {
-                Showbiz.log.warn("$id: No held reel")
-                return@listen
-            }
+            if (reel == null) return@listen
             val selected = packet.selected
             val shows = runCatching { FileStorage.fetchShowPaths() }.onFailure { Showbiz.log.error(it.toString()) }.getOrNull()
             if (shows.isNullOrEmpty()) {
@@ -61,7 +55,6 @@ object FileServer {
                 return@listen
             }
             ReelItem.setFilename(reel, selected.id)
-            Showbiz.log.info("$id: Stack filename is now {}", reel.get(ModComponents.FileName.type))
             player.inventoryMenu.broadcastChanges()
         }
         ServerPackets.listen(ShowFileEditPacket.type) { packet, ctx ->
