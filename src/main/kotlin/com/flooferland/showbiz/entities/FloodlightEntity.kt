@@ -66,7 +66,7 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     val light = lightManager.add(SpotLight())
 
     val isLit: Boolean get() = lit || redstoneSignal > 0
-    var value: Float = 0f  // Used for smoothing on the client
+    var clientValue: Float = 0f  // Used for smoothing on the client
     var redstoneSignal: Int = 0
     var supportAbove = false
     var supportBelow = false
@@ -85,8 +85,8 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     var turn = comp.turn
 
     private var lit: Boolean = false
-    var startPos = position()!!
-    var endPos = position()!!
+    var clientStartPos = position()!!
+    var clientEndPos = position()!!
 
     init {
         updateYaw(turn.x)
@@ -105,19 +105,19 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
         val power = if (redstoneSignal > Redstone.SIGNAL_NONE) redstoneSignal / Redstone.SIGNAL_MAX.toFloat() else 1f
 
         val target = (if (isLit) power else 0f) * brightness
-        val fadingOut = target < value
+        val fadingOut = target < clientValue
         val speed = 0.15f - (if (fadingOut) 0.03f else 0.0f)
-        value = lerp(value, target, speed * delta)
-        value = value.coerceIn(if (isLit) 0.5f else 0f, 1f)
+        clientValue = lerp(clientValue, target, speed * delta)
+        clientValue = clientValue.coerceIn(if (isLit) 0.5f else 0f, 1f)
 
-        light?.enabled = value >= 0f
+        light?.enabled = clientValue >= 0f
         light?.range = 20f
         light?.angle = angle
         light?.shadows = shadows
-        light?.intensity = value
+        light?.intensity = clientValue
         light?.color = Color4.fromPacked(color)
-        light?.localPos = endPos.subtract(position())
-        light?.dir = endPos.subtract(startPos).normalize()
+        light?.localPos = clientEndPos.subtract(position())
+        light?.dir = clientEndPos.subtract(clientStartPos).normalize()
     }
 
     override fun getDefaultDimensions(pose: Pose): EntityDimensions =

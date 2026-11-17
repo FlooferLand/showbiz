@@ -85,18 +85,18 @@ class GeoWorkaroundRenderHook() {
             is SpotlightBlockEntity -> {
                 val startBone = model.getBone("start").getOrNull() ?: return
                 val startPos = bonePosFromCapture(startBone) ?: return
-                animatable.startPos = startPos
+                animatable.clientStartPos = startPos
                 val endBone = model.getBone("end").getOrNull() ?: return
                 val endPos = bonePosFromCapture(endBone) ?: return
-                animatable.endPos = endPos
+                animatable.clientEndPos = endPos
             }
             is FloodlightEntity -> {
                 val startBone = model.getBone("start").getOrNull() ?: return
                 val startPos = bonePosFromCapture(startBone) ?: return
-                animatable.startPos = startPos
+                animatable.clientStartPos = startPos
                 val endBone = model.getBone("end").getOrNull() ?: return
                 val endPos = bonePosFromCapture(endBone) ?: return
-                animatable.endPos = endPos
+                animatable.clientEndPos = endPos
             }
             is ICollidePartInteractable -> {
                 val instance = animatable.collidePartInstance

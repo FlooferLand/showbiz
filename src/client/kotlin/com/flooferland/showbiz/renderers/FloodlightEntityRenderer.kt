@@ -1,10 +1,10 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.renderer.culling.*
-import net.minecraft.client.renderer.entity.*
 import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.models.FloodlightModel
 import com.flooferland.showbiz.renderers.base.GeoFixedEntityRenderer
+import net.minecraft.client.renderer.culling.Frustum
+import net.minecraft.client.renderer.entity.EntityRendererProvider
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 
 class FloodlightEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRenderer<FloodlightEntity>(ctx, FloodlightModel()) {
@@ -14,5 +14,5 @@ class FloodlightEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEn
     // Prevents the light from teleporting to 0 0 0 since the light position is gotten from the GeckoLib model
     override fun shouldRender(entity: FloodlightEntity, camera: Frustum, camX: Double, camY: Double, camZ: Double) =
         super.shouldRender(entity, camera, camX, camY, camZ)
-                || entity.isLit || entity.value > 0f
+                || entity.isLit || entity.clientValue > 0f
 }
