@@ -84,9 +84,9 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
         val target = (if (isLit) power else 0f) * brightness
         val fadingOut = target < clientValue
-        val speed = 0.2f - (if (fadingOut) 0.03f else 0.0f)
+        val speed = 0.15f - (if (fadingOut) 0.04f else 0.0f)
         clientValue = lerp(clientValue, target, speed * delta)
-        clientValue = clientValue.coerceIn(if (isLit) 0.5f else 0f, 1f)
+        clientValue = clientValue.coerceIn(if (isLit) 0.1f else 0f, 1f)
 
         light?.enabled = clientValue >= 0f
         light?.range = 20f

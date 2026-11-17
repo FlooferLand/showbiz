@@ -2,8 +2,6 @@ package com.flooferland.showbiz.types.lights
 
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.*
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.BlockGetter
@@ -15,26 +13,10 @@ import java.util.concurrent.ConcurrentHashMap
 // TODO: Figure out a way to prevent flashing lights using vanilla's lighting from looking so bad
 
 object VanillaLightBackend : BaseLightBackend() {
-    private val lights = ConcurrentHashMap.newKeySet<OwnerId>()!!
-    private val lightBonusOwners = ConcurrentHashMap<OwnerId, HashSet<Long>>()
+    private val lights = ConcurrentHashMap.newKeySet<ILightEmitter>()!!
+    private val lightBonusOwners = ConcurrentHashMap<ILightEmitter, HashSet<Long>>()
     private val lightBonusMap = ConcurrentHashMap<Long, Int>()
     private var frameBlockLights = ConcurrentHashMap<Long, Int>()
-
-    private fun loadEmitter(id: OwnerId, level: ClientLevel) {
-        lights.add(id)
-        lightBonusOwners[id] = hashSetOf()
-    }
-    private fun unloadEmitter(id: OwnerId, level: ClientLevel) {
-        if (lights.contains(id)) {
-            lights.remove(id)
-            lightBonusOwners.remove(id)?.let {
-                for (pos in it) {
-                    lightBonusMap.remove(pos)
-                    level.lightEngine.checkBlock(BlockPos.of(pos))
-                }
-            }
-        }
-    }
 
     private fun paintLightLevel(level: ClientLevel, pos: Long, light: Int) {
         val light = light.coerceIn(0, LightEngine.MAX_LEVEL)
@@ -49,27 +31,22 @@ object VanillaLightBackend : BaseLightBackend() {
         return lightBonusMap[pos] ?: 0
     }
 
-    init {
-        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level ->
-            if (entity !is ILightEmitter) return@register
-            loadEmitter(OwnerId.of(entity.blockPos), level)
-        }
-        ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
-            if (entity !is ILightEmitter) return@register
-            unloadEmitter(OwnerId.ofEntity(entity), level)
-        }
-        ClientEntityEvents.ENTITY_LOAD.register { entity, level ->
-            if (entity !is ILightEmitter) return@register
-            loadEmitter(OwnerId.ofEntity(entity), level)
-        }
-        ClientEntityEvents.ENTITY_UNLOAD.register { entity, level ->
-            if (entity !is ILightEmitter) return@register
-            unloadEmitter(OwnerId.ofEntity(entity), level)
-        }
+    override fun addLight(emitter: ILightEmitter, light: AbstractLight) {
+        lights.add(emitter)
+        lightBonusOwners[emitter] = hashSetOf()
     }
 
-    override fun removeLight(ownerId: OwnerId, light: AbstractLight) {
-        cleanupLights(ownerId)
+    override fun removeLight(emitter: ILightEmitter, light: AbstractLight) {
+        if (lights.contains(emitter)) {
+            lights.remove(emitter)
+            lightBonusOwners.remove(emitter)?.let {
+                for (pos in it) {
+                    lightBonusMap.remove(pos)
+                    level?.lightEngine?.checkBlock(BlockPos.of(pos))
+                }
+            }
+        }
+        cleanupLights(emitter)
     }
 
     override fun reset() {
@@ -83,35 +60,35 @@ object VanillaLightBackend : BaseLightBackend() {
         frameBlockLights.clear()
     }
 
-    override fun preRender(ownerId: OwnerId, light: AbstractLight) {
+    override fun preRender(emitter: ILightEmitter, light: AbstractLight) {
         frameBlockLights = ConcurrentHashMap<Long, Int>()
     }
 
-    override fun renderPointlight(ownerId: OwnerId, light: PointLight) {
+    override fun renderPointlight(emitter: ILightEmitter, light: PointLight) {
         val level = level ?: return
-        val blockPos = ownerId.grabBlockPos(level) ?: return
+        val blockPos = OwnerId.ofLight(emitter)?.grabBlockPos(level) ?: return
         if (!light.enabled) return
 
         val blockLight = light.getLightLevel()
         frameBlockLights[blockPos.asLong()] = blockLight
     }
 
-    override fun renderSpotlight(ownerId: OwnerId, light: SpotLight) {
-        vanillaRenderLightBeam(ownerId, light, light.dir.normalize(), light.range)
+    override fun renderSpotlight(emitter: ILightEmitter, light: SpotLight) {
+        vanillaRenderLightBeam(emitter, light, light.dir.normalize(), light.range)
     }
 
-    override fun renderArealight(ownerId: OwnerId, light: AreaLight) {
-        vanillaRenderLightBeam(ownerId, light, light.dir.normalize(), light.range)
+    override fun renderArealight(emitter: ILightEmitter, light: AreaLight) {
+        vanillaRenderLightBeam(emitter, light, light.dir.normalize(), light.range)
     }
 
-    override fun postRender(ownerId: OwnerId, light: AbstractLight) {
-        cleanupLights(ownerId)
+    override fun postRender(emitter: ILightEmitter, light: AbstractLight) {
+        cleanupLights(emitter)
     }
 
-    private fun vanillaRenderLightBeam(ownerId: OwnerId, light: AbstractLight, lightDir: Vec3, lightRange: Float) {
+    private fun vanillaRenderLightBeam(emitter: ILightEmitter, light: AbstractLight, lightDir: Vec3, lightRange: Float) {
         val level = level ?: return
         if (!light.enabled) return
-        val blockPos = ownerId.grabBlockPos(level) ?: return
+        val blockPos = OwnerId.ofLight(emitter)?.grabBlockPos(level) ?: return
 
         val blockLight = light.getLightLevel().coerceAtMost(13)
         if (blockLight == 0) return
@@ -126,8 +103,8 @@ object VanillaLightBackend : BaseLightBackend() {
         }, { null })
     }
 
-    fun cleanupLights(ownerId: OwnerId) {
-        val prevLights = lightBonusOwners.getOrPut(ownerId) { hashSetOf() }
+    fun cleanupLights(emitter: ILightEmitter) {
+        val prevLights = lightBonusOwners.getOrPut(emitter) { hashSetOf() }
         val removed = prevLights - frameBlockLights.keys
         for (pos in removed) {
             lightBonusMap.remove(pos)
@@ -136,6 +113,6 @@ object VanillaLightBackend : BaseLightBackend() {
         for ((pos, light) in frameBlockLights) {
             paintLightLevel(level ?: break, pos, light)
         }
-        lightBonusOwners[ownerId] = frameBlockLights.keys.toHashSet()
+        lightBonusOwners[emitter] = frameBlockLights.keys.toHashSet()
     }
 }

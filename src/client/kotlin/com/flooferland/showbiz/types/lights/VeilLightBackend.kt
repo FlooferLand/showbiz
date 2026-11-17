@@ -1,10 +1,6 @@
 package com.flooferland.showbiz.types.lights
 
-import com.flooferland.showbiz.types.OwnerId
-import com.flooferland.showbiz.types.light.AbstractLight
-import com.flooferland.showbiz.types.light.AreaLight
-import com.flooferland.showbiz.types.light.PointLight
-import com.flooferland.showbiz.types.light.SpotLight
+import com.flooferland.showbiz.types.light.*
 import foundry.veil.api.client.render.VeilRenderSystem
 import foundry.veil.api.client.render.light.data.AreaLightData
 import foundry.veil.api.client.render.light.data.LightData
@@ -18,7 +14,7 @@ import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 
 internal object VeilLightBackend : BaseLightBackend() {
-    val handles = ConcurrentHashMap<OwnerId, LightRenderHandle<*>>()
+    val handles = ConcurrentHashMap<ILightEmitter, LightRenderHandle<*>>()
 
     init {
         FabricVeilRenderLevelStageEvent.EVENT.register { stage, renderer, source, stack, fc, fc2, i, tracker, camera, frustum ->
@@ -31,34 +27,34 @@ internal object VeilLightBackend : BaseLightBackend() {
         handles.clear()
     }
 
-    override fun addLight(ownerId: OwnerId, light: AbstractLight) {
+    override fun addLight(emitter: ILightEmitter, light: AbstractLight) {
         val data: LightData = when (light) {
             is PointLight -> PointLightData()
             is SpotLight -> runCatching { foundry.veil.api.client.render.light.data.SpotLightData() }.getOrNull() ?: AreaLightData()
             is AreaLight -> AreaLightData()
         }
-        veilConfigureLight(ownerId, data, light)
+        veilConfigureLight(emitter, data, light)
 
         val handle = VeilRenderSystem.renderer().getLightRenderer().addLight(data)
-        handles[ownerId] = handle
+        handles[emitter] = handle
     }
 
-    override fun removeLight(ownerId: OwnerId, light: AbstractLight) {
-        handles[ownerId]?.free()
-        handles.remove(ownerId)
+    override fun removeLight(emitter: ILightEmitter, light: AbstractLight) {
+        handles[emitter]?.free()
+        handles.remove(emitter)
     }
 
-    override fun postRender(ownerId: OwnerId, light: AbstractLight) {
-        val handle = handles[ownerId] ?: return
-        veilConfigureLight(ownerId, handle.lightData, light)
+    override fun postRender(emitter: ILightEmitter, light: AbstractLight) {
+        val handle = handles[emitter] ?: return
+        veilConfigureLight(emitter, handle.lightData, light)
     }
 
-    private fun veilConfigureLight(ownerId: OwnerId, data: LightData, light: AbstractLight) {
+    private fun veilConfigureLight(emitter: ILightEmitter, data: LightData, light: AbstractLight) {
         if (level == null) return
         val inscattering = 3f
         val brightness = light.intensity * if (light.enabled) 5f else 0f
         val occlusion = light.shadows
-        val pos = getPos(ownerId, light) ?: return
+        val pos = getPos(emitter, light) ?: return
         val up = Vector3f(0f, 1f, 0f)
 
         data.setColor(light.color.pack())

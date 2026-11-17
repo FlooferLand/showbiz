@@ -20,7 +20,7 @@ import net.minecraft.client.multiplayer.ClientLevel
 import java.util.concurrent.ConcurrentHashMap
 
 object ModClientLights {
-    val lights = ConcurrentHashMap<OwnerId, AbstractLight>()
+    val lights = ConcurrentHashMap<ILightEmitter, AbstractLight>()
     var backend = findBackend()
         public get
         private set
@@ -53,30 +53,33 @@ object ModClientLights {
         VanillaLightBackend::class.forceLoad()
         reload()
 
-        LightManager.addLight = { ownerId, light ->
-            lights[ownerId] = light
-            Minecraft.getInstance().execute { backend.addLight(ownerId, light) }
+        // Adding lights
+        LightManager.addLight = addLight@ { emitter, light ->
+            addLight(emitter)
+        }
+        ClientBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, _ ->
+            val emitter = entity as? ILightEmitter ?: return@register
+            addLight(emitter)
+        }
+        ClientEntityEvents.ENTITY_LOAD.register { entity, _ ->
+            val emitter = entity as? ILightEmitter ?: return@register
+            addLight(emitter)
         }
 
+        // Cleaning up lights
         ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, _ ->
-            if (entity is ILightEmitter) {
-                val ownerId = OwnerId.ofEntity(entity)
-                lights[ownerId]?.let { backend.removeLight(ownerId, it) }
-                lights.remove(ownerId)
-            }
+            val emitter = entity as? ILightEmitter ?: return@register
+            removeLight(emitter)
         }
         ClientEntityEvents.ENTITY_UNLOAD.register { entity, _ ->
-            if (entity is ILightEmitter) {
-                val ownerId = OwnerId.ofEntity(entity)
-                lights[ownerId]?.let { backend.removeLight(ownerId, it) }
-                lights.remove(ownerId)
-            }
+            val emitter = entity as? ILightEmitter ?: return@register
+            removeLight(emitter)
         }
         ClientTickEvents.END_WORLD_TICK.register { level ->
-            // Cleaning up lights
-            lights.entries.removeIf { (ownerId, light) ->
-                if (ownerId.isRemoved(level)) {
-                    backend.removeLight(ownerId, light)
+            lights.entries.removeIf { (emitter, light) ->
+                val ownerId = OwnerId.ofLight(emitter)
+                if (ownerId?.isRemoved(level) ?: true) {
+                    backend.removeLight(emitter, light)
                     return@removeIf true
                 }
                 false
@@ -97,18 +100,31 @@ object ModClientLights {
         }
     }
 
+    fun addLight(emitter: ILightEmitter, light: AbstractLight? = null) {
+        val light = light ?: emitter.lightManager.lights.firstOrNull() ?: return
+        if (!lights.containsKey(emitter)) {
+            lights[emitter] = light
+            Minecraft.getInstance().execute { backend.addLight(emitter, light) }
+        }
+    }
+
+    fun removeLight(emitter: ILightEmitter) {
+        lights[emitter]?.let { backend.removeLight(emitter, it) }
+        lights.remove(emitter)
+    }
+
     fun emit(level: ClientLevel, delta: Float) {
-        for ((ownerId, light) in lights) {
-            val owner = ownerId.grabLightEmitter(level) ?: continue
+        for ((emitter, light) in lights) {
+            val owner = OwnerId.ofLight(emitter)?.grabLightEmitter(level) ?: continue
             owner.clientUpdateLights(delta)
 
-            backend.preRender(ownerId, light)
+            backend.preRender(emitter, light)
             when (light) {
-                is PointLight -> backend.renderPointlight(ownerId, light)
-                is SpotLight -> backend.renderSpotlight(ownerId, light)
-                is AreaLight -> backend.renderArealight(ownerId, light)
+                is PointLight -> backend.renderPointlight(emitter, light)
+                is SpotLight -> backend.renderSpotlight(emitter, light)
+                is AreaLight -> backend.renderArealight(emitter, light)
             }
-            backend.postRender(ownerId, light)
+            backend.postRender(emitter, light)
         }
     }
 

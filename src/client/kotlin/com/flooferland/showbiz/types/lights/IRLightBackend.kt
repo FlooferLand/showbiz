@@ -4,6 +4,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.IRLights
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.AreaLight
+import com.flooferland.showbiz.types.light.ILightEmitter
 import com.flooferland.showbiz.types.light.PointLight
 import com.flooferland.showbiz.types.light.SpotLight
 import net.fabricmc.loader.api.FabricLoader
@@ -32,10 +33,11 @@ internal object IRLightBackend : BaseLightBackend() {
 
     }
 
-    override fun renderPointlight(ownerId: OwnerId, light: PointLight) {
+    override fun renderPointlight(emitter: ILightEmitter, light: PointLight) {
         if (!light.enabled || level == null) return
+        val ownerId = OwnerId.ofLight(emitter) ?: return
 
-        val pos = getPos(ownerId, light) ?: return
+        val pos = getPos(emitter, light) ?: return
 
         LightRegistry.registerPoint(
             pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(),
@@ -50,13 +52,14 @@ internal object IRLightBackend : BaseLightBackend() {
         )
     }
 
-    override fun renderSpotlight(ownerId: OwnerId, light: SpotLight) {
+    override fun renderSpotlight(emitter: ILightEmitter, light: SpotLight) {
         if (!light.enabled || level == null) return
+        val ownerId = OwnerId.ofLight(emitter) ?: return
 
         val cookie = IRLights.getCookie()
         val angle = light.angle * 2f
         val cone = LightMath.cone(angle, angle * 0.9f)
-        val pos = getPos(ownerId, light) ?: return
+        val pos = getPos(emitter, light) ?: return
         val dir = light.dir
         val (r, g, b) = light.color.toLinear()
         LightRegistry.registerSpot(
@@ -79,10 +82,11 @@ internal object IRLightBackend : BaseLightBackend() {
      * IRLights doesn't support area lights for now so I'm spawning a spotlight at each corner..
      * This illusion works for the most part, but it is COOKED at larger area sizes
      */
-    override fun renderArealight(ownerId: OwnerId, light: AreaLight) {
+    override fun renderArealight(emitter: ILightEmitter, light: AreaLight) {
         if (!light.enabled || level == null) return
+        val ownerId = OwnerId.ofLight(emitter) ?: return
 
-        val pos = getPos(ownerId, light) ?: return
+        val pos = getPos(emitter, light) ?: return
         val dir = light.dir.normalize()
 
         // Right/up vectors
