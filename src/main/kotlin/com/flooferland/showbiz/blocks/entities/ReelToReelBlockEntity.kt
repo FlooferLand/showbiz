@@ -129,6 +129,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
         }
 
+        // Client-side loading
+        if (showData.loading && showData.isLoaded) {
+            showData.loading = false
+        }
+
         // Playback stuff
         if (playing && !paused) {
             val now = System.nanoTime()
@@ -440,6 +445,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         ClientboundBlockEntityDataPacket.create(this)
 
     fun loadShow(filename: String, block: (ShowData?) -> Unit) {
+        showData.loading = true
+        if (level !is ServerLevel) return
         showData.load(filename) { data, err ->
             val level = level as? ServerLevel ?: return@load
             if (err != null) {

@@ -166,7 +166,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
                 botId.matches("showbiz-wp5:mini_mozzarella") || botId.matches("showbiz-wp5:queenie") -> {
                     map("Booper", CollidePartId.Boop)
                 }
-                botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") -> {
+                botId.matches("showbiz:dook_larue") || botId.matches("luce_rae:dook2") || botId.matches("luce_cec:cu_pasqually") -> {
                     map("LeftStickCollision", CollidePartId.LeftStick)
                     map("RightStickCollision", CollidePartId.RightStick)
                     map("HiHatCollision", CollidePartId.HiHat)

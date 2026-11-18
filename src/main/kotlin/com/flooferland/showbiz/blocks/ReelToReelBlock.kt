@@ -100,12 +100,10 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     if (player is ServerPlayer) {
                         player.setItemInHand(hand, Items.AIR.defaultInstance)
                         entity.resetPlayback()
-                        entity.showData.load(filename) { _, err ->
-                            if (player.isRemoved) return@load
-                            if (err != null) player.displayClientMessage(err, true) else player.displayClientMessage(Component.empty(), true)
-                            Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
-                            player.setInventoryChanged()
-                        }
+                    }
+                    entity.loadShow(filename) {
+                        Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+                        player.setInventoryChanged()
                     }
                 } else {
                     player.displayClientMessage(

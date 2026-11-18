@@ -1,12 +1,5 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.client.resources.model.*
-import net.minecraft.world.item.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
@@ -14,6 +7,15 @@ import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.client.resources.model.ModelResourceLocation
+import net.minecraft.world.item.ItemDisplayContext
+import net.minecraft.world.item.Items
+import net.minecraft.world.phys.BlockHitResult
 import org.joml.Quaternionf
 import org.joml.Vector3f
 
@@ -110,15 +112,35 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         }
 
         // Rendering information about the loaded reel
-        if (!reelStack.isEmpty && (minecraft.hitResult as? BlockHitResult)?.blockPos == entity.blockPos) {
-            val text = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
-            val textWidth = minecraft.font.width(text)
-            poseStack.pushPose()
-            poseStack.translate(0.5, 0.3, 0.37)
-            poseStack.scale(0.004f, -0.004f, 0.004f)
-            poseStack.mulPose(Axis.YP.rotationDegrees(180f))
-            minecraft.font.drawInBatch(text, -(textWidth / 2f), 0f, 0xFF_FF_FF_FF.toInt(), false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0x00_00_00_00, packedLight)
-            poseStack.popPose()
+        if ((minecraft.hitResult as? BlockHitResult)?.blockPos == entity.blockPos) {
+            var text = ""
+
+            if (entity.showData.loading) {
+                text = "Loading.."
+            } else if (!reelStack.isEmpty) {
+                text = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
+            }
+
+            if (text.isNotEmpty()) {
+                val textWidth = minecraft.font.width(text)
+                poseStack.pushPose()
+                poseStack.translate(0.5, 0.3, 0.37)
+                poseStack.scale(0.004f, -0.004f, 0.004f)
+                poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+                minecraft.font.drawInBatch(
+                    text,
+                    -(textWidth / 2f),
+                    0f,
+                    0xFF_FF_FF_FF.toInt(),
+                    false,
+                    poseStack.last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.NORMAL,
+                    0x00_00_00_00,
+                    packedLight
+                )
+                poseStack.popPose()
+            }
         }
 
         poseStack.popPose()
