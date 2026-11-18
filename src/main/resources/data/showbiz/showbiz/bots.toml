@@ -46,12 +46,6 @@ authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
-[organ]
-name = "Prop - Fatz' Organ"
-authors = ["Creative Engineering", "xion_no.i"]
-accepts.rockafire = true
-accepts.fnaf1 = false
-
 [beach_bear]
 name = "Beach Bear"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
@@ -61,12 +55,6 @@ accepts.fnaf1 = false
 [uncle_klunk]
 name = "Uncle Klunk (W.I.P, innacurate)"
 authors = ["Creative Engineering", "xion_no.i", "FlooferLand"]
-accepts.rockafire = true
-accepts.fnaf1 = false
-
-[choo_choo]
-name = "Prop - Choo Choo"
-authors = ["Creative Engineering", "xion_no.i"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
@@ -82,14 +70,30 @@ authors = ["Creative Engineering", "CastIronSkillet"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
+
+# Props
+
+[organ]
+name = "Prop - Fatz' Organ"
+authors = ["Creative Engineering", "xion_no.i"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
+[choo_choo]
+name = "Prop - Choo Choo"
+authors = ["Creative Engineering", "xion_no.i"]
+accepts.rockafire = true
+accepts.fnaf1 = false
+
 [gas_pump]
-name = "Gas Pump"
+name = "Prop - Gas Pump"
 authors = ["Creative Engineering", "Monsterwaill"]
 accepts.rockafire = true
 accepts.fnaf1 = false
 
 
 # Shhhh
+
 [conner]
 name = "Conner The Cow"
 authors = ["Saloon Devs"]
