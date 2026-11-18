@@ -1,0 +1,42 @@
+set rae rolfe
+
+any 1td {
+    flow speed in:1.0 out:1.0
+    flow accel in:0.8 out:0.67
+    move "MouthC" y:-0.7
+    rotate "MouthL" z:22.5
+    rotate "MouthR" z:-22.5
+}
+
+# Head turn
+any 2td {
+    flow speed in:0.25 out:0.25
+    flow accel in:0.25 out:0.25
+    rotate "Neck" y:-35
+    hold yes
+}
+any 3td {
+    flow speed in:0.25 out:0.25
+    flow accel in:0.25 out:0.25
+    rotate "Neck" y:35
+    hold yes
+}
+
+# Head up
+any 4td {
+    flow speed in:0.3 out:0.3
+    flow accel in:0.2 out:0.4
+    rotate "Neck" x:10
+}
+
+# Arm movements
+any 5td {
+    flow speed in:0.3 out:0.3
+    flow accel in:0.2 out:0.4
+    rotate "ArmL" z:-15
+}
+any 6td {
+    flow speed in:0.3 out:0.3
+    flow accel in:0.2 out:0.4
+    rotate "ArmR" z:15
+}

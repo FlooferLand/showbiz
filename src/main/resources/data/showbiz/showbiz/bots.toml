@@ -1,9 +1,3 @@
-[conner]
-name = "Conner The Cow"
-authors = ["Saloon Devs"]
-accepts.rockafire = true
-accepts.fnaf1 = true
-
 [billy_bob]
 name = "Billy Bob"
 authors = ["Creative Engineering", "LBN"]
@@ -93,3 +87,16 @@ name = "Gas Pump"
 authors = ["Creative Engineering", "Monsterwaill"]
 accepts.rockafire = true
 accepts.fnaf1 = false
+
+
+# Shhhh
+[conner]
+name = "Conner The Cow"
+authors = ["Saloon Devs"]
+accepts.rockafire = true
+accepts.fnaf1 = true
+
+[singing_clergyman]
+name = "The Singing Clergyman"
+authors = ["Trevor Henderson", "xion_no.i"]
+accepts.rockafire = true

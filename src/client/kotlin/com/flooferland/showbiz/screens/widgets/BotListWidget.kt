@@ -31,6 +31,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
     val excluded = listOf(
         ResourceId(Showbiz.MOD_ID, "conner"),
+        ResourceId(Showbiz.MOD_ID, "singing_clergyman"),
         ResourceId(Showbiz.MOD_ID, "sun"),
         ResourceId(Showbiz.MOD_ID, "moon"),
     )
@@ -58,6 +59,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
     public fun setBots(bots: Map<ResourceId, AddonBotEntry>) {
         clearEntries()
+        scrollAmount = 0.0
 
         val grouped = bots.entries.sortedBy { it.key.namespace }.groupBy { it.key.namespace }
         selectedBot?.let { visibleCategories.add(it.namespace) }

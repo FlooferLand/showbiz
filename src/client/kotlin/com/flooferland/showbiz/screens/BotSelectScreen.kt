@@ -36,8 +36,11 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         refresh()
     }
 
+    fun clean(text: String) =
+        text.lowercase().replace("the ", "").trim()
+
     fun botFilter(bot: Map.Entry<ResourceId, AddonBotEntry>) =
-        bot.value.name.contains(searchText, ignoreCase = true)
+        clean(bot.value.name).contains(clean(searchText), ignoreCase = true)
 
     fun refresh() {
         clearWidgets()
@@ -82,9 +85,12 @@ class BotSelectScreen(val selectMenu: BotSelectMenu, inventory: Inventory, title
         val searchBar = EditBox(font, botListWidget.x, botListWidget.y + botListWidget.height, botListWidget.width, searchBarHeight, Component.literal("Search") )
         searchBar.setHint(Component.literal("Search..").withStyle(ChatFormatting.DARK_GRAY))
         searchBar.setResponder { name ->
-            searchText = name.trim()
-            botListWidget.showExcluded =
-                botListWidget.excluded.any { searchText == it.toString() || searchText == it.path }
+            searchText = clean(name)
+            botListWidget.showExcluded = botListWidget.excluded.any { excluded ->
+                searchText == clean(excluded.toString())
+                        || searchText.equals(clean(excluded.path), ignoreCase = true)
+                        || (bots[excluded]?.let { bot -> searchText.equals(clean(bot.name), ignoreCase = true) } ?: false)
+            }
 
             if (searchText.isBlank()) {
                 botListWidget.visibleCategories = mutableSetOf()

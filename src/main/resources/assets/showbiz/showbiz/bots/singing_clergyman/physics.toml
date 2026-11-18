@@ -1,0 +1,17 @@
+format = 1
+
+[dynbones."Neck"]
+damping = 0.05
+elasticity = 0.1
+freeze_x = false
+
+[dynbones."Cables"]
+damping = 0.05
+elasticity = 0.1
+freeze_x = false
+
+[dynbones."Head"]
+damping = 0.05
+elasticity = 0.25
+freeze_x = false
+
