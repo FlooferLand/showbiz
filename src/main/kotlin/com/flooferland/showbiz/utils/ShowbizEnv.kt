@@ -41,6 +41,8 @@ object ShowbizEnv {
         FabricLoader.getInstance()?.getModContainer("computercraft")?.isPresent == true
     fun hasIRLights() =
         FabricLoader.getInstance()?.getModContainer("irl-redactor")?.isPresent == true
+    fun hasIris() =
+        FabricLoader.getInstance()?.getModContainer("iris")?.isPresent == true
     fun hasVeil() =
         FabricLoader.getInstance()?.getModContainer("veil")?.isPresent == true
     //endregion

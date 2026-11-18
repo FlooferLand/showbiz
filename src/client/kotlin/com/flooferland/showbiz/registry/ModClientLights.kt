@@ -15,8 +15,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.network.chat.Component
 import java.util.concurrent.ConcurrentHashMap
 
 object ModClientLights {
@@ -132,14 +134,23 @@ object ModClientLights {
     fun reload() {
         val newBackend = findBackend()
         if (backend != newBackend) {
+            // Unloading the old backend
             lights.forEach { (ownerId, light) -> backend.removeLight(ownerId, light) }
             backend.unload()
             backend.reset()
 
+            // Loading the new backend
             newBackend.reset()
             newBackend.load()
             backend = newBackend
             lights.forEach { (ownerId, light) -> backend.addLight(ownerId, light) }
+
+            // Iris can break Veil hard for some reason..
+            if (ShowbizEnv.hasIris() && backend.type == BackendType.Veil) run {
+                val player = Minecraft.getInstance()?.player ?: return@run
+                val text = "Showbiz warning: Iris is known to break the Veil light engine"
+                player.displayClientMessage(Component.literal(text).withStyle(ChatFormatting.GOLD), false)
+            }
         }
     }
 }
