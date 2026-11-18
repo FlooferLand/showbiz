@@ -20,7 +20,6 @@ import net.minecraft.server.packs.resources.ResourceManager
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener
 import net.minecraft.util.profiling.ProfilerFiller
 import java.io.InputStream
-import kotlin.jvm.optionals.getOrNull
 
 // TODO: Move this to a more efficient async reloader
 
@@ -76,9 +75,7 @@ object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), I
                 }
 
                 // Validating ID
-                val isShowbizMod = (namespace == Showbiz.MOD_ID)
-                        && (pack.knownPackInfo().getOrNull()?.let { !it.isVanilla && it.id == Showbiz.MOD_ID } ?: false)
-                if (isShowbizMod) {
+                if (pack.packId() == Showbiz.MOD_ID) {
                     Showbiz.log.info("Found Showbiz built-in '$addonId'")
                 } else {
                     if (!AddonId.checkValid(pack.packId(), manifest, ::err, ::warn))
