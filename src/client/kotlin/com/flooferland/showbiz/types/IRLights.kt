@@ -2,13 +2,12 @@ package com.flooferland.showbiz.types
 
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.utils.ShowbizEnv
-import org.qualet.irl.light.iris.IrisShadersState
 
-/** NOTE: NEVER LOAD THIS UNLESS IRLIGHTS IS INSTALLED!! INSTANT CRASH */
+/** Safe class for communicating with IRLights to avoid NoClassDefFoundError */
 object IRLights {
     fun shadersDisabled(): Boolean {
         if (!ShowbizEnv.hasIRLights()) return true
-        return IrisShadersState.shadersDisabled()
+        return runCatching { org.qualet.irl.light.iris.IrisShadersState.shadersDisabled() }.getOrNull() ?: true
     }
 
     fun getCookie(): Int {

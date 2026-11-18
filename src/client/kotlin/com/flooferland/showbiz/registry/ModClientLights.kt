@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.registry
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.types.IRLights
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.light.*
 import com.flooferland.showbiz.types.lights.BaseLightBackend
@@ -33,7 +34,7 @@ object ModClientLights {
         val config = Showbiz.config.light
         if (config.forceVanillaLighting) return VanillaLightBackend
 
-        val allowIRLights = ShowbizEnv.hasIRLights() && !com.flooferland.showbiz.types.IRLights.shadersDisabled()
+        val allowIRLights = ShowbizEnv.hasIRLights() && !IRLights.shadersDisabled()
         val allowVeil = ShowbizEnv.hasVeil()
 
         fun get(type: BackendType, load: () -> BaseLightBackend): BaseLightBackend? =
@@ -145,11 +146,18 @@ object ModClientLights {
             backend = newBackend
             lights.forEach { (ownerId, light) -> backend.addLight(ownerId, light) }
 
-            // Iris can break Veil hard for some reason..
-            if (ShowbizEnv.hasIris() && backend.type == BackendType.Veil) run {
-                val player = Minecraft.getInstance()?.player ?: return@run
-                val text = "Showbiz warning: Iris is known to break the Veil light engine"
-                player.displayClientMessage(Component.literal(text).withStyle(ChatFormatting.GOLD), false)
+            // Backend-specific cases
+            val player = Minecraft.getInstance()?.player ?: return
+            fun warn(text: String) =
+                player.displayClientMessage(Component.literal("Showbiz warning: $text").withStyle(ChatFormatting.GOLD), false)
+            when (backend.type) {
+                BackendType.Vanilla -> {}
+                BackendType.Veil -> if (ShowbizEnv.hasIris()) {
+                    warn("Iris is known to break the Veil light engine")
+                }
+                BackendType.IRLights -> if (IRLights.shadersDisabled()) {
+                    warn("You need to patch a shader using the J menu for IRLights to work")
+                }
             }
         }
     }
