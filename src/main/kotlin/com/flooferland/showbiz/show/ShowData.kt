@@ -23,9 +23,7 @@ import net.minecraft.world.Containers
 import net.minecraft.world.entity.player.Player
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.nio.file.Files
-import java.nio.file.NoSuchFileException
 import java.util.*
 import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
@@ -94,22 +92,18 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 }
                 Showbiz.charts.extensionToId[ext]
             }
-            Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
+            Showbiz.log.debug("Loading show '${filename}' ($mapping)")
             val path = getFilePath(filename)
             val loaded: RawShowData = run {
-                val file: InputStream = Task.measured("Loading the file", listener) {
-                    if (!isActive) return@launch
-                    try { Files.newInputStream(path) }
-                    catch (_: NoSuchFileException) {
-                        error("No file found at '$path'")
-                    }
-                    catch (throwable: Throwable) {
-                        error("Failed to read '$path': $throwable")
-                    }
+                if (!Files.exists(path)) {
+                    error("No file found at '$path'")
                 }
-                Task.measured("Reading the file", listener) {
+                if (!Files.isReadable(path)) {
+                    error("No readable file at '$path'")
+                }
+                Task.measured("Reading the show", listener) {
                     if (!isActive) return@launch
-                    val out = file.use { runCatching { RshowFormat().read(it) } }
+                    val out = runCatching { RshowFormat().readFile(path) }
                     out.onFailure { throwable ->
                         Showbiz.log.error("BizlibNative failed to load '$path'. Using fallback Java-based reader", throwable)
                     }
