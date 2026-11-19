@@ -21,6 +21,29 @@ Note that this project is split into several different components:
   - [BizLibNative](https://github.com/FlooferLand/bizlib/tree/main/BizlibNative) - C#-based library I wrote to maximize engine compatibility, as it reads shows roughly the same way RR Engine does _(except using NRBF instead of BinaryFormatter since it's far more secure)_
 
 
+# License
+
+
+### Source Code
+_\*Please note that this section does not apply to art assets_
+
+Showbiz is free software [licensed under LGPL.](./LICENSE). You can read more about our license [here](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+If you use **any** of our code in your project, you must release your project's source code publicly under a [similarly free license](https://www.gnu.org/licenses/license-compatibility.html). <br/>
+We believe that if your project is worth anyone's time, it's users should be able to inspect it, modify it, and release their modifications in some way. We may decompile and inspect any proprietary project we believe unfairly uses our work and breaks our licensing. <br/>
+
+There are plenty of instances in the Minecraft modding community where mod developers steal and compile other people's hard work while cowardly hiding their unoriginal source code out of fear of legal action and competition. Modding games is a hobby.
+
+
+### Art
+
+If you use any of our art assets, please mention the name of our artists somewhere in your project.
+
+If your project is a Showbiz addon, use the `authors` field in your `bots.toml`
+
+The animatronics and props from The Rock-afire Explosion, the Wolf-Pack 5, and other CEI shows are property of [Creative Engineering (CEI)](https://engineeringcreative.com). Please credit them as well!
+
+
 ## Building
 
 1. Download this project 
