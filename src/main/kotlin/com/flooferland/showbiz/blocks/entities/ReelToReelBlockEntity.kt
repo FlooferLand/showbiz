@@ -31,12 +31,14 @@ import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.NonNullList
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.Container
+import net.minecraft.world.ContainerHelper
 import net.minecraft.world.WorldlyContainer
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -94,6 +96,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         public get private set
     var hasFinished = false
         public get private set
+
+    var clientSeek = 0.0
+
     private val fps = 60  // Tied to rshw
     private var seekInt = 0
     private var lastVideoFrameIndex = 0
@@ -108,6 +113,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
     private var audioBytesWritten = 0
     private var stateDirty = false
+    private var inputItem: ItemStack = ItemStack.EMPTY
 
     fun tick() {
         val level = level ?: return
@@ -118,10 +124,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
 
         // Loading the show
-        val filename = showData.name
-        if (showData.isLoaded && filename != null && showData.isEmpty() && !getItem(0).isEmpty && playing && !level.isClientSide) {
+        if (showData.isLoaded && !inputItem.isEmpty && showData.isEmpty() && playing && !level.isClientSide) {
             val seek = seek
-            loadShow(filename) { data ->
+            loadShow(inputItem) { data ->
                 if (data != null) applyChange(true) {
                     setPlaying(true)
                     seekTo(seek)
@@ -246,10 +251,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
             // Setting playing to false when the show ends
             // TODO: Make shows unload data when they finish, the item keeps vanishing for some reason
-            if (seek >= endTime && !recording) {
+            if (seek >= endTime && !recording && endTime > 0.0) {
                 setPlaying(false)
                 hasFinished = true
-                // showData.unload()
+                showData.unload()
                 markDirtyNotifyAll()
             }
         }
@@ -263,6 +268,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun setRemoved() {
         super.setRemoved()
         modelPartInstance.kill()
+        if (level is ServerLevel) {
+            showData.unload()
+        }
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
@@ -275,6 +283,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     // region | Playback
     fun setPlaying(playing: Boolean) {
+        if (this.playing == playing) return
         this.playing = playing
         if (!playing) resetPlayback()
         show.send(PackedShowData(playing, signal, showData.mapping))
@@ -283,6 +292,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         lastPlaybackNanos = 0
     }
     fun setPaused(paused: Boolean) {
+        if (this.paused == paused) return
         this.playing = !paused
         this.paused = paused
         show.send(PackedShowData(playing, signal, showData.mapping))
@@ -413,19 +423,30 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.removeIfPresent("signal_frame")
 
         // Save other
+        NonNullList.create<ItemStack>().also { items ->
+            items.add(inputItem)
+            ContainerHelper.saveAllItems(tag, items, true, registries)
+        }
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
         tag.putDouble("seek", seek)
         connectionManager.save(tag)
-        showData.saveNBT(tag)  // TODO: Should probably remove this?
+        showData.saveNBT(tag)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
 
         // Load other
+        NonNullList.create<ItemStack>().also { items ->
+            items.add(inputItem)
+            ContainerHelper.loadAllItems(tag, items, registries)
+            inputItem = items.getOrNull(0)
+                ?: showData.name?.let { ReelItem.makeItem(it) }  // Pre-0.6.0 shows that were loaded up
+                ?: ItemStack.EMPTY
+        }
         playing = tag.getBooleanOrNull("playing") ?: false
         paused = tag.getBooleanOrNull("paused") ?: false
         recording = tag.getBooleanOrNull("recording") ?: false
@@ -444,8 +465,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun getUpdatePacket(): ClientboundBlockEntityDataPacket =
         ClientboundBlockEntityDataPacket.create(this)
 
-    fun loadShow(filename: String, block: (ShowData?) -> Unit) {
+    fun loadShow(stack: ItemStack, block: (ShowData?) -> Unit) {
+        val filename = ReelItem.getFilename(stack) ?: return
+
+        inputItem = stack
         showData.loading = true
+        setChanged()
+
         if (level !is ServerLevel) return
         showData.load(filename) { data, err ->
             val level = level as? ServerLevel ?: return@load
@@ -464,20 +490,23 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             .firstOrNull { it !is ReelToReelBlockEntity }
     override fun getContainerSize() = 1
     override fun getMaxStackSize() = 1
-    override fun canPlaceItem(slot: Int, stack: ItemStack) = (slot < containerSize) && stack.item is ReelItem
-    override fun isEmpty() = showData.isNotLoaded()
+    override fun canPlaceItem(slot: Int, stack: ItemStack): Boolean {
+        return (slot < containerSize) && stack.item is ReelItem
+    }
+    override fun isEmpty() = inputItem.isEmpty
     override fun getItem(slot: Int): ItemStack {
-        return showData.name?.let { ReelItem.makeItem(it) } ?: ItemStack.EMPTY
+        if (slot != 0) return ItemStack.EMPTY
+        return inputItem
     }
     override fun removeItem(slot: Int, amount: Int): ItemStack {
-        val item = showData.name?.let { ReelItem.makeItem(it) }
+        if (slot != 0 || amount < 1) return ItemStack.EMPTY
         if (!isEmpty) {
             setPlaying(false)
             showData.unload()
         }
-        showData.name = null
+        val pastItem = inputItem.copyAndClear()
         setChanged()
-        return item ?: ItemStack.EMPTY
+        return pastItem
     }
     override fun removeItemNoUpdate(slot: Int) = removeItem(slot, 1)
     override fun setItem(slot: Int, stack: ItemStack) {
@@ -486,14 +515,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             removeItem(slot, 1)
             return
         }
-        if (stack.item is ReelItem) {
-            val filename = ReelItem.getFilename(stack) ?: return
+        if (showData.loading) return
+        if (stack.item is ReelItem && !ItemStack.isSameItemSameComponents(stack, inputItem)) {
             resetPlayback()
-            showData.isLoaded = true
-            loadShow(filename) { data ->
-                if (data != null) applyChange(true) {
-                    setPlaying(true)
-                }
+            inputItem = stack
+            loadShow(stack) { data ->
+                if (data != null)
+                    applyChange(true) { setPlaying(true) }
             }
         }
         setChanged()
@@ -502,15 +530,18 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         Container.stillValidBlockEntity(this, player)
     override fun clearContent() {
         applyChange(true) {
+            removeItem(0, 1)
             showData.unload()
             resetPlayback()
         }
     }
     override fun getSlotsForFace(side: Direction) = intArrayOf(0)
-    override fun canPlaceItemThroughFace(index: Int, stack: ItemStack, direction: Direction?) =
-        stack.item is ReelItem && isEmpty
-    override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction) =
-        !isEmpty && hasFinished && !playing
+    override fun canPlaceItemThroughFace(index: Int, stack: ItemStack, direction: Direction?): Boolean {
+        return stack.item is ReelItem && inputItem.isEmpty
+    }
+    override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction): Boolean {
+        return !inputItem.isEmpty && !playing && hasFinished
+    }
     // endregion
 
     companion object {

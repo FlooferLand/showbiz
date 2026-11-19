@@ -14,6 +14,7 @@ import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Sounds
+import com.flooferland.showbiz.utils.Task
 import kotlinx.coroutines.*
 import net.minecraft.ChatFormatting
 import net.minecraft.nbt.CompoundTag
@@ -63,6 +64,12 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
     var loading = false
     var isLoaded = false
+    var progressText: String = ""
+    val loadContext = Dispatchers.IO + CoroutineExceptionHandler { context, throwable ->  }
+    val listener = Task.Listener { task ->
+        progressText = task?.name ?: ""
+        owner.markDirtyNotifyAll()
+    }
 
     fun getFilePath(filename: String) = FileStorage.fetchShowPaths()[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
     fun isNotLoaded() = !isLoaded
@@ -79,8 +86,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         loading = true
         id = UUID.randomUUID()
 
-        val exceptionHandler = CoroutineExceptionHandler { context, throwable ->  }
-        loadJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
+        loadJob = CoroutineScope(loadContext + CoroutineName("Show")).launch {
             mapping = run {
                 val ext = filename.getFileExtension() ?: error("The file is missing a file extension")
                 if (!Showbiz.charts.checkExtension(ext)) {
@@ -91,23 +97,29 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             Showbiz.log.debug("Loading tape '${filename}' ($mapping)")
             val path = getFilePath(filename)
             val loaded: RawShowData = run {
-                val file: InputStream = try { Files.newInputStream(path) }
-                catch (_: NoSuchFileException) {
-                    error("No file found at '$path'")
+                val file: InputStream = Task.measured("Loading the file", listener) {
+                    if (!isActive) return@launch
+                    try { Files.newInputStream(path) }
+                    catch (_: NoSuchFileException) {
+                        error("No file found at '$path'")
+                    }
+                    catch (throwable: Throwable) {
+                        error("Failed to read '$path': $throwable")
+                    }
                 }
-                catch (throwable: Throwable) {
-                    error("Failed to read '$path': $throwable")
+                Task.measured("Reading the file", listener) {
+                    if (!isActive) return@launch
+                    val out = file.use { runCatching { RshowFormat().read(it) } }
+                    out.onFailure { throwable ->
+                        Showbiz.log.error("BizlibNative failed to load '$path'. Using fallback Java-based reader", throwable)
+                    }
+                    out.getOrNull() ?: LegacyRshowFormat().readFile(path)
                 }
-
-                val out = file.use { runCatching { RshowFormat().read(it) } }
-                out.onFailure { throwable ->
-                    Showbiz.log.error("BizlibNative failed to load '$path'. Using fallback Java-based reader", throwable)
-                }
-                out.getOrNull() ?: LegacyRshowFormat().readFile(path)
             }
 
             // Audio and conversion
-            run {
+            Task.measured("Converting audio", listener) {
+                if (!isActive) return@launch
                 val source = AudioSystem.getAudioInputStream(ByteArrayInputStream(loaded.audio))
                 if (AudioSystem.isConversionSupported(targetFormat, source.format)) {
                     val stream = AudioSystem.getAudioInputStream(targetFormat, source)
@@ -122,20 +134,24 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
 
             // Parsing signal data
-            val current = mutableListOf<BitId>()
-            for (s in loaded.signal) {
-                if (s == 0) {
-                    signal.add(current.toBitIdArray())
-                    current.clear()
-                } else {
-                    current.add(s.toBitId())
+            Task.measured("Parsing signal data", listener) {
+                if (!isActive) return@launch
+                val current = mutableListOf<BitId>()
+                for (s in loaded.signal) {
+                    if (s == 0) {
+                        signal.add(current.toBitIdArray())
+                        current.clear()
+                    } else {
+                        current.add(s.toBitId())
+                    }
                 }
             }
 
             // Reading video
             val videoPath = getShowVideo(path)
-            if (videoPath != null && FFmpeg.localAvailable) {
-                val result = CoroutineScope(Dispatchers.IO).launch {
+            if (videoPath != null && FFmpeg.localAvailable) Task.measured("Probing the video file") {
+                if (!isActive) return@launch
+                val result = runCatching {
                     val probe = FFmpeg.probeVideo(videoPath)!!
                     val fps = 20.0
                     val output = if (Showbiz.config.video.highResVideo)
@@ -146,15 +162,20 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                     this@ShowData.videoInputInfo = probe
                     this@ShowData.video = FFmpeg.openVideoStream(probe, output)
                 }
-                result.invokeOnCompletion {
-                    if (it != null || videoInputInfo == null)
-                        Showbiz.log.error("Failed to read video", it ?: Throwable("Unknown error"))
+                result.onFailure {
+                    Showbiz.log.error("Failed to read video", it)
                 }
-                result.join()
             }
         }
         loadJob?.invokeOnCompletion { err -> owner.level?.server?.execute {
             loading = false
+            listener.end()
+            if (err is CancellationException) {
+                onLoadOrErr.invoke(null, null)
+                return@execute
+            }
+
+            // Success
             if (audio.isNotEmpty() && err == null) {
                 isLoaded = true
                 Showbiz.log.info("Loaded show! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)")
@@ -162,6 +183,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                 owner.markDirtyNotifyAll()
                 return@execute
             }
+
+            // Error
             Showbiz.log.error("Show '${filename}' failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)", err)
             val errComp = Component.empty()
                 .append(Component.translatable("message.showbiz.show_load_fail"))
@@ -190,6 +213,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         name = tag.getStringOrNull("show_name")
         isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
         mapping = tag.getStringOrNull("show_mapping")
+        progressText = tag.getStringOrNull("progress_text") ?: ""
         /*if (id == null || name == null) {
             Showbiz.log.error("Missing one of: id=$id, name=$name")
             return
@@ -207,6 +231,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         name?.let { tag.putString("show_name", it) }
         mapping?.let { tag.putString("show_mapping", it) }
         tag.putBoolean("is_loaded", isLoaded)
+        tag.putString("progress_text", progressText)
     }
 
     /** Saves the show to the disk */
@@ -273,6 +298,6 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         videoInputInfo = null
         video?.close()
         video = null
-        System.gc()
+        //System.gc()
     }
 }

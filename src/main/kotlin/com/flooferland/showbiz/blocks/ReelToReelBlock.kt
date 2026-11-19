@@ -101,8 +101,11 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         player.setItemInHand(hand, Items.AIR.defaultInstance)
                         entity.resetPlayback()
                     }
-                    entity.loadShow(filename) {
-                        Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+                    entity.loadShow(heldStack) { data ->
+                        if (data != null) {
+                            Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+                        }
+                        player.displayClientMessage(Component.empty(), true)
                         player.setInventoryChanged()
                     }
                 } else {
@@ -110,14 +113,15 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         tc("message", "empty_reel_warning").withStyle(ChatFormatting.RED), true
                     )
                 }
-            } else if (heldStack.isEmpty && !entity.showData.isNotLoaded() && player is ServerPlayer && Permissions.SwitchReels.testAndNotify(player)) {
-                // Removing
+            } else if (heldStack.isEmpty && Permissions.SwitchReels.testAndNotify(player)) { // Removing
+                if (entity.showData.loading) {
+                    player.displayClientMessage(Component.literal("Cancelled loading"), true)
+                }
                 val showName = entity.showData.name
                 showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
                 Sounds.play(player, ModSounds.ReelExit)
                 entity.applyChange(true) {
-                    entity.setPlaying(false)
-                    entity.showData.unload(player)
+                    entity.removeItem(0, 1)
                     player.setInventoryChanged()
                 }
             }
@@ -151,6 +155,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
     override fun isSignalSource(state: BlockState) = true
     override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
+        if (direction.axis == Direction.Axis.Y) return Redstone.SIGNAL_NONE
         val entity = level.getBlockEntity(pos) as? ReelToReelBlockEntity ?: return Redstone.SIGNAL_NONE
         return if (entity.playing) Redstone.SIGNAL_MAX else Redstone.SIGNAL_NONE
     }

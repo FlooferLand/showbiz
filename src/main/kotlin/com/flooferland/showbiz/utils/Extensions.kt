@@ -34,6 +34,8 @@ import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import java.util.*
 import kotlin.enums.enumEntries
+import kotlin.io.path.Path
+import kotlin.io.path.name
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 import kotlin.time.Duration
@@ -199,6 +201,8 @@ object Extensions {
     }
 
     fun String.count(substring: String) = windowed(substring.length) { if (it == substring) 1 else 0 }.sum()
+    fun String.getFile() = Path(this).name.ifEmpty { null }
+    fun String.getFileName() = if (contains('.')) substringBeforeLast('.') else null
     fun String.getFileExtension() = if (contains('.')) substringAfterLast('.') else null
     fun String.alwaysEndsWith(suffix: String) = if (!endsWith(suffix)) this + suffix else this
     fun String.alwaysEndsWith(suffixes: Collection<String>): String {

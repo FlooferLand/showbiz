@@ -1,32 +1,50 @@
 package com.flooferland.showbiz.renderers
 
+import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.client.resources.model.ModelResourceLocation
+import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.Items
 import net.minecraft.world.phys.BlockHitResult
 import org.joml.Quaternionf
 import org.joml.Vector3f
+import kotlin.math.abs
+import kotlin.math.round
 
 class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
     override fun render(entity: ReelToReelBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val facing = entity.blockState.getValue(FacingEntityBlock.FACING) ?: return
         val minecraft = Minecraft.getInstance() ?: return
+        val level = entity.level as? ClientLevel ?: return
         val reelStack = entity.getItem(0)
 
         // Time
-        val rotationAngle = entity.seek.toFloat() * 150f
+        val delta = (ShowbizClient.getDeltaTime() * 0.1).coerceIn(0.0, 1.0)
+        val target = if (entity.playing) entity.seek * 200.0 else round(entity.clientSeek / 360.0) * 360.0
+        if (!minecraft.isPaused) {
+            entity.clientSeek = lerp(entity.clientSeek, target, delta)
+
+            // Resetting for long shows cuz number overflow
+            if (abs(entity.clientSeek - target) < 0.05)
+                entity.clientSeek = 0.0
+        }
+
+        val rotationAngle = entity.clientSeek.toFloat()
 
         poseStack.pushPose()
         poseStack.translate(0.5, 0.0, 0.5)
@@ -90,56 +108,68 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             val offset = if (i == 0) 1f else -1f
             runCatching {
                 val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
-                if (entity.showData.isLoaded || i == 1) {
-                    poseStack.pushPose()
-                    poseStack.translate(0.5 + (offset * 0.3), 0.7, 0.58)
-                    poseStack.scale(0.6f, 0.6f, 0.6f)
-                    poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 0f, 1f), -rotationAngle))
-                    poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(1f, 0f, 0f), 90.0f))
-                    Minecraft.getInstance().itemRenderer.render(
-                        if (!reelStack.isEmpty) reelStack else ModItems.Reel.item.defaultInstance,
-                        ItemDisplayContext.NONE,
-                        false,
-                        poseStack,
-                        bufferSource,
-                        packedLight,
-                        packedOverlay,
-                        model
-                    )
-                    poseStack.popPose()
-                }
+                val stack = if (i == 0) reelStack else ModItems.Reel.item.defaultInstance
+                if (stack.isEmpty) return@runCatching
+
+                poseStack.pushPose()
+                poseStack.translate(0.5 + (offset * 0.28), 0.715, 0.58)
+                poseStack.scale(0.6f, 0.6f, 0.6f)
+                poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 0f, 1f), -rotationAngle))
+                poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(1f, 0f, 0f), 90.0f))
+                Minecraft.getInstance().itemRenderer.render(
+                    stack,
+                    ItemDisplayContext.NONE,
+                    false,
+                    poseStack,
+                    bufferSource,
+                    packedLight,
+                    packedOverlay,
+                    model
+                )
+                poseStack.popPose()
             }.onFailure { poseStack.popPose() }
         }
 
         // Rendering information about the loaded reel
         if ((minecraft.hitResult as? BlockHitResult)?.blockPos == entity.blockPos) {
-            var text = ""
+            val text = Component.empty()
 
             if (entity.showData.loading) {
-                text = "Loading.."
+                text.append(Component.literal(entity.showData.progressText.ifEmpty { ".." }).withStyle(ChatFormatting.GRAY))
             } else if (!reelStack.isEmpty) {
-                text = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
+                val filename = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
+                if (!filename.contains('.')) {
+                    text.append(Component.literal(filename))
+                } else {
+                    text.append(Component.literal(filename.substringBeforeLast('.')))
+                    if (minecraft.player?.isCrouching ?: false) {
+                        text.append(Component.literal('.' + filename.substringAfterLast('.')).withStyle(ChatFormatting.GRAY))
+                    }
+                }
             }
 
-            if (text.isNotEmpty()) {
-                val textWidth = minecraft.font.width(text)
-                poseStack.pushPose()
-                poseStack.translate(0.5, 0.3, 0.37)
-                poseStack.scale(0.004f, -0.004f, 0.004f)
-                poseStack.mulPose(Axis.YP.rotationDegrees(180f))
-                minecraft.font.drawInBatch(
-                    text,
-                    -(textWidth / 2f),
-                    0f,
-                    0xFF_FF_FF_FF.toInt(),
-                    false,
-                    poseStack.last().pose(),
-                    bufferSource,
-                    Font.DisplayMode.NORMAL,
-                    0x00_00_00_00,
-                    packedLight
-                )
-                poseStack.popPose()
+            if (text.string.isNotEmpty()) {
+                val lines = minecraft.font.split(text, 175)
+                for ((i, line) in lines.withIndex()) {
+                    val lineWidth = minecraft.font.width(line)
+                    poseStack.pushPose()
+                    poseStack.translate(0.5, 0.3, 0.37)
+                    poseStack.scale(0.005f, -0.005f, 0.005f)
+                    poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+                    minecraft.font.drawInBatch(
+                        line,
+                        -(lineWidth / 2f),
+                        i.toFloat() * minecraft.font.lineHeight,
+                        0xFF_FF_FF_FF.toInt(),
+                        false,
+                        poseStack.last().pose(),
+                        bufferSource,
+                        Font.DisplayMode.NORMAL,
+                        0x00_00_00_00,
+                        packedLight
+                    )
+                    poseStack.popPose()
+                }
             }
         }
 

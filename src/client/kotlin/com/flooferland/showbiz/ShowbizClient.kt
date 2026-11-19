@@ -273,8 +273,10 @@ object ShowbizClient : ClientModInitializer {
         BotEntity.decor = DecorEntity.decorTick
     }
 
-    fun getDeltaTime() =
-        Minecraft.getInstance().timer.gameTimeDeltaTicks.coerceAtMost(1.25f)
+    fun getDeltaTime(): Float {
+        val timer = Minecraft.getInstance()?.timer ?: return 0f
+        return timer.gameTimeDeltaTicks.coerceAtMost(1.25f) + timer.getGameTimeDeltaPartialTick(true)
+    }
 
     fun resetAssetErrors() {
         BaseBotModel.errorsTriggered.clear()

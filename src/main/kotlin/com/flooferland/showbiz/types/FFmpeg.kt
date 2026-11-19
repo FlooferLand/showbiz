@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.types
 
 import com.flooferland.showbiz.Showbiz
+import com.flooferland.showbiz.utils.Extensions.getFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
@@ -215,7 +216,7 @@ object FFmpeg {
             .redirectError(ProcessBuilder.Redirect.DISCARD)
             .start()
         if (Showbiz.log.isDebugEnabled) {
-            Showbiz.log.debug("FFmpeg ${process.pid()} - ${args.joinToString(" ")}")
+            Showbiz.log.debug("FFmpeg ${process.pid()} - ${args.mapIndexed { i, arg -> if (i == 0) (arg.getFile() ?: arg) else arg } .joinToString(" ")}")
         }
         return process
     }
