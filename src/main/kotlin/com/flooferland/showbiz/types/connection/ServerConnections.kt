@@ -1,11 +1,5 @@
 package com.flooferland.showbiz.types.connection
 
-import net.minecraft.network.*
-import net.minecraft.server.level.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
 import com.flooferland.showbiz.registry.ModItems
@@ -16,6 +10,13 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.phys.Vec3
 
 // TODO: Fix Reel-To-Reel's connections somehow remaining even after it's destroyed
 // TODO: Add connection support for multiple levels/dimensions
@@ -65,6 +66,8 @@ object ServerConnections {
 
         ServerTickEvents.END_WORLD_TICK.register { level ->
             if (level.dimension() != Level.OVERWORLD) return@register
+            val canLogDev = false // Showbiz.log.isDebugEnabled && level.gameTime % 5.secsToTicks() == 0L
+
             val queued = mutableListOf<IConnectable>()
             for (connectable in loaded.copy()) {
                 val manager = connectable.connectionManager
@@ -81,7 +84,7 @@ object ServerConnections {
                 queued.add(connectable)
 
                 // Checking that I didn't forget to use the save/load functions of ConnectionManager
-                if (Showbiz.log.isDebugEnabled && connectable is BlockEntity) {
+                if (canLogDev && connectable is BlockEntity) {
                     val tag = connectable.saveCustomOnly(level.registryAccess())
                     connectable.loadCustomOnly(tag, level.registryAccess())
                     val blockId = BlockEntityType.getKey(connectable.type)?.path
@@ -100,7 +103,7 @@ object ServerConnections {
                 for (connectable in queued) OwnerId.of(connectable)?.let { broadcastUpdate(it, level) }
             }
 
-            if (Showbiz.log.isDebugEnabled) {
+            if (canLogDev) {
                 for (connectable in loaded.toList()) {
                     if (connectable !is BlockEntity) continue
                     val state = level.getBlockState(connectable.blockPos)
