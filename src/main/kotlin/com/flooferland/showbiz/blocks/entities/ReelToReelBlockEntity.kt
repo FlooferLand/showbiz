@@ -6,6 +6,7 @@ import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
@@ -285,7 +286,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPlaying(playing: Boolean) {
         if (this.playing == playing) return
         this.playing = playing
-        if (!playing) resetPlayback()
+        if (!playing) {
+            resetPlayback()
+        } else if (paused) {
+            setPaused(false)
+        }
         show.send(PackedShowData(playing, signal, showData.mapping))
         audio.sendTrigger(if (playing) PackedAudioData.Action.None else PackedAudioData.Action.Stop)
         stateDirty = true
@@ -375,6 +380,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
+        val sounds = Sounds.player(player)
         when (key) {
             0 -> { // Record
                 if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
@@ -382,7 +388,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                         if (recording) {
                             recording = false
                             showData.saveToDisk(player)
-                            Sounds.exit(player)
+                            sounds.exit()
                         } else if (playing) {
                             if (show.readListeners().none { id -> id.grabConnectable(level) is ProgrammerBlockEntity }) {
                                 player.displayClientMessage(
@@ -391,15 +397,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                                 )
                             }
                             recording = true
-                            Sounds.enter(player)
+                            sounds.enter()
                         } else {
                             player.displayClientMessage(Component.literal("Recording is only allowed during playback!"), true)
-                            Sounds.bad(player)
+                            sounds.bad()
                         }
                     }
                 } else {
                     player.notifyPermissionError(Permissions.WriteReels)
-                    Sounds.bad(player)
+                    sounds.bad()
                 }
             }
             1, 2 -> {  // Seek
@@ -411,7 +417,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                     .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
                     .append(Component.literal(endTime.seconds.toShortString()))
                 player.displayClientMessage(text, true)
-                Sounds.click(player)
+                sounds.click()
             }
         }
     }
@@ -486,6 +492,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 nearby.forEach { it.displayClientMessage(err, true) }
             }
             block(data)
+            markDirtyNotifyAll()
         }
     }
 
@@ -526,10 +533,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (stack.item is ReelItem && !ItemStack.isSameItemSameComponents(stack, inputItem)) {
             resetPlayback()
             inputItem = stack
+            level?.let { Sounds.block(it, blockPos).play(ModSounds.ReelEnter.event, volume = 0.5f) }
             loadShow(stack) { data ->
-                // TODO: FIXME: For some reason the show doesn't start playing automatically when a hopper adds it
-                if (data != null)
+                if (data != null) {
                     applyChange(true) { setPlaying(true) }
+                }
             }
         }
         markDirtyNotifyAll()

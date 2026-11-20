@@ -73,12 +73,12 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             data.blockPos = pos
             blockEntity.operators.add(player)
             player.displayClientMessage(Component.literal("Entering programming mode"), true)
-            Sounds.enter(player)
+            Sounds.player(player).enter()
         } else {
             data.blockPos = null
             blockEntity.operators.remove(player)
             player.displayClientMessage(Component.literal("Exiting programming mode"), true)
-            Sounds.exit(player)
+            Sounds.player(player).exit()
         }
         data.saveToPlayer(player)
 

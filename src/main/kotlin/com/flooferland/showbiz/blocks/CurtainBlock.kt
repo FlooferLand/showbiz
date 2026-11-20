@@ -1,16 +1,5 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
-import net.minecraft.world.phys.shapes.*
 import com.flooferland.showbiz.Permissions.Companion.mayInteractAt
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.entities.CurtainBlockEntity
@@ -18,6 +7,26 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Sounds
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.ItemInteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.DyeItem
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.BaseEntityBlock
+import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
 
 class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
     val codec = simpleCodec(::CurtainBlock)!!
@@ -56,7 +65,7 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
             if (entity.group != groupSet) {
                 entity.applyChange(true) { group = groupSet }
             }
-            Sounds.click(player)
+            Sounds.player(player).click()
             player.displayClientMessage(Component.literal("[-] interact down, [+] interact up"), true)
         } else {
             entity.setCurtains(!entity.isOpen)

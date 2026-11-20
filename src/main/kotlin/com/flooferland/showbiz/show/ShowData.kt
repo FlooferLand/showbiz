@@ -65,7 +65,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var isLoaded = false
     var endTime: Double = 0.0
     var progressText: String = ""
-    val loadContext = Dispatchers.IO + CoroutineExceptionHandler { context, throwable ->  }
+    val loadContext = Dispatchers.IO + CoroutineExceptionHandler { context, throwable -> Showbiz.log.error("ShowData coroutine", throwable)  }
     val listener = Task.Listener { task ->
         progressText = task?.name ?: ""
         owner.markDirtyNotifyAll()
@@ -149,27 +149,31 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
             // Reading video
             val videoPath = getShowVideo(path)
-            if (videoPath != null && FFmpeg.localAvailable) Task.measured("Probing the video file") {
-                if (!isActive) return@launch
-                val result = runCatching {
-                    val probe = FFmpeg.probeVideo(videoPath)!!
-                    val fps = 20.0
-                    val output = if (Showbiz.config.video.highResVideo)
-                        FFmpeg.VideoInfo(videoPath, probe.width, probe.height, fps)
-                    else
-                        FFmpeg.VideoInfo(videoPath, 128, 128, fps)
+            if (videoPath != null) {
+                FFmpeg.init(silent = false)
+                if (FFmpeg.localAvailable) Task.measured("Probing the video file") {
+                    if (!isActive) return@launch
+                    val result = runCatching {
+                        val probe = FFmpeg.probeVideo(videoPath)!!
+                        val fps = 20.0
+                        val output = if (Showbiz.config.video.highResVideo)
+                            FFmpeg.VideoInfo(videoPath, probe.width, probe.height, fps)
+                        else
+                            FFmpeg.VideoInfo(videoPath, 128, 128, fps)
 
-                    this@ShowData.videoInputInfo = probe
-                    this@ShowData.video = FFmpeg.openVideoStream(probe, output)
-                }
-                result.onFailure {
-                    Showbiz.log.error("Failed to read video", it)
+                        this@ShowData.videoInputInfo = probe
+                        this@ShowData.video = FFmpeg.openVideoStream(probe, output)
+                    }
+                    result.onFailure {
+                        Showbiz.log.error("Failed to read video", it)
+                    }
                 }
             }
         }
         loadJob?.invokeOnCompletion { err -> owner.level?.server?.execute {
             loading = false
             listener.end()
+
             if (err is CancellationException) {
                 onLoadOrErr.invoke(null, null)
                 return@execute
@@ -185,23 +189,27 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             }
 
             // Error
-            Showbiz.log.error("Show '${filename}' failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)", err)
-            val errComp = Component.empty()
-                .append(Component.translatable("message.showbiz.show_load_fail"))
-                .append(Component.literal(": ${err?.message}"))
-                .withStyle(ChatFormatting.RED)
+            if (err != null) {
+                Showbiz.log.error(
+                    "Show '${filename}' failed to load! (signal=${signal.size}, audio=${audio.size}, video=$videoInputInfo)",
+                    err
+                )
+                val errComp = Component.empty()
+                    .append(Component.translatable("message.showbiz.show_load_fail"))
+                    .append(Component.literal(": ${err.message}"))
+                    .withStyle(ChatFormatting.RED)
 
-            onLoadOrErr.invoke(null, errComp)
+                onLoadOrErr.invoke(null, errComp)
 
-            // Dropping the reel in case it's broken
-            val stack = owner.getItem(0)
-            if (!stack.isEmpty) {
-                val pos = owner.blockPos.center.add(0.0, 0.5, 0.0)
-                Containers.dropItemStack(owner.level!!, pos.x, pos.y, pos.z, stack)
-                owner.removeItem(0, 1)
+                // Dropping the reel in case it's broken
+                val stack = owner.getItem(0)
+                if (!stack.isEmpty) {
+                    val pos = owner.blockPos.center.add(0.0, 0.5, 0.0)
+                    Containers.dropItemStack(owner.level!!, pos.x, pos.y, pos.z, stack)
+                    owner.removeItem(0, 1)
+                }
+                owner.resetPlayback()
             }
-
-            owner.resetPlayback()
             owner.markDirtyNotifyAll()
         } }
     }
@@ -211,28 +219,21 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         val oldName = name
         id = tag.getUUIDOrNull("show_id")
         name = tag.getStringOrNull("show_name")
-        isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
         mapping = tag.getStringOrNull("show_mapping")
+
+        isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
+        loading = tag.getBooleanOrNull("is_loading") ?: false
         endTime = tag.getDoubleOrNull("end_time") ?: 0.0
         progressText = tag.getStringOrNull("progress_text") ?: ""
-        /*if (id == null || name == null) {
-            Showbiz.log.error("Missing one of: id=$id, name=$name")
-            return
-        }
-
-        // TODO: Load the show from metadata. Currently VERY buggy
-        val notUseless = (oldName != name && !owner.playing)
-        if (notUseless || isEmpty() && !loading && !owner.playing) {  // TODO: Figure out a way to bind IDs to shows
-            println("Reloading from ${ShowData::loadNBT.name} ($oldName != $name)")
-            load(name!!)
-        }*/
     }
     fun saveNBT(tag: CompoundTag) {
         id?.let { tag.putUUID("show_id", it) }
         name?.let { tag.putString("show_name", it) }
         mapping?.let { tag.putString("show_mapping", it) }
-        tag.putDouble("end_time", endTime)
+
         tag.putBoolean("is_loaded", isLoaded)
+        tag.putBoolean("is_loading", loading)
+        tag.putDouble("end_time", endTime)
         tag.putString("progress_text", progressText)
     }
 
@@ -249,7 +250,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             signalInt[i++] = 0
         }
         if (signalInt.isEmpty()) {
-            toNotify?.let { Sounds.bad(it) }
+            toNotify?.let { Sounds.player(it).bad() }
             val message = "Failed to save show '$filename' (signal=0)"
             toNotify?.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.RED), true)
             Showbiz.log.info(message)

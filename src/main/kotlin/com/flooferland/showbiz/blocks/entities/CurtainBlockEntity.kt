@@ -91,7 +91,7 @@ class CurtainBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
         val center = findCenter(rails) ?: blockPos
 
         // Sounds
-        Sounds.play(level, center, SoundEvents.WOOL_HIT, SoundSource.BLOCKS)
+        Sounds.block(level, center).play(SoundEvents.WOOL_HIT, SoundSource.BLOCKS)
     }
 
     fun findConnectedCurtains(ignoreGroups: Boolean = false, affectWorld: Boolean = true): Set<BlockPos> {

@@ -70,17 +70,22 @@ object FFmpeg {
     private var probeFile: File? = null
     private var error: String? = null
 
-    val localAvailable get() = mainFile?.exists() == true
+    val localAvailable get() = mainFile?.exists() == true && probeFile?.exists() == true
     var serverAvailable = false
 
     init { init() }
 
-    fun init() {
-        if (mainFile != null && probeFile != null) return
+    fun init(silent: Boolean = false) {
+        val mainExists = mainFile?.exists() == true && mainFile?.canExecute() == true
+        val probeExists = probeFile?.exists() == true && probeFile?.canExecute() == true
+        if (mainExists && probeExists) return
+
         mainFile = findFile("ffmpeg") ?: run { setError("Failed to find FFmpeg executable"); return@run null }
         probeFile = findFile("ffprobe") ?: run { setError("Failed to find FFprobe executable"); return@run null }
-        Showbiz.log.info("FFmpeg: '${mainFile?.absolutePath}'")
-        Showbiz.log.info("FFprobe: '${probeFile?.absolutePath}'")
+        if (!silent) {
+            Showbiz.log.info("FFmpeg: '${mainFile?.absolutePath}'")
+            Showbiz.log.info("FFprobe: '${probeFile?.absolutePath}'")
+        }
     }
 
     private fun findFile(name: String): File? = runCatching {
@@ -211,12 +216,12 @@ object FFmpeg {
         Showbiz.log.error("FFmpeg error: $text")
     }
 
-    private fun startProcess(vararg args: String): Process {
-        val process = ProcessBuilder(*args)
+    private fun startProcess(command: String, vararg args: String): Process {
+        val process = ProcessBuilder(command, *args)
             .redirectError(ProcessBuilder.Redirect.DISCARD)
             .start()
         if (Showbiz.log.isDebugEnabled) {
-            Showbiz.log.debug("FFmpeg ${process.pid()} - ${args.mapIndexed { i, arg -> if (i == 0) (arg.getFile() ?: arg) else arg } .joinToString(" ")}")
+            Showbiz.log.debug("FFmpeg ${process.pid()} - ${command.getFile()} ${args.joinToString(" ")}")
         }
         return process
     }

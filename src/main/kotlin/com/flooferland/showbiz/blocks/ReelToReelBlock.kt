@@ -73,6 +73,8 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
         if (!player.mayInteractWith(entity)) return ItemInteractionResult.FAIL
 
+        val sounds = Sounds.player(player)
+
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing
             if (heldStack.item is ReelItem && entity.showData.isNotLoaded() && Permissions.SwitchReels.testAndNotify(player)) {
@@ -80,7 +82,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
                     player.displayClientMessage(Component.literal("Loading.."), true)
-                    Sounds.play(player, ModSounds.ReelEnter)
+                    sounds.play(ModSounds.ReelEnter)
 
                     // Playback
                     if (player is ServerPlayer) {
@@ -89,7 +91,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     }
                     entity.loadShow(heldStack) { data ->
                         if (data != null) {
-                            Sounds.play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+                            sounds.play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
                         }
                         player.displayClientMessage(Component.empty(), true)
                         player.setInventoryChanged()
@@ -104,9 +106,8 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     player.displayClientMessage(Component.literal("Cancelled loading"), true)
                 }
                 val stack = entity.getItem(0)
-                println("Stack: $stack")
                 player.setItemInHand(hand, stack)
-                Sounds.play(player, ModSounds.ReelExit)
+                sounds.play(ModSounds.ReelExit)
                 entity.removeItem(0, 1)
                 player.setInventoryChanged()
             }
@@ -127,12 +128,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 }
 
                 if (!paused)
-                    Sounds.play(player, ModSounds.ReelPlay)
+                    sounds.play(ModSounds.ReelPlay)
                 else
-                    Sounds.play(player, ModSounds.ReelPlay, volume = 0.5f, pitch = 0.8f)
+                    sounds.play(ModSounds.ReelPlay, volume = 0.5f, pitch = 0.8f)
                 return ItemInteractionResult.SUCCESS
             } else {
-                Sounds.play(player, ModSounds.ReelPlay, volume = 0.4f, pitch = 0.4f)
+                sounds.play(ModSounds.ReelPlay, volume = 0.4f, pitch = 0.4f)
             }
         }
         return ItemInteractionResult.SUCCESS

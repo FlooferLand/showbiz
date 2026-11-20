@@ -73,7 +73,7 @@ class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModB
             setItem(slot, ItemStack.EMPTY)
         }
 
-        Sounds.play(player, ModSounds.ReelPlay)
+        Sounds.player(player).play(ModSounds.ReelPlay)
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {

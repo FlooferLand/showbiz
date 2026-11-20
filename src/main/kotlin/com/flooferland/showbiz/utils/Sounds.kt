@@ -1,34 +1,45 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.core.*
-import net.minecraft.server.level.*
-import net.minecraft.sounds.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
 import com.flooferland.showbiz.registry.ModSounds
+import net.minecraft.core.BlockPos
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
 
 /** Fast way to play all sorts of server-side sounds to the player */
 object Sounds {
-    fun play(player: Player, sound: ModSounds, volume: Float = 1.0f, pitch: Float = 1.0f) = play(player, sound.event, volume, pitch)
-    fun play(player: Player, sound: SoundEvent, volume: Float = 1.0f, pitch: Float = 1.0f) {
-        (player as? ServerPlayer)?.playNotifySound(sound, SoundSource.MASTER, volume, pitch)
+    interface Source {
+        fun play(sound: SoundEvent, source: SoundSource? = null, volume: Float = 1.0f, pitch: Float = 1.0f)
+
+        fun play(sound: ModSounds, source: SoundSource? = null, volume: Float = 1.0f, pitch: Float = 1.0f) {
+            play(sound.event, source, volume, pitch)
+        }
+
+        fun bad() = play(SoundEvents.NOTE_BLOCK_BASS.value(), volume = 1.0f, pitch = 0.5f)
+        fun click() = play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+        fun enter() = play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+        fun exit() = play(ModSounds.ReelExit, volume = 0.4f, pitch = 1.5f)
     }
 
-    fun play(level: Level, pos: BlockPos, sound: SoundEvent, source: SoundSource = SoundSource.BLOCKS, volume: Float = 1.0f, pitch: Float = 1.0f) {
-        (level as? ServerLevel)?.playSound(null, pos, sound, source, volume, pitch)
-    }
-    fun bad(player: Player) {
-        play(player, SoundEvents.NOTE_BLOCK_BASS.value(), volume = 1.0f, pitch = 0.5f)
-    }
-
-    fun click(player: Player) {
-        play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+    //region Sources
+    data class BlockSource(val level: Level, val pos: BlockPos) : Source {
+        override fun play(sound: SoundEvent, source: SoundSource?, volume: Float, pitch: Float) {
+            val source = source ?: SoundSource.BLOCKS
+            (level as? ServerLevel)?.playSound(null, pos, sound, source, volume, pitch)
+        }
     }
 
-    fun enter(player: Player) {
-        play(player, ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
+    data class PlayerSource(val player: Player) : Source {
+        override fun play(sound: SoundEvent, source: SoundSource?, volume: Float, pitch: Float) {
+            (player as? ServerPlayer)?.playNotifySound(sound, SoundSource.MASTER, volume, pitch)
+        }
     }
-    fun exit(player: Player) {
-        play(player, ModSounds.ReelExit, volume = 0.4f, pitch = 1.5f)
-    }
+    //endregion
+
+    fun block(level: Level, pos: BlockPos) = BlockSource(level, pos)
+    fun player(player: Player) = PlayerSource(player)
 }
