@@ -10,6 +10,8 @@ import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.utils.Extensions.applyChange
+import com.flooferland.showbiz.utils.Extensions.generateHorizontal
+import com.flooferland.showbiz.utils.Extensions.getCachedOrRotate
 import com.flooferland.showbiz.utils.Extensions.setInventoryChanged
 import com.flooferland.showbiz.utils.Sounds
 import com.flooferland.showbiz.utils.tc
@@ -35,9 +37,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BooleanProperty
 import net.minecraft.world.level.redstone.Redstone
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.Vec3
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
@@ -47,20 +47,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
     init {
         registerDefaultState(stateDefinition.any().setValue(PLAYING, false))
-    }
-
-    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
-        val facing = state.getValue(FacingEntityBlock.FACING) ?: return Shapes.block()
-        val width = 0.9
-        val height = 0.8
-        val thickness = 0.4
-        return when (facing) {
-            Direction.NORTH, Direction.SOUTH ->
-                Shapes.create(AABB.ofSize(Vec3(0.5, 0.5, 0.5), width, height, thickness))
-            Direction.EAST, Direction.WEST ->
-                Shapes.create(AABB.ofSize(Vec3(0.5, 0.5, 0.5), thickness, height, width))
-            else -> Shapes.block()
-        }
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? =
@@ -177,7 +163,16 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         }
     }
 
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
+        val facing = state.getValue(FACING)
+        return shapes.getCachedOrRotate(facing)
+    }
+
     companion object {
         val PLAYING: BooleanProperty = BooleanProperty.create("playing")!!
+        val shapes: HashMap<Direction, VoxelShape> = run {
+            val shape = Shapes.box(0.0625, 0.0625, 0.375, 0.9375, 0.875, 0.6875)
+            shape.generateHorizontal()
+        }
     }
 }

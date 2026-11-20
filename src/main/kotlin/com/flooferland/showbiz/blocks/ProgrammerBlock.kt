@@ -1,14 +1,5 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
@@ -16,7 +7,30 @@ import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
+import com.flooferland.showbiz.utils.Extensions.generateHorizontal
+import com.flooferland.showbiz.utils.Extensions.getCachedOrRotate
 import com.flooferland.showbiz.utils.Sounds
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.network.chat.Component
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.LevelAccessor
+import net.minecraft.world.level.LevelReader
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.BooleanOp
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
+
 
 class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlockModel {
     override val codec = simpleCodec(::ProgrammerBlock)!!
@@ -73,4 +87,26 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? ProgrammerBlockEntity)?.tick(level, pos, blockState) }
+
+
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
+        val facing = state.getValue(FACING)
+        return shapes.getCachedOrRotate(facing)
+    }
+
+    companion object {
+        val shapes: HashMap<Direction, VoxelShape> = run {
+            var shape = Shapes.empty()
+            shape = Shapes.join(shape, Shapes.box(0.0, 0.0, 0.5, 1.0, 0.3125, 1.0), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.125, 0.3546875, 0.546875, 0.5, 0.671875, 0.9515625000000001), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.0625, 0.375, 0.4375, 0.5625, 0.8125, 0.625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.590625, 0.3125, 0.625, 0.909375, 0.4375, 0.8578125), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.121875, 0.3125, 0.625, 0.503125, 0.4375, 0.9203125), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.5625, 0.375, 0.4375, 0.9375, 0.6875, 0.625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.0625, 0.3125, 0.5, 0.5625, 0.375, 0.625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.5625, 0.3125, 0.5, 0.9375, 0.375, 0.625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.59375, 0.346875, 0.528125, 0.9, 0.5484375, 0.8734375), BooleanOp.OR);
+            shape.generateHorizontal()
+        }
+    }
 }
