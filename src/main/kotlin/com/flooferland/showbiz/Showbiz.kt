@@ -45,27 +45,31 @@ object Showbiz : ModInitializer {
         FFmpeg.init()
 
         // Making sure the JVM compiles these
-        @Suppress("UnusedExpression")
         run {
+            // Registries
             ModComponents.register()
             ModPackets.register()
             ModEntities.register()
             ModLivingEntities.register()
-            ModSetTypes.entries
-            ModBlocks.entries
+            ModSetTypes.register()
+            ModBlocks.register()
             ModDecoBlocks.register()
-            ModItems.entries
-            ModMusicDiscs.entries
-            ModItemGroups.entries
-            ModSounds.entries
-            ModPlayerSynchedData
+            ModItems.register()
+            ModMusicDiscs.register()
+            ModItemGroups.register()
+            ModSounds.register()
+            ModPlayerSynchedData.register()
             ModCommands.register()
-            ModScreenHandlers
-            if (ShowbizEnv.hasComputerCraft()) runCatching { ModPeripherals.register() }
-            ServerConnections
-            FileStorage
-            FileServer
-            UpdateChecker
+            ModScreenHandlers.register()
+            if (ShowbizEnv.hasComputerCraft()) {
+                runCatching { ModPeripherals.register() }
+            }
+
+            // Utils
+            ServerConnections.register()
+            FileStorage.register()
+            FileServer.register()
+            UpdateChecker.register()
             ServerPackets.init()
             ServerStats.init()
             VersionMigrator.register()

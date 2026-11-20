@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.registry
 
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
@@ -62,5 +63,11 @@ enum class ModItemGroups {
             .displayItems { _, output -> items.forEach { output.accept(it) } }
             .build()
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, rl(name), tab)
+    }
+
+    companion object {
+        fun register() {
+            ModItemGroups::class.forceLoad()
+        }
     }
 }

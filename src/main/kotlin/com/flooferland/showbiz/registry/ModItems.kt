@@ -6,6 +6,7 @@ import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.components.PropComponent
 import com.flooferland.showbiz.datagen.providers.ItemProvider.ItemModelId
 import com.flooferland.showbiz.items.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceKey
@@ -73,5 +74,11 @@ enum class ModItems {
             constructor(properties(baseProps))
             //?}
         )
+    }
+
+    companion object {
+        fun register() {
+            ModItems::class.forceLoad()
+        }
     }
 }

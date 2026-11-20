@@ -37,7 +37,7 @@ object FileServer {
         }
     }
 
-    init {
+    fun register() {
         // Show files
         ServerPackets.listen(ShowFileListPacket.type) { _, ctx -> sendShowsToClient(ctx.player()) }
         ServerPackets.listen(ShowFileSelectPacket.type) { packet, ctx ->

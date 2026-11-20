@@ -1,7 +1,5 @@
 package com.flooferland.showbiz.types
 
-import net.minecraft.client.*
-import net.minecraft.network.*
 import com.flooferland.showbiz.ClientPackets
 import com.flooferland.showbiz.network.packets.ConnectionDataPacket
 import com.flooferland.showbiz.network.packets.UpdateConnectionsPacket
@@ -12,6 +10,8 @@ import com.flooferland.showbiz.types.connection.ServerConnections.Point
 import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.minecraft.client.Minecraft
+import net.minecraft.network.FriendlyByteBuf
 
 object ClientConnections {
     val entries = mutableMapOf<OwnerId, MutableList<Point>>()
@@ -23,7 +23,7 @@ object ClientConnections {
         links.remove(id)
     }
 
-    init {
+    fun register() {
         ClientPackets.listen(UpdateConnectionsPacket.type) { packet, _ ->
             if (packet.points.isEmpty()) remove(packet.id) else {
                 entries[packet.id] = packet.points.toMutableList()

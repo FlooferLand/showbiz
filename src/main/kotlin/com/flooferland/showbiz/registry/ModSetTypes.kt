@@ -1,8 +1,9 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.sounds.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.state.properties.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.level.block.SoundType
+import net.minecraft.world.level.block.state.properties.BlockSetType
 
 enum class ModSetTypes(val type: BlockSetType) {
     ShowbizWood(BlockSetType(
@@ -21,4 +22,11 @@ enum class ModSetTypes(val type: BlockSetType) {
         SoundEvents.WOODEN_BUTTON_CLICK_OFF,
         SoundEvents.WOODEN_BUTTON_CLICK_ON
     ))
+    ;
+
+    companion object {
+        fun register() {
+            ModSetTypes::class.forceLoad()
+        }
+    }
 }

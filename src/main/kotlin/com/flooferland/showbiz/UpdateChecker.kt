@@ -33,7 +33,7 @@ object UpdateChecker {
     var currentVersion: String = "0.0.0"
     var newerVersion: String? = null
 
-    init {
+    fun register() {
         currentVersion = FabricLoader.getInstance()
             .getModContainer(Showbiz.MOD_ID)
             .map { container -> container.metadata.version.friendlyString }

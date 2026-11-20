@@ -1,14 +1,17 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.component.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.sounds.*
-import net.minecraft.world.item.*
 import com.flooferland.showbiz.items.base.MusicDiscItem
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Rarity
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -62,5 +65,11 @@ enum class ModMusicDiscs(val key: String, val title: String, val length: Duratio
     fun getLyric(tick: Long): String {
         val key = lyrics.keys.filter { it <= tick }.maxOrNull() ?: return ""
         return lyrics[key] ?: ""
+    }
+
+    companion object {
+        fun register() {
+            ModMusicDiscs::class.forceLoad()
+        }
     }
 }

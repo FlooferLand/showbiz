@@ -75,15 +75,14 @@ object ShowbizClient : ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(AddonAssetsReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(HandbookReloadListener)
-        @Suppress("UnusedExpression")
         run {
-            ModPackets
-            ModClientEntities
-            ModClientInput.entries
-            ModClientLights.load()
-            ClientConnections
-            ClientPackets.init()
-            ClientWorldRender
+            ModPackets.register()
+            ModClientEntities.register()
+            ModClientInput.register()
+            ModClientLights.register()
+            ClientConnections.register()
+            ClientPackets.register()
+            ClientWorldRender.register()
             if (ShowbizEnv.hasIRLights()) run { IRLights.register() }
         }
         ShowbizShowAudio.init()

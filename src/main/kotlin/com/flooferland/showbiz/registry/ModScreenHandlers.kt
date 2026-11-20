@@ -1,11 +1,5 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.network.*
-import net.minecraft.network.codec.*
-import net.minecraft.resources.*
-import net.minecraft.world.inventory.*
 import com.flooferland.showbiz.menus.*
 import com.flooferland.showbiz.network.packets.BitViewPacket
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
@@ -13,6 +7,13 @@ import com.flooferland.showbiz.network.packets.editscreen.*
 import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.codec.StreamCodec
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.inventory.MenuType
 
 // Don't forget to also register the screen in ShowbizClient !!
 sealed class ModScreenHandlers<T: AbstractContainerMenu, D: Any> {
@@ -32,6 +33,8 @@ sealed class ModScreenHandlers<T: AbstractContainerMenu, D: Any> {
     }
 
     companion object {
-        init { ModScreenHandlers::class.forceLoad() }
+        fun register() {
+            ModScreenHandlers::class.forceLoad()
+        }
     }
 }

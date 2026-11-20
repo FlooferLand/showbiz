@@ -38,7 +38,7 @@ object ClientPackets {
         }
     }
 
-    fun init() {
+    fun register() {
         // Server capabilities
         listen(ServerCapabilitiesPacket.type) { packet, ctx ->
             FFmpeg.serverAvailable = packet.hasFFmpeg

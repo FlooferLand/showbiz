@@ -1,14 +1,19 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.world.entity.*
-import net.minecraft.world.level.*
 import com.flooferland.showbiz.entities.CollidePartEntity
 import com.flooferland.showbiz.entities.DecorEntity
 import com.flooferland.showbiz.entities.ModelPartEntity
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.MobCategory
+import net.minecraft.world.level.Level
 
 sealed class ModClientEntities<T: Entity> {
     object ModelPart : ModClientEntities<ModelPartEntity>("model_part", ::ModelPartEntity)
@@ -30,6 +35,8 @@ sealed class ModClientEntities<T: Entity> {
     }
 
     companion object {
-        init { ModClientEntities::class.sealedSubclasses.forEach { it.objectInstance } }
+        fun register() {
+            ModClientEntities::class.forceLoad()
+        }
     }
 }

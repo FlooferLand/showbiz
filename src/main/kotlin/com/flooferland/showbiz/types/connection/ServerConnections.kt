@@ -58,7 +58,7 @@ object ServerConnections {
         }
     }
 
-    init {
+    fun register() {
         ServerEntityEvents.ENTITY_LOAD.register { entity, level -> loadEntity(entity, level) }
         ServerEntityEvents.ENTITY_UNLOAD.register { blockEntity, level -> unloadEntity(blockEntity, level) }
         ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level -> loadEntity(entity, level) }

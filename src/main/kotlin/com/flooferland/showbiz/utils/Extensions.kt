@@ -38,6 +38,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.name
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObjectInstance
 import kotlin.time.Duration
 
 
@@ -196,8 +197,11 @@ object Extensions {
     fun BlockPos.toComp() = Component.literal("$x $y $z").withTeleport(this)
     //endregion
 
+    /** Should specify the class and not the companion */
     fun KClass<*>.forceLoad() {
-        sealedSubclasses.forEach { it.objectInstance ?: it.forceLoad() }
+        this.objectInstance
+        this.companionObjectInstance
+        this.sealedSubclasses.forEach { it.objectInstance ?: it.forceLoad() }
     }
 
     fun String.count(substring: String) = windowed(substring.length) { if (it == substring) 1 else 0 }.sum()

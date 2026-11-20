@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.registry
 
 import com.flooferland.showbiz.entities.PlushEntity
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
@@ -33,7 +34,7 @@ sealed class ModEntities<T : Entity> {
 
     companion object {
         fun register() {
-            ModEntities::class.sealedSubclasses.forEach { it.objectInstance }
+            ModEntities::class.forceLoad()
         }
     }
 }

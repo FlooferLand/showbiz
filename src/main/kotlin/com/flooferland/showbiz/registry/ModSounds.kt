@@ -1,10 +1,11 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.sounds.*
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
 
 /// NOTE: Data generator should be called after adding new sounds here
 enum class ModSounds {
@@ -43,4 +44,10 @@ enum class ModSounds {
     val sounds: Array<ResourceLocation>
     val folder: String?
     val procedural: Boolean
+
+    companion object {
+        fun register() {
+            ModSounds::class.forceLoad()
+        }
+    }
 }

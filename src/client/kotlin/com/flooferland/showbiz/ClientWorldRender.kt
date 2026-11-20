@@ -12,7 +12,7 @@ import net.minecraft.client.player.LocalPlayer
 import net.minecraft.client.renderer.MultiBufferSource
 
 object ClientWorldRender {
-    init {
+    fun register() {
         WorldRenderEvents.BEFORE_ENTITIES.register { GeoWorkaroundRenderHook.inWorldPass = true }
         WorldRenderEvents.END.register { GeoWorkaroundRenderHook.inWorldPass = false }
         WorldRenderEvents.AFTER_ENTITIES.register { ctx ->

@@ -13,7 +13,7 @@ object FileStorage {
     val SHOWBIZ_DIR = Path(Showbiz.MOD_ID)
     val SHOWS_DIR = SHOWBIZ_DIR / "shows"
 
-    init {
+    fun register() {
         runCatching { Files.createDirectories(SHOWS_DIR) }
         ServerLifecycleEvents.SERVER_STARTED.register { _ ->
             cachedShowPaths.clear()

@@ -6,6 +6,7 @@ import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.components.PropComponent
 import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
 import com.mojang.serialization.Codec
 import net.minecraft.core.Registry
@@ -56,7 +57,7 @@ sealed class ModComponents<T> {
 
     companion object {
         fun register() {
-            ModComponents::class.sealedSubclasses.forEach { it.objectInstance }
+            ModComponents::class.forceLoad()
         }
     }
 }

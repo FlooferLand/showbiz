@@ -52,7 +52,7 @@ sealed class ModPackets<T: CustomPacketPayload> {
     }
 
     enum class PacketRegistryWay { /** S2C */ ServerToClient, /** C2S */ ClientToServer, Bidirectional }
-
+    
     companion object {
         fun register() {
             ModPackets::class.forceLoad()

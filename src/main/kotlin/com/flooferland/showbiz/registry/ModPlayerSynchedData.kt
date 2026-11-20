@@ -1,12 +1,14 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.nbt.*
-import net.minecraft.network.syncher.*
-import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.ICompoundable
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.world.entity.player.Player
 
 sealed class ModPlayerSynchedData(id: String, val default: ICompoundable) {
     object Programming : ModPlayerSynchedData("programming", PlayerProgrammingData())
@@ -35,6 +37,10 @@ sealed class ModPlayerSynchedData(id: String, val default: ICompoundable) {
                 it.objectInstance?.let { instance -> list.add(instance) }
             }
             entries = list
+        }
+
+        fun register() {
+            ModPlayerSynchedData::class.forceLoad()
         }
     }
 }

@@ -120,6 +120,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -131,7 +132,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -167,6 +167,7 @@
 			"wrap_mode": "limited",
 			"pbr_channel": "color",
 			"fps": 7,
+			"force_translucent": false,
 			"frame_time": 1,
 			"frame_order_type": "loop",
 			"frame_order": "",

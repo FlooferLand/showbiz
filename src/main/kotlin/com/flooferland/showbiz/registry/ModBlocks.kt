@@ -1,19 +1,27 @@
 package com.flooferland.showbiz.registry
 
-import net.minecraft.core.*
-import net.minecraft.core.registries.*
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.BlockBehaviour.*
 import com.flooferland.showbiz.blocks.*
 import com.flooferland.showbiz.blocks.entities.*
 import com.flooferland.showbiz.datagen.providers.BlockProvider.BlockModelId
 import com.flooferland.showbiz.items.base.FancyBlockItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
+import com.flooferland.showbiz.utils.Extensions.forceLoad
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.SoundType
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties
+import net.minecraft.world.level.block.state.BlockState
 
 // TODO: Add requiresCorrectToolForDrops and set up JSON tags for it to actually work
 
@@ -213,4 +221,10 @@ enum class ModBlocks {
 
     typealias BlockItemConstructor = (ResourceLocation, Block, Item.Properties) -> BlockItem
     private data class Entity(val entity: ((pos: BlockPos, blockState: BlockState) -> BlockEntity), val isGeckolib: Boolean)
+
+    companion object {
+        fun register() {
+            ModBlocks::class.forceLoad()
+        }
+    }
 }

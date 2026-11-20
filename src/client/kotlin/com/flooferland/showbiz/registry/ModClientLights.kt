@@ -52,7 +52,7 @@ object ModClientLights {
         return backend
     }
 
-    fun load() {
+    fun register() {
         VanillaLightBackend::class.forceLoad()
         reload()
 
