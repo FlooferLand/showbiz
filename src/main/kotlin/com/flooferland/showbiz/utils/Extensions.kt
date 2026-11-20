@@ -199,8 +199,8 @@ object Extensions {
 
     /** Should specify the class and not the companion */
     fun KClass<*>.forceLoad() {
-        this.objectInstance
         this.companionObjectInstance
+        this.objectInstance
         this.sealedSubclasses.forEach { it.objectInstance ?: it.forceLoad() }
     }
 
