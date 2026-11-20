@@ -5,7 +5,7 @@ rae 47 {
     flow accel in:0.13 out:0.13
     flow smash in:0.0 out:0.0
     flow smash_speed in:0.0 out:0.0
-    move "moon" y:18
+    move "moon" y:19
 }
 
 rae 46 {
