@@ -11,7 +11,7 @@ import kotlinx.serialization.decodeFromString
 // [hits.<mapping>] for their thunks, [dynbones."<bone>"] for the floppy parts
 @Serializable
 data class PhysicsData(
-    val format: Int = 1,
+    val format: Int,
     val chains: Map<String, ChainSolver.Params> = emptyMap(),
     val cylinders: Map<String, PneumaticValve.Supply> = emptyMap(),
     val hits: Map<String, PneumaticValve.Hit> = emptyMap(),
