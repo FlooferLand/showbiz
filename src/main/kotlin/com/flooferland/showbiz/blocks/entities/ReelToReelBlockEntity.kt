@@ -527,6 +527,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             resetPlayback()
             inputItem = stack
             loadShow(stack) { data ->
+                // TODO: FIXME: For some reason the show doesn't start playing automatically when a hopper adds it
                 if (data != null)
                     applyChange(true) { setPlaying(true) }
             }
