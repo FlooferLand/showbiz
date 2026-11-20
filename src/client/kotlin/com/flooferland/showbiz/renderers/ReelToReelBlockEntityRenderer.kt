@@ -5,6 +5,7 @@ import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.Extensions.toShortString
 import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
@@ -20,11 +21,11 @@ import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.Items
-import net.minecraft.world.phys.BlockHitResult
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import kotlin.math.abs
 import kotlin.math.round
+import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
     override fun render(entity: ReelToReelBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
@@ -131,25 +132,24 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         }
 
         // Rendering information about the loaded reel
-        if ((minecraft.hitResult as? BlockHitResult)?.blockPos == entity.blockPos) {
-            val text = Component.empty()
-
+        if ((minecraft.player?.distanceToSqr(entity.blockPos.center) ?: 0.0) < 16.0 * 16.0) run {
+            // Show name
+            val showText = Component.empty()
             if (entity.showData.loading) {
-                text.append(Component.literal(entity.showData.progressText.ifEmpty { ".." }).withStyle(ChatFormatting.GRAY))
+                showText.append(Component.literal(entity.showData.progressText.ifEmpty { ".." }).withStyle(ChatFormatting.GRAY))
             } else if (!reelStack.isEmpty) {
                 val filename = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
                 if (!filename.contains('.')) {
-                    text.append(Component.literal(filename))
+                    showText.append(Component.literal(filename))
                 } else {
-                    text.append(Component.literal(filename.substringBeforeLast('.')))
+                    showText.append(Component.literal(filename.substringBeforeLast('.')))
                     if (minecraft.player?.isCrouching ?: false) {
-                        text.append(Component.literal('.' + filename.substringAfterLast('.')).withStyle(ChatFormatting.GRAY))
+                        showText.append(Component.literal('.' + filename.substringAfterLast('.')).withStyle(ChatFormatting.GRAY))
                     }
                 }
             }
-
-            if (text.string.isNotEmpty()) {
-                val lines = minecraft.font.split(text, 175)
+            if (showText.string.isNotEmpty()) {
+                val lines = minecraft.font.split(showText, 175)
                 for ((i, line) in lines.withIndex()) {
                     val lineWidth = minecraft.font.width(line)
                     poseStack.pushPose()
@@ -170,6 +170,31 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
                     )
                     poseStack.popPose()
                 }
+            }
+
+            // Show length
+            if (entity.showData.isLoaded) {
+                val timeText = Component.literal(entity.seek.seconds.toShortString())
+                    .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(entity.endTime.seconds.toShortString()))
+                val lineWidth = minecraft.font.width(timeText)
+                poseStack.pushPose()
+                poseStack.translate(0.09, 0.36, 0.37)
+                poseStack.scale(0.005f, -0.005f, 0.005f)
+                poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+                minecraft.font.drawInBatch(
+                    timeText,
+                    -lineWidth.toFloat(),
+                    0f,
+                    0xFF_FF_FF_FF.toInt(),
+                    false,
+                    poseStack.last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.NORMAL,
+                    0x00_00_00_00,
+                    packedLight
+                )
+                poseStack.popPose()
             }
         }
 

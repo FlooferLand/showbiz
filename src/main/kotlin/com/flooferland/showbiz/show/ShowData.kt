@@ -9,6 +9,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getFileExtension
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import com.flooferland.showbiz.utils.Extensions.getUUIDOrNull
@@ -62,6 +63,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
     var loading = false
     var isLoaded = false
+    var endTime: Double = 0.0
     var progressText: String = ""
     val loadContext = Dispatchers.IO + CoroutineExceptionHandler { context, throwable ->  }
     val listener = Task.Listener { task ->
@@ -121,10 +123,14 @@ class ShowData(val owner: ReelToReelBlockEntity) {
                     audio = stream.readAllBytes()
                     stream.close()
                 } else {
-                    Showbiz.log.warn("Unsupported audio format for the show '$filename'. It might appear broken")
-                    format = source.format
-                    audio = loaded.audio
+                    source.close()
+                    error("Unsupported audio format ${source.format}")
                 }
+            }
+
+            // Getting the end time
+            (format ?: targetFormat).let { format ->
+                endTime = audio.size.toDouble() / (format.sampleRate * format.frameSize)
             }
 
             // Parsing signal data
@@ -207,6 +213,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         name = tag.getStringOrNull("show_name")
         isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
         mapping = tag.getStringOrNull("show_mapping")
+        endTime = tag.getDoubleOrNull("end_time") ?: 0.0
         progressText = tag.getStringOrNull("progress_text") ?: ""
         /*if (id == null || name == null) {
             Showbiz.log.error("Missing one of: id=$id, name=$name")
@@ -224,6 +231,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         id?.let { tag.putUUID("show_id", it) }
         name?.let { tag.putString("show_name", it) }
         mapping?.let { tag.putString("show_mapping", it) }
+        tag.putDouble("end_time", endTime)
         tag.putBoolean("is_loaded", isLoaded)
         tag.putString("progress_text", progressText)
     }

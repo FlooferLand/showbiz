@@ -117,13 +117,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 if (entity.showData.loading) {
                     player.displayClientMessage(Component.literal("Cancelled loading"), true)
                 }
-                val showName = entity.showData.name
-                showName?.let { player.setItemInHand(hand, ReelItem.makeItem(filename = showName)) }
+                val stack = entity.getItem(0)
+                println("Stack: $stack")
+                player.setItemInHand(hand, stack)
                 Sounds.play(player, ModSounds.ReelExit)
-                entity.applyChange(true) {
-                    entity.removeItem(0, 1)
-                    player.setInventoryChanged()
-                }
+                entity.removeItem(0, 1)
+                player.setInventoryChanged()
             }
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
         } else if (player is ServerPlayer && Permissions.ControlPlayback.testAndNotify(player)) {

@@ -82,7 +82,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             return bytes - (bytes % frameSize)
         }
     val endTime: Double
-        get() = showData.audio.size.toDouble() / (getFormat().sampleRate * getFormat().frameSize)
+        get() = showData.endTime
 
     public var recording: Boolean = false
     public var showData: ShowData = ShowData(this)
@@ -422,11 +422,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // Removing legacy tags
         tag.removeIfPresent("signal_frame")
 
-        // Save other
+        // Saving the inventory
         NonNullList.create<ItemStack>().also { items ->
             items.add(inputItem)
             ContainerHelper.saveAllItems(tag, items, true, registries)
         }
+
+        // Saving other stuff
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
         tag.putBoolean("recording", recording)
@@ -439,7 +441,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
 
-        // Load other
+        // Loading the inventory
+        // I have absolutely no idea why this works but touching it breaks it in some form of way
+        inputItem = ItemStack.EMPTY
         NonNullList.create<ItemStack>().also { items ->
             items.add(inputItem)
             ContainerHelper.loadAllItems(tag, items, registries)
@@ -447,6 +451,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 ?: showData.name?.let { ReelItem.makeItem(it) }  // Pre-0.6.0 shows that were loaded up
                 ?: ItemStack.EMPTY
         }
+
+        // Loading other stuff
         playing = tag.getBooleanOrNull("playing") ?: false
         paused = tag.getBooleanOrNull("paused") ?: false
         recording = tag.getBooleanOrNull("recording") ?: false
@@ -470,7 +476,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         inputItem = stack
         showData.loading = true
-        setChanged()
+        markDirtyNotifyAll()
 
         if (level !is ServerLevel) return
         showData.load(filename) { data, err ->
@@ -496,19 +502,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun isEmpty() = inputItem.isEmpty
     override fun getItem(slot: Int): ItemStack {
         if (slot != 0) return ItemStack.EMPTY
-        return inputItem
+        return inputItem.copy()
     }
     override fun removeItem(slot: Int, amount: Int): ItemStack {
         if (slot != 0 || amount < 1) return ItemStack.EMPTY
-        if (!isEmpty) {
+        if (!isEmpty || playing || showData.isLoaded) {
             setPlaying(false)
             showData.unload()
         }
         val pastItem = inputItem.copyAndClear()
-        setChanged()
+        markDirtyNotifyAll()
         return pastItem
     }
-    override fun removeItemNoUpdate(slot: Int) = removeItem(slot, 1)
+    override fun removeItemNoUpdate(slot: Int) =
+        removeItem(slot, 1)
     override fun setItem(slot: Int, stack: ItemStack) {
         if (slot != 0) return
         if (stack.isEmpty) {
@@ -524,7 +531,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                     applyChange(true) { setPlaying(true) }
             }
         }
-        setChanged()
+        markDirtyNotifyAll()
     }
     override fun stillValid(player: Player): Boolean =
         Container.stillValidBlockEntity(this, player)
