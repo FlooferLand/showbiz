@@ -1,14 +1,13 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.types.OwnerId
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
 import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
@@ -24,7 +23,11 @@ class CymbalBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mod
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        val id = OwnerId.of(pos)
-        collidePartInstance.tick(level, id)
+        collidePartInstance.tick()
+    }
+
+    override fun setRemoved() {
+        super.setRemoved()
+        collidePartInstance.kill()
     }
 }

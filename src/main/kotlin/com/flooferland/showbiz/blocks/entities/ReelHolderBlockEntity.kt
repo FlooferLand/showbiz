@@ -1,43 +1,52 @@
 package com.flooferland.showbiz.blocks.entities
 
-import net.minecraft.core.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.entity.*
-import net.minecraft.world.level.block.state.*
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.registry.ModSounds
-import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
-import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import com.flooferland.showbiz.types.collidepart.CollidePartId
+import com.flooferland.showbiz.types.collidepart.CollidePartManager
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.utils.Sounds
+import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.NonNullList
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.Container
+import net.minecraft.world.ContainerHelper
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import software.bernie.geckolib.animatable.GeoBlockEntity
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 
-class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.ReelHolder.entityType!!, pos, state), Container, IModelPartInteractable, GeoBlockEntity {
+class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.ReelHolder.entityType!!, pos, state), Container, ICollidePartInteractable, GeoBlockEntity {
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) = Unit
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = cache
 
-    val inventory = Array<ItemStack>(7) { ItemStack.EMPTY }
+    override val collidePartInstance = CollidePartManager.create(this) {
+        (0..6).forEach { map("reel$it", CollidePartId.Kick) }
+    }
+
+    val inventory = NonNullList.withSize(7, ItemStack.EMPTY)!!
 
     fun tick(level: Level, pos: BlockPos, state: BlockState) {
-        modelPartInstance.tick(level, pos, state)
+        collidePartInstance.tick()
     }
 
     override fun setRemoved() {
         super.setRemoved()
-        modelPartInstance.kill()
+        collidePartInstance.kill()
     }
 
-    override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelHolder)
     override fun getInteractionMapping() = hashMapOf<String, Int>().also { map ->
-        (0..6).forEach { map["reels/reel$it"] = it }
+        (0..6).forEach { map["reel$it"] = it }
     }
 
     override fun getNameMapping() = hashMapOf<Int, String>().also { map ->
@@ -67,27 +76,38 @@ class ReelHolderBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModB
         Sounds.play(player, ModSounds.ReelPlay)
     }
 
+    override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        ContainerHelper.saveAllItems(tag, inventory, registries)
+    }
+
+    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        inventory.clear()
+        ContainerHelper.loadAllItems(tag, inventory, registries)
+    }
+
     // region | Container
     override fun getContainerSize() = inventory.size
     override fun getMaxStackSize() = 1
-    override fun isEmpty() = inventory.all { it.isEmpty }
-    override fun getItem(slot: Int) = inventory.getOrElse(slot) { ItemStack.EMPTY!! }
-    override fun canPlaceItem(slot: Int, stack: ItemStack) = (slot < containerSize) && stack.item is ReelItem
+    override fun isEmpty() =
+        inventory.all { it.isEmpty }
+    override fun getItem(slot: Int): ItemStack =
+        inventory.getOrElse(slot) { ItemStack.EMPTY!! }
+    override fun canPlaceItem(slot: Int, stack: ItemStack) =
+        (slot < containerSize) && stack.item is ReelItem
     override fun setItem(slot: Int, stack: ItemStack) {
-        if (!canPlaceItem(slot, stack)) return
         inventory[slot] = stack
+        stack.limitSize(getMaxStackSize(stack))
         setChanged()
     }
     override fun removeItem(slot: Int, amount: Int): ItemStack {
-        if (slot > containerSize) return ItemStack.EMPTY
-        if (amount == 0) return ItemStack.EMPTY
-        val item = inventory[slot].copy()
-        inventory[slot] = ItemStack.EMPTY
-        setChanged()
-        return item
+        val itemStack = ContainerHelper.removeItem(inventory, slot, amount)
+        if (!itemStack.isEmpty()) setChanged()
+        return itemStack
     }
-    override fun removeItemNoUpdate(slot: Int) = removeItem(slot, 1)
-    override fun stillValid(player: Player): Boolean = Container.stillValidBlockEntity(this, player)
+    override fun removeItemNoUpdate(slot: Int): ItemStack =
+        ContainerHelper.takeItem(inventory, slot);
+    override fun stillValid(player: Player): Boolean =
+        Container.stillValidBlockEntity(this, player)
     override fun clearContent() {
         inventory.fill(ItemStack.EMPTY)
         setChanged()

@@ -88,7 +88,6 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? ProgrammerBlockEntity)?.tick(level, pos, blockState) }
 
-
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
         val facing = state.getValue(FACING)
         return shapes.getCachedOrRotate(facing)

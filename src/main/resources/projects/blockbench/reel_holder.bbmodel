@@ -15,7 +15,7 @@
 	"unhandled_root_fields": {},
 	"geckolib_modid": "showbiz",
 	"geckolib_filepath_cache": {
-		"model": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\block\\reel_holder.geo.json",
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\block\\reel_holder.geo.json",
 		"display": "E:\\Minecraft Mods\\Showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\block\\reel_holder.json"
 	},
 	"resolution": {
@@ -813,6 +813,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -824,7 +825,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -836,6 +836,7 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -847,7 +848,6 @@
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -859,18 +859,18 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [6, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -882,18 +882,18 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [4, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -905,18 +905,18 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [2, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -928,18 +928,18 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [0, 1.64351, 1],
+			"origin": [0, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -951,21 +951,21 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [-2, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "reel5",
@@ -974,18 +974,18 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [-4, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
 			"primary_selected": false
@@ -997,20 +997,43 @@
 			"locked": false,
 			"scope": 0,
 			"selected": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
 			},
-			"origin": [6, 3, 1],
+			"origin": [-6, 0.03701, 1.55709],
 			"rotation": [0, 0, 0],
 			"color": 0,
 			"children": [],
 			"reset": false,
 			"shade": true,
 			"mirror_uv": false,
-			"visibility": true,
 			"autouv": 0,
 			"isOpen": true,
+			"primary_selected": false
+		},
+		{
+			"name": "body",
+			"uuid": "c2520ce3-e266-de14-7bbd-edc2de81d10c",
+			"export": true,
+			"locked": false,
+			"scope": 0,
+			"selected": false,
+			"visibility": true,
+			"_static": {
+				"properties": {},
+				"temp_data": {}
+			},
+			"origin": [0, 1.64351, 1],
+			"rotation": [0, 0, 0],
+			"color": 0,
+			"children": [],
+			"reset": false,
+			"shade": true,
+			"mirror_uv": false,
+			"autouv": 0,
+			"isOpen": false,
 			"primary_selected": false
 		}
 	],
@@ -1019,17 +1042,23 @@
 			"uuid": "c3b6af71-e74f-432e-012e-94918fa3f16f",
 			"isOpen": true,
 			"children": [
-				"40f00e3e-81ec-3e35-8dcf-0b7f42cdd831",
-				"cedc151c-a4ab-6faa-9e7e-64a5a775396d",
-				"26c4424a-5186-0ebc-d862-23b29a7db0f3",
-				"35d38c6e-77c9-93f3-17e2-6a2af0b65feb",
-				"6adeb2ab-cbc0-7d93-2e24-80a800638cac",
-				"556a7b3d-5384-b6eb-7968-bd58e8210017",
-				"882af6b4-f16d-0836-1b23-0f6499175225",
-				"2b558988-b1e5-60e4-8de2-300d76ce8e0c",
-				"c951473d-d942-c877-e375-2f43b5c49167",
-				"bde1ba37-3065-22f6-0d59-d29b2e3b70d6",
-				"bff0f3c6-d8a9-2d8e-4e0a-b7967e9d5758",
+				{
+					"uuid": "c2520ce3-e266-de14-7bbd-edc2de81d10c",
+					"isOpen": false,
+					"children": [
+						"bff0f3c6-d8a9-2d8e-4e0a-b7967e9d5758",
+						"40f00e3e-81ec-3e35-8dcf-0b7f42cdd831",
+						"cedc151c-a4ab-6faa-9e7e-64a5a775396d",
+						"26c4424a-5186-0ebc-d862-23b29a7db0f3",
+						"35d38c6e-77c9-93f3-17e2-6a2af0b65feb",
+						"6adeb2ab-cbc0-7d93-2e24-80a800638cac",
+						"556a7b3d-5384-b6eb-7968-bd58e8210017",
+						"882af6b4-f16d-0836-1b23-0f6499175225",
+						"2b558988-b1e5-60e4-8de2-300d76ce8e0c",
+						"c951473d-d942-c877-e375-2f43b5c49167",
+						"bde1ba37-3065-22f6-0d59-d29b2e3b70d6"
+					]
+				},
 				{
 					"uuid": "60f9bb9a-0652-fd9c-1703-6a1f7d1444b6",
 					"isOpen": true,
@@ -1097,6 +1126,7 @@
 			"wrap_mode": "limited",
 			"pbr_channel": "color",
 			"fps": 7,
+			"force_translucent": false,
 			"frame_time": 1,
 			"frame_order_type": "loop",
 			"frame_order": "",

@@ -67,10 +67,9 @@ class StagedBotBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         decor?.tick(this)
         soundHandler?.tick(this)
 
-        val id = OwnerId.of(this)
-        if (id != null) collidePartInstance.tick(level, id)
+        collidePartInstance.tick()
         if (botId != prevBotId) {
-            if (id != null) collidePartInstance.refresh(level, id)
+            collidePartInstance.refresh()
             prevBotId = botId
         }
     }

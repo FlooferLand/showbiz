@@ -1,8 +1,5 @@
 package com.flooferland.showbiz.types.collidepart
 
-import net.minecraft.world.level.*
-import com.flooferland.showbiz.types.OwnerId
-
 /** Responsible for initializing parts */
 object CollidePartManager {
     var clientInstancer: (ICollidePartInteractable) -> IInstance? = { _ -> null }
@@ -16,7 +13,8 @@ object CollidePartManager {
         )
 
     interface IInstance {
-        fun tick(level: Level, ownerId: OwnerId) {}
-        fun refresh(level: Level, ownerId: OwnerId) {}
+        fun tick() {}
+        fun kill() {}
+        fun refresh() {}
     }
 }

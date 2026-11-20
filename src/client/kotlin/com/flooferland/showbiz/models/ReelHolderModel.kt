@@ -9,7 +9,7 @@ class ReelHolderModel : DefaultedBlockGeoModel<ReelHolderBlockEntity>(rl("reel_h
     override fun setCustomAnimations(animatable: ReelHolderBlockEntity, instanceId: Long, state: AnimationState<ReelHolderBlockEntity>) {
         animatable.inventory.forEachIndexed { slot, stack ->
             val bone = animationProcessor.getBone("reel$slot") ?: return@forEachIndexed
-            bone.isHidden = stack.isEmpty
+            bone.isHidden = false // stack.isEmpty
         }
     }
 }

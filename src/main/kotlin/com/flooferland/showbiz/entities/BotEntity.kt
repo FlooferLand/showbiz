@@ -102,10 +102,9 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
         }
 
         // Updating stuff when the bot switches
-        val id = OwnerId.of(this)
-        if (id != null) collidePartInstance.tick(level, id)
+        collidePartInstance.tick()
         if (botId != prevBotId || botVariant != prevBotVariant) {
-            if (id != null) collidePartInstance.refresh(level, id)
+            collidePartInstance.refresh()
             prevBotId = botId
             prevBotVariant = botVariant
         }

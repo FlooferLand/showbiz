@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types
 
+import com.flooferland.showbiz.types.collidepart.ICollidePartInteractable
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.light.ILightEmitter
 import com.flooferland.showbiz.utils.Extensions.getEntity
@@ -96,6 +97,7 @@ sealed class OwnerId() {
             else -> null
         }
         fun of(connectable: IConnectable) = ofAny(connectable)
+        fun ofPart(part: ICollidePartInteractable) = ofAny(part)
         fun ofLight(lightEmitter: ILightEmitter) = ofAny(lightEmitter)
         fun ofEntity(entity: Entity) = of(entity.uuid, if (entity.level().isClientSide) entity.id else null)
         fun ofEntity(entity: BlockEntity) = of(entity.blockPos)
