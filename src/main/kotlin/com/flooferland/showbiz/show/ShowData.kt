@@ -150,7 +150,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             // Reading video
             val videoPath = getShowVideo(path)
             if (videoPath != null) {
-                FFmpeg.init(silent = false)
+                FFmpeg.init(silent = true)
                 if (FFmpeg.localAvailable) Task.measured("Probing the video file") {
                     if (!isActive) return@launch
                     val result = runCatching {
