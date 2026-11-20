@@ -1,20 +1,32 @@
 package com.flooferland.showbiz.blocks
 
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.context.*
-import net.minecraft.world.level.*
-import net.minecraft.world.level.block.*
-import net.minecraft.world.level.block.state.*
-import net.minecraft.world.level.block.state.properties.*
-import net.minecraft.world.phys.*
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.datagen.blocks.CustomBlockModel
 import com.flooferland.showbiz.registry.ModBlocks
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.click
+import com.flooferland.showbiz.utils.Extensions.generateHorizontal
+import com.flooferland.showbiz.utils.Extensions.getCachedOrRotate
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.StateDefinition
+import net.minecraft.world.level.block.state.properties.BooleanProperty
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.BooleanOp
+import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.phys.shapes.Shapes
+import net.minecraft.world.phys.shapes.VoxelShape
+
 
 class MonitorBlock(props: Properties) : FacingEntityBlock(props) {
     override val codec = simpleCodec(::MonitorBlock)!!
@@ -65,7 +77,21 @@ class MonitorBlock(props: Properties) : FacingEntityBlock(props) {
         }
     }
 
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
+        val facing = state.getValue(FACING)
+        return shapes.getCachedOrRotate(facing)
+    }
+
     companion object {
+        val shapes: HashMap<Direction, VoxelShape> = run {
+            var shape = Shapes.empty()
+            shape = Shapes.join(shape, Shapes.box(0.203125, 0.160846875, 0.267628125, 0.803125, 0.668346875, 0.915128125), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.103125, 0.09999999999999998, 0.090625, 0.903125, 0.8, 0.390625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.198125, 0.0, 0.390625, 0.808125, 0.2, 0.863125), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.103125, 0.0, 0.190625, 0.903125, 0.1, 0.390625), BooleanOp.OR);
+            shape = Shapes.join(shape, Shapes.box(0.205625, 0.2, 0.765625, 0.800625, 0.5025, 0.990625), BooleanOp.OR);
+            shape.generateHorizontal()
+        }
         val HANGED = BooleanProperty.create("hanged")!!
     }
 }
