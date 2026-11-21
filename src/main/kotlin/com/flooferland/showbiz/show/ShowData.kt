@@ -301,6 +301,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         videoInputInfo = null
         video?.close()
         video = null
+
+        owner.setChanged()
         //System.gc()
     }
 }

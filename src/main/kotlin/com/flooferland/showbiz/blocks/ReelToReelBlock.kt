@@ -81,12 +81,12 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                 // Adding a reel
                 val filename = ReelItem.getFilename(heldStack) ?: ""
                 if (filename.isNotEmpty()) {
-                    player.displayClientMessage(Component.literal("Loading.."), true)
                     sounds.play(ModSounds.ReelEnter)
 
                     // Playback
                     if (player is ServerPlayer) {
                         player.setItemInHand(hand, Items.AIR.defaultInstance)
+                        player.setInventoryChanged()
                         entity.resetPlayback()
                     }
                     entity.loadShow(heldStack) { data ->
@@ -114,7 +114,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
             level.setBlockAndUpdate(pos, state.setValue(PLAYING, false))
         } else if (player is ServerPlayer && Permissions.ControlPlayback.testAndNotify(player)) {
             // Pausing / unpausing
-            if (!entity.showData.isNotLoaded()) {
+            if (!entity.isEmpty) {
                 var paused = entity.paused
 
                 entity.applyChange(true) {
@@ -133,7 +133,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                     sounds.play(ModSounds.ReelPlay, volume = 0.5f, pitch = 0.8f)
                 return ItemInteractionResult.SUCCESS
             } else {
-                sounds.play(ModSounds.ReelPlay, volume = 0.4f, pitch = 0.4f)
+                sounds.play(ModSounds.ReelPlay, volume = 0.6f, pitch = 0.2f)
             }
         }
         return ItemInteractionResult.SUCCESS

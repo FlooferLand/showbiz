@@ -2,6 +2,7 @@ package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.Permissions
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.ReelToReelBlock.Companion.PLAYING
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.network.packets.ShowPlaybackStatePacket
@@ -26,6 +27,7 @@ import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
 import com.flooferland.showbiz.utils.Extensions.removeIfPresent
 import com.flooferland.showbiz.utils.Extensions.secsToTicks
 import com.flooferland.showbiz.utils.Extensions.toShortString
+import com.flooferland.showbiz.utils.Extensions.toTicks
 import com.flooferland.showbiz.utils.Sounds
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.ChatFormatting
@@ -73,11 +75,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
     }
 
+    val unloadTime: Long
+        get() = if (showData.loading) -1L else 10.seconds.toTicks()
+
     val aFrameMs: Int
         get() = 200
     val aBufferSize: Int
         get() {
-            val format = getFormat()
+            val format = showData.format ?: showData.targetFormat
             val frameSize = format.frameSize
             val bytes = (format.sampleRate * aFrameMs / 1_000).toInt()
             return bytes - (bytes % frameSize)
@@ -106,6 +111,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private val recordQueue = mutableListOf<SignalFrame>()
     private var lastPlaybackNanos = 0L
     private var lastPlaybackClockEpoch = playbackClockEpoch
+    private var ticksSinceInteract = 0L  // Used for unloading shows on inactivity
 
     override val modelPartInstance = ModelPartManager.create(this, ModBlocks.ReelToReel) {
         addPart("record", Vec3(-0.28, 0.35, -0.2), Vec3(0.08, 0.08, 0.13))
@@ -122,6 +128,18 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (stateDirty) {
             updateState()
             stateDirty = false
+        }
+
+        // Unloading inactive shows
+        if (level is ServerLevel) {
+            if (showData.isLoaded && ticksSinceInteract > unloadTime) {
+                Showbiz.log.info("Unloaded show $blockPos out of inactivity")
+                showData.unload()
+                resetInactivity()
+                markDirtyNotifyAll()
+                return
+            }
+            ticksSinceInteract += 1
         }
 
         // Loading the show
@@ -198,9 +216,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             show.send(PackedShowData(outPlaying, signal, outMapping))
         }
 
-        if (runningShow) {
+        if (runningShow) run {
+            resetInactivity()
+
             // Audio
-            val format = getFormat()
+            val format = showData.format ?: return@run
             val frameSize = format.frameSize
             val targetBytes = (seek * format.sampleRate * frameSize).toInt()
             val lookaheadBytes = format.sampleRate.toInt() * frameSize / 2
@@ -275,7 +295,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
-        val format = getFormat()
+        val format = showData.format ?: return
         audio.data.mono = chunk
         audio.data.chunkId++
         audio.data.lead = startIndex.toDouble() / (format.sampleRate * format.frameSize) - seek
@@ -286,13 +306,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun setPlaying(playing: Boolean) {
         if (this.playing == playing) return
         this.playing = playing
+        if (playing && showData.isNotLoaded() && !inputItem.isEmpty) {
+            loadShow(inputItem) { setPlaying(true) }
+            return
+        }
+
         if (!playing) {
             resetPlayback()
         } else if (paused) {
             setPaused(false)
         }
+
         show.send(PackedShowData(playing, signal, showData.mapping))
         audio.sendTrigger(if (playing) PackedAudioData.Action.None else PackedAudioData.Action.Stop)
+        resetInactivity()
         stateDirty = true
         lastPlaybackNanos = 0
     }
@@ -300,8 +327,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (this.paused == paused) return
         this.playing = !paused
         this.paused = paused
+        if (!paused && showData.isNotLoaded() && !inputItem.isEmpty) {
+            loadShow(inputItem) { setPaused(false) }
+            return
+        }
+
         show.send(PackedShowData(playing, signal, showData.mapping))
         audio.sendTrigger(if (paused) PackedAudioData.Action.Pause else PackedAudioData.Action.Unpause)
+        resetInactivity()
         stateDirty = true
         lastPlaybackNanos = 0
     }
@@ -310,13 +343,15 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         seekInt = (seek * fps).toInt()
         lastPlaybackNanos = 0L
 
-        val format = getFormat()
-        val alignedBytes = (seek * format.sampleRate).toLong() * format.frameSize
-        audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+        showData.format?.let { format ->
+            val alignedBytes = (seek * format.sampleRate).toLong() * format.frameSize
+            audioBytesWritten = alignedBytes.coerceIn(0L, showData.audio.size.toLong()).toInt()
+        }
 
         showData.video?.let { lastVideoFrameIndex = (seek * it.output.fps).toInt() - 1 }
         showData.video?.seek(seek.seconds)
         audio.sendTrigger(PackedAudioData.Action.Stop)
+        resetInactivity()
         stateDirty = true
     }
     fun resetPlayback() {
@@ -354,6 +389,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         val state = blockState.setValue(PLAYING, playing && !paused)
         level?.setBlockAndUpdate(blockPos, state)
         level?.updateNeighborsAt(blockPos, state.block)
+        resetInactivity()
         setChanged()
 
         // TODO: Find only near players
@@ -364,7 +400,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
     }
 
-    fun getFormat() = showData.format ?: showData.targetFormat
+    fun resetInactivity() {
+        ticksSinceInteract = 0L
+    }
 
     override fun getInteractionMapping() = mapOf(
         "record" to 0,
@@ -381,6 +419,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
         val sounds = Sounds.player(player)
+        resetInactivity()
         when (key) {
             0 -> { // Record
                 if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
@@ -482,6 +521,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
         inputItem = stack
         showData.loading = true
+        resetInactivity()
         markDirtyNotifyAll()
 
         if (level !is ServerLevel) return
@@ -492,6 +532,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 nearby.forEach { it.displayClientMessage(err, true) }
             }
             block(data)
+            resetInactivity()
             markDirtyNotifyAll()
         }
     }

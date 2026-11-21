@@ -23,8 +23,6 @@ import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.Items
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import kotlin.math.abs
-import kotlin.math.round
 import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
@@ -35,14 +33,10 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         val reelStack = entity.getItem(0)
 
         // Time
-        val delta = (ShowbizClient.getDeltaTime() * 0.1).coerceIn(0.0, 1.0)
-        val target = if (entity.playing) entity.seek * 200.0 else round(entity.clientSeek / 360.0) * 360.0
+        val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
+        val target = entity.seek * 200.0
         if (!minecraft.isPaused) {
             entity.clientSeek = lerp(entity.clientSeek, target, delta)
-
-            // Resetting for long shows cuz number overflow
-            if (abs(entity.clientSeek - target) < 0.05)
-                entity.clientSeek = 0.0
         }
 
         val rotationAngle = entity.clientSeek.toFloat()
@@ -83,8 +77,8 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
 
         // Rendering the reel bands
         // NOTE: Innacurate, reel to reels have the reels going to separate reel pickup points, not to each-other
-        /*if (entity.show.isLoaded) run {
-            val reelBand = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("gray_concrete"), "inventory")) ?: return@run
+        /*if (!entity.isEmpty) runCatching {
+            val reelBand = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("black_concrete"), "inventory")) ?: return@runCatching
             for (i in 0..1) {
                 val offset = if (i == 0) 0.9 else 0.55
                 poseStack.pushPose()
@@ -139,10 +133,11 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
                 showText.append(Component.literal(entity.showData.progressText.ifEmpty { ".." }).withStyle(ChatFormatting.GRAY))
             } else if (!reelStack.isEmpty) {
                 val filename = ReelItem.getFilename(reelStack) ?: reelStack.displayName.string
+                val format = if (entity.showData.isLoaded) ChatFormatting.WHITE else ChatFormatting.GRAY
                 if (!filename.contains('.')) {
-                    showText.append(Component.literal(filename))
+                    showText.append(Component.literal(filename).withStyle(format))
                 } else {
-                    showText.append(Component.literal(filename.substringBeforeLast('.')))
+                    showText.append(Component.literal(filename.substringBeforeLast('.')).withStyle(format))
                     if (minecraft.player?.isCrouching ?: false) {
                         showText.append(Component.literal('.' + filename.substringAfterLast('.')).withStyle(ChatFormatting.GRAY))
                     }

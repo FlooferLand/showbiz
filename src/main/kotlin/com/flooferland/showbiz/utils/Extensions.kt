@@ -36,10 +36,11 @@ import java.util.*
 import kotlin.enums.enumEntries
 import kotlin.io.path.Path
 import kotlin.io.path.name
-import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 
 @Suppress("unused")
@@ -222,9 +223,10 @@ object Extensions {
     //endregion
 
     // region Number conversion funkiness
-    fun Int.secsToTicks(): Int = this * 20
-    fun Float.secsToTicks(): Int = (this * 20).roundToInt()
-    fun Double.secsToTicks(): Int = (this * 20).roundToInt()
+    fun Int.secsToTicks(): Long = this * 20L
+    fun Float.secsToTicks(): Long = (this * 20).roundToLong()
+    fun Double.secsToTicks(): Long = (this * 20).roundToLong()
+    fun Duration.toTicks(): Long = this.toDouble(DurationUnit.SECONDS).secsToTicks()
 
     fun Int.bytesToFriendlySize() = this.toLong().bytesToFriendlySize()
     fun Long.bytesToFriendlySize(): String {
