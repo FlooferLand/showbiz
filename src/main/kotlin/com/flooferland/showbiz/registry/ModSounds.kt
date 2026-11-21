@@ -6,6 +6,8 @@ import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /// NOTE: Data generator should be called after adding new sounds here
 enum class ModSounds {
@@ -27,14 +29,16 @@ enum class ModSounds {
     Honk("honk"),
     HonkBye("honk_bye"),
     DoorOpen("door_open"),
-    DoorClose("door_close")
+    DoorClose("door_close"),
+    AmbientArtifact("artifact", folder = "ambient", length = 25.seconds)
     ;
 
-    constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), procedural: Boolean = false) {
+    constructor(name: String, folder: String? = null, sounds: Array<String> = arrayOf(name), length: Duration? = null, procedural: Boolean = false) {
         this.id = rl(if (folder == null) name else "$folder.$name")
         this.event = SoundEvent.createVariableRangeEvent(this.id)
         this.sounds = sounds.map { rl(it) }.toTypedArray()
         this.folder = folder
+        this.length = length
         this.procedural = procedural
         Registry.register(BuiltInRegistries.SOUND_EVENT, this.id, this.event)
     }
@@ -43,6 +47,7 @@ enum class ModSounds {
     val event: SoundEvent
     val sounds: Array<ResourceLocation>
     val folder: String?
+    val length: Duration?
     val procedural: Boolean
 
     companion object {

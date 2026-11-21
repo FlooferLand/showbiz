@@ -6,10 +6,7 @@ import com.flooferland.showbiz.addons.data.AddonDataReloadListener
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.network.packets.*
 import com.flooferland.showbiz.registry.*
-import com.flooferland.showbiz.types.BitChartStore
-import com.flooferland.showbiz.types.FFmpeg
-import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.types.VersionMigrator
+import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.connection.ServerConnections
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.utils.ShowbizEnv
@@ -73,6 +70,7 @@ object Showbiz : ModInitializer {
             ServerPackets.init()
             ServerStats.init()
             VersionMigrator.register()
+            AmbientSoundPlayer.register()
         }
 
         // Services

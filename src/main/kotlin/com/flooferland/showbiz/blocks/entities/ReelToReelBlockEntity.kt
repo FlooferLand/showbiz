@@ -12,6 +12,7 @@ import com.flooferland.showbiz.show.BitIdArray
 import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
+import com.flooferland.showbiz.types.AmbientSoundPlayer
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
@@ -121,10 +122,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var audioBytesWritten = 0
     private var stateDirty = false
     private var inputItem: ItemStack = ItemStack.EMPTY
+    val ambient = AmbientSoundPlayer(this, ModSounds.AmbientArtifact) {
+        trigger { isCave() && !showData.isLoaded && !playing }
+    }
 
     fun tick() {
         val level = level ?: return
         modelPartInstance.tick(level, blockPos, blockState)
+        ambient.tick()
         if (stateDirty) {
             updateState()
             stateDirty = false
@@ -289,6 +294,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     override fun setRemoved() {
         super.setRemoved()
         modelPartInstance.kill()
+        ambient.remove()
         if (level is ServerLevel) {
             showData.unload()
         }

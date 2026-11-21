@@ -55,7 +55,7 @@ enum class ModMusicDiscs(val key: String, val title: String, val length: Duratio
             .jukeboxPlayable(ResourceKey.create(Registries.JUKEBOX_SONG, id))
             .component(DataComponents.RARITY, Rarity.RARE)
     )
-    val lyrics = lyrics.mapKeys { it.key.toDouble(DurationUnit.SECONDS).secsToTicks().toLong() }
+    val lyrics = lyrics.mapKeys { it.key.toDouble(DurationUnit.SECONDS).secsToTicks() }
 
     init {
         Registry.register(BuiltInRegistries.SOUND_EVENT, id, event)
