@@ -76,6 +76,7 @@ object ShowbizClient : ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(ModelPartReloadListener)
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(HandbookReloadListener)
         run {
+            ModClientModels.register()
             ModPackets.register()
             ModClientEntities.register()
             ModClientInput.register()

@@ -1,12 +1,16 @@
 package com.flooferland.showbiz.utils
 
+import net.minecraft.client.Minecraft
+import net.minecraft.client.resources.model.BakedModel
 import net.minecraft.world.phys.Vec3
-import com.flooferland.showbiz.utils.Extensions.divide
 import org.joml.Matrix4f
 import org.joml.Vector4f
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
+    fun BakedModel?.isMissing(): Boolean =
+        this == null || this == Minecraft.getInstance().modelManager.missingModel
+
     fun GeoBone.calculateBounds(): Vec3 =
         calculateBounds { it.worldSpaceMatrix }
 

@@ -4,6 +4,7 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
+import com.flooferland.showbiz.registry.ModClientModels
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.Extensions.toShortString
 import com.flooferland.showbiz.utils.lerp
@@ -102,16 +103,19 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         for (i in 0..1) {
             val offset = if (i == 0) 1f else -1f
             runCatching {
-                val model = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(ModItems.Reel.id, "inventory")) ?: return@runCatching
+                var model = ModClientModels.ReelClean.getModel()
+                if (model == null) model = ModClientModels.Reel.getModel()
+                if (model == null) return@runCatching
+
                 val stack = if (i == 0) reelStack else ModItems.Reel.item.defaultInstance
                 if (stack.isEmpty) return@runCatching
 
                 poseStack.pushPose()
-                poseStack.translate(0.5 + (offset * 0.28), 0.715, 0.58)
+                poseStack.translate(0.5 + (offset * 0.28), 0.715, 0.565)
                 poseStack.scale(0.6f, 0.6f, 0.6f)
                 poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(0f, 0f, 1f), -rotationAngle))
                 poseStack.mulPose(Quaternionf().fromAxisAngleDeg(Vector3f(1f, 0f, 0f), 90.0f))
-                Minecraft.getInstance().itemRenderer.render(
+                minecraft.itemRenderer.render(
                     stack,
                     ItemDisplayContext.NONE,
                     false,
