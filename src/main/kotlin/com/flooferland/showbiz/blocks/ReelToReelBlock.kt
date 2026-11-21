@@ -93,7 +93,6 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
                         if (data != null) {
                             sounds.play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
                         }
-                        player.displayClientMessage(Component.empty(), true)
                         player.setInventoryChanged()
                     }
                 } else {

@@ -76,7 +76,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     val unloadTime: Long
-        get() = if (showData.loading) -1L else 10.seconds.toTicks()
+        get() = if (showData.loading) -1L else 40.seconds.toTicks()
 
     val aFrameMs: Int
         get() = 200
@@ -373,7 +373,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
         showData.video = null
         stateDirty = true
-        setChanged()
     }
     /** Client-side only !! */
     fun clientApplyPlaybackState(packet: ShowPlaybackStatePacket) {
@@ -534,6 +533,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             block(data)
             resetInactivity()
             markDirtyNotifyAll()
+            stateDirty = true
         }
     }
 

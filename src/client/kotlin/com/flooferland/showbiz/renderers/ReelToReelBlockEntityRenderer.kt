@@ -79,10 +79,10 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         // NOTE: Innacurate, reel to reels have the reels going to separate reel pickup points, not to each-other
         /*if (!entity.isEmpty) runCatching {
             val reelBand = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("black_concrete"), "inventory")) ?: return@runCatching
-            for (i in 0..1) {
-                val offset = if (i == 0) 0.9 else 0.55
+            run {
                 poseStack.pushPose()
-                poseStack.translate(0.5, offset, 0.3)
+                poseStack.translate(0.5, 0.4, 0.3)
+                poseStack.mulPose(Axis.ZP.rotationDegrees(25f))
                 poseStack.scale(0.5f, 0.01f, 0.038f)
                 Minecraft.getInstance().itemRenderer.render(
                     Items.GRAY_CONCRETE.defaultInstance,
