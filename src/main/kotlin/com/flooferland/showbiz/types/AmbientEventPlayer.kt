@@ -14,7 +14,7 @@ import net.minecraft.world.level.entity.EntityTypeTest
 import net.minecraft.world.phys.AABB
 import kotlin.time.Duration
 
-class AmbientSoundPlayer(val entity: BlockEntity, val sound: ModSounds, val block: Context.() -> Unit) {
+class AmbientEventPlayer(val entity: BlockEntity, val sound: ModSounds, val block: Context.() -> Unit) {
     private val triggerCtx = TriggerContext()
     private val ctx = Context()
 
@@ -42,6 +42,15 @@ class AmbientSoundPlayer(val entity: BlockEntity, val sound: ModSounds, val bloc
         fun start(block: () -> Unit) { start = block }
         fun update(block: () -> Unit) { update = block }
         fun end(block: () -> Unit) { end = block }
+
+        fun getSpookers(): List<BotEntity> {
+            val level = entity.level as? ServerLevel ?: return emptyList()
+            val blockPos = entity.blockPos ?: return emptyList()
+            val bounds = AABB.ofSize(blockPos.center, 20.0, 20.0, 20.0)
+            return level.getEntities(EntityTypeTest.forClass(BotEntity::class.java), bounds) { entity ->
+                entity.botId?.path == "singing_clergyman"
+            }
+        }
     }
 
     inner class TriggerContext() {
@@ -55,13 +64,7 @@ class AmbientSoundPlayer(val entity: BlockEntity, val sound: ModSounds, val bloc
             return blockPos.y < -20 && isDark()
         }
         fun isSpookerNear(): Boolean {
-            val level = entity.level as? ServerLevel ?: return false
-            val blockPos = entity.blockPos ?: return false
-            val bounds = AABB.ofSize(blockPos.center, 10.0, 10.0, 10.0)
-            val spookers = level.getEntities(EntityTypeTest.forClass(BotEntity::class.java), bounds) { entity ->
-                entity.botId?.path == "singing_clergyman"
-            }
-            return spookers.isNotEmpty()
+            return ctx.getSpookers().isNotEmpty()
         }
         fun isCave(): Boolean {
             val level = entity.level as? ServerLevel ?: return false
@@ -125,10 +128,10 @@ class AmbientSoundPlayer(val entity: BlockEntity, val sound: ModSounds, val bloc
     }
 
     companion object {
-        val entities = mutableMapOf<BlockEntity, MutableSet<AmbientSoundPlayer>>()
+        val entities = mutableMapOf<BlockEntity, MutableSet<AmbientEventPlayer>>()
 
         fun register() {
-            AmbientSoundPlayer::class.forceLoad()
+            AmbientEventPlayer::class.forceLoad()
             ServerBlockEntityEvents.BLOCK_ENTITY_LOAD.register { entity, level -> }
             ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register { entity, level ->
                 val sounds = entities[entity] ?: return@register

@@ -9,6 +9,7 @@ import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.AddonBot
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.addons.data.ChainLayout
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateAnimation
 import com.flooferland.showbiz.models.CymbalModel.Companion.updateState
 import com.flooferland.showbiz.models.CymbalModel.CymbalState
@@ -24,7 +25,9 @@ import com.flooferland.showbiz.types.physics.ChainRig
 import com.flooferland.showbiz.types.physics.ChainSolver
 import com.flooferland.showbiz.types.physics.DynBone
 import com.flooferland.showbiz.types.pneumatic.PneumaticValve
+import com.flooferland.showbiz.utils.ClientExtensions.getBoneCaseInsensitive
 import com.mojang.blaze3d.Blaze3D
+import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
@@ -33,6 +36,8 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.block.entity.BlockEntity
+import org.joml.Quaternionf
+import org.joml.Vector3f
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animatable.stateless.StatelessAnimationController
 import software.bernie.geckolib.animation.AnimatableManager
@@ -62,6 +67,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         var dynBonesFor: Map<String, DynBone.Params>? = null
     }
 
+    val headBoneNames = arrayOf("head", "neck")
     var triggeredBadAnimationError = false
 
     override fun setCustomAnimations(animatable: T, instanceId: Long, state: AnimationState<T>) {
@@ -228,6 +234,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         }
 
         poseBits(bitmapBits, storage, model) { it.drawn(alpha) }
+        poseEasterEgg(animatable, delta)
         for (dynBone in storage.dynBones) dynBone.draw(animationProcessor::getBone, alpha)
     }
 
@@ -296,6 +303,29 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 bone.posZ += move.target.z.toFloat() * eased
             }
         }
+    }
+
+    private fun poseEasterEgg(animatable: T, delta: Float) {
+        val entity = animatable as? BotEntity ?: return
+        if (entity.strangeEvent <= 0) return
+
+        val minecraft = Minecraft.getInstance() ?: return
+        val partialTicks = minecraft.timer.gameTimeDeltaTicks
+        val player = minecraft.player ?: return
+
+        val head = arrayOf("neck", "head").firstNotNullOfOrNull { animationProcessor.getBoneCaseInsensitive(it) }
+        val body = arrayOf("body", "root").firstNotNullOfOrNull { animationProcessor.getBoneCaseInsensitive(it) }
+
+        val eyes = player.getEyePosition(partialTicks)
+        val origin = entity.eyePosition
+        val target = Vector3f((eyes.x - origin.x).toFloat(), (eyes.y - origin.y).toFloat(), (eyes.z - origin.z).toFloat()).normalize()
+
+        val euler = Quaternionf()
+            .rotationTo(Vector3f(0f, 0f, 1f), target)
+            .getEulerAnglesYXZ(Vector3f())
+        head?.rotY = euler.y * 0.5f
+        head?.rotX = -euler.x
+        body?.rotY = (entity.yRot * Mth.DEG_TO_RAD) + (euler.y * 0.5f)
     }
 
     private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {

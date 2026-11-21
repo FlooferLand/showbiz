@@ -20,6 +20,7 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.nbt.CompoundTag
@@ -73,6 +74,11 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             field = value
             if (level() is ServerLevel) updatePersistentData { it.putString("bot_variant", value) }
         }
+    var strangeEvent = 0
+        set(value) {
+            field = value
+            if (level() is ServerLevel) updatePersistentData { it.putInt("strange_event", value) }
+        }
 
     override val collidePartInstance = CollidePartManager.create(this) {
         bonePrepare(this, this@BotEntity)
@@ -93,12 +99,14 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     override fun tick() {
         super.tick()
         val level = level() ?: return
+
         decor?.tick(this)
         soundHandler?.tick(this)
         if (!level.isClientSide) {
             show.data.tempReset()
             show.data.merge(pendingShow)
             pendingShow.tempReset()
+            if (strangeEvent > 0) strangeEvent -= 1
         }
 
         // Updating stuff when the bot switches
@@ -142,12 +150,16 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     override fun addAdditionalSaveData(tag: CompoundTag) {
         tag.putString("bot_id", botId?.toString() ?: "")
         tag.putString("bot_variant", botVariant)
+        tag.putInt("strange_event", strangeEvent)
+
         super.addAdditionalSaveData(tag)
         connectionManager.save(tag)
     }
     override fun readAdditionalSaveData(tag: CompoundTag) {
-        botId = tag.getStringOrNull("bot_id")?.let { if (it.isNotBlank()) ResourceId.of(it) else null }
-        tag.getStringOrNull("bot_variant")?.let { if (it.isNotBlank()) botVariant = it }
+        botId = tag.getStringOrNull("bot_id")?.ifBlank { null }?.let { ResourceId.of(it) }
+        botVariant = tag.getStringOrNull("bot_variant")?.ifBlank { null } ?: IBot.DEFAULT_VARIANT
+        strangeEvent = tag.getIntOrNull("strange_event") ?: 0
+
         super.readAdditionalSaveData(tag)
         connectionManager.load(tag)
     }

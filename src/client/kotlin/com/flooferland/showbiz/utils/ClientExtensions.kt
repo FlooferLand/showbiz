@@ -5,11 +5,15 @@ import net.minecraft.client.resources.model.BakedModel
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.joml.Vector4f
+import software.bernie.geckolib.animation.AnimationProcessor
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
     fun BakedModel?.isMissing(): Boolean =
         this == null || this == Minecraft.getInstance().modelManager.missingModel
+
+    fun AnimationProcessor<*>.getBoneCaseInsensitive(boneName: String): GeoBone? =
+        registeredBones.firstOrNull { it.name.equals(boneName, ignoreCase = true) }
 
     fun GeoBone.calculateBounds(): Vec3 =
         calculateBounds { it.worldSpaceMatrix }

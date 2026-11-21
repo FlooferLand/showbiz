@@ -70,7 +70,7 @@ object Showbiz : ModInitializer {
             ServerPackets.init()
             ServerStats.init()
             VersionMigrator.register()
-            AmbientSoundPlayer.register()
+            AmbientEventPlayer.register()
         }
 
         // Services
