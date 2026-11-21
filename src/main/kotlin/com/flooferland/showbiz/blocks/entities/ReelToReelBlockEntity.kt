@@ -51,6 +51,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(ModBlocks.ReelToReel.entityType!!, pos, blockState), IConnectable, WorldlyContainer, IModelPartInteractable {
@@ -123,7 +124,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     private var stateDirty = false
     private var inputItem: ItemStack = ItemStack.EMPTY
     val ambient = AmbientSoundPlayer(this, ModSounds.AmbientArtifact) {
-        trigger { isCave() && !showData.isLoaded && !playing }
+        every(2.hours to 12.hours)
+        trigger { (isCave() || isSpookerNear()) && !showData.isLoaded && !playing }
+        update { seek += 0.1; stateDirty = true }
+        end { seek = 0.0 }
     }
 
     fun tick() {
