@@ -18,6 +18,7 @@ import net.minecraft.network.protocol.common.ClientboundDisconnectPacket
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.level.block.entity.BlockEntity
+import java.time.Instant
 
 /** Prevents Fabric's broken as hell packet system from silently not registering receivers on the same packet */
 object ServerPackets {
@@ -78,6 +79,25 @@ object ServerPackets {
 
         ServerPackets.listen(ClientCapabilitiesPacket.type) { packet, ctx ->
             val player = ctx.player() ?: return@listen
+
+            // Build
+            runCatching {
+                if (packet.buildStamp == 0L || UpdateChecker.buildStamp == 0L) {
+                    Showbiz.log.warn("Build timestamps are empty (client=${packet.buildStamp}, server=${UpdateChecker.buildStamp})")
+                    return@runCatching
+                }
+                val clientTime = Instant.ofEpochSecond(packet.buildStamp)
+                val serverTime = Instant.ofEpochSecond(UpdateChecker.buildStamp)
+                if (serverTime != clientTime && serverTime.isAfter(clientTime)) {
+                    val reason = Component.literal("The Showbiz mod is out of date.\n\n")
+                        .append(Component.literal("Your version was built on $clientTime\n"))
+                        .append(Component.literal("Server version was built on $serverTime"))
+                    player.connection.send(ClientboundDisconnectPacket(reason))
+                    return@listen
+                }
+            }
+
+            // Addons
             val playerAddons = packet.addons
             for ((addonId, addon) in Showbiz.addons) {
                 // Checking presence

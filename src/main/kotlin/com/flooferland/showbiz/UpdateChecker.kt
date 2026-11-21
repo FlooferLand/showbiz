@@ -30,14 +30,15 @@ object UpdateChecker {
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build()
 
+    var buildStamp = 0L
     var currentVersion: String = "0.0.0"
     var newerVersion: String? = null
 
     fun register() {
-        currentVersion = FabricLoader.getInstance()
-            .getModContainer(Showbiz.MOD_ID)
-            .map { container -> container.metadata.version.friendlyString }
-            .getOrNull() ?: currentVersion
+        val mod = FabricLoader.getInstance().getModContainer(Showbiz.MOD_ID).getOrNull() ?: return
+
+        buildStamp = mod.metadata.getCustomValue("showbiz:buildStamp")?.asString?.toLongOrNull() ?: 0L
+        currentVersion = mod.metadata.version.friendlyString
     }
 
     fun isEnabled() =

@@ -14,7 +14,7 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
-data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<String, SemVer?>) : CustomPacketPayload {
+data class ClientCapabilitiesPacket(val buildStamp: Long = 0L, val config: ModConfig, val addons: Map<String, SemVer?>) : CustomPacketPayload {
     override fun type() = type
 
     companion object {
@@ -26,6 +26,8 @@ data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<Strin
         val type = CustomPacketPayload.Type<ClientCapabilitiesPacket>(rl("client_capabilities"))
         val codec = StreamCodec.of<FriendlyByteBuf, ClientCapabilitiesPacket>(
             { buf, packet ->
+                buf.writeLong(packet.buildStamp)
+
                 // Saving the config
                 val config = runCatching { toml.encodeToString(packet.config) }.getOrNull()
                 buf.writeBoolean(config != null)
@@ -44,8 +46,10 @@ data class ClientCapabilitiesPacket(val config: ModConfig, val addons: Map<Strin
                 )
             },
             { buf ->
+                val buildNumber = buf.readLong()
                 val config = if (buf.readBoolean()) toml.decodeFromString<ModConfig>(buf.readUtf()) else null
                 ClientCapabilitiesPacket(
+                    buildStamp = buildNumber,
                     config = config ?: Showbiz.config.clone(),
                     addons = buf.readMap({ it.readUtf() }, { buf -> if (buf.readBoolean()) SemVer(buf.readUtf()) else null })
                 )

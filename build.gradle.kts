@@ -4,6 +4,7 @@ import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.awt.Desktop
+import java.time.Instant
 
 fun vers(name: String): String = project.property("vers.${name}") as String
 fun dep(name: String): String = project.property("deps.${name}") as String
@@ -247,7 +248,8 @@ tasks.withType<ProcessResources>().configureEach {
         "irlights" to irlights,
         "cctweaked" to dep("cctweaked"),
         "archivesName" to modId,
-        "archivesBaseName" to modId
+        "archivesBaseName" to modId,
+        "buildStamp" to Instant.now().epochSecond
     )
     properties.forEach() { (k, v) ->
         inputs.property(k, v)

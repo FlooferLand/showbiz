@@ -63,5 +63,8 @@
     "suggests": {
         "computercraft": ">=$cctweaked",
         "irl-redactor": "^$irlights"
+    },
+    "custom": {
+        "showbiz:buildStamp": "$buildStamp"
     }
 }

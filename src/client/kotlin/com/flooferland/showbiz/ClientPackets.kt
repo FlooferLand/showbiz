@@ -34,7 +34,7 @@ object ClientPackets {
     fun sendCapabilities() {
         val addons = ShowbizClient.addons.mapValues { (_, v) -> v.manifest?.addon?.version?.let { SemVer(it) } }
         if (ClientPlayNetworking.canSend(ClientCapabilitiesPacket.type)) {
-            ClientPlayNetworking.send(ClientCapabilitiesPacket(Showbiz.config, addons))
+            ClientPlayNetworking.send(ClientCapabilitiesPacket(UpdateChecker.buildStamp, Showbiz.config, addons))
         }
     }
 
