@@ -120,43 +120,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         driveChains(animatable, model, storage, bot)
     }
 
-    private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {
-        val layout = model.chainLayout
-        if (layout.size == 0) return
-        val tables = bot.physics?.chains ?: return
-        val poses = GeoWorkaroundRenderHook.lastPoses[animatable] ?: return
-        if (storage.chainsFor !== layout) {
-            storage.chains = ChainSolver.forTables(layout, tables)
-            storage.chainsFor = layout
-        }
-        val now = Blaze3D.getTime()
-        val last = storage.chainClock
-        storage.chainClock = now
-        if (last < 0.0) return
-        val delta = if (ShowbizClient.getDeltaTime() <= 0.001f) 0.001f else ((now - last) * 20.0).toFloat().coerceIn(0.001f, 1.25f)
-
-        for (solver in storage.chains) {
-            val members = solver.members
-            for (i in members.indices) solver.roots[i] = poses[layout.roots[members[i]]]
-            solver.frame(delta, { i -> ChainRig.length(layout.links[members[i]], poses) }, { i, k -> poses[layout.links[members[i]][k]] })
-
-            // Writing the bones
-            for (i in members.indices) {
-                val chain = solver.chains[i]
-                if (!chain.posed) continue
-                val links = layout.links[members[i]]
-                for (k in 0 until chain.links) {
-                    if (!chain.eulerOk[k]) continue
-                    val bone = animationProcessor.getBone(links[k]) ?: continue
-                    val rest = model.initBoneRots[links[k]] ?: continue
-                    bone.rotX = rest.x + chain.euler[k * 3]
-                    bone.rotY = rest.y + chain.euler[k * 3 + 1]
-                    bone.rotZ = rest.z + chain.euler[k * 3 + 2]
-                    bone.markRotationAsChanged()
-                }
-            }
-        }
-    }
     private fun driveCollideParts(animatable: T, model: BotModelData, storage: LocalBotStorage, partialTick: Float) {
         if (animatable !is ICollidePartInteractable) return
 
@@ -331,6 +294,44 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 bone.posX += move.target.x.toFloat() * eased
                 bone.posY += move.target.y.toFloat() * eased
                 bone.posZ += move.target.z.toFloat() * eased
+            }
+        }
+    }
+
+    private fun driveChains(animatable: T, model: BotModelData, storage: LocalBotStorage, bot: AddonBot) {
+        val layout = model.chainLayout
+        if (layout.size == 0) return
+        val tables = bot.physics?.chains ?: return
+        val poses = GeoWorkaroundRenderHook.lastPoses[animatable] ?: return
+        if (storage.chainsFor !== layout) {
+            storage.chains = ChainSolver.forTables(layout, tables)
+            storage.chainsFor = layout
+        }
+        val now = Blaze3D.getTime()
+        val last = storage.chainClock
+        storage.chainClock = now
+        if (last < 0.0) return
+        val delta = if (ShowbizClient.getDeltaTime() <= 0.001f) 0.001f else ((now - last) * 20.0).toFloat().coerceIn(0.001f, 1.25f)
+
+        for (solver in storage.chains) {
+            val members = solver.members
+            for (i in members.indices) solver.roots[i] = poses[layout.roots[members[i]]]
+            solver.frame(delta, { i -> ChainRig.length(layout.links[members[i]], poses) }, { i, k -> poses[layout.links[members[i]][k]] })
+
+            // Writing the bones
+            for (i in members.indices) {
+                val chain = solver.chains[i]
+                if (!chain.posed) continue
+                val links = layout.links[members[i]]
+                for (k in 0 until chain.links) {
+                    if (!chain.eulerOk[k]) continue
+                    val bone = animationProcessor.getBone(links[k]) ?: continue
+                    val rest = model.initBoneRots[links[k]] ?: continue
+                    bone.rotX = rest.x + chain.euler[k * 3]
+                    bone.rotY = rest.y + chain.euler[k * 3 + 1]
+                    bone.rotZ = rest.z + chain.euler[k * 3 + 2]
+                    bone.markRotationAsChanged()
+                }
             }
         }
     }
