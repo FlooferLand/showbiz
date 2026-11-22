@@ -204,7 +204,6 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 animManager?.let {
                     if (!animManager.animationControllers.contains(controllerKey)) {
                         val controller = StatelessAnimationController(animatable, controllerKey)
-                        controller.transitionLength(4)
                         controller.setSoundKeyframeHandler { state -> soundKeyframeHandler(animatable, state) }
                         animManager.addController(controller)
                     }

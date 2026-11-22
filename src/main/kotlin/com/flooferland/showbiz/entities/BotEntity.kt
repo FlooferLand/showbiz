@@ -8,10 +8,7 @@ import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.registry.ModLivingEntities
-import com.flooferland.showbiz.types.IBot
-import com.flooferland.showbiz.types.IBotAttachment
-import com.flooferland.showbiz.types.OwnerId
-import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartId
 import com.flooferland.showbiz.types.collidepart.CollidePartInstance
 import com.flooferland.showbiz.types.collidepart.CollidePartManager
@@ -20,6 +17,10 @@ import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedShowData
+import com.flooferland.showbiz.types.light.ILightEmitter
+import com.flooferland.showbiz.types.light.LightManager
+import com.flooferland.showbiz.types.light.PointLight
+import com.flooferland.showbiz.types.math.Color4
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
@@ -48,7 +49,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
  * The main class of the mod.
  * Has to be a LivingEntity unfortunately to cast shadows when using shaders
  */
-class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable {
+class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable, ILightEmitter {
     constructor(level: Level) : this(level, null) {
         refreshDimensions()
     }
@@ -60,6 +61,9 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     override val show = connectionManager.port("show", PackedShowData(), PortDirection.In, autoUseReceived = false) { received ->
         pendingShow.merge(received)
     }
+
+    override val lightManager = LightManager(this)
+    val pointLight = lightManager.add(PointLight())
 
     override val botLevel: Level? get() = level()
     override val botPos: Vec3 get() = position()
@@ -115,6 +119,20 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
             collidePartInstance.refresh()
             prevBotId = botId
             prevBotVariant = botVariant
+        }
+    }
+
+    override fun clientUpdateLights(delta: Float) {
+        when (botId.toString()) {
+            "showbiz:gas_pump" -> {
+                pointLight?.enabled = show.data.mapping == BitChartStore.RAE_ID && show.data.signal.frameHas(241)
+                pointLight?.color = Color4(255, 175, 90)
+                pointLight?.radius = 0.8f
+                pointLight?.shadows = false
+                pointLight?.localPos = Vec3(0.0, 2.0, 0.0)
+                pointLight?.vanillaBackend = false
+            }
+            else -> pointLight?.enabled = false
         }
     }
 

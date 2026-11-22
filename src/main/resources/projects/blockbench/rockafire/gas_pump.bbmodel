@@ -456,7 +456,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": true
+			"primary_selected": false
 		}
 	],
 	"outliner": [
@@ -482,8 +482,8 @@
 	],
 	"textures": [
 		{
-			"name": "pump.png",
-			"relative_path": "../../../assets/showbiz/showbiz/bots/gas_pump/textures/pump.png",
+			"name": "gas_pump.png",
+			"relative_path": "../../../assets/showbiz/showbiz/bots/gas_pump/textures/gas_pump.png",
 			"folder": "block",
 			"namespace": "",
 			"id": "0",
@@ -515,8 +515,8 @@
 			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAIkklEQVR4AeyabYhcZxXHn5ndzbqzXZbsatSY1hoTqi2YD9UGrFJoUVqQWihVsFakaBVRi9JPEf3QD37qFxVEUfOhVVFBKEWpVBQEFWwbQaFvtKRv6VtKtoRtdrub3U7v78z8b8595r7OTFrCNOR/zzn/83Kfc57n3p0dth0K/v19975uXfx514XdO991QQa/2/1Bs5GCjym4bSH97NF/d1eOP5QLfIKPEYcsKlw4gKKEPH5uejrsmJlJXeunT4fNBOLQT66tmV+cGQ0u8+cthlOvnhzIgMMnB7YgrkyOZQC6gW9OQ6Bx9LlkQPgZBlI5TaRvVHniJMV7WeYb6wDi5mhcC0GP/fK9lXJsA1BzSDXEri92OmGx0zFKQzBjiAtHO04TJxn7sct8YxsAN1LzapyjLm6x0wnwPg69Lmgi7yjD4fN14IDnivQ2b3D/tsf+9eJ7u0UJRXx783RYbrXDnpkdhl2hFRa2tlMdWz6kv6fXeWP7N7n0ovuKp2FBnCS86njJvdqvbGyE9a0txZrcOTs7wJmj5EKOd1Mzr7aPydNZbMyzw55feObacOrIVWkYPmJSoq/Ag745IPDZI8CPMRYcR+RxcQx2HIdNTXwAG1mFojgW6htcveCeMH/p3zLliMkQfcPn9amMaLNz8Y3ZuUxUDSPOoSa1a6TWClGD9+26zOKRd73/E6aXNak8C4wu5NkJgGfHWDQ6UEOeg68C8dRS3LB1lB/Ll+Z2BJr/9PH7w7vXN81d1qQFFFzIs3cAfhaObAry1KRy4dBjHq4I5BDPrsQxcAD+pqf/GWgeXRIfgPOAA57zOj57BDyJztEF6IDFIWOIJxbEfjggXvGyJcX7WBaHX9LreVyRv4hXjfQRIFBgJ05sbsislMSDvMCmdc7f+/HW1dd8OVx/w61BEl2Au/KqL4WDBz9rQPeAp8bSrktaSEE2EohPH4G8xY/KFQ2lrO5ll36s8jPIzqWd4fEnn2gVoax+7Ms9AXFQmT1Mk3n1VGfjtd7J+9fPV8J3jzwcvESXP69GHS6OGRiAFuIDeavrORUf2/B5ufBCnTqz75gNNPniy6fC9Q++J/z0kysm//jRFwOc/Ko5qhwYgH8R6flVs0gh78Y+1/ub1KF5cq/4ajtMXfSr8KPlOZOH9iwGOPwMgZhxwAZQtHPLO2YL78Fu4ixq2tdsUmet/8XJE4/8Nrx0fIVbpBIOP0MwxxguNgDfhF94WX1OQuz3ub5mHOftuE4n+a2RJvd9+Avh8iu+aaGScPiNHNPFBjDMwvPu75v2NfNiiziap8kfHut9/fXY3XPhH7943cLFEWPEGC7tU69vZ8oMu3CKxLlxbWLqgAYvv3ch3HpiPVx03bo9++i8FPExoDp16sS059tTwe+c1/XyqlOIGJ+LTm34pnXIufIb54XDe88PC4vvDFMzHdMvvqGFKzAEU8ZwsUfA14l30fuq9FFyVdt/uPnfQ/9vAThJdKD4UaUNIG/h69vboeztXXVj1Ry1TtV9RvXbADiucaG5qakwzNFVHdUctY7qnS1pL0HtFjfRwuvuXF4udeB5CQ5Th/w3CwMvQd2YFxhNyG4qGSQ1QJM6f7rw4q7HffsPdAXPS8eHjgToHlXrtkdAQVooOwdHE8gqEA+IUw10oUkd5Ujytbogzkt82EiA3gQ2AC2ahUqniNexY8R+bGoQh44EXseO4f2feerhFvje/HS4fXk+fKe1aYDzwAeII8b7vB7fK7ZtAOweiwAEcGzh0KtAHPGAWGoAeGxJ9DIQpxrE+V948j746PeBUT8T2EvQ35iFsACBZqR7KZ5c5UgS53lsxaN7iFf8gUs+0tWXIjRJ8wwDTj50OOrw5QiQD86jSk9PgAK1EEl4FhkDHqhpJDlwABsJJz2ugU0MUAw7SuMAHaAD6cQDOEkGIhuuLmwABLMAQTYSwCMF2Uga9Dwc8FyeDqc4pOrwKY9PfQAdoAN08mgU+KZl42+C9tdWj7fK8MWTL5gfKRCP7iW6xy3//X645enfpLjxyTtNR9744KEAiMEmzmSS0338J11Q1gQnAT9NI2Mbri7SE/CXe++p/DKyblGLW/5QCCceNTVzgcMnEruPrbVVsYWSZnkvIAlCykaHawIbAM2vvroRDh/+5fiHEK9GzfclTQvTnYVedN/XM7JXHgP/OHgbPRtdbdkArr7m2tbq6smwsLA4/iFUrCFtuiIuz807II9vwtkASLj55q/YEFZWnsccDzjacSVxfcnuMwRAKHbuo4MzAT8C9SPv/iMP2BcE2IlrqP/pADj+DOG2235gRYeq5pNoMO8ow+Hrx1rjcCDhzE5k0X+9+CSL4uryNoA77rh96GefN3Z35a/dGJULoGEhDk74uJ7ZyU8Inn9BadjSm0obwNLS7sDuN022+GSxJv2FHXb81tGvh2P/uelMBD5izjA9DR70rMFrmW8wuhZjA+C55xGolVEniIW6Bqf3/izsOXhXNpOYLNOzXF6POLtXGwDPPUMY6636Df5+6Tori/zx+z5netlLLvTzeoHR9SwMxwbAbRjC/g/s6wLscYG/6KD5z6/cHfQXHaVNlt24bDhleSW+dADEDPNBInc32SmQFP32c38INJ+oqbScvh8+BRxIiUgp80Whdc3MAEjaPr0WmpwC+7lNohbXl8b3dWuYGNDnYv/Wsw8E41xMnJf6iRkTBgZw9NjzjT4HzBw41GotfarV2v+tMzLRjU9kxqe4hI/92MDqJP68PPxVfTf1DwyA3ecUNC10rsZnBqDmm56Cc7V51p0ZAMQkNU+/mQFw9DkFOCYFmQGw+5M2hMwA2HWGgJwUDAyAR4BTMJED2Ltnt/1aPEmnIHMC+EuMoT4On8PHxQbAzoNJOvraMxuAjEk6+urZBkDjQOQkSRvAJDUc9/r2AOKJTJp9zp+AUTfsDQAAAP//hMgZDQAAAAZJREFUAwBsa1bbfvD2mgAAAABJRU5ErkJggg=="
 		},
 		{
-			"name": "pump_glowmask.png",
-			"relative_path": "../../../assets/showbiz/showbiz/bots/gas_pump/textures/pump_glowmask.png",
+			"name": "gas_pump_glowmask.png",
+			"relative_path": "../../../assets/showbiz/showbiz/bots/gas_pump/textures/gas_pump_glowmask.png",
 			"folder": "",
 			"namespace": "",
 			"id": "1",
@@ -554,8 +554,8 @@
 			"name": "animation.gas_pump.light.on",
 			"loop": "hold",
 			"override": false,
-			"length": 0.08333,
-			"snapping": 24,
+			"length": 0.01667,
+			"snapping": 60,
 			"selected": false,
 			"saved": true,
 			"path": "../../../assets/showbiz/showbiz/bots/gas_pump/models/gas_pump.animation.json",
@@ -596,7 +596,7 @@
 								}
 							],
 							"uuid": "92ae2bdc-2eb1-e33b-f3c8-87da0a4a2c27",
-							"time": 0.04167,
+							"time": 0.01667,
 							"color": -1,
 							"uniform": true,
 							"interpolation": "linear"
@@ -616,13 +616,13 @@
 			"name": "animation.gas_pump.light.off",
 			"loop": "hold",
 			"override": false,
-			"length": 0.08333,
-			"snapping": 24,
+			"length": 0.01667,
+			"snapping": 60,
 			"selected": true,
-			"saved": true,
+			"saved": false,
 			"path": "../../../assets/showbiz/showbiz/bots/gas_pump/models/gas_pump.animation.json",
 			"scope": 0,
-			"anim_time_update": "",
+			"anim_time_update": "0",
 			"blend_weight": "",
 			"start_delay": "",
 			"loop_delay": "",
@@ -658,7 +658,7 @@
 								}
 							],
 							"uuid": "7c8d1e07-de87-faeb-ee71-68dab18dd23f",
-							"time": 0.04167,
+							"time": 0.01667,
 							"color": -1,
 							"uniform": true,
 							"interpolation": "linear"
