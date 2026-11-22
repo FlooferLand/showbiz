@@ -249,7 +249,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
             signalInt[i++] = 0
         }
         if (signalInt.isEmpty()) {
-            toNotify?.let { Sounds.player(it).bad() }
+            toNotify?.let { Sounds.serverPlayer(it).bad() }
             val message = "Failed to save show '$filename' (signal=0)"
             toNotify?.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.RED), true)
             Showbiz.log.info(message)

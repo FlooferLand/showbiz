@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.handbook
-import net.minecraft.network.chat.*
 import kotlinx.serialization.Serializable
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
@@ -33,6 +34,14 @@ object HandbookXml {
         val entries: List<Element> = emptyList(),
     )
 
+    @Serializable
+    @XmlSerialName("ref")
+    data class StyleRef(
+        val id: String,
+        val color: String? = null,
+        val background: String? = null
+    )
+
     /// Wrappers since XML parsing won't work another way
     object Transient {
         @Serializable
@@ -44,6 +53,11 @@ object HandbookXml {
         @XmlSerialName("pages")
         data class Pages(
             val entries: List<Page> = emptyList(),
+        )
+        @Serializable
+        @XmlSerialName("styles")
+        data class Styles(
+            val entries: List<StyleRef> = emptyList(),
         )
     }
 
@@ -69,8 +83,14 @@ object HandbookXml {
             @XmlValue val text: String = ""
         ) : Element() {
             // TODO: Read the style property
-            fun toComponent(): MutableComponent =
-                Component.translatableWithFallback(key, text)
+            fun toComp(): MutableComponent {
+                val comp = if (key.isNotEmpty()) {
+                    Component.translatableWithFallback(key, text)
+                } else {
+                    Component.literal(text)
+                }
+                return comp
+            }
         }
 
         @Serializable

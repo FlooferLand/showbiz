@@ -65,7 +65,7 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
             if (entity.group != groupSet) {
                 entity.applyChange(true) { group = groupSet }
             }
-            Sounds.player(player).click()
+            Sounds.serverPlayer(player).click()
             player.displayClientMessage(Component.literal("[-] interact down, [+] interact up"), true)
         } else {
             entity.setCurtains(!entity.isOpen)

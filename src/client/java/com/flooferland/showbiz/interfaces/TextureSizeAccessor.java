@@ -1,4 +1,4 @@
-package com.flooferland.showbiz.accessor;
+package com.flooferland.showbiz.interfaces;
 
 public interface TextureSizeAccessor {
 	int showbiz_getWidth();

@@ -19,7 +19,8 @@ object Sounds {
             play(sound.event, source, volume, pitch)
         }
 
-        fun bad() = play(SoundEvents.NOTE_BLOCK_BASS.value(), volume = 1.0f, pitch = 0.5f)
+        fun good() = play(SoundEvents.NOTE_BLOCK_CHIME.value(), volume = 0.8f, pitch = 1.5f)
+        fun bad() = play(SoundEvents.NOTE_BLOCK_BASS.value(), volume = 0.8f, pitch = 0.5f)
         fun click() = play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
         fun enter() = play(ModSounds.ReelEnter, volume = 0.4f, pitch = 1.5f)
         fun exit() = play(ModSounds.ReelExit, volume = 0.4f, pitch = 1.5f)
@@ -33,13 +34,18 @@ object Sounds {
         }
     }
 
-    data class PlayerSource(val player: Player) : Source {
+    data class PlayerSource(val player: Player, val local: Boolean = false) : Source {
         override fun play(sound: SoundEvent, source: SoundSource?, volume: Float, pitch: Float) {
-            (player as? ServerPlayer)?.playNotifySound(sound, SoundSource.MASTER, volume, pitch)
+            if (local) {
+                player.playNotifySound(sound, SoundSource.MASTER, volume, pitch)
+            } else if (player is ServerPlayer) {
+                player.playNotifySound(sound, SoundSource.MASTER, volume, pitch)
+            }
         }
     }
     //endregion
 
     fun block(level: Level, pos: BlockPos) = BlockSource(level, pos)
-    fun player(player: Player) = PlayerSource(player)
+    fun serverPlayer(player: Player) = PlayerSource(player, local = false)
+    fun localPlayer(player: Player) = PlayerSource(player, local = true)
 }

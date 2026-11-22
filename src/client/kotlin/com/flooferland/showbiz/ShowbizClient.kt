@@ -238,7 +238,8 @@ object ShowbizClient : ClientModInitializer {
             val key = ModClientInput.OpenInHandbook.mapping.translatedKeyMessage
             val itemId = BuiltInRegistries.ITEM.getKey(stack.item)
             if (!Handbook.cache.items.has(itemId)) return@register
-            val comp = tc("other", "open_in_handbook", key)
+
+            val comp = tc("other", "open_in_handbook", key).withStyle(ChatFormatting.ITALIC)
             components.add(max(0, components.size - 2), comp)
         }
 

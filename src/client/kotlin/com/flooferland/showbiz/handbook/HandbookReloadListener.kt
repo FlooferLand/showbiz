@@ -60,8 +60,8 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
 
             try {
                 val entry = HandbookEntry(
-                    root.head.summary.toComponent(),
-                    root.head.facts.lines.map { it.toComponent() },
+                    root.head.summary.toComp(),
+                    root.head.facts.lines.map { it.toComp() },
                     root.pages.entries
                 )
                 when (dir) {

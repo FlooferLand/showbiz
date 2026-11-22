@@ -443,7 +443,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun onInteract(key: Int, level: Level, player: Player) {
         val player = player as? ServerPlayer ?: return
-        val sounds = Sounds.player(player)
+        val sounds = Sounds.serverPlayer(player)
         resetInactivity()
         when (key) {
             0 -> { // Record

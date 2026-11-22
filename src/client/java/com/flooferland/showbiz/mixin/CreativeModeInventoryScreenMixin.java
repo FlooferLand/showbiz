@@ -1,6 +1,8 @@
 package com.flooferland.showbiz.mixin;
 
+import com.flooferland.showbiz.mixin.accessor.AbstractContainerScreenAccessor;
 import com.flooferland.showbiz.registry.ModItemGroups;
+import com.flooferland.showbiz.screens.HandbookPageScreen;
 import com.flooferland.showbiz.utils.CreateAeronauticsBurglary;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -10,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /// We love the Create Aeronautics devs Mwwwah
 @Mixin(CreativeModeInventoryScreen.class)
@@ -21,6 +24,12 @@ public class CreativeModeInventoryScreenMixin {
 		if (selectedTab == ModItemGroups.Main.getTab()) {
 			CreateAeronauticsBurglary.renderBanners((CreativeModeInventoryScreen) (Object) this, guiGraphics, mouseX, mouseY);
 		}
+	}
+
+	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+	private void showbiz_keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+		var self = (AbstractContainerScreenAccessor) (Object) this;
+		HandbookPageScreen.Companion.handleKeyPressed(self, keyCode, scanCode, modifiers, cir);
 	}
 
 	/*@Inject(method = "getTooltipFromContainerItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTabs;tabs()Ljava/util/List;"))

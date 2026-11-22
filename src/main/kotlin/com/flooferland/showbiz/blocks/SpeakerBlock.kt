@@ -54,7 +54,7 @@ class SpeakerBlock(props: Properties) : FacingEntityBlock(props) {
         }
 
         player.displayClientMessage(message, true)
-        Sounds.player(player).click()
+        Sounds.serverPlayer(player).click()
         return InteractionResult.SUCCESS
     }
 

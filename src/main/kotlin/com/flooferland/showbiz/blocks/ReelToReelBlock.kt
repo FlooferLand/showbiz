@@ -73,7 +73,7 @@ class ReelToReelBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         if (entity !is ReelToReelBlockEntity) return ItemInteractionResult.FAIL
         if (!player.mayInteractWith(entity)) return ItemInteractionResult.FAIL
 
-        val sounds = Sounds.player(player)
+        val sounds = Sounds.serverPlayer(player)
 
         if (player.isCrouching || hitResult.direction == Direction.UP || heldStack.item is ReelItem) {
             // Adding / removing

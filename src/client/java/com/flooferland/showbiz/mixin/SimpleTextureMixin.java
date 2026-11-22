@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.mixin;
 
-import com.flooferland.showbiz.accessor.TextureSizeAccessor;
+import com.flooferland.showbiz.interfaces.TextureSizeAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import org.spongepowered.asm.mixin.Mixin;

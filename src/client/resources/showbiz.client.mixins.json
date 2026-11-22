@@ -12,6 +12,7 @@
         "ItemPickerMenuMixin",
         "KeyboardHandlerMixin",
         "SimpleTextureMixin",
+        "accessor.AbstractContainerScreenAccessor",
         "accessor.CreativeModeInventoryScreenAccessor"
     ],
     "injectors": {

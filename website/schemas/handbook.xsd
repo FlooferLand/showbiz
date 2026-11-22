@@ -23,6 +23,13 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    <xs:element name="style">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="style_ref" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
     <!-- Base element type -->
     <xs:element name="element" abstract="true" />
@@ -114,6 +121,15 @@
                     <xs:attribute name="title" type="xs:string" />
                 </xs:extension>
             </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Style ref -->
+    <xs:element name="style_ref">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required" />
+            <xs:attribute name="color" type="xs:string" />
+            <xs:attribute name="background" type="xs:string" />
         </xs:complexType>
     </xs:element>
 

@@ -1,25 +1,35 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.*
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.components.*
-import net.minecraft.client.gui.layouts.*
-import net.minecraft.client.gui.screens.*
-import net.minecraft.client.gui.screens.inventory.*
-import net.minecraft.client.renderer.texture.*
-import net.minecraft.core.registries.*
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
-import net.minecraft.util.*
-import com.flooferland.showbiz.accessor.TextureSizeAccessor
 import com.flooferland.showbiz.handbook.Handbook
+import com.flooferland.showbiz.handbook.Handbook.cache
 import com.flooferland.showbiz.handbook.HandbookEntry
 import com.flooferland.showbiz.handbook.HandbookXml
+import com.flooferland.showbiz.interfaces.TextureSizeAccessor
+import com.flooferland.showbiz.mixin.accessor.AbstractContainerScreenAccessor
+import com.flooferland.showbiz.registry.ModClientInput
 import com.flooferland.showbiz.screens.widgets.ItemWidget
 import com.flooferland.showbiz.screens.widgets.TextWidget
+import com.flooferland.showbiz.utils.Sounds.localPlayer
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.ImageWidget
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.layouts.LayoutSettings
+import net.minecraft.client.gui.layouts.LinearLayout
+import net.minecraft.client.gui.layouts.SpacerElement
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.screens.inventory.PageButton
+import net.minecraft.client.renderer.texture.SimpleTexture
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.CommonColors
+import net.minecraft.world.item.ItemStack
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.math.roundToInt
 
 class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) : Screen(Component.literal("The Showbiz Handbook").withStyle(ChatFormatting.BOLD)) {
@@ -102,9 +112,9 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
         }
         when (entry) {
             is HandbookXml.Element.Line ->
-                addText(Component.literal("- ").append(entry.toComponent()))
+                addText(Component.literal("- ").append(entry.toComp()))
             is HandbookXml.Element.TextContent ->
-                addText(entry.toComponent())
+                addText(entry.toComp())
             is HandbookXml.Element.Image -> {
                 val instance = Minecraft.getInstance()
                 val id = ResourceLocation.tryParse(entry.src)?.let { id ->
@@ -163,5 +173,30 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
 
         RenderSystem.defaultBlendFunc()
         graphics.setColor(1f, 1f, 1f, 1f)
+    }
+
+    companion object {
+        /**
+         * Not sure where else to put this.
+         * Handles opening the screen and cancelling other input.
+         * Called in mixins
+         */
+        fun handleKeyPressed(self: AbstractContainerScreenAccessor, keyCode: Int, scanCode: Int, modifiers: Int, cir: CallbackInfoReturnable<Boolean?>) {
+            val instance = Minecraft.getInstance()
+            val player = instance.player ?: return
+            val hoveredSlot = self.hoveredSlot ?: return
+            if (!hoveredSlot.hasItem()) return
+
+            val pressed = ModClientInput.OpenInHandbook.mapping.matches(keyCode, scanCode)
+            if (pressed && instance.screen !is HandbookPageScreen) {
+                val stack: ItemStack = hoveredSlot.getItem()
+                val id = BuiltInRegistries.ITEM.getKey(stack.getItem())
+                val entry = cache.items.get(id) ?: return
+
+                instance.setScreen(HandbookPageScreen(instance.screen, id))
+                localPlayer(player).click()
+                cir.setReturnValue(true)
+            }
+        }
     }
 }
