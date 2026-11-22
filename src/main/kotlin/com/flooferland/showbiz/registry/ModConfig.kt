@@ -43,7 +43,8 @@ data class ModConfig(
     @Serializable
     data class Audio(
         var playPneumaticSounds: Boolean = true,
-        var playBotEffects: Boolean = true
+        var playBotEffects: Boolean = true,
+        var stereoAudio: Boolean = true
     )
 
     @Serializable

@@ -72,6 +72,7 @@
 
     "config.prop.audio.playPneumaticSounds": "Play pneumatic sounds",
     "config.prop.audio.playBotEffects": "Play custom bot effects",
+    "config.prop.audio.stereoAudio": "Stereo audio (uses more memory and network bandwidth)",
     "config.prop.video.playVideo": "Allow video playback",
     "config.prop.video.highResVideo": "High resolution video (server toggle)",
     "config.prop.video.devFastVideoRender": "Fast video render (DEV)",

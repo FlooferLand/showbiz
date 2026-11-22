@@ -42,7 +42,6 @@ import kotlin.io.path.Path
  * Every rshw frame is a list of currently played bits, collecting that at load time is way nicer.
  */
 class ShowData(val owner: ReelToReelBlockEntity) {
-    // TODO: Convert signal to a list of longs and pack bit ids using bitwise operations
     val signal: MutableList<BitIdArray> = ArrayList()
     var audio: ByteArray = ByteArray(0)
     var videoInputInfo: FFmpeg.VideoInfo? = null
@@ -53,10 +52,10 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     var mapping: String? = null
     var loadJob: Job? = null
 
-    val targetFormat = AudioFormat(
+    val targetFormat: AudioFormat get() = AudioFormat(
         44100f,
         16,
-        1,
+        if (Showbiz.config.audio.stereoAudio) 2 else 1,
         true,
         false
     )

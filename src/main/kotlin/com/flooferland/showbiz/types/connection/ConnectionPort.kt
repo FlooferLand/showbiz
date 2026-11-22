@@ -137,16 +137,18 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
     }
 
     /** Sends the current data through this port and notifies the listeners */
-    fun send() {
+    fun send(data: T? = null, transform: (IConnectable, T) -> T = { _, data -> data }) {
         val level = owner.grabLevel() ?: return
-        val bytes = (level as? ServerLevel)?.let { encodeData() }
+        val data = data ?: this.data
 
         @Suppress("UNCHECKED_CAST")
         listeners.forEach { ownerId ->
             val connectable = ownerId.grabConnectable(level) ?: return@forEach
             val listener = connectable.connectionManager.inputs[id] as? ConnectionPort<T> ?: return@forEach
+            val data = transform(connectable, data)
+            val bytes = (level as? ServerLevel)?.let { encodeData(data) }
 
-            listener.dataReceived = data //.duplicate()
+            listener.dataReceived = data // ref
             if (listener.autoUseReceived) {
                 listener.data = listener.dataReceived
             }
@@ -168,13 +170,8 @@ data class ConnectionPort<T: ConnectionData<T>>(val owner: IConnectable, val id:
         }
     }
 
-    /** Sends a piece of data through this port and notifies the listeners */
-    fun send(data: T) {
-        this.data = data
-        send()
-    }
-
-    fun encodeData(): ByteArray {
+    fun encodeData(): ByteArray = encodeData(data)
+    private fun encodeData(data: T): ByteArray {
         val buf = FriendlyByteBuf(Unpooled.buffer())
         data.encode(buf)
         return ByteArray(buf.readableBytes()).also { buf.readBytes(it); buf.release() }

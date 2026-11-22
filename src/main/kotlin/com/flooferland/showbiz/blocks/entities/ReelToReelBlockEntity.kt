@@ -313,10 +313,18 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     }
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
-        val format = showData.format ?: return
-        audio.data.mono = chunk
-        audio.data.chunkId++
-        audio.data.lead = startIndex.toDouble() / (format.sampleRate * format.frameSize) - seek
+        val showFormat = showData.format ?: return
+        with (audio.data) {
+            mono = chunk
+            format.sampleRate = showFormat.sampleRate.toInt()
+            format.sampleBits = showFormat.sampleSizeInBits
+            format.stereo = showFormat.channels == 2
+            format.signed = true
+            format.bigEndian = showFormat.isBigEndian
+
+            chunkId++
+            lead = startIndex.toDouble() / (showFormat.sampleRate * showFormat.frameSize) - seek
+        }
         audio.send()
     }
 

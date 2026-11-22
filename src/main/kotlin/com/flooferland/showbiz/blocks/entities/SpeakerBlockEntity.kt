@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.blocks.entities
 
 import com.flooferland.showbiz.registry.ModBlocks
+import com.flooferland.showbiz.types.AudioChannel
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.PackedAudioData
+import com.flooferland.showbiz.utils.Extensions.getStringOrNull
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -17,15 +19,19 @@ class SpeakerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(Mo
     override val connectionManager = ConnectionManager(this)
     val audio = connectionManager.port("audio", PackedAudioData(), PortDirection.In) {
         val level = level as? ServerLevel ?: return@port
-        it.tick(level, pos)
+        it.withChannel(channel).tick(level, pos)
     }
+
+    var channel = AudioChannel.DEFAULT
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.save(tag)
+        tag.putString("channel", channel.id)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         connectionManager.load(tag)
+        channel = tag.getStringOrNull("channel")?.let { AudioChannel.from(it) } ?: AudioChannel.DEFAULT
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {

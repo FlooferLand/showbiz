@@ -2,10 +2,12 @@ package com.flooferland.showbiz.types.connection.data
 
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackAudioStatePacket
+import com.flooferland.showbiz.types.AudioChannel
 import com.flooferland.showbiz.types.FriendlyAudioFormat
 import com.flooferland.showbiz.types.connection.ConnectionData
 import com.flooferland.showbiz.types.connection.ConnectionPort
 import com.flooferland.showbiz.types.connection.data.PackedAudioData.Action
+import com.flooferland.showbiz.utils.AudioUtils
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
@@ -88,6 +90,15 @@ data class PackedAudioData(
     fun clear() {
         tempReset()
         chunkId = 0
+    }
+
+    fun withChannel(channel: AudioChannel): PackedAudioData {
+        if (triggerAction != Action.None || mono.isEmpty() || !format.stereo) return this
+        val bytes = AudioUtils.extract(mono, format, channel) ?: return this
+        return copy(mono = bytes, format = format.copy(stereo = false)).also {
+            it.chunkId = chunkId
+            it.lead = lead
+        }
     }
     // endregion
 
