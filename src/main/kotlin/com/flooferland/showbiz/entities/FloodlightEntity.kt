@@ -77,12 +77,12 @@ class FloodlightEntity(level: Level, comp: FloodlightComponent) : BasePropEntity
     var supportBlockLoc: Vec3? = null
 
     override var menuData = EditScreenMenu.EditScreenBuf(OwnerId.ofEntity(this))
-    val bitFilter = comp.bitFilter
+    val bitFilter = comp.bitFilter.clone()
     var angle = comp.angle
     var shadows: Boolean = comp.shadows
     var color: Int = comp.color
     var brightness: Float = 1.0f
-    var turn = comp.turn
+    var turn = comp.turn.copy()
 
     private var lit: Boolean = false
     var clientStartPos = position()!!

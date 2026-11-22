@@ -14,7 +14,7 @@ import net.minecraft.util.ExtraCodecs
 data class FloodlightComponent(var turn: Vec2f = Vec2f.ZERO, var angle: Float = 45f, var shadows: Boolean = true, var color: Int = CommonColors.WHITE, var bitFilter: MappedBits = MappedBits()) {
     companion object {
         fun from(entity: FloodlightEntity) = FloodlightComponent(
-            turn = entity.turn,
+            turn = entity.turn.copy(),
             angle = entity.angle,
             shadows = entity.shadows,
             color = entity.color,
