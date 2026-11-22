@@ -89,7 +89,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
         clientValue = clientValue.coerceIn(if (isLit) 0.1f else 0f, 1f)
 
         light?.enabled = clientValue >= 0f
-        light?.range = 20f
+        light?.range = 25f
         light?.angle = angle
         light?.shadows = shadows
         light?.intensity = clientValue

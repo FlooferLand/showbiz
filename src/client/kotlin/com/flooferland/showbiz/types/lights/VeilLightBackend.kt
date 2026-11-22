@@ -53,7 +53,7 @@ internal object VeilLightBackend : BaseLightBackend(ModClientLights.BackendType.
     private fun veilConfigureLight(emitter: ILightEmitter, data: LightData, light: AbstractLight) {
         if (level == null) return
         val inscattering = 3f
-        val brightness = light.intensity * if (light.enabled) 5f else 0f
+        val brightness = light.intensity * if (light.enabled) 3f else 0f
         val occlusion = light.shadows
         val pos = getPos(emitter, light) ?: return
         val up = Vector3f(0f, 1f, 0f)
