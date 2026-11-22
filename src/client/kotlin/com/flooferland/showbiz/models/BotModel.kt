@@ -78,7 +78,10 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         // TODO: Make bots work when they receive any mapping, even an empty one
         val showMapping = animatable.show?.data?.mapping
         val showPlaying = animatable.show?.data?.playing == true
-        val bitmapBits = (bot.bitmap.bits["any"]?.toMutableMap() ?: mutableMapOf()) + (bot.bitmap.bits[showMapping] ?: mapOf())
+
+        // TODO: For some reason the any mapping doesn't work properly
+        //val bitmapBits = (bot.bitmap.bits["any"]?.toMutableMap() ?: mutableMapOf()) + (bot.bitmap.bits[showMapping] ?: mapOf())
+        val bitmapBits = bot.bitmap.bits[showMapping] ?: bot.bitmap.bits["any"] ?: mapOf()
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
