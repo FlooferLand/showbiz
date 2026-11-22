@@ -22,6 +22,8 @@
         </page>
     </pages>
     <styles>
-        <def id="list_test" color="red" />
+        <def id="list_test">
+            <foreground color="red" />
+        </def>
     </styles>
 </root>

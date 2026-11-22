@@ -15,6 +15,9 @@ object HandbookXml {
 
         @XmlElement(true)
         val pages: Transient.Pages = Transient.Pages(),
+
+        @XmlElement(true)
+        val styles: Transient.Styles = Transient.Styles(),
     )
 
     @Serializable
@@ -35,11 +38,10 @@ object HandbookXml {
     )
 
     @Serializable
-    @XmlSerialName("ref")
-    data class StyleRef(
+    @XmlSerialName("def")
+    data class StyleDefs(
         val id: String,
-        val color: String? = null,
-        val background: String? = null
+        val entries: List<Styling> = emptyList(),
     )
 
     /// Wrappers since XML parsing won't work another way
@@ -57,8 +59,17 @@ object HandbookXml {
         @Serializable
         @XmlSerialName("styles")
         data class Styles(
-            val entries: List<StyleRef> = emptyList(),
+            val entries: List<StyleDefs> = emptyList(),
         )
+    }
+
+    @Serializable
+    sealed class Styling {
+        @Serializable @XmlSerialName("foreground")
+        data class Foreground(val color: String) : Styling()
+
+        @Serializable @XmlSerialName("background")
+        data class Background(val color: String) : Styling()
     }
 
     @Serializable
@@ -84,12 +95,13 @@ object HandbookXml {
         ) : Element() {
             // TODO: Read the style property
             fun toComp(): MutableComponent {
+                val styles = Handbook.cache.styles[style] ?: StyleDefs(id = style)
                 val comp = if (key.isNotEmpty()) {
                     Component.translatableWithFallback(key, text)
                 } else {
                     Component.literal(text)
                 }
-                return comp
+                return Handbook.Style.getComp(comp, styles)
             }
         }
 

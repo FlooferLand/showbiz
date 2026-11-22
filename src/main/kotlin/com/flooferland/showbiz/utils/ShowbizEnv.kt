@@ -56,7 +56,7 @@ object ShowbizEnv {
     fun isDev() =
         FabricLoader.getInstance()?.isDevelopmentEnvironment == true
     fun devThrow(text: String, error: Exception? = null) {
-        if (isDev()) error(text + "\n" + error) else Showbiz.log.error(text, error)
+        if (isDev()) error("DEVTHROW: $text\n$error") else Showbiz.log.error(text, error)
     }
     fun <T> assert(a: T, b: T, ctx: String) where T: Comparable<T> {
         if (a != b) devThrow("Assertion failed: $a != $b ($ctx)")

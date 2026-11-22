@@ -5,6 +5,7 @@
             <xs:sequence>
                 <xs:element ref="head" />
                 <xs:element ref="pages" />
+                <xs:element ref="styles" minOccurs="0" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -23,13 +24,46 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    <xs:element name="style">
+    <xs:element name="styles">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="style_ref" maxOccurs="unbounded" />
+                <xs:element ref="def" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+
+    <!-- Style def -->
+    <xs:element name="def">
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="format" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="color" type="formats" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="foreground" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="color" type="xs:string" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="background" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="color" type="xs:string" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:all>
+            <xs:attribute name="id" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Colors -->
+    <xs:simpleType name="formats">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="white" />
+            <xs:enumeration value="red" />
+            <xs:enumeration value="yellow" />
+        </xs:restriction>
+    </xs:simpleType>
 
     <!-- Base element type -->
     <xs:element name="element" abstract="true" />
@@ -121,15 +155,6 @@
                     <xs:attribute name="title" type="xs:string" />
                 </xs:extension>
             </xs:complexContent>
-        </xs:complexType>
-    </xs:element>
-
-    <!-- Style ref -->
-    <xs:element name="style_ref">
-        <xs:complexType>
-            <xs:attribute name="id" type="xs:string" use="required" />
-            <xs:attribute name="color" type="xs:string" />
-            <xs:attribute name="background" type="xs:string" />
         </xs:complexType>
     </xs:element>
 

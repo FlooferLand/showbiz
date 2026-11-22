@@ -1,5 +1,10 @@
 package com.flooferland.showbiz.handbook
 
-import net.minecraft.network.chat.*
+import net.minecraft.network.chat.Component
 
-data class HandbookEntry(val summary: Component, val facts: List<Component>, val pages: List<HandbookXml.Page>)
+data class HandbookEntry(
+    val summary: Component,
+    val facts: List<Component>,
+    val pages: List<HandbookXml.Page>,
+    val styles: Map<String, HandbookXml.StyleDefs>
+)
