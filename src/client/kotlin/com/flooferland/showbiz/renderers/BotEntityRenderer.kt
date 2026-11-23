@@ -50,7 +50,14 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
         glow.shouldRender = (geoModel as? BotModel)?.hasGlowTexture(entity) ?: false
 
         // Rendering
-        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight)
+        try {
+            super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight)
+        } catch (throwable: Throwable) {
+            val message = throwable.toString()
+            if (!BaseBotModel.errorsTriggered.values.any { it.context == message }) {
+                BaseBotModel.errorsTriggered[animatable] = BaseBotModel.Error.RenderException.withBot(animatable).withContext(message)
+            }
+        }
     }
 
     companion object {
