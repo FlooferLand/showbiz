@@ -3,6 +3,7 @@ versions/**/bin
 versions/**/build
 versions/**/run
 versions/**/src
+*.blend1
 
 # Python stuff
 **/__pycache__/

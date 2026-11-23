@@ -1,18 +1,19 @@
 {
 	"meta": {
 		"format_version": "5.0",
-		"model_format": "bedrock",
+		"model_format": "geckolib_model",
 		"box_uv": true
 	},
 	"name": "billy_bob",
-	"model_identifier": "Billy_Bob_V2",
+	"model_identifier": "billy_bob",
 	"visible_box": [3, 3.5, 1.25],
 	"variable_placeholders": "",
 	"multi_file_ruleset": "",
 	"variable_placeholder_buttons": [],
-	"bedrock_animation_mode": "entity",
 	"timeline_setups": [],
 	"unhandled_root_fields": {},
+	"geckolib_modid": "",
+	"geckolib_filepath_cache": {},
 	"resolution": {
 		"width": 128,
 		"height": 128
@@ -1504,7 +1505,6 @@
 			},
 			"origin": [0, 8, 3],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 0,
 			"children": [],
 			"reset": false,
@@ -1528,7 +1528,6 @@
 			},
 			"origin": [0, 23.6, 1],
 			"rotation": [-5, 0, 0],
-			"bedrock_binding": "",
 			"color": 1,
 			"children": [],
 			"reset": false,
@@ -1552,7 +1551,6 @@
 			},
 			"origin": [0, 23.6, 0],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 2,
 			"children": [],
 			"reset": false,
@@ -1576,7 +1574,6 @@
 			},
 			"origin": [0, 23.6, 0],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 3,
 			"children": [],
 			"reset": false,
@@ -1600,7 +1597,6 @@
 			},
 			"origin": [0, 19.61522, -0.34862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 4,
 			"children": [],
 			"reset": false,
@@ -1624,7 +1620,6 @@
 			},
 			"origin": [-3, 30.11522, -0.34862],
 			"rotation": [0, 0, 10],
-			"bedrock_binding": "",
 			"color": 5,
 			"children": [],
 			"reset": false,
@@ -1648,7 +1643,6 @@
 			},
 			"origin": [3, 30.61522, -0.34862],
 			"rotation": [0, 0, -10],
-			"bedrock_binding": "",
 			"color": 6,
 			"children": [],
 			"reset": false,
@@ -1672,7 +1666,6 @@
 			},
 			"origin": [0, 19.61522, -0.34862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 7,
 			"children": [],
 			"reset": false,
@@ -1696,7 +1689,6 @@
 			},
 			"origin": [0, 23.61522, -5.74862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 8,
 			"children": [],
 			"reset": false,
@@ -1720,7 +1712,6 @@
 			},
 			"origin": [0, 22.61522, -5.34862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 9,
 			"children": [],
 			"reset": false,
@@ -1728,7 +1719,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		},
 		{
 			"name": "EyeLids",
@@ -1744,7 +1735,6 @@
 			},
 			"origin": [0, 26.91522, -4.54862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 0,
 			"children": [],
 			"reset": false,
@@ -1768,7 +1758,6 @@
 			},
 			"origin": [-1.5, 26.51522, -4.54862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 1,
 			"children": [],
 			"reset": false,
@@ -1792,7 +1781,6 @@
 			},
 			"origin": [1.5, 26.51522, -4.54862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 2,
 			"children": [],
 			"reset": false,
@@ -1816,7 +1804,6 @@
 			},
 			"origin": [0, 26.61522, -5.44862],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 3,
 			"children": [],
 			"reset": false,
@@ -1840,7 +1827,6 @@
 			},
 			"origin": [-2.5, 29.11522, -0.34862],
 			"rotation": [0, 0, 10],
-			"bedrock_binding": "",
 			"color": 4,
 			"children": [],
 			"reset": false,
@@ -1864,7 +1850,6 @@
 			},
 			"origin": [2.5, 29.11522, -0.34862],
 			"rotation": [0, 0, -10],
-			"bedrock_binding": "",
 			"color": 5,
 			"children": [],
 			"reset": false,
@@ -1888,7 +1873,6 @@
 			},
 			"origin": [-7, 18, 0],
 			"rotation": [5, 5, 70],
-			"bedrock_binding": "",
 			"color": 6,
 			"children": [],
 			"reset": false,
@@ -1912,7 +1896,6 @@
 			},
 			"origin": [-13.06526, 18, -0.50428],
 			"rotation": [-80, -82.5, -180],
-			"bedrock_binding": "",
 			"color": 7,
 			"children": [],
 			"reset": false,
@@ -1936,7 +1919,6 @@
 			},
 			"origin": [-19.06526, 18, -0.50428],
 			"rotation": [0, 0, 50],
-			"bedrock_binding": "",
 			"color": 8,
 			"children": [],
 			"reset": false,
@@ -1960,7 +1942,6 @@
 			},
 			"origin": [5.48024, 19.19418, 0.89497],
 			"rotation": [0, 0, -62.5],
-			"bedrock_binding": "",
 			"color": 9,
 			"children": [],
 			"reset": false,
@@ -1984,7 +1965,6 @@
 			},
 			"origin": [6.329, 19.61944, 0.89497],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 0,
 			"children": [],
 			"reset": false,
@@ -2008,7 +1988,6 @@
 			},
 			"origin": [11.91104, 18.74497, 0.40485],
 			"rotation": [0, 90, -30],
-			"bedrock_binding": "",
 			"color": 1,
 			"children": [],
 			"reset": false,
@@ -2032,7 +2011,6 @@
 			},
 			"origin": [18.99059, 18.21104, 0.25826],
 			"rotation": [0, 0, -90],
-			"bedrock_binding": "",
 			"color": 2,
 			"children": [],
 			"reset": false,
@@ -2056,7 +2034,6 @@
 			},
 			"origin": [1.08682, 13.3424, -4],
 			"rotation": [0, 0, -10],
-			"bedrock_binding": "",
 			"color": 3,
 			"children": [],
 			"reset": false,
@@ -2080,7 +2057,6 @@
 			},
 			"origin": [3, 10, 2],
 			"rotation": [0, -10, 0],
-			"bedrock_binding": "",
 			"color": 4,
 			"children": [],
 			"reset": false,
@@ -2104,7 +2080,6 @@
 			},
 			"origin": [3, 0, -0.5],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 5,
 			"children": [],
 			"reset": false,
@@ -2128,7 +2103,6 @@
 			},
 			"origin": [-3, 10, 2],
 			"rotation": [0, 10, 0],
-			"bedrock_binding": "",
 			"color": 6,
 			"children": [],
 			"reset": false,
@@ -2152,7 +2126,6 @@
 			},
 			"origin": [-3, 0, -0.5],
 			"rotation": [0, 0, 0],
-			"bedrock_binding": "",
 			"color": 7,
 			"children": [],
 			"reset": false,
@@ -2370,5 +2343,700 @@
 			"uuid": "70a5855b-d982-1ecd-c12c-bf36cdb08df7",
 			"source": "data:image/png;base64,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"
 		}
-	]
+	],
+	"animations": [
+		{
+			"uuid": "f6ccc051-21a3-99a9-b5e2-70af9bffc44d",
+			"name": "posing",
+			"loop": "loop",
+			"override": false,
+			"length": 0,
+			"snapping": 24,
+			"selected": true,
+			"saved": true,
+			"path": "../../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
+			"scope": 0,
+			"anim_time_update": "",
+			"blend_weight": "",
+			"start_delay": "",
+			"loop_delay": "",
+			"animators": {
+				"fb75f83e-60c0-d35d-1bc7-10866acc8879": {
+					"name": "Head",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "rotation",
+							"data_points": [
+								{
+									"x": "5",
+									"y": "20",
+									"z": "0"
+								}
+							],
+							"uuid": "f885f42a-a283-857a-c277-f24b031e2749",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"bc2cbd65-8768-95eb-88f7-153356e37fe3": {
+					"name": "Jaw",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "rotation",
+							"data_points": [
+								{
+									"x": "-20",
+									"y": "0",
+									"z": "0"
+								}
+							],
+							"uuid": "06e00a4c-99ae-2537-a515-9337540b8d2a",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"d1c1bac0-3c4f-8601-b100-2d0e4db02ff5": {
+					"name": "EyeLids",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "rotation",
+							"data_points": [
+								{
+									"x": "12.5",
+									"y": "0",
+									"z": "0"
+								}
+							],
+							"uuid": "5cccba8d-75f5-3286-b111-cec3a89a9c67",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"875881d5-8128-4842-d368-b3c744daf205": {
+					"name": "Eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "position",
+							"data_points": [
+								{
+									"x": "0.7",
+									"y": "0",
+									"z": "0"
+								}
+							],
+							"uuid": "ed567f27-d5bd-9dc5-616f-183c841c2223",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"9b7b4868-2727-96d5-eb6e-e3bc89a4b369": {
+					"name": "Torso",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d7b59c66-d74c-d8ce-4c06-0867d111b649": {
+					"name": "Head4",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0ca9ec99-8809-2d99-6368-81bd39761d36": {
+					"name": "Head3",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8ad2fd74-6503-75a3-a5bc-5fbb0bca49e2": {
+					"name": "Head2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0bd1472e-9dd3-5f3b-c378-e3ac2767c397": {
+					"name": "EarL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6a2d448c-86ed-a175-ae16-be068d1b056a": {
+					"name": "EarR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5d3b9e70-8012-146e-affe-c0dc9b12a66e": {
+					"name": "Face",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"11de8f1e-b5b0-d908-cb33-986e49138167": {
+					"name": "Snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"dffb29a3-daa2-e0d1-fed5-cac4c2bf9f7a": {
+					"name": "EyeLidL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e2bac06a-6dc5-a15d-56a9-ebd608a6fea1": {
+					"name": "EyeLidR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6c664bc8-809a-c85f-a69f-79b6d205871a": {
+					"name": "EarL2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d8af4a61-d007-b844-41a4-5af330728726": {
+					"name": "EarR2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0b79660d-d1c8-3785-7906-018fc2c98a10": {
+					"name": "ArmL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8a3e2805-64f8-66a7-2fd0-840d8161fc35": {
+					"name": "Arm2L",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"2b3a37e7-218b-6116-822d-b4cd76d29c02": {
+					"name": "HandL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"177c86fe-3ccb-67bf-1a7d-75e0f4e4cd77": {
+					"name": "ArmR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"47b334ae-6c3a-f582-e970-a3c04202e661": {
+					"name": "Arm3R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8358c504-0932-2916-a0e4-bf7d12f365e7": {
+					"name": "Arm2R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"35d8d419-96c4-cc12-8559-06344009a02f": {
+					"name": "HandR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"3b09b129-a791-08e1-e5a2-4d3af441e430": {
+					"name": "Banjo",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5456f4b5-c161-f1d2-3bb4-c7be6dc101fc": {
+					"name": "LegR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"83d23572-0249-ba9f-e38c-9d751d4f6b26": {
+					"name": "ToesR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8eef6e61-de46-e9fa-fbef-b58d260cbf62": {
+					"name": "LegL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8158d160-d316-af74-5afa-74b5dfda170f": {
+					"name": "ToesL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				}
+			}
+		},
+		{
+			"uuid": "b17a6e2b-7a8c-22c3-3ef4-b7b0ac1d8179",
+			"name": "animation.billy_bob.eyelids.on",
+			"loop": "hold",
+			"override": false,
+			"length": 0.25,
+			"snapping": 12,
+			"selected": false,
+			"saved": true,
+			"path": "../../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
+			"scope": 0,
+			"anim_time_update": "",
+			"blend_weight": "",
+			"start_delay": "",
+			"loop_delay": "",
+			"animators": {
+				"d1c1bac0-3c4f-8601-b100-2d0e4db02ff5": {
+					"name": "EyeLids",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "position",
+							"data_points": [
+								{
+									"x": "0",
+									"y": "0",
+									"z": "0"
+								}
+							],
+							"uuid": "0c480c3f-adf4-499e-95f5-27649172cce5",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						},
+						{
+							"channel": "position",
+							"data_points": [
+								{
+									"x": "0",
+									"y": "0.575",
+									"z": "0"
+								}
+							],
+							"uuid": "603fba1a-61fb-5548-c3df-4c6367b7a7f0",
+							"time": 0.25,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"9b7b4868-2727-96d5-eb6e-e3bc89a4b369": {
+					"name": "Torso",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"fb75f83e-60c0-d35d-1bc7-10866acc8879": {
+					"name": "Head",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d7b59c66-d74c-d8ce-4c06-0867d111b649": {
+					"name": "Head4",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0ca9ec99-8809-2d99-6368-81bd39761d36": {
+					"name": "Head3",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8ad2fd74-6503-75a3-a5bc-5fbb0bca49e2": {
+					"name": "Head2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0bd1472e-9dd3-5f3b-c378-e3ac2767c397": {
+					"name": "EarL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6a2d448c-86ed-a175-ae16-be068d1b056a": {
+					"name": "EarR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5d3b9e70-8012-146e-affe-c0dc9b12a66e": {
+					"name": "Face",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"11de8f1e-b5b0-d908-cb33-986e49138167": {
+					"name": "Snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"bc2cbd65-8768-95eb-88f7-153356e37fe3": {
+					"name": "Jaw",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"dffb29a3-daa2-e0d1-fed5-cac4c2bf9f7a": {
+					"name": "EyeLidL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e2bac06a-6dc5-a15d-56a9-ebd608a6fea1": {
+					"name": "EyeLidR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"875881d5-8128-4842-d368-b3c744daf205": {
+					"name": "Eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6c664bc8-809a-c85f-a69f-79b6d205871a": {
+					"name": "EarL2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d8af4a61-d007-b844-41a4-5af330728726": {
+					"name": "EarR2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0b79660d-d1c8-3785-7906-018fc2c98a10": {
+					"name": "ArmL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8a3e2805-64f8-66a7-2fd0-840d8161fc35": {
+					"name": "Arm2L",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"2b3a37e7-218b-6116-822d-b4cd76d29c02": {
+					"name": "HandL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"177c86fe-3ccb-67bf-1a7d-75e0f4e4cd77": {
+					"name": "ArmR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"47b334ae-6c3a-f582-e970-a3c04202e661": {
+					"name": "Arm3R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8358c504-0932-2916-a0e4-bf7d12f365e7": {
+					"name": "Arm2R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"35d8d419-96c4-cc12-8559-06344009a02f": {
+					"name": "HandR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"3b09b129-a791-08e1-e5a2-4d3af441e430": {
+					"name": "Banjo",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5456f4b5-c161-f1d2-3bb4-c7be6dc101fc": {
+					"name": "LegR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"83d23572-0249-ba9f-e38c-9d751d4f6b26": {
+					"name": "ToesR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8eef6e61-de46-e9fa-fbef-b58d260cbf62": {
+					"name": "LegL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8158d160-d316-af74-5afa-74b5dfda170f": {
+					"name": "ToesL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				}
+			}
+		},
+		{
+			"uuid": "9b33a083-dd8e-21b4-5490-c8446c30c0bc",
+			"name": "animation.billy_bob.eyelids.off",
+			"loop": "hold",
+			"override": false,
+			"length": 0.25,
+			"snapping": 12,
+			"selected": false,
+			"saved": true,
+			"path": "../../../assets/showbiz/showbiz/bots/billy_bob/models/billy_bob.animation.json",
+			"scope": 0,
+			"anim_time_update": "",
+			"blend_weight": "",
+			"start_delay": "",
+			"loop_delay": "",
+			"animators": {
+				"d1c1bac0-3c4f-8601-b100-2d0e4db02ff5": {
+					"name": "EyeLids",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false,
+					"keyframes": [
+						{
+							"channel": "position",
+							"data_points": [
+								{
+									"x": "0",
+									"y": "0.575",
+									"z": "0"
+								}
+							],
+							"uuid": "419aea7c-e47a-e336-1437-d14c44b855ed",
+							"time": 0,
+							"color": -1,
+							"interpolation": "linear"
+						},
+						{
+							"channel": "position",
+							"data_points": [
+								{
+									"x": "0",
+									"y": "0",
+									"z": "0"
+								}
+							],
+							"uuid": "90f50ae0-ba9d-a544-7762-03350acef722",
+							"time": 0.25,
+							"color": -1,
+							"interpolation": "linear"
+						}
+					]
+				},
+				"9b7b4868-2727-96d5-eb6e-e3bc89a4b369": {
+					"name": "Torso",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"fb75f83e-60c0-d35d-1bc7-10866acc8879": {
+					"name": "Head",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d7b59c66-d74c-d8ce-4c06-0867d111b649": {
+					"name": "Head4",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0ca9ec99-8809-2d99-6368-81bd39761d36": {
+					"name": "Head3",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8ad2fd74-6503-75a3-a5bc-5fbb0bca49e2": {
+					"name": "Head2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0bd1472e-9dd3-5f3b-c378-e3ac2767c397": {
+					"name": "EarL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6a2d448c-86ed-a175-ae16-be068d1b056a": {
+					"name": "EarR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5d3b9e70-8012-146e-affe-c0dc9b12a66e": {
+					"name": "Face",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"11de8f1e-b5b0-d908-cb33-986e49138167": {
+					"name": "Snout",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"bc2cbd65-8768-95eb-88f7-153356e37fe3": {
+					"name": "Jaw",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"dffb29a3-daa2-e0d1-fed5-cac4c2bf9f7a": {
+					"name": "EyeLidL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"e2bac06a-6dc5-a15d-56a9-ebd608a6fea1": {
+					"name": "EyeLidR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"875881d5-8128-4842-d368-b3c744daf205": {
+					"name": "Eyes",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"6c664bc8-809a-c85f-a69f-79b6d205871a": {
+					"name": "EarL2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"d8af4a61-d007-b844-41a4-5af330728726": {
+					"name": "EarR2",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"0b79660d-d1c8-3785-7906-018fc2c98a10": {
+					"name": "ArmL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8a3e2805-64f8-66a7-2fd0-840d8161fc35": {
+					"name": "Arm2L",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"2b3a37e7-218b-6116-822d-b4cd76d29c02": {
+					"name": "HandL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"177c86fe-3ccb-67bf-1a7d-75e0f4e4cd77": {
+					"name": "ArmR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"47b334ae-6c3a-f582-e970-a3c04202e661": {
+					"name": "Arm3R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8358c504-0932-2916-a0e4-bf7d12f365e7": {
+					"name": "Arm2R",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"35d8d419-96c4-cc12-8559-06344009a02f": {
+					"name": "HandR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"3b09b129-a791-08e1-e5a2-4d3af441e430": {
+					"name": "Banjo",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"5456f4b5-c161-f1d2-3bb4-c7be6dc101fc": {
+					"name": "LegR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"83d23572-0249-ba9f-e38c-9d751d4f6b26": {
+					"name": "ToesR",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8eef6e61-de46-e9fa-fbef-b58d260cbf62": {
+					"name": "LegL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				},
+				"8158d160-d316-af74-5afa-74b5dfda170f": {
+					"name": "ToesL",
+					"type": "bone",
+					"rotation_global": false,
+					"quaternion_interpolation": false
+				}
+			}
+		}
+	],
+	"export_options": {
+		"gltf": {
+			"encoding": "ascii",
+			"scale": 16,
+			"embed_textures": true,
+			"armature": true,
+			"merge_armature": false,
+			"animations": true
+		}
+	},
+	"geckolib_model_type": "Entity"
 }

@@ -11,7 +11,7 @@
         "issues": "https://github.com/FlooferLand/showbiz/issues"
     },
     "license": "LGPL3",
-    "icon": "assets/showbiz/icon.png",
+    "icon": "assets/showbiz/icon_looney.png",
     "environment": "*",
     "entrypoints": {
         "preLaunch": [
