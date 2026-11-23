@@ -175,8 +175,6 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
                     addTitle(layout, "Failed to find page ${page.number}")
                     return
                 }
-
-                addTitle(layout, page.title ?: "Page $page")
                 for (entry in page.entries) {
                     addElement(layout, entry)
                 }
