@@ -160,9 +160,9 @@ object DrawUtils {
 
         var height = 0f
         val lines = mutableListOf<Pair<FormattedCharSequence, Float>>()
-        for ((blockIndex, block) in text.string.split("\n").withIndex()) {
+        for ((blockIndex, block) in font.splitter.splitLines(text, 9999, text.style).withIndex()) {
             // Separating via maxWidth
-            for ((lineIndex, line) in font.split(Component.literal(block).withStyle(text.style), style.maxWidth).withIndex()) {
+            for ((lineIndex, line) in font.split(block, style.maxWidth).withIndex()) {
                 if (blockIndex > 0 || lineIndex > 0)
                     height += if (lineIndex == 0) style.linePad else style.wrapPad
                 lines.add(line to height)

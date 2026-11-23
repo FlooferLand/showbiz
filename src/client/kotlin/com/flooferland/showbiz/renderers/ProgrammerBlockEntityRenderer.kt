@@ -5,6 +5,7 @@ import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.utils.DrawUtils
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
@@ -17,9 +18,9 @@ class ProgrammerBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : 
         val facing = blockEntity.blockState.getValue(FacingEntityBlock.FACING) ?: return
 
         if (blockEntity.operators.isNotEmpty()) {
-            val text = Component.literal("Operators:\n")
+            val text = Component.literal("Operators:\n").withStyle(ChatFormatting.GRAY)
             for (operator in blockEntity.operators) {
-                text.append(operator.name)
+                text.append(operator.name.copy().withStyle(ChatFormatting.WHITE))
             }
             poseStack.pushPose()
             poseStack.translate(0.5, 0.0, 0.5)
@@ -29,6 +30,7 @@ class ProgrammerBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : 
                 scale = 0.35f
                 rotation = 180f
                 billboard = false
+                drawBackground = false
                 depth = true
                 vAlign = 0f
             }
