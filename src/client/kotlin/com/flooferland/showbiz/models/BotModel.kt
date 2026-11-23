@@ -79,9 +79,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         val showMapping = animatable.show?.data?.mapping
         val showPlaying = animatable.show?.data?.playing == true
 
-        // TODO: For some reason the any mapping doesn't work properly
-        //val bitmapBits = (bot.bitmap.bits["any"]?.toMutableMap() ?: mutableMapOf()) + (bot.bitmap.bits[showMapping] ?: mapOf())
-        val bitmapBits = bot.bitmap.bits[showMapping] ?: bot.bitmap.bits["any"] ?: mapOf()
+        val bitmapBits = bot.bitmap.bits["any"].orEmpty().toMutableMap() + bot.bitmap.bits[showMapping].orEmpty()
 
         // Resetting bones
         val instanceCache = animatable.getAnimatableInstanceCache()
