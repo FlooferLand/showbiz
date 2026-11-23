@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.redstone.Redstone
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
@@ -64,7 +65,7 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         val blockEntity = level.getBlockEntity(pos) as? ProgrammerBlockEntity ?: return InteractionResult.FAIL
         if (!player.mayInteractWith(blockEntity)) return InteractionResult.PASS
         if (data.active && data.blockPos != pos) {
-            player.displayClientMessage(Component.literal("You're already programming another terminal!"), true)
+            player.displayClientMessage(Component.literal("You're already programming!"), true)
             return InteractionResult.FAIL
         }
 
@@ -72,17 +73,27 @@ class ProgrammerBlock(props: Properties) : FacingEntityBlock(props), CustomBlock
         if (data.active) {
             data.blockPos = pos
             blockEntity.operators.add(player)
-            player.displayClientMessage(Component.literal("Entering programming mode"), true)
             Sounds.serverPlayer(player).enter()
         } else {
             data.blockPos = null
             blockEntity.operators.remove(player)
-            player.displayClientMessage(Component.literal("Exiting programming mode"), true)
             Sounds.serverPlayer(player).exit()
         }
         data.saveToPlayer(player)
 
         return InteractionResult.SUCCESS
+    }
+
+    // Why don't comparators work..
+    override fun isSignalSource(state: BlockState) = true
+    override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: Direction): Int {
+        val entity = level.getBlockEntity(pos) as? ProgrammerBlockEntity ?: return Redstone.SIGNAL_NONE
+        return if (entity.operators.isNotEmpty()) Redstone.SIGNAL_MAX else Redstone.SIGNAL_MIN
+    }
+    override fun hasAnalogOutputSignal(state: BlockState) = true
+    override fun getAnalogOutputSignal(state: BlockState, level: Level, pos: BlockPos): Int {
+        val entity = level.getBlockEntity(pos) as? ProgrammerBlockEntity ?: return Redstone.SIGNAL_NONE
+        return entity.operators.size.coerceIn(Redstone.SIGNAL_MIN, Redstone.SIGNAL_MAX)
     }
 
     override fun <T : BlockEntity?> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>) =

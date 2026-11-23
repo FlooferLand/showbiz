@@ -198,10 +198,13 @@ object DrawUtils {
         }
 
         for ((line, ly) in lines) {
-            font.drawInBatch(line, -font.width(line) / 2f, yOffset + ly, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT)
+            val displayMode = if (!style.depth) Font.DisplayMode.SEE_THROUGH else Font.DisplayMode.NORMAL
+            font.drawInBatch(line, -font.width(line) / 2f, yOffset + ly, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, displayMode, 0, LightTexture.FULL_BRIGHT)
         }
-        RenderSystem.disableDepthTest()
-        RenderSystem.depthMask(false)
+        if (!style.depth) {
+            RenderSystem.disableDepthTest()
+            RenderSystem.depthMask(false)
+        }
         buffer.endBatch()
 
         RenderSystem.depthMask(true)
