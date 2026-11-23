@@ -34,7 +34,7 @@ class StagedBotBlock(props: Properties) : BaseEntityBlock(props) {
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.MODEL
 
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        return handleEditScreen(state, level, pos, player, hand, hitResult)
+        return handleEditScreen(stack, state, level, pos, player, hand, hitResult)
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {

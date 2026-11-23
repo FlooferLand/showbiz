@@ -58,7 +58,7 @@ class ShowParserBlock(properties: BlockBehaviour.Properties) : DiodeBlock(proper
     }
 
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        return handleEditScreen(state, level, pos, player, hand, hitResult)
+        return handleEditScreen(stack, state, level, pos, player, hand, hitResult)
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState {

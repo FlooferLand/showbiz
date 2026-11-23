@@ -1,5 +1,18 @@
 package com.flooferland.showbiz.renderers
 
+import com.flooferland.showbiz.items.WandItem
+import com.flooferland.showbiz.registry.ModComponents
+import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.types.ClientConnections
+import com.flooferland.showbiz.types.OwnerId
+import com.flooferland.showbiz.types.connection.ServerConnections.Point
+import com.flooferland.showbiz.types.connection.ServerConnections.PointType
+import com.flooferland.showbiz.utils.DrawUtils
+import com.flooferland.showbiz.utils.Extensions.getHeldItem
+import com.mojang.blaze3d.platform.GlStateManager
+import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.blaze3d.vertex.*
+import com.mojang.math.Axis
 import net.minecraft.client.*
 import net.minecraft.client.gui.*
 import net.minecraft.client.renderer.*
@@ -9,17 +22,6 @@ import net.minecraft.world.entity.*
 import net.minecraft.world.entity.player.*
 import net.minecraft.world.level.*
 import net.minecraft.world.phys.*
-import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.types.ClientConnections
-import com.flooferland.showbiz.types.OwnerId
-import com.flooferland.showbiz.types.connection.ServerConnections.Point
-import com.flooferland.showbiz.types.connection.ServerConnections.PointType
-import com.flooferland.showbiz.utils.DrawUtils
-import com.mojang.blaze3d.platform.GlStateManager
-import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.*
-import com.mojang.math.Axis
 import kotlin.math.atan2
 
 // TODO: Remove queuedText and make it work with normal queued rendering
@@ -67,6 +69,7 @@ object ConnectionRenderer {
 
     //region Queue draw utils stuff
     private fun queueRenderSimple(player: Player, level: Level, partialTick: Float) {
+        val wandStack = player.getHeldItem { it.item is WandItem }
         val eyePos = player.getEyePosition(partialTick)
         val hoveredId = getHoveredId()
         val time = level.gameTime + partialTick.toDouble()
@@ -75,9 +78,10 @@ object ConnectionRenderer {
             val targets = ClientConnections.links[ownerId].orEmpty()
 
             val hovered = ownerId == hoveredId
+            val selected = wandStack?.get(ModComponents.HeldConnection.type) == ownerId
             val wired = points.any { it.connected } || hovered
             if (eyePos.distanceToSqr(from) < RENDER_DISTANCE_SQR) {
-                val size = if (hovered) 0.2 else 0.1
+                val size = (if (hovered || selected) 0.15 else 0.1) + (if (selected) 0.05 else 0.0)
                 val bound = AABB.ofSize(Vec3.ZERO, size, size, size)
                 val nodeColor = getNodeColor(points)
                 val color = if (hovered) FastColor.ARGB32.lerp(0.25f, FastColor.ARGB32.opaque(nodeColor), CommonColors.WHITE) else nodeColor
@@ -238,13 +242,11 @@ object ConnectionRenderer {
         pose.popPose()
     }
 
-    fun renderDeferred(pose: PoseStack) {
+    fun renderDeferred(pose: PoseStack, buffer: MultiBufferSource.BufferSource) {
         val mc = Minecraft.getInstance() ?: return
-        val target = mc.levelRenderer?.entityTarget() ?: return
-        target.bindWrite(false)
 
         val tesselator = Tesselator.getInstance() ?: return
-        RenderSystem.enableDepthTest()
+        RenderSystem.disableDepthTest()
         RenderSystem.enableBlend()
         RenderSystem.blendFuncSeparate(
             GlStateManager.SourceFactor.SRC_ALPHA,
@@ -265,40 +267,13 @@ object ConnectionRenderer {
             builder.build()?.let { mesh -> BufferUploader.drawWithShader(mesh) }
         }
 
-        run { // Render text
-            val mc = Minecraft.getInstance() ?: return@run
-            val camera = mc.gameRenderer?.mainCamera ?: return@run
-            val font = mc.font ?: return@run
-            val bufferSource = mc.renderBuffers()?.bufferSource() ?: return@run
-
-            RenderSystem.disableDepthTest()
-            RenderSystem.depthMask(false)
-
-            val textSnapshot = queuedText.toList()
-            for (text in textSnapshot) {
-                pose.pushPose()
-                pose.translate(text.x, text.y, text.z)
-                pose.mulPose(camera.rotation())
-                pose.mulPose(Axis.XP.rotation(Mth.PI))
-                pose.scale(0.01f, 0.01f, 0.01f)
-                val matrix = pose.last().pose()
-                val shadowText = Component.literal(text.value.string).withColor(0xFF_00_00_00.toInt())
-                font.drawInBatch(shadowText, -(font.width(shadowText) / 2).toFloat() + 1, 1f, 0xFF_00_00_00.toInt(), false, matrix, bufferSource, Font.DisplayMode.NORMAL, 0x00_00_00_00,  LightTexture.FULL_BRIGHT)
-                font.drawInBatch(text.value, -(font.width(text.value) / 2).toFloat(), 0f, 0xFF_FF_FF_FF.toInt(), false, matrix, bufferSource, Font.DisplayMode.SEE_THROUGH, 0x00_00_00_00,  LightTexture.FULL_BRIGHT)
-                pose.popPose()
+        run {
+            for (text in queuedText.toList()) {
+                DrawUtils.drawText(pose, Vec3(text.x.toDouble(), text.y.toDouble(), text.z.toDouble()), text.value, buffer) {
+                    drawBackground = false
+                }
             }
-            bufferSource.endBatch()
-            RenderSystem.enableDepthTest()
-            RenderSystem.depthMask(true)
         }
-
-        pose.popPose()
-        RenderSystem.disableBlend()
-        RenderSystem.defaultBlendFunc()
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
-        RenderSystem.depthMask(true)
-
-        mc.mainRenderTarget.bindWrite(false)
     }
 
     private fun deferRender(layer: DrawLayer = DrawLayer.Solid, call: QueuedDraw.Call) {

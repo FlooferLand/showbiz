@@ -30,7 +30,7 @@ object ClientWorldRender {
                 ProgrammerBlockEntityRenderer.render(mc, buffer, poseStack)
                 BotEntityRenderer.render(mc, buffer, poseStack)
                 ConnectionRenderer.draw(player, buffer, partialTick)
-                ConnectionRenderer.renderDeferred(poseStack)
+                ConnectionRenderer.renderDeferred(poseStack, buffer)
                 DecorEntity.moveAll(ctx)
             }
         }

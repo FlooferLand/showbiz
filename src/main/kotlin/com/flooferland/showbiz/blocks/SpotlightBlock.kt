@@ -60,7 +60,7 @@ class SpotlightBlock(props: Properties) : FacingEntityBlock(props) {
         BlockEntityTicker<T> { level, pos, blockState, entity -> (entity as? SpotlightBlockEntity)?.tick(level, pos, blockState) }
 
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        return handleEditScreen(state, level, pos, player, hand, hitResult)
+        return handleEditScreen(stack, state, level, pos, player, hand, hitResult)
     }
 
     override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, movedByPiston: Boolean) {

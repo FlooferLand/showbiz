@@ -27,7 +27,7 @@ class BitViewBlock(props: Properties) : FacingEntityBlock(props) {
         ModBlocks.BitView.entityType!!.create(pos, state)!!
 
     override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
-        return handleViewScreen(state, level, pos, player, hand, hitResult)
+        return handleViewScreen(stack, state, level, pos, player, hand, hitResult)
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {

@@ -20,6 +20,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.ItemInteractionResult
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
@@ -62,17 +63,19 @@ object Extensions {
     }
 
     /** Should be called in useItemOn */
-    fun Block.handleViewScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
+    fun Block.handleViewScreen(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
         if (!player.mayInteractAt(pos)) return ItemInteractionResult.FAIL
         if (player.isHolding { it.item is WandItem }) return ItemInteractionResult.FAIL
+        if (stack.item is BlockItem) return ItemInteractionResult.FAIL
         if (player is ServerPlayer) player.openMenu(state.getMenuProvider(level, pos))
         return ItemInteractionResult.SUCCESS
     }
 
     /** Should be called in useItemOn */
-    fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
+    fun Block.handleEditScreen(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
         if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return ItemInteractionResult.FAIL
         if (player.isHolding { it.item is WandItem }) return ItemInteractionResult.FAIL
+        if (stack.item is BlockItem) return ItemInteractionResult.FAIL
         if (player is ServerPlayer) player.openMenu(state.getMenuProvider(level, pos))
         return ItemInteractionResult.SUCCESS
     }
