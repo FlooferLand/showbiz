@@ -19,6 +19,19 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 
 object DrawUtils {
+    class TextStyle {
+        var drawBackground: Boolean = true
+        var backgroundColor: Int = 0xCC_00_00_00.toInt()
+        var maxWidth: Int = 150
+        var scale: Float = 1.0f
+        var vAlign: Float = 0.5f
+        var billboard: Boolean = true
+        var rotation: Float = 0f
+        var depth: Boolean = false
+        var wrapPad: Int = 3
+        var linePad: Int = 6
+    }
+
     @Suppress("DuplicatedCode")
     fun drawBox(
         poseStack: PoseStack,
@@ -125,42 +138,45 @@ object DrawUtils {
         poseStack: PoseStack,
         worldPos: Vec3,
         text: Component,
-        scale: Float = 1.0f,
         buffer: MultiBufferSource.BufferSource? = null,
-        backgroundColor: Int = 0xCC_00_00_00.toInt(),
-        maxWidth: Int = 150,
-        wrapPad: Int = 3,
-        linePad: Int = 6,
-        vAlign: Float = 0.5f,
-        drawBackground: Boolean = true
+        configure: TextStyle.() -> Unit = { }
     ) {
         val minecraft = Minecraft.getInstance() ?: return
         val font = minecraft.font ?: return
         val camera = minecraft.gameRenderer?.mainCamera ?: return
         val buffer = buffer ?: minecraft.renderBuffers().bufferSource()
+        val style = TextStyle().apply(configure)
 
         poseStack.pushPose()
         poseStack.translate(worldPos.x, worldPos.y, worldPos.z)
-        poseStack.mulPose(camera.rotation())
+        if (style.billboard) {
+            poseStack.mulPose(camera.rotation())
+        } else {
+            poseStack.mulPose(Axis.YP.rotationDegrees(style.rotation))
+        }
         poseStack.mulPose(Axis.XP.rotation(Mth.PI))
-        poseStack.scale(scale * 0.01f, scale * 0.01f, scale * 0.01f)
+        poseStack.scale(style.scale * 0.01f, style.scale * 0.01f, style.scale * 0.01f)
         val matrix = poseStack.last().pose()
 
         var height = 0f
         val lines = mutableListOf<Pair<FormattedCharSequence, Float>>()
         for ((blockIndex, block) in text.string.split("\n").withIndex()) {
             // Separating via maxWidth
-            for ((lineIndex, line) in font.split(Component.literal(block).withStyle(text.style), maxWidth).withIndex()) {
+            for ((lineIndex, line) in font.split(Component.literal(block).withStyle(text.style), style.maxWidth).withIndex()) {
                 if (blockIndex > 0 || lineIndex > 0)
-                    height += if (lineIndex == 0) linePad else wrapPad
+                    height += if (lineIndex == 0) style.linePad else style.wrapPad
                 lines.add(line to height)
                 height += font.lineHeight
             }
         }
-        val yOffset = -height * vAlign
+        val yOffset = -height * style.vAlign
 
-        if (drawBackground) {
-            RenderSystem.disableDepthTest()
+        if (style.drawBackground) {
+            if (!style.depth) {
+                RenderSystem.disableDepthTest()
+            } else {
+                RenderSystem.enableDepthTest()
+            }
             RenderSystem.disableCull()
             RenderSystem.enableBlend()
             RenderSystem.defaultBlendFunc()
@@ -171,10 +187,10 @@ object DrawUtils {
                 val x1 = -x0
                 val y0 = yOffset + ly - 2f
                 val y1 = yOffset + ly + font.lineHeight + 2f
-                builder.addVertex(matrix, x0, y0, 0f).setColor(backgroundColor)
-                builder.addVertex(matrix, x0, y1, 0f).setColor(backgroundColor)
-                builder.addVertex(matrix, x1, y1, 0f).setColor(backgroundColor)
-                builder.addVertex(matrix, x1, y0, 0f).setColor(backgroundColor)
+                builder.addVertex(matrix, x0, y0, 0f).setColor(style.backgroundColor)
+                builder.addVertex(matrix, x0, y1, 0f).setColor(style.backgroundColor)
+                builder.addVertex(matrix, x1, y1, 0f).setColor(style.backgroundColor)
+                builder.addVertex(matrix, x1, y0, 0f).setColor(style.backgroundColor)
             }
             BufferUploader.drawWithShader(builder.buildOrThrow())
             RenderSystem.enableCull()

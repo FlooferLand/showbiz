@@ -27,6 +27,7 @@ object ClientWorldRender {
                 CollidePartEntityRenderer.render(mc, buffer, poseStack)
                 ModelPartEntityRenderer.render(mc, buffer, poseStack)
                 CurtainBlockEntityRenderer.render(mc, buffer, poseStack)
+                ProgrammerBlockEntityRenderer.render(mc, buffer, poseStack)
                 BotEntityRenderer.render(mc, buffer, poseStack)
                 ConnectionRenderer.draw(player, buffer, partialTick)
                 ConnectionRenderer.renderDeferred(poseStack)

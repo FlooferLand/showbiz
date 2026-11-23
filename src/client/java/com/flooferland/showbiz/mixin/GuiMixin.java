@@ -1,7 +1,7 @@
 package com.flooferland.showbiz.mixin;
 
 import com.flooferland.showbiz.entities.ModelPartEntity;
-import com.flooferland.showbiz.renderers.ProgrammerRenderer;
+import com.flooferland.showbiz.renderers.ProgrammerGuiRenderer;
 import com.flooferland.showbiz.types.entity.PlayerProgrammingData;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
@@ -43,7 +43,7 @@ public class GuiMixin {
 		var data = PlayerProgrammingData.Companion.getFromPlayer(player);
 		if (data.getActive()) {
 			ci.cancel();
-			ProgrammerRenderer.INSTANCE.renderBitView(guiGraphics, data);
+			ProgrammerGuiRenderer.INSTANCE.renderBitView(guiGraphics, data);
 		}
 	}
 }

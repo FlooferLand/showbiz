@@ -24,7 +24,7 @@ class ModelPartEntityRenderer(val context: EntityRendererProvider.Context) : Ent
             }
 
             val text = entity.getName()
-            DrawUtils.drawText(poseStack, entity.position(), text, scale = 0.8f - pickZoom, buffer = buffer)
+            DrawUtils.drawText(poseStack, entity.position(), text, buffer) { scale = 0.8f - pickZoom }
 
             if (prevPick?.id != entity.id) {
                 pickZoom = 0.1f

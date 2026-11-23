@@ -51,9 +51,12 @@ class ProgrammerBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             for ((i, heldKey) in data.heldKeys.withIndex()) {
                 if (!heldKey) continue
                 val mappedBits = data.mapKeyToBit(i) ?: continue
-                val (mapping, bit) = mappedBits.getFirstNotEmpty() ?: continue
+                val (mapping, bits) = mappedBits.getFirstNotEmpty() ?: continue
+                if (show.data.mapping != null && show.data.mapping != mapping && bits.any { bit -> show.data.signal.frameHas(bit) }) {
+                    player.displayClientMessage(Component.literal("Conflicting mappings: last=${show.data.mapping}, now=$mapping"), true)
+                }
                 show.data.mapping = mapping
-                show.data.signal += bit
+                show.data.signal += bits
             }
         }
         show.send()

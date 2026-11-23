@@ -72,7 +72,10 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
                 Component.literal("Show playing=${entity.show.data.playing} map=${entity.show.data.mapping}"),
                 Component.literal("Bot mappings={${bot.bitmap.bits.map { "${it.key}=${it.value.size}" }.joinToString(" ")}}")
             ).forEach { text.append(it.append("\n")) }
-            DrawUtils.drawText(poseStack, entity.eyePosition.add(0.0, 0.5, 0.0), text, maxWidth = 300, buffer = buffer, vAlign = 1f)
+            DrawUtils.drawText(poseStack, entity.eyePosition.add(0.0, 0.5, 0.0), text, buffer) {
+                maxWidth = 300
+                vAlign = 1f
+            }
         }
     }
 }

@@ -248,7 +248,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                     .append(Component.literal("Group ${curtain.group}\n").withColor(curtain.getGroupColor()))
                     .append(Component.literal("-"))
 
-                DrawUtils.drawText(poseStack, curtainPos.bottomCenter, text, scale = 0.9f - zoom, buffer = buffer)
+                DrawUtils.drawText(poseStack, curtainPos.bottomCenter, text, buffer) { scale = 0.9f - zoom }
             }
         }
     }

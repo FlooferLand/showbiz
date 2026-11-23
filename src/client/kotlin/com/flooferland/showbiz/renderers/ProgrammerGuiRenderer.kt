@@ -1,7 +1,5 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
 import com.flooferland.showbiz.blocks.entities.ProgrammerBlockEntity
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.screens.ProgrammerScreen
@@ -9,8 +7,10 @@ import com.flooferland.showbiz.types.entity.PlayerProgrammingData
 import com.flooferland.showbiz.types.math.Vec2ic
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphics
 
-object ProgrammerRenderer {
+object ProgrammerGuiRenderer {
     val settingsTextureOn = rl("textures/gui/sprites/hud/programbar_settings_on.png")
     val settingsTextureOff = rl("textures/gui/sprites/hud/programbar_settings_off.png")
     val settingsTextureSize = Vec2ic(16, 24)

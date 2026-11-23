@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.types.connection.data
 
+import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.network.packets.PlaybackAudioChunkPacket
 import com.flooferland.showbiz.network.packets.PlaybackAudioStatePacket
 import com.flooferland.showbiz.types.AudioChannel
@@ -94,7 +95,10 @@ data class PackedAudioData(
 
     fun withChannel(channel: AudioChannel): PackedAudioData {
         if (triggerAction != Action.None || mono.isEmpty() || !format.stereo) return this
-        val bytes = AudioUtils.extract(mono, format, channel) ?: return this
+        val bytes = AudioUtils.extract(mono, format, channel) ?: run {
+            Showbiz.log.warn("Failed to extract channel '${channel}'")
+            return this
+        }
         return copy(mono = bytes, format = format.copy(stereo = false)).also {
             it.chunkId = chunkId
             it.lead = lead

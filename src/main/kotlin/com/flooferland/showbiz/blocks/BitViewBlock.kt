@@ -2,13 +2,15 @@ package com.flooferland.showbiz.blocks
 
 import com.flooferland.showbiz.blocks.base.FacingEntityBlock
 import com.flooferland.showbiz.registry.ModBlocks
-import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.Extensions.generateHorizontal
 import com.flooferland.showbiz.utils.Extensions.getCachedOrRotate
+import com.flooferland.showbiz.utils.Extensions.handleViewScreen
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.world.InteractionResult
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.ItemInteractionResult
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.RenderShape
@@ -24,10 +26,8 @@ class BitViewBlock(props: Properties) : FacingEntityBlock(props) {
     override fun newBlockEntity(pos: BlockPos, state: BlockState) =
         ModBlocks.BitView.entityType!!.create(pos, state)!!
 
-    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
-        if (player.isHolding(ModItems.Wand.item)) return InteractionResult.PASS
-        player.openMenu(getMenuProvider(state, level, pos))
-        return InteractionResult.SUCCESS
+    override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
+        return handleViewScreen(state, level, pos, player, hand, hitResult)
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {

@@ -128,6 +128,7 @@ object ShowbizClient : ClientModInitializer {
             add(ModBlocks.Spotlight, ::SpotlightBlockEntityRenderer)
             add(ModBlocks.Cymbal, ::CymbalBlockEntityRenderer)
             add(ModBlocks.ReelHolder, ::ReelHolderBlockEntityRenderer)
+            add(ModBlocks.Programmer, ::ProgrammerBlockEntityRenderer)
             add(ModBlocks.Monitor, ::MonitorBlockEntityRenderer)
 
             EntityRendererRegistry.register(ModClientEntities.ModelPart.type, ::ModelPartEntityRenderer)

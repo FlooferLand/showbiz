@@ -62,6 +62,14 @@ object Extensions {
     }
 
     /** Should be called in useItemOn */
+    fun Block.handleViewScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
+        if (!player.mayInteractAt(pos)) return ItemInteractionResult.FAIL
+        if (player.isHolding { it.item is WandItem }) return ItemInteractionResult.FAIL
+        if (player is ServerPlayer) player.openMenu(state.getMenuProvider(level, pos))
+        return ItemInteractionResult.SUCCESS
+    }
+
+    /** Should be called in useItemOn */
     fun Block.handleEditScreen(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult {
         if (!player.mayInteractAt(pos) || !Permissions.EditScreenAccess.testAndNotify(player)) return ItemInteractionResult.FAIL
         if (player.isHolding { it.item is WandItem }) return ItemInteractionResult.FAIL
