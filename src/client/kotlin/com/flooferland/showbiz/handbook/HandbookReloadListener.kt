@@ -61,7 +61,7 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
             try {
                 val styles = root.styles.entries.associateBy { it.id }
                 val entry = HandbookEntry(
-                    summary = root.head.summary.toComp(),
+                    summary = root.head.summary,
                     facts = root.head.facts.lines.map { it.toComp() },
                     pages = root.pages.entries,
                     styles = root.styles.entries.associateBy { it.id }

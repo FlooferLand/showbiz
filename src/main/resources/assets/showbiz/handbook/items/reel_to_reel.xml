@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <root xmlns="showbiz:handbook">
     <head>
-        <summary>Plays back reels</summary>
+        <summary>
+            <p>Reads show reels, plays them back, and handles recording</p>
+            <p>Slot a reel in at the top, start/pause playback by right-clicking</p>
+        </summary>
         <facts>
-            <l>Slot in a reel at the top</l>
-            <l>Start/pause playback by right-clicking</l>
             <l>Can pull reels from a chest on its side</l>
-            <l>Emits a redstone signal on it's side while a show is playing</l>
+            <l>Emits a redstone signal on its sides while a show is playing</l>
         </facts>
     </head>
     <pages>

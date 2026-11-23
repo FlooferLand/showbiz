@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root xmlns="showbiz:handbook">
+    <head>
+        <summary>
+            <p>Listens to a show and outputs a redstone signal based off the bit filters you set.</p>
+            <p>This can be used if you for example wanted to power a redstone lamp using a spotlight bit, or wanted to power other redstone circuitry, such as curtains.</p>
+        </summary>
+        <facts>
+        </facts>
+    </head>
+    <pages>
+    </pages>
+    <styles>
+        <def id="list_test">
+            <foreground color="red" />
+        </def>
+    </styles>
+</root>

@@ -32,7 +32,7 @@ import net.minecraft.world.item.ItemStack
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import kotlin.math.roundToInt
 
-class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) : Screen(Component.literal("The Showbiz Handbook").withStyle(ChatFormatting.BOLD)) {
+class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) : Screen(Component.literal("The Showbiz Handbook")) {
     val background = rl("textures/gui/handbook_page.png")
 
     val texSize = 256
@@ -40,27 +40,91 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
     val textureX get() = (width / 2) - (size / 2)
     val textureY get() = (height / 2) - (size / 2)
     val contentWidth get() = size - 220
+    val contentHeight get() = size - 220
 
     val entry: HandbookEntry? = Handbook.cache.items.get(key)
     var pageBack: PageButton? = null
     var pageForward: PageButton? = null
-    var page = -1
+    var page: Page = Page.Main()
+
+    sealed class Page(val id: String) {
+        class Main : Page("main") {
+            override fun getName(entry: HandbookEntry) =
+                Component.literal("Main")!!
+        }
+        class Facts : Page("facts") {
+            override fun getName(entry: HandbookEntry) =
+                Component.literal("Facts")!!
+        }
+        class Content(val number: Int = 0) : Page("page$number") {
+            override fun getName(entry: HandbookEntry) =
+                entry.pages.getOrNull(number)?.title?.let { Component.literal(it) } ?: Component.literal("Page $number")!!
+        }
+
+        abstract fun getName(entry: HandbookEntry): Component
+
+        fun back(entry: HandbookEntry): Page = when (this) {
+            is Main -> this
+            is Facts -> Main()
+            is Content -> when {
+                number > 0 -> Content(number - 1)
+                entry.facts.isNotEmpty() -> Facts()
+                else -> Main()
+            }
+        }
+
+        fun next(entry: HandbookEntry): Page = when (this) {
+            is Main -> when {
+                entry.facts.isNotEmpty() -> Facts()
+                entry.pages.isNotEmpty() -> Content(0)
+                else -> this
+            }
+            is Facts -> when {
+                entry.pages.isNotEmpty() -> Content(0)
+                else -> this
+            }
+            is Content -> when {
+                number + 1 < entry.pages.size -> Content(number + 1)
+                else -> this
+            }
+        }
+    }
 
     override fun init() {
         updateLayout()
     }
 
+    fun pageBack() {
+        page = page.back(entry ?: return)
+        updateLayout()
+    }
+
+    fun pageNext() {
+        page = page.next(entry ?: return)
+        updateLayout()
+    }
+
     fun updateLayout() {
         clearWidgets()
+        val entry = entry ?: return
+
         run {
-            val x = textureX + 90
-            val y = textureY + (size * 0.77f).toInt()
-            pageBack = PageButton(x, y, false, { page -= 1; updateLayout() }, true)
-            pageBack?.visible = entry?.let { page > -1 } ?: false
-            pageForward = PageButton(x + (size * 0.45).toInt(), y, true, { page += 1; updateLayout() }, true)
-            pageForward?.visible = entry?.let { page + 1 < it.pages.size } ?: false
-            addRenderableWidget(pageBack!!)
-            addRenderableWidget(pageForward!!)
+            val x = textureX + 110
+            val y = textureY + (size * 0.76f).toInt()
+            pageBack = PageButton(x, y, false, { pageBack() }, true)
+                .also { button ->
+                    val back = page.back(entry)
+                    button.visible = back.id != page.id
+                    button.tooltip = Tooltip.create(back.getName(entry))
+                    addRenderableWidget(button)
+                }
+            pageForward = PageButton(x + 140, y, true, { pageNext() }, true)
+                .also { button ->
+                    val next = page.next(entry)
+                    button.visible = next.id != page.id
+                    button.tooltip = Tooltip.create(next.getName(entry))
+                    addRenderableWidget(button)
+                }
         }
 
         val layout = LinearLayout.vertical().spacing(6)
@@ -80,25 +144,49 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
 
     fun loadPages(layout: LinearLayout) {
         if (entry == null) {
-            layout.addChild(TextWidget(font, Component.literal("No page was found"), contentWidth))
-        } else if (page < 0) {
-            BuiltInRegistries.ITEM.getOptional(key).ifPresent {
-                layout.addChild(ItemWidget(it.defaultInstance, size = 32))
-                layout.addChild(TextWidget(font, it.getName(it.defaultInstance).copy().withStyle(ChatFormatting.BOLD), contentWidth))
-            }
-            layout.addChild(TextWidget(font, entry.summary.copy().withStyle(ChatFormatting.ITALIC), contentWidth))
-            layout.addChild(SpacerElement.height(font.lineHeight))
+            addTitle(layout, "Page $page was not found")
+            return
+        }
 
-            for (fact in entry.facts) {
-                layout.addChild(TextWidget(font, fact, contentWidth))
+        val page = page
+        when (page) {
+            is Page.Main -> {
+                val itemSize = 32
+                BuiltInRegistries.ITEM.getOptional(key).ifPresent {
+                    layout.addChild(ItemWidget(it.defaultInstance, size = itemSize))
+                    layout.addChild(TextWidget(font, it.getName(it.defaultInstance).copy().withStyle(ChatFormatting.BOLD), contentWidth))
+                }
+
+                for (entry in entry.summary.entries) {
+                    addElement(layout, entry)
+                }
+                layout.addChild(SpacerElement.height(font.lineHeight))
             }
-        } else if (page < entry.pages.size) {
-            val page = entry.pages[page]
-            layout.addChild(TextWidget(font, Component.literal("Title: ${page.title}"), contentWidth))
-            for (entry in page.entries) {
-                addElement(layout, entry)
+
+            is Page.Facts -> {
+                for (fact in entry.facts) {
+                    layout.addChild(TextWidget(font, fact, contentWidth))
+                }
+            }
+
+            // Pages
+            is Page.Content -> {
+                val page = entry.pages.getOrNull(page.number) ?: run {
+                    addTitle(layout, "Failed to find page ${page.number}")
+                    return
+                }
+
+                addTitle(layout, page.title ?: "Page $page")
+                for (entry in page.entries) {
+                    addElement(layout, entry)
+                }
             }
         }
+    }
+
+    fun addTitle(layout: LinearLayout, text: String) {
+        layout.addChild(TextWidget(font, Component.literal(text).withStyle(ChatFormatting.BOLD), contentWidth))
+        layout.addChild(SpacerElement.height(font.lineHeight))
     }
 
     // Probably not a good idea to use recursion..
@@ -111,10 +199,12 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
             add(TextWidget(font, comp, contentWidth))
         }
         when (entry) {
-            is HandbookXml.Element.Line ->
+            is HandbookXml.Element.Line -> {
                 addText(Component.literal("- ").append(entry.toComp()))
-            is HandbookXml.Element.TextContent ->
+            }
+            is HandbookXml.Element.TextContent -> {
                 addText(entry.toComp())
+            }
             is HandbookXml.Element.Image -> {
                 val instance = Minecraft.getInstance()
                 val id = ResourceLocation.tryParse(entry.src)?.let { id ->
@@ -142,10 +232,15 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
                     addText(Component.literal("[${entry.alt}]"))
                 }
             }
-            is HandbookXml.Element.ListElement ->
-                for (entry in entry.lines) { addElement(layout, entry) }
-            is HandbookXml.Element.Container ->
-                for (entry in entry.entries) { addElement(layout, entry) }
+            is HandbookXml.Element.ListElement -> {
+                for (entry in entry.lines) addElement(layout, entry)
+            }
+            is HandbookXml.Element.Container -> {
+                for (entry in entry.entries) addElement(layout, entry)
+            }
+            is HandbookXml.Element.Summary -> {
+                for (entry in entry.entries) addElement(layout, entry)
+            }
         }
     }
 
@@ -158,6 +253,10 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
         super.render(graphics, mouseX, mouseY, partialTick)
 
         // Handbook title
+        val title = run {
+            val text = if (page !is Page.Main && entry != null) page.getName(entry).copy() else title.copy()
+            text.withStyle(ChatFormatting.BOLD)
+        }
         val x = textureX + (size / 2) - (font.width(title) / 2)
         val y = textureY + (size * 0.2f).toInt()
         graphics.drawString(font, title, x, y, CommonColors.BLACK, false)

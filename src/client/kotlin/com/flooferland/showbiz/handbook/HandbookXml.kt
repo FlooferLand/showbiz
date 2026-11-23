@@ -1,5 +1,7 @@
 package com.flooferland.showbiz.handbook
+import com.flooferland.showbiz.types.math.Vec2i
 import kotlinx.serialization.Serializable
+import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import nl.adaptivity.xmlutil.serialization.XmlElement
@@ -74,25 +76,45 @@ object HandbookXml {
 
     @Serializable
     sealed class Element(val style: String = "") {
+        abstract fun getSize(): Vec2i
+
+        protected fun textSize(text: Component) = Vec2i(
+            x = Minecraft.getInstance()?.font?.width(text) ?: 0,
+            y = Minecraft.getInstance()?.font?.lineHeight ?: 0
+        )
+        protected fun containerSize(entries: List<Element>): Vec2i {
+            val size = Vec2i()
+            for (item in entries) {
+                size += item.getSize()
+            }
+            return size
+        }
+
         @Serializable
         @XmlSerialName("container")
         data class Container(
             val type: String,
             val entries: List<Element> = emptyList()
-        ) : Element()
+        ) : Element() {
+            override fun getSize() = containerSize(entries)
+        }
 
         @Serializable
         @XmlSerialName("list")
         data class ListElement(
             val type: String,
             val lines: List<Line> = emptyList()
-        ) : Element()
+        ) : Element() {
+            override fun getSize() = containerSize(lines)
+        }
 
         @Serializable
         sealed class TextContent(
             val key: String = "",
             @XmlValue val text: String = ""
         ) : Element() {
+            override fun getSize() = textSize(toComp())
+
             // TODO: Read the style property
             fun toComp(): MutableComponent {
                 val styles = Handbook.cache.styles[style] ?: StyleDefs(id = style)
@@ -107,7 +129,11 @@ object HandbookXml {
 
         @Serializable
         @XmlSerialName("summary")
-        class Summary : TextContent()
+        class Summary(
+            val entries: List<Element> = emptyList()
+        ) : Element() {
+            override fun getSize() = containerSize(entries)
+        }
 
         @Serializable
         @XmlSerialName("p")
@@ -119,6 +145,11 @@ object HandbookXml {
 
         @Serializable
         @XmlSerialName("image")
-        data class Image(val src: String, val alt: String = "") : Element()
+        data class Image(val src: String, val alt: String = "") : Element() {
+            override fun getSize(): Vec2i {
+                // TODO: Measure texture sizes
+                return Vec2i.ZERO
+            }
+        }
     }
 }

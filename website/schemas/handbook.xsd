@@ -4,7 +4,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="head" />
-                <xs:element ref="pages" />
+                <xs:element ref="pages" minOccurs="0" />
                 <xs:element ref="styles" minOccurs="0" />
             </xs:sequence>
         </xs:complexType>
@@ -145,7 +145,7 @@
     </xs:element>
 
     <!-- Summary -->
-    <xs:element name="summary" type="text_content" />
+    <xs:element name="summary" type="element_container" />
 
     <!-- Page -->
     <xs:element name="page">
