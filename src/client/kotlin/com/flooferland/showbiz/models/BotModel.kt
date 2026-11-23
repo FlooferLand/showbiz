@@ -73,6 +73,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
     override fun setCustomAnimations(animatable: T, instanceId: Long, state: AnimationState<T>) {
         val bot = ShowbizClient.bots[animatable.botId] ?: run { resetAll(); return }
         val model = currentModel ?: run { resetAll(); return }
+        if (isStrangeEvent(animatable, checkDistance = true)) return
 
         // Getting the bits via the mapping
         // TODO: Make bots work when they receive any mapping, even an empty one
@@ -307,7 +308,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
 
     private fun poseEasterEgg(animatable: T, delta: Float) {
         val entity = animatable as? BotEntity ?: return
-        if (entity.strangeEvent <= 0) return
+        if (!isStrangeEvent(animatable)) return
 
         val minecraft = Minecraft.getInstance() ?: return
         val partialTicks = minecraft.timer.gameTimeDeltaTicks

@@ -2,6 +2,7 @@ package com.flooferland.showbiz.models
 
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
+import com.flooferland.showbiz.entities.BotEntity
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
@@ -46,6 +47,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     }
 
     override fun getModelResource(animatable: T): ResourceLocation {
+        if (isStrangeEvent(animatable, checkDistance = true)) return rl("geo/entity/it.geo.json")
         currentVariant = animatable.botVariant
         val botId = animatable.botId ?: return emptyModel
         val bot = ShowbizClient.bots[botId] ?: run {
@@ -57,6 +59,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     }
 
     override fun getTextureResource(animatable: T): ResourceLocation {
+        if (isStrangeEvent(animatable, checkDistance = true)) return rl("textures/entity/it.png")
         val botId = animatable.botId ?: return emptyTexture
         val bot = ShowbizClient.bots[botId] ?: run {
             addError(Error.MissingBot, animatable,
@@ -69,6 +72,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
 
     // TODO: QUICK: Make this cache the animation based on the bot ID, loading the cached version if cached
     override fun getAnimationResource(animatable: T): ResourceLocation? {
+        if (isStrangeEvent(animatable, checkDistance = true)) return null
         val botId = animatable.botId ?: return null
         return ShowbizClient.bots[botId]?.variants[animatable.botVariant]?.animations
     }
@@ -95,8 +99,9 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     // For some reason GeckoLib seems to require setting the active model every single time?
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel {
         if (location == null) return super.getBakedModel(emptyModel)
+
         val variants = ShowbizClient.botModels[location]
-        val model = variants?.get(currentVariant) ?: variants?.get(IBot.DEFAULT_VARIANT) ?: return super.getBakedModel(emptyModel)
+        val model = variants?.get(currentVariant) ?: variants?.get(IBot.DEFAULT_VARIANT) ?: return super.getBakedModel(location)
 
         if (model != currentModel) {
             currentModel = model
@@ -114,6 +119,15 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
             addError(Error.MissingAnimation, animatable, "Couldn't find animation '$name' in '$res'")
             null
         }
+    }
+
+    fun isStrangeEvent(animatable: T, checkDistance: Boolean = false): Boolean {
+        val entity = animatable as? BotEntity ?: return false
+        val event = animatable.strangeEvent > 0
+
+        if (!checkDistance) return event
+        val player = Minecraft.getInstance().player ?: return event
+        return event && player.distanceTo(entity) > 24
     }
 
     companion object {
