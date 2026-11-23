@@ -51,6 +51,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
+import javax.sound.sampled.AudioFormat
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -289,7 +290,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             }
 
             // Setting playing to false when the show ends
-            // TODO: Make shows unload data when they finish, the item keeps vanishing for some reason
             if (seek >= endTime && !recording && endTime > 0.0) {
                 setPlaying(false)
                 hasFinished = true
@@ -320,7 +320,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             format.sampleRate = showFormat.sampleRate.toInt()
             format.sampleBits = showFormat.sampleSizeInBits
             format.stereo = showFormat.channels == 2
-            format.signed = true
+            format.signed = showFormat.encoding == AudioFormat.Encoding.PCM_SIGNED
             format.bigEndian = showFormat.isBigEndian
 
             chunkId++

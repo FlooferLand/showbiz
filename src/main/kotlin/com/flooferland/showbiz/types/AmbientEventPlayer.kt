@@ -56,7 +56,7 @@ class AmbientEventPlayer(val entity: BlockEntity, val sound: ModSounds, val bloc
     inner class TriggerContext() {
         fun isDark(): Boolean {
             val level = entity.level as? ServerLevel ?: return false
-            return level.lightEngine.getRawBrightness(entity.blockPos, 0) < 2
+            return level.lightEngine.getRawBrightness(entity.blockPos, 0) < 3
         }
         fun isCaveLike(): Boolean {
             val level = entity.level as? ServerLevel ?: return false
@@ -73,6 +73,7 @@ class AmbientEventPlayer(val entity: BlockEntity, val sound: ModSounds, val bloc
                     biome.`is`(Biomes.DRIPSTONE_CAVES)
                     || biome.`is`(Biomes.LUSH_CAVES)
                     || biome.`is`(Biomes.DEEP_DARK)
+                    || biome.`is`(Biomes.THE_VOID)
                 )
         }
     }
