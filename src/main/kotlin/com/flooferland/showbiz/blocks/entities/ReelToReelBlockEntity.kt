@@ -13,15 +13,18 @@ import com.flooferland.showbiz.show.ShowData
 import com.flooferland.showbiz.show.SignalFrame
 import com.flooferland.showbiz.show.bitIdArrayOf
 import com.flooferland.showbiz.types.AmbientEventPlayer
+import com.flooferland.showbiz.types.FriendlyAudioFormat.Companion.toFriendly
 import com.flooferland.showbiz.types.connection.ConnectionManager
 import com.flooferland.showbiz.types.connection.IConnectable
 import com.flooferland.showbiz.types.connection.PortDirection
 import com.flooferland.showbiz.types.connection.data.*
 import com.flooferland.showbiz.types.modelpart.IModelPartInteractable
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
+import com.flooferland.showbiz.utils.AudioUtils
 import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
+import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getNearbyPlayers
 import com.flooferland.showbiz.utils.Extensions.markDirtyNotifyAll
 import com.flooferland.showbiz.utils.Extensions.notifyPermissionError
@@ -52,6 +55,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import javax.sound.sampled.AudioFormat
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -98,6 +102,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     public var showData: ShowData = ShowData(this)
     public val signal = SignalFrame()
 
+    var loudness = 0f
+        public get private set
     var seek = 0.0
         public get private set
     var playing = false
@@ -108,6 +114,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         public get private set
 
     var clientSeek = 0.0
+    var clientLoudness = 0f
 
     private val fps = 60  // Tied to rshw
     private var seekInt = 0
@@ -244,6 +251,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val targetBytes = (seek * format.sampleRate * frameSize).toInt()
             val lookaheadBytes = format.sampleRate.toInt() * frameSize / 2
 
+            run { // Loudness
+                val windowBytes = ((format.sampleRate * 0.05).toInt() * frameSize).coerceAtLeast(frameSize)
+                val nextLoudness = AudioUtils.volumePeak(
+                    showData.audio,
+                    format.toFriendly(),
+                    targetBytes,
+                    targetBytes + windowBytes
+                )
+                if (abs(nextLoudness - loudness) > 0.1f) {
+                    loudness = nextLoudness
+                    stateDirty = true
+                }
+            }
+
             val earliestBytes = ((targetBytes - lookaheadBytes).coerceAtLeast(0) / frameSize) * frameSize
             if (audioBytesWritten < earliestBytes) {
                 audioBytesWritten = earliestBytes
@@ -315,6 +336,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     private fun sendChunk(chunk: ByteArray, startIndex: Int) {
         val showFormat = showData.format ?: return
+
+        // Sending the packet
         with (audio.data) {
             mono = chunk
             format.sampleRate = showFormat.sampleRate.toInt()
@@ -342,6 +365,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             resetPlayback()
         } else if (paused) {
             setPaused(false)
+        }
+        if (!playing || paused) {
+            loudness = 0f
         }
 
         show.send(PackedShowData(playing, signal, showData.mapping))
@@ -416,7 +442,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         level?.setBlockAndUpdate(blockPos, state)
         level?.updateNeighborsAt(blockPos, state.block)
         resetInactivity()
-        setChanged()
+        markDirtyNotifyAll()
 
         // TODO: Find only near players
         val serverLevel = level as? ServerLevel ?: return
@@ -499,6 +525,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.putBoolean("recording", recording)
         tag.putBoolean("finished", hasFinished)
         tag.putDouble("seek", seek)
+        tag.putFloat("loudness", loudness)
         connectionManager.save(tag)
         showData.saveNBT(tag)
 
@@ -518,6 +545,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         recording = tag.getBooleanOrNull("recording") ?: false
         hasFinished = tag.getBooleanOrNull("finished") ?: false
         seek = tag.getDoubleOrNull("seek") ?: 0.0
+        loudness = tag.getFloatOrNull("loudness") ?: 0f
         connectionManager.load(tag)
         showData.loadNBT(tag)
 

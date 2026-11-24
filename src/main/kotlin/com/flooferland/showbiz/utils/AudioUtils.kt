@@ -2,6 +2,7 @@ package com.flooferland.showbiz.utils
 
 import com.flooferland.showbiz.types.AudioChannel
 import com.flooferland.showbiz.types.FriendlyAudioFormat
+import kotlin.math.abs
 
 object AudioUtils {
     /** Extracts a specific channel from a stereo PCM byte array */
@@ -28,12 +29,29 @@ object AudioUtils {
         return output
     }
 
+    fun volumePeak(bytes: ByteArray, format: FriendlyAudioFormat, startByte: Int = 0, endByte: Int = bytes.size): Float {
+        if (bytes.isEmpty() || format.sampleBits != 16 || !format.signed) return 0f
+        val step = if (format.stereo) 4 else 2
+        val start = (startByte.coerceIn(0, bytes.size) / step) * step
+        val end = (endByte.coerceIn(start, bytes.size) / step) * step
+        if (end <= start) return 0f
+
+        var peak = 0
+        for (offset in start until end step 2) {
+            val abs = abs(read16(bytes, offset, format.bigEndian))
+            if (abs > peak) peak = abs
+        }
+        return (peak / Short.MAX_VALUE.toFloat()).coerceIn(0f, 1f)
+    }
+
+    /** @throws IndexOutOfBoundsException */
     private fun read16(bytes: ByteArray, offset: Int, bigEndian: Boolean): Int {
         val lo = bytes[offset].toInt() and 0xff
         val hi = bytes[offset + 1].toInt() and 0xff
         return (if (bigEndian) (lo shl 8) or hi else (hi shl 8) or lo).toShort().toInt()
     }
 
+    /** @throws IndexOutOfBoundsException */
     private fun write16(bytes: ByteArray, offset: Int, value: Int, bigEndian: Boolean) {
         val sample = value.toShort().toInt()
         if (bigEndian) {

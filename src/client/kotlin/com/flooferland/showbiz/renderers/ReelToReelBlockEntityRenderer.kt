@@ -6,6 +6,7 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModClientModels
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.utils.DrawUtils
 import com.flooferland.showbiz.utils.Extensions.toShortString
 import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rlVanilla
@@ -16,12 +17,15 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 import net.minecraft.world.item.ItemDisplayContext
 import net.minecraft.world.item.Items
+import net.minecraft.world.phys.AABB
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import kotlin.time.Duration.Companion.seconds
@@ -34,12 +38,13 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         val reelStack = entity.getItem(0)
 
         // Time
-        val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
-        val target = entity.seek * 200.0
-        if (!minecraft.isPaused) {
-            entity.clientSeek = lerp(entity.clientSeek, target, delta)
+        run {
+            val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
+            val target = entity.seek * 200.0
+            if (!minecraft.isPaused) {
+                entity.clientSeek = lerp(entity.clientSeek, target, delta)
+            }
         }
-
         val rotationAngle = entity.clientSeek.toFloat()
 
         poseStack.pushPose()
@@ -76,28 +81,40 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             poseStack.popPose()
         }
 
-        // Rendering the reel bands
-        // NOTE: Innacurate, reel to reels have the reels going to separate reel pickup points, not to each-other
-        /*if (!entity.isEmpty) runCatching {
-            val reelBand = Minecraft.getInstance().modelManager.getModel(ModelResourceLocation(rlVanilla("black_concrete"), "inventory")) ?: return@runCatching
-            run {
-                poseStack.pushPose()
-                poseStack.translate(0.5, 0.4, 0.3)
-                poseStack.mulPose(Axis.ZP.rotationDegrees(25f))
-                poseStack.scale(0.5f, 0.01f, 0.038f)
-                Minecraft.getInstance().itemRenderer.render(
-                    Items.GRAY_CONCRETE.defaultInstance,
-                    ItemDisplayContext.NONE,
-                    false,
-                    poseStack,
-                    bufferSource,
-                    packedLight,
-                    packedOverlay,
-                    reelBand
-                )
-                poseStack.popPose()
+        // Rendering volume meter
+        runCatching {
+            val delta = (ShowbizClient.getDeltaTime() * 0.5).coerceIn(0.0, 1.0)
+            val target = if (entity.playing && !entity.paused) entity.loudness else 0f
+            if (!minecraft.isPaused) {
+                entity.clientLoudness = lerp(entity.clientLoudness.toDouble(), target.toDouble(), delta).toFloat()
+                entity.clientLoudness = entity.clientLoudness.coerceIn(0f, 1f)
             }
-        }*/
+
+            val consumer = bufferSource.getBuffer(RenderType.solid())
+
+            val rotation = lerp(-60.0, 60.0, entity.clientLoudness.toDouble()).toFloat()
+            val width = 0.005
+            val length = 0.1
+            poseStack.pushPose()
+            poseStack.translate(0.25, 0.125, 0.38)
+            poseStack.mulPose(Axis.ZP.rotationDegrees(rotation))
+            DrawUtils.drawBox(
+                poseStack = poseStack,
+                consumer = consumer,
+                box = AABB(-width, 0.0, -0.01, width, length, 0.01),
+                color = CommonColors.BLACK,
+                packedOverlay = packedOverlay,
+                packedLight = packedLight,
+                normalShade = true,
+                drawSouth = false,
+                drawNorth = true,
+                drawWest = false,
+                drawEast = false,
+                drawTop = false,
+                drawBottom = false
+            )
+            poseStack.popPose()
+        }
 
         // Rendering the reels
         for (i in 0..1) {
