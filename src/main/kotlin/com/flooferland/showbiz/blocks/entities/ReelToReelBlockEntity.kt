@@ -493,12 +493,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // Removing legacy tags
         tag.removeIfPresent("signal_frame")
 
-        // Saving the inventory
-        NonNullList.create<ItemStack>().also { items ->
-            items.add(inputItem)
-            ContainerHelper.saveAllItems(tag, items, true, registries)
-        }
-
         // Saving other stuff
         tag.putBoolean("playing", playing)
         tag.putBoolean("paused", paused)
@@ -507,21 +501,16 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         tag.putDouble("seek", seek)
         connectionManager.save(tag)
         showData.saveNBT(tag)
+
+        // Saving the inventory
+        NonNullList.create<ItemStack>().also { items ->
+            items.add(inputItem)
+            ContainerHelper.saveAllItems(tag, items, true, registries)
+        }
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
-
-        // Loading the inventory
-        // I have absolutely no idea why this works but touching it breaks it in some form of way
-        inputItem = ItemStack.EMPTY
-        NonNullList.create<ItemStack>().also { items ->
-            items.add(inputItem)
-            ContainerHelper.loadAllItems(tag, items, registries)
-            inputItem = items.getOrNull(0)
-                ?: showData.name?.let { ReelItem.makeItem(it) }  // Pre-0.6.0 shows that were loaded up
-                ?: ItemStack.EMPTY
-        }
 
         // Loading other stuff
         playing = tag.getBooleanOrNull("playing") ?: false
@@ -531,6 +520,20 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         seek = tag.getDoubleOrNull("seek") ?: 0.0
         connectionManager.load(tag)
         showData.loadNBT(tag)
+
+        // Loading the inventory
+        // I have absolutely no idea why this works but touching it breaks it in some form of way
+        inputItem = ItemStack.EMPTY
+        NonNullList.create<ItemStack>().also { items ->
+            items.add(inputItem)
+            ContainerHelper.loadAllItems(tag, items, registries)
+            inputItem = items.getOrNull(0)?.takeUnless { it.isEmpty }
+                ?: showData.name?.let { ReelItem.makeItem(it) }  // Pre-0.6.0 shows that were loaded up
+                ?: ItemStack.EMPTY
+            println("LOAD: loadAdditional: Got show_name: ${showData.name}")
+            println("LOAD: loadAdditional: Got made item: ${showData.name?.let { ReelItem.makeItem(it) }}")
+            println("LOAD: loadAdditional: Got inputItem: $inputItem")
+        }
     }
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag? {

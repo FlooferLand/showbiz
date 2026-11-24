@@ -9,6 +9,7 @@ import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.types.FFmpeg
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
 import com.flooferland.showbiz.utils.Extensions.getDoubleOrNull
 import com.flooferland.showbiz.utils.Extensions.getFileExtension
 import com.flooferland.showbiz.utils.Extensions.getStringOrNull
@@ -215,10 +216,15 @@ class ShowData(val owner: ReelToReelBlockEntity) {
 
     fun loadNBT(tag: CompoundTag?) {
         if (tag == null) return
+
+        // Reading pre-0.6 shows since the whole show data was slapped onto the root of the reel to reel before
+        val tag = tag.getCompoundOrNull("show") ?: tag
+
         val oldName = name
         id = tag.getUUIDOrNull("show_id")
         name = tag.getStringOrNull("show_name")
         mapping = tag.getStringOrNull("show_mapping")
+        println("LOAD: ShowData: Got show_name: $name")
 
         isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
         loading = tag.getBooleanOrNull("is_loading") ?: false
@@ -226,6 +232,8 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         progressText = tag.getStringOrNull("progress_text") ?: ""
     }
     fun saveNBT(tag: CompoundTag) {
+        val tag = CompoundTag().also { tag.put("show", it) }
+
         id?.let { tag.putUUID("show_id", it) }
         name?.let { tag.putString("show_name", it) }
         mapping?.let { tag.putString("show_mapping", it) }
