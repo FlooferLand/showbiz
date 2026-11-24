@@ -158,7 +158,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         // Unloading inactive shows
         if (level is ServerLevel) {
             if (showData.isLoaded && ticksSinceInteract > unloadTime) {
-                Showbiz.log.info("Unloaded show $blockPos out of inactivity")
+                Showbiz.log.info("Unloaded show (${blockPos.toShortString()}) out of inactivity")
                 showData.unload()
                 resetInactivity()
                 markDirtyNotifyAll()
