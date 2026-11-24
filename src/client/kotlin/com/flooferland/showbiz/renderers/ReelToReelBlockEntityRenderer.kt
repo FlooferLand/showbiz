@@ -42,7 +42,7 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
             val target = entity.seek * 200.0
             if (!minecraft.isPaused) {
-                entity.clientSeek = lerp(entity.clientSeek, target, delta)
+                entity.clientSeek = if (!entity.showData.isLoaded) target else lerp(entity.clientSeek, target, delta)
             }
         }
         val rotationAngle = entity.clientSeek.toFloat()

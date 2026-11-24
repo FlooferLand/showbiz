@@ -8,6 +8,7 @@
         <facts>
             <l>Can pull reels from a chest on its side</l>
             <l>Emits a redstone signal on its sides while a show is playing</l>
+            <l>The VU meter needle is driven by the server</l>
         </facts>
     </head>
     <pages>

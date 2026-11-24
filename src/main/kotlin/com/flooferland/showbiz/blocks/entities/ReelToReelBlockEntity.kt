@@ -91,9 +91,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     val aBufferSize: Int
         get() {
             val format = showData.format ?: showData.targetFormat
-            val frameSize = format.frameSize
-            val bytes = (format.sampleRate * aFrameMs / 1_000).toInt()
-            return bytes - (bytes % frameSize)
+            val frames = (format.sampleRate * aFrameMs / 1_000f).toInt()
+            return frames * format.frameSize
         }
     val endTime: Double
         get() = showData.endTime
