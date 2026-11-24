@@ -5,17 +5,26 @@
             <p>Allows you to send show data from the game out through a serial port</p>
             <p>Useful if you for example had an Arduino board and wanted to control a bot in real life</p>
         </summary>
-        <facts>
-        </facts>
     </head>
     <pages>
         <page title="Data">
             <p>Currently, the data is sent as commands. Each command ending with a new line (\n)</p>
             <p>For example, "c pause" is a control command sent when the show is unpaused, "c unpause" would be the opposite</p>
             <p>The signal command starts with an "s" and contains a list of bits (ex: "s 166,42")</p>
+            <p>The next pages provide some code examples</p>
+        </page>
+        <page title="1. Reading Showbiz serial data">
+            <p>The image below shows you how to read from the serial port</p>
+            <image style="screenshot" src="showbiz:textures/handbook/show_bridge_example_reading_data.png" alt="Image showing how to read the data" />
+        </page>
+        <page title="2. Reading bits">
+            <p>The image below shows you how to split the bits and is used in the previous step</p>
+            <image style="screenshot" src="showbiz:textures/handbook/show_bridge_example_reading_bits.png" alt="Image showing how to read the bits" />
         </page>
     </pages>
     <styles>
-
+        <def id="screenshot">
+            <fit type="cover"/>
+        </def>
     </styles>
 </root>

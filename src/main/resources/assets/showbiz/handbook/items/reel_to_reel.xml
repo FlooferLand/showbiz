@@ -14,17 +14,13 @@
     <pages>
         <page title="Page 1">
             <container type="vbox">
-                <p>Some text</p>
-                <list type="ordered">
-                    <l>Some list of sorts</l>
-                    <l style="list_test">Yippe</l>
-                </list>
+                <p style="style_test">Work in progress</p>
                 <image src="showbiz:textures/item/bot.png" alt="test image" />
             </container>
         </page>
     </pages>
     <styles>
-        <def id="list_test">
+        <def id="style_test">
             <foreground color="red" />
         </def>
     </styles>

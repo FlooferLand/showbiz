@@ -58,15 +58,16 @@ object HandbookReloadListener : SimplePreparableReloadListener<MutableMap<Resour
             val dir = path.getOrNull(0) ?: continue
             val name = path.getOrNull(1)?.let { location.withPath(it) } ?: continue
 
+
             try {
                 val styles = root.styles.entries.associateBy { it.id }
                 val entry = HandbookEntry(
                     summary = root.head.summary,
                     facts = root.head.facts.lines.map { it.toComp() },
                     pages = root.pages.entries,
-                    styles = root.styles.entries.associateBy { it.id }
+                    styles = styles
                 )
-                cache.styles = styles
+                root.pages.entries.forEach { page -> page.entries.forEach { it.owner = entry } }
                 when (dir) {
                     "items" -> cache.items.put(name, entry)
                     "bots" -> cache.bots.put(name, entry)

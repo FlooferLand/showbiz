@@ -157,12 +157,16 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
 
     fun tick() {
         val player = Minecraft.getInstance()?.gameRenderer?.mainCamera?.position ?: return
-        handleALBasic { alListener3f(AL_POSITION, player.x.toFloat(), player.y.toFloat(), player.z.toFloat()) }
-        updatePosition()
-        updateAttenuation()
+        if (isValidSource()) {
+            handleALBasic { alListener3f(AL_POSITION, player.x.toFloat(), player.y.toFloat(), player.z.toFloat()) }
+            updatePosition()
+            updateAttenuation()
+        }
     }
 
     private fun updateAttenuation() {
+        if (!isValidSource()) return
+
         handleAL { alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED) }
         handleAL { alSourcef(source, AL_ROLLOFF_FACTOR, 8f) }
         handleAL { alSourcef(source, AL_REFERENCE_DISTANCE, 15f) }
@@ -176,6 +180,8 @@ class Source(val friendlyFormat: FriendlyAudioFormat, var position: Vec3? = null
             handleAL { alSourcef(source, EXTSourceRadius.AL_SOURCE_RADIUS, 4.0f) }
     }
     private fun updatePosition() {
+        if (!isValidSource()) return
+
         val pos = position
         if (pos != null) {
             handleAL { alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE) }

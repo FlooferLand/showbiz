@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root xmlns="showbiz:handbook">
+    <head>
+        <summary>
+            <p>Allows you to play video from a show</p>
+            <p>Requires installing FFmpeg on the server</p>
+        </summary>
+    </head>
+</root>

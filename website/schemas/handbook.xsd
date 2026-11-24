@@ -13,7 +13,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="summary" />
-                <xs:element ref="facts" />
+                <xs:element ref="facts" minOccurs="0" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -51,17 +51,27 @@
                         <xs:attribute name="color" type="xs:string" />
                     </xs:complexType>
                 </xs:element>
+                <xs:element name="fit" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="type" type="fits" />
+                    </xs:complexType>
+                </xs:element>
             </xs:all>
             <xs:attribute name="id" type="xs:string" use="required" />
         </xs:complexType>
     </xs:element>
 
-    <!-- Colors -->
+    <!-- Style enums -->
     <xs:simpleType name="formats">
         <xs:restriction base="xs:string">
             <xs:enumeration value="white" />
             <xs:enumeration value="red" />
             <xs:enumeration value="yellow" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="fits">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="cover" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -161,8 +171,12 @@
     <!-- Other types -->
     <xs:element name="image" substitutionGroup="element">
         <xs:complexType>
-            <xs:attribute name="src" type="xs:anyURI" use="required" />
-            <xs:attribute name="alt" type="xs:string" />
+            <xs:complexContent>
+                <xs:extension base="element_base">
+                    <xs:attribute name="src" type="xs:anyURI" use="required" />
+                    <xs:attribute name="alt" type="xs:string" />
+                </xs:extension>
+            </xs:complexContent>
         </xs:complexType>
     </xs:element>
 </xs:schema>

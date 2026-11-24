@@ -8,7 +8,9 @@ import com.flooferland.showbiz.interfaces.TextureSizeAccessor
 import com.flooferland.showbiz.mixin.accessor.AbstractContainerScreenAccessor
 import com.flooferland.showbiz.registry.ModClientInput
 import com.flooferland.showbiz.screens.widgets.ItemWidget
+import com.flooferland.showbiz.screens.widgets.ScaledImageWidget
 import com.flooferland.showbiz.screens.widgets.TextWidget
+import com.flooferland.showbiz.types.math.Vec2ic
 import com.flooferland.showbiz.utils.Sounds.localPlayer
 import com.flooferland.showbiz.utils.rl
 import com.mojang.blaze3d.systems.RenderSystem
@@ -16,7 +18,6 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractWidget
-import net.minecraft.client.gui.components.ImageWidget
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.layouts.LayoutSettings
 import net.minecraft.client.gui.layouts.LinearLayout
@@ -92,6 +93,10 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
 
     override fun init() {
         updateLayout()
+    }
+
+    override fun isPauseScreen(): Boolean {
+        return false
     }
 
     fun pageBack() {
@@ -196,6 +201,8 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
         fun addText(comp: Component) {
             add(TextWidget(font, comp, contentWidth))
         }
+
+        val styles = entry.getStyles()
         when (entry) {
             is HandbookXml.Element.Line -> {
                 addText(Component.literal("- ").append(entry.toComp()))
@@ -221,9 +228,20 @@ class HandbookPageScreen(val parent: Screen? = null, val key: ResourceLocation) 
                 val width = accessor?.showbiz_getWidth() ?: 0
                 val height = accessor?.showbiz_getHeight() ?: 0
 
-                @Suppress("KotlinConstantConditions")
                 if (width > 0 && height > 0 && id != null) {
-                    val widget = ImageWidget.texture(width, height, id, width, height)
+                    val scale = if (width > contentWidth) contentWidth.toFloat() / width else 1f
+                    val fit = styles.entries.firstOrNull() { it is HandbookXml.Styling.Fit } as? HandbookXml.Styling.Fit
+                    val drawSize = when (fit?.type) {
+                        // Squishes images when they're too tall.. should prob fix that
+                        HandbookXml.Styling.Fit.COVER_TYPE -> Vec2ic(
+                            (width * scale).roundToInt().coerceIn(0..contentWidth),
+                            (height * scale).roundToInt().coerceIn(0..contentHeight)
+                        )
+                        null -> Vec2ic(width, height)
+                        else -> return
+                    }
+
+                    val widget = ScaledImageWidget.texture(drawSize.x, drawSize.y, id, width, height)
                     widget.tooltip = Component.literal(entry.alt.ifEmpty { "image" }).let { Tooltip.create(it, it) }
                     add(widget)
                 } else {

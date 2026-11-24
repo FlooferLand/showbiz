@@ -11,8 +11,7 @@ object Handbook {
 
     public data class Cache(
         val items: Category = Category(),
-        val bots: Category = Category(),
-        var styles: Map<String, HandbookXml.StyleDefs> = mapOf()
+        val bots: Category = Category()
     )
 
     public class Category {
@@ -42,9 +41,7 @@ object Handbook {
                             val color = style.color.let { ChatFormatting.getByName(it) } ?: ChatFormatting.WHITE
                             textStyle.withColor(color)
                         }
-                        is Styling.Background -> {
-                            textStyle
-                        }
+                        else -> textStyle
                     }
                 }
             }

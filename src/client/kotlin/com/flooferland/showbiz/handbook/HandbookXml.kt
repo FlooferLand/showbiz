@@ -1,6 +1,7 @@
 package com.flooferland.showbiz.handbook
 import com.flooferland.showbiz.types.math.Vec2i
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -16,10 +17,10 @@ object HandbookXml {
         val head: Head,
 
         @XmlElement(true)
-        val pages: Transient.Pages = Transient.Pages(),
+        val pages: Collections.Pages = Collections.Pages(),
 
         @XmlElement(true)
-        val styles: Transient.Styles = Transient.Styles(),
+        val styles: Collections.Styles = Collections.Styles(),
     )
 
     @Serializable
@@ -29,7 +30,7 @@ object HandbookXml {
         val summary: Element.Summary,
 
         @XmlElement(true)
-        val facts: Transient.Facts = Transient.Facts()
+        val facts: Collections.Facts = Collections.Facts()
     )
 
     @Serializable
@@ -47,7 +48,7 @@ object HandbookXml {
     )
 
     /// Wrappers since XML parsing won't work another way
-    object Transient {
+    object Collections {
         @Serializable
         @XmlSerialName("facts")
         data class Facts(
@@ -72,11 +73,23 @@ object HandbookXml {
 
         @Serializable @XmlSerialName("background")
         data class Background(val color: String) : Styling()
+
+        @Serializable @XmlSerialName("fit")
+        data class Fit(val type: String) : Styling() {
+            companion object {
+                const val COVER_TYPE = "cover"
+            }
+        }
     }
 
     @Serializable
     sealed class Element(val style: String = "") {
+        @Transient internal var owner: HandbookEntry? = null
+
         abstract fun getSize(): Vec2i
+        fun getStyles(): StyleDefs {
+            return owner?.styles[style] ?: StyleDefs(id = style)
+        }
 
         protected fun textSize(text: Component) = Vec2i(
             x = Minecraft.getInstance()?.font?.width(text) ?: 0,
@@ -117,13 +130,12 @@ object HandbookXml {
 
             // TODO: Read the style property
             fun toComp(): MutableComponent {
-                val styles = Handbook.cache.styles[style] ?: StyleDefs(id = style)
                 val comp = if (key.isNotEmpty()) {
                     Component.translatableWithFallback(key, text)
                 } else {
                     Component.literal(text)
                 }
-                return Handbook.Style.getComp(comp, styles)
+                return Handbook.Style.getComp(comp, getStyles())
             }
         }
 

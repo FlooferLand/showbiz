@@ -8,11 +8,4 @@
         <facts>
         </facts>
     </head>
-    <pages>
-    </pages>
-    <styles>
-        <def id="list_test">
-            <foreground color="red" />
-        </def>
-    </styles>
 </root>
