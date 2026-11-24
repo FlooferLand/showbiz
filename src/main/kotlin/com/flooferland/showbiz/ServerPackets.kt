@@ -86,14 +86,20 @@ object ServerPackets {
                     Showbiz.log.warn("Build timestamps are empty (client=${packet.buildStamp}, server=${UpdateChecker.buildStamp})")
                     return@runCatching
                 }
-                val clientTime = Instant.ofEpochSecond(packet.buildStamp)
-                val serverTime = Instant.ofEpochSecond(UpdateChecker.buildStamp)
-                if (serverTime != clientTime && serverTime.isAfter(clientTime)) {
+
+                val clientStamp = Instant.ofEpochSecond(packet.buildStamp)
+                val serverStamp = Instant.ofEpochSecond(UpdateChecker.buildStamp)
+
+                if (serverStamp > clientStamp) {
                     val reason = Component.literal("The Showbiz mod is out of date.\n\n")
-                        .append(Component.literal("Your version was built on $clientTime\n"))
-                        .append(Component.literal("Server version was built on $serverTime"))
+                        .append(Component.literal("Your version was built on $clientStamp\n"))
+                        .append(Component.literal("Server version was built on $serverStamp"))
                     player.connection.send(ClientboundDisconnectPacket(reason))
                     return@listen
+                } else if (serverStamp < clientStamp) {
+                    val text = Component.literal("Your Showbiz mod is newer than the one installed on the server")
+                        .withStyle(ChatFormatting.YELLOW)
+                    player.displayClientMessage(text, false)
                 }
             }
 
