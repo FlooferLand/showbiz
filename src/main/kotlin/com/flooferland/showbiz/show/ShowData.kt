@@ -67,7 +67,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
     val loadContext = Dispatchers.IO + CoroutineExceptionHandler { context, throwable -> Showbiz.log.error("ShowData coroutine", throwable)  }
     val listener = Task.Listener { task ->
         progressText = task?.name ?: ""
-        owner.markDirtyNotifyAll()
+        owner.level?.server?.execute { owner.markDirtyNotifyAll() }
     }
 
     fun getFilePath(filename: String) = FileStorage.fetchShowPaths()[filename] ?: Path("${FileStorage.SHOWS_DIR}/$filename")
