@@ -530,9 +530,6 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             inputItem = items.getOrNull(0)?.takeUnless { it.isEmpty }
                 ?: showData.name?.let { ReelItem.makeItem(it) }  // Pre-0.6.0 shows that were loaded up
                 ?: ItemStack.EMPTY
-            println("LOAD: loadAdditional: Got show_name: ${showData.name}")
-            println("LOAD: loadAdditional: Got made item: ${showData.name?.let { ReelItem.makeItem(it) }}")
-            println("LOAD: loadAdditional: Got inputItem: $inputItem")
         }
     }
 

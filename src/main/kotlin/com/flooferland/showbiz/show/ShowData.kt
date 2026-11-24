@@ -224,7 +224,6 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         id = tag.getUUIDOrNull("show_id")
         name = tag.getStringOrNull("show_name")
         mapping = tag.getStringOrNull("show_mapping")
-        println("LOAD: ShowData: Got show_name: $name")
 
         isLoaded = tag.getBooleanOrNull("is_loaded") ?: false
         loading = tag.getBooleanOrNull("is_loading") ?: false
