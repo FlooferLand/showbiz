@@ -1,6 +1,7 @@
 package com.flooferland.showbiz
 
 import com.flooferland.showbiz.Permissions.Companion.mayInteractWith
+import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.network.packets.BotListSelectPacket
 import com.flooferland.showbiz.network.packets.ClientCapabilitiesPacket
 import com.flooferland.showbiz.network.packets.ModelPartInteractPacket
@@ -106,14 +107,22 @@ object ServerPackets {
             // Addons
             val playerAddons = packet.addons
             for ((addonId, addon) in Showbiz.addons) {
+                fun badAddon(reason: Component): Boolean {
+                    if (addonId == MOD_ID || addonId.startsWith(MOD_ID)) {
+                        player.sendSystemMessage(Component.literal("$reason"))
+                        return false
+                    }
+                    player.connection.send(ClientboundDisconnectPacket(reason))
+                    return true
+                }
+
                 // Checking presence
                 if (!playerAddons.containsKey(addonId)) {
                     val reason = Component.literal("Missing Showbiz addon ").append(Component.literal("$addonId v${addon.manifest.addon.version}").withStyle(ChatFormatting.YELLOW))
                         .append(Component.literal("\n\n").withStyle(ChatFormatting.RESET))
                         .append(Component.literal("Installed addons:\n").append("[${playerAddons.keys.sorted().joinToString(", ")}]\n\n"))
                         .append(Component.literal("Server addons:\n").append("[${Showbiz.addons.keys.sorted().joinToString(", ")}]\n\n"))
-                    player.connection.send(ClientboundDisconnectPacket(reason))
-                    return@listen
+                    if (badAddon(reason)) return@listen
                 }
 
                 // Getting the versions (skips if null cuz the manifest might be missing on the client)
@@ -129,8 +138,7 @@ object ServerPackets {
                         .append(Component.literal(addonId).withStyle(ChatFormatting.GRAY))
                         .append(" (v${playerVersion})\n")
                         .append("v$serverVersion is installed on the server")
-                    player.connection.send(ClientboundDisconnectPacket(reason))
-                    return@listen
+                    if (badAddon(reason)) return@listen
                 }
                 if (playerVersion.string != serverVersion.string) {
                     player.sendSystemMessage(Component.literal("Showbiz addon '${addonId}' version mismatch ($playerVersion != $serverVersion)"))

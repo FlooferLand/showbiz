@@ -8,7 +8,9 @@ import com.flooferland.showbiz.registry.ModSounds
 import com.flooferland.showbiz.types.BotPreviewAnimatable
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.types.ResourceId
+import com.flooferland.showbiz.utils.ClientExtensions.pushAndPop
 import com.mojang.blaze3d.platform.Lighting
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
 import net.minecraft.client.Minecraft
@@ -70,21 +72,25 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         val depth = 100.0
         val heightOffset = 0.2f * height
         val poseStack = guiGraphics.pose()
-        poseStack.pushPose()
-        poseStack.translate(x.toDouble() + (width / 2), y.toDouble() + (height) - heightOffset + 10, depth)
-        poseStack.scale(scale, -scale, scale)
-        poseStack.mulPose(Axis.XP.rotationDegrees(15f))
-        poseStack.mulPose(Axis.YP.rotationDegrees(180f + 45f + rotation))
+        poseStack.pushAndPop {
+            translate(x.toDouble() + (width / 2), y.toDouble() + (height) - heightOffset + 10, depth)
+            scale(scale, -scale, scale)
+            mulPose(Axis.XP.rotationDegrees(15f))
+            mulPose(Axis.YP.rotationDegrees(180f + 45f + rotation))
 
-        Lighting.setupFor3DItems()
-        val texture = model.getTextureResource(animatable)
-        val renderType = model.getRenderType(animatable, texture) ?: return
-        val buffer = guiGraphics.bufferSource().getBuffer(renderType)
-        renderer.defaultRender(poseStack, animatable, guiGraphics.bufferSource(), renderType, buffer, 0f, partialTick, LightTexture.FULL_BRIGHT)
-        guiGraphics.bufferSource().endBatch(renderType)
+            Lighting.setupFor3DItems()
+            val texture = model.getTextureResource(animatable)
+            val renderType = model.getRenderType(animatable, texture) ?: return@pushAndPop
+            val buffer = guiGraphics.bufferSource().getBuffer(renderType)
+            renderer.defaultRender(poseStack, animatable, guiGraphics.bufferSource(), renderType, buffer, 0f, partialTick, LightTexture.FULL_BRIGHT)
+            guiGraphics.bufferSource().endBatch(renderType)
+        }
+        resetRender(guiGraphics)
+    }
+
+    fun resetRender(guiGraphics: GuiGraphics) {
         Lighting.setupForFlatItems()
-        poseStack.popPose()
-
+        RenderSystem.defaultBlendFunc()
         guiGraphics.disableScissor()
     }
 
@@ -110,7 +116,10 @@ class BotPreviewWidget(x: Int, y: Int, width: Int, height: Int) : AbstractWidget
         }
 
         val result = runCatching { renderBot(guiGraphics, width, height, mouseX, mouseY, partialTick) }
-        result.onFailure { Showbiz.log.error("Failed to render bot in preview", it) }
+        result.onFailure {
+            resetRender(guiGraphics)
+            Showbiz.log.error("Failed to render bot in preview", it)
+        }
     }
 
     override fun playDownSound(handler: SoundManager) {

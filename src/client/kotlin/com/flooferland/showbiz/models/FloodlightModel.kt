@@ -1,9 +1,9 @@
 package com.flooferland.showbiz.models
 
-import net.minecraft.resources.*
-import net.minecraft.util.*
 import com.flooferland.showbiz.entities.FloodlightEntity
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.Mth
 import software.bernie.geckolib.animation.AnimationState
 import software.bernie.geckolib.model.DefaultedEntityGeoModel
 

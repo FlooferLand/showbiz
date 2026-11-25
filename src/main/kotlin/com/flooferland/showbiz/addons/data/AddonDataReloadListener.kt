@@ -49,14 +49,12 @@ object AddonDataReloadListener : SimplePreparableReloadListener<LoadedData>(), I
                         addonId,
                         AddonNotice(AddonNotice.Severity.Error, AddonNotice.Side.Data, Component.literal(msg), throwable = throwable)
                     )
-                    Showbiz.log.error("Addon '$addonId' (datapack): $msg", throwable)
                 }
                 fun warn(msg: String) {
                     AddonNotices.add(
                         addonId,
                         AddonNotice(AddonNotice.Severity.Warning, AddonNotice.Side.Data, Component.literal(msg))
                     )
-                    Showbiz.log.warn("Addon '$addonId' (datapack): $msg")
                 }
                 fun getRes(path: String): IoSupplier<InputStream>? =
                     pack.getResource(PackType.SERVER_DATA, rlCustom(namespace.replace("file/", ""), path))

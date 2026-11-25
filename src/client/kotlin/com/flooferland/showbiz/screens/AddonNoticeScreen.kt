@@ -90,7 +90,13 @@ class AddonNoticeScreen(val parent: Screen? = null) : Screen(Component.literal("
             notice.title?.let { label.append(Component.literal(" : $it").withStyle(ChatFormatting.GRAY)) }
 
             val text = notice.text.copy()
-            notice.throwable?.let { text.append(Component.literal("\n${it}\n").withStyle(ChatFormatting.GRAY)) }
+            notice.throwable?.let { throwable ->
+                val message = throwable.localizedMessage ?: throwable.message ?: ""
+                val trace = throwable.stackTrace.take(5).joinToString("\n") { "\tat $it" }
+                val body = if ('\n' in message || ':' in message) message else "$message\n$trace".trim()
+                val errorText = "${throwable.javaClass.simpleName}: $body"
+                text.append(Component.literal("\n${errorText}\n").withStyle(ChatFormatting.RED))
+            }
 
             // Adding lines
             noticeList.addRow(NoticeLine(label.visualOrderText, backgroundColor, 4, true, text))

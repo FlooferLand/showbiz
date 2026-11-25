@@ -168,7 +168,7 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
     override fun addAdditionalSaveData(tag: CompoundTag) {
         tag.putString("bot_id", botId?.toString() ?: "")
         tag.putString("bot_variant", botVariant)
-        tag.putInt("strange_event", strangeEvent)
+        if (strangeEvent != 0) tag.putInt("strange_event", strangeEvent)
 
         super.addAdditionalSaveData(tag)
         connectionManager.save(tag)

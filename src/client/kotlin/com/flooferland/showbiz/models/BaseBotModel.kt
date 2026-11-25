@@ -3,12 +3,13 @@ package com.flooferland.showbiz.models
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.addons.data.BotModelData
 import com.flooferland.showbiz.entities.BotEntity
+import com.flooferland.showbiz.types.BotError
+import com.flooferland.showbiz.types.BotErrors
 import com.flooferland.showbiz.types.IBot
 import com.flooferland.showbiz.utils.rl
 import com.flooferland.showbiz.utils.rlCustom
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.phys.Vec3
 import software.bernie.geckolib.animatable.GeoAnimatable
 import software.bernie.geckolib.animation.Animation
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
@@ -21,51 +22,33 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     protected var currentVariant: String = IBot.DEFAULT_VARIANT
     protected var currentModel: BotModelData? = null
 
-    enum class Error {
-        MissingBot,
-        MissingModel,
-        MissingTexture,
-        MissingAnimation,
-        RenderException;
-
-        var context: String? = null
-        var botId: String? = null
-        var botPos: Vec3? = null
-        fun withContext(context: String): Error {
-            this.context = context
-            return this
-        }
-        fun withBot(animatable: IBot): Error {
-            this.botId = animatable.botId.toString()
-            this.botPos = animatable.botPos
-            return this
-        }
-    }
-
-    fun addError(err: Error, animatable: T, context: String) {
-        errorsTriggered[animatable] = err.withBot(animatable).withContext(context)
-    }
-
     override fun getModelResource(animatable: T): ResourceLocation {
         if (isStrangeEvent(animatable, checkDistance = true)) return rl("geo/entity/it.geo.json")
+
         currentVariant = animatable.botVariant
-        val botId = animatable.botId ?: return emptyModel
+        val botId = animatable.botId ?: run {
+            BotErrors.add(BotError.MissingBot().withBot(animatable).withContext("Failed to a bot by bot ID ${animatable.botId}"))
+            return errorModel
+        }
         val bot = ShowbizClient.bots[botId] ?: run {
-            val context = "Failed to get model for bot $botId. This error usually occurs when your files aren't structured properly"
-            addError(Error.MissingBot, animatable, context)
-            return emptyModel
+            BotErrors.add(BotError.MissingBot().withBot(animatable).withContext("Failed to get the model for bot $botId"))
+            return errorModel
         }
         return bot.variants[currentVariant]?.model ?: bot.getDefaultModel()
     }
 
     override fun getTextureResource(animatable: T): ResourceLocation {
         if (isStrangeEvent(animatable, checkDistance = true)) return rl("textures/entity/it.png")
-        val botId = animatable.botId ?: return emptyTexture
+
+        val botId = animatable.botId ?: run {
+            BotErrors.add(BotError.MissingBot().withBot(animatable).withContext("Failed to a bot by bot ID ${animatable.botId}"))
+            return errorTexture
+        }
         val bot = ShowbizClient.bots[botId] ?: run {
-            addError(Error.MissingBot, animatable,
+            BotErrors.add(BotError.MissingBot().withBot(animatable).withContext(
                 "Failed to get texture for bot $botId"
-            )
-            return emptyTexture
+            ))
+            return errorTexture
         }
         return bot.variants[currentVariant]?.texture ?: bot.getDefaultTexture()
     }
@@ -98,10 +81,16 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
 
     // For some reason GeckoLib seems to require setting the active model every single time?
     override fun getBakedModel(location: ResourceLocation?): BakedGeoModel {
-        if (location == null) return super.getBakedModel(emptyModel)
+        if (location == null) return super.getBakedModel(errorModel)
 
         val variants = ShowbizClient.botModels[location]
-        val model = variants?.get(currentVariant) ?: variants?.get(IBot.DEFAULT_VARIANT) ?: return super.getBakedModel(location)
+        val model = variants?.get(currentVariant)
+            ?: variants?.get(IBot.DEFAULT_VARIANT)
+            ?: runCatching { return super.getBakedModel(location) }.getOrNull()
+            ?: run {
+                BotErrors.add(BotError.MissingModel().withContext("Failed to get any model for '${location}'"))
+                return super.getBakedModel(errorModel)
+            }
 
         if (model != currentModel) {
             currentModel = model
@@ -112,11 +101,11 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
 
     override fun getAnimation(animatable: T, name: String): Animation? {
         val res = getAnimationResource(animatable) ?: run {
-            addError(Error.MissingAnimation, animatable, "Couldn't find animation file for animation '$name'")
+            BotErrors.add(BotError.MissingAnimation().withBot(animatable).withContext("Couldn't find animation file for animation '$name'"))
             null
         }
         return ShowbizClient.botAnimations[res]?.get(animatable.botVariant)?.getAnimation(name) ?: run {
-            addError(Error.MissingAnimation, animatable, "Couldn't find animation '$name' in '$res'")
+            BotErrors.add(BotError.MissingAnimation().withBot(animatable).withContext("Couldn't find animation '$name' in '$res'"))
             null
         }
     }
@@ -131,8 +120,7 @@ open class BaseBotModel<T> : GeoModel<T>() where T: GeoAnimatable, T: IBot {
     }
 
     companion object {
-        val errorsTriggered = hashMapOf<IBot, Error>()
-        val emptyModel = rl("geo/empty.geo.json")
-        val emptyTexture = rl("textures/empty.png")
+        val errorModel = rl("geo/error.geo.json")
+        val errorTexture = rl("textures/error.png")
     }
 }

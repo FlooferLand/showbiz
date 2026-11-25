@@ -1,18 +1,22 @@
 package com.flooferland.showbiz.addons
 
+import com.flooferland.showbiz.utils.Extensions.ifNotEmpty
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.ResourceLocation
 
+// Note to self: USE THE ADDON ERROR FUNCTION FOR EXCEPTIONS!!
+// It already handles exceptions, don't shove them into the errors themselves
+
 sealed class AddonErr {
-    class FailedToParse(val thing: String) : AddonErr() {
+    class FailedToParse(val thing: String, val info: String = "") : AddonErr() {
         override fun getText(): MutableComponent =
-            Component.literal("Failed to parse ").append(quote(thing))
+            Component.literal("Failed to parse ").append(quote(thing)).append(info.ifNotEmpty { ": $info" })
     }
-    class FailedToFind(val thing: String) : AddonErr() {
+    class FailedToFind(val thing: String, val info: String = "") : AddonErr() {
         override fun getText(): MutableComponent =
-            Component.literal("Failed to find ").append(quote(thing))
+            Component.literal("Failed to find ").append(quote(thing)).append(info.ifNotEmpty { ": $info" })
     }
 
     class ChainMissingTexture(val botId: String) : AddonErr() {

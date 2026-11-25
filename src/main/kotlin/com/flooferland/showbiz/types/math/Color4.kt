@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.types.math
 
-import net.minecraft.util.*
+import net.minecraft.util.FastColor
 import java.awt.Color
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -45,6 +45,11 @@ data class Color4(var r: Int = 0, var g: Int = 0, var b: Int = 0, var a: Int = 2
         return Color4(r - factor, g - factor, b - factor)
     }
 
+    fun lighten(value: Float): Color4 {
+        val factor = (value * 255f).roundToInt().coerceIn(0, 255);
+        return Color4(r + factor, g + factor, b + factor)
+    }
+
     fun withOpacity(value: Float): Color4 {
         val packed = FastColor.ARGB32.color((value * 255f).roundToInt().coerceIn(0, 255), r, g, b)
         return Color4.fromPacked(packed)
@@ -64,8 +69,14 @@ data class Color4(var r: Int = 0, var g: Int = 0, var b: Int = 0, var a: Int = 2
 
     companion object {
         val ZERO get() = Color4()
+
         val WHITE get() = Color4(255, 255, 255)
         val BLACK get() = Color4(0, 0, 0)
+
+        val RED get() = Color4(255, 0, 0)
+        val GREEN get() = Color4(0, 255, 0)
+        val BLUE get() = Color4(0, 0, 255)
+
         fun fromPacked(packed: Int) = Color4(
             FastColor.ARGB32.red(packed),
             FastColor.ARGB32.green(packed),

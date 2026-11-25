@@ -87,7 +87,6 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
                         addonId,
                         AddonNotice(AddonNotice.Severity.Error, AddonNotice.Side.Assets, type.getText(), throwable = throwable)
                     )
-                    Showbiz.log.error("Addon '$addonId': ${type.getText().string}\n", throwable)
                 }
                 fun bitmapWarnHandler(id: String, message: BitsMap.LogMessage) {
                     warnings += 1
@@ -96,7 +95,6 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
                         addonId,
                         AddonNotice(AddonNotice.Severity.Warning, AddonNotice.Side.Assets, rlCustom(addonId, id), message)
                     )
-                    Showbiz.log.warn("Bitmap '$addonId:$id': $message")
                 }
                 fun getResAsString(location: ResourceLocation) =
                     pack.getResource(PackType.CLIENT_RESOURCES, location)?.get()?.readAllBytes()?.decodeToString()
@@ -144,23 +142,29 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
                     foundBots.computeIfAbsent(botId) { FoundBot(rootPath = ResourcePath(location.namespace, botsIntro + botId)) }
 
                     // Reading whatever file was found
-                    val string = stream.get()?.readAllBytes()?.decodeToString()
-
-                    // Models
-                    if (location.path.endsWith(".geo.json")) {
-                        val model = string?.let { ShowbizUtils.loadBakedModel(location, it, chainTransform(botId)) }
-                        foundBots[botId]?.models?.add(Pair(location, model))
-                    }
+                    val string = stream.get()?.readAllBytes()?.decodeToString() ?: return@ResourceOutput
 
                     // Textures
                     if (location.path.endsWith(".png")) {
                         foundBots[botId]?.textures?.add(location)
                     }
 
+                    // Models
+                    if (location.path.endsWith(".geo.json")) run {
+                        val model = ShowbizUtils.bakeModel(location, string, chainTransform(botId)).getOrElse {
+                            err(AddonErr.FailedToParse("GeckoLib model", location.toString()), it)
+                            return@run
+                        }
+                        foundBots[botId]?.models += Pair(location, model)
+                    }
+
                     // Animations
-                    if (location.path.endsWith(".animation.json")) {
-                        val anim = string?.let { ShowbizUtils.loadBakedAnimation(location, it) }
-                        foundBots[botId]?.animations?.add(Pair(location, anim))
+                    if (location.path.endsWith(".animation.json")) run {
+                        val anim = ShowbizUtils.bakeAnimation(location, string).getOrElse {
+                            err(AddonErr.FailedToParse("GeckoLib animation", location.toString()), it)
+                            return@run
+                        }
+                        foundBots[botId]?.animations += Pair(location, anim)
                     }
                 }
                 pack.listResources(PackType.CLIENT_RESOURCES, namespace, Showbiz.MOD_ID, onList)

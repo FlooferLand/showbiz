@@ -1,21 +1,24 @@
 package com.flooferland.showbiz.renderers
 
-import net.minecraft.client.renderer.*
-import net.minecraft.client.renderer.blockentity.*
-import net.minecraft.world.level.*
 import com.flooferland.showbiz.ShowbizClient
 import com.flooferland.showbiz.blocks.StagedBotBlock
 import com.flooferland.showbiz.blocks.entities.StagedBotBlockEntity
-import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.BotModel
 import com.flooferland.showbiz.renderers.base.GeoFixedBlockEntityRenderer
+import com.flooferland.showbiz.types.BotError
+import com.flooferland.showbiz.types.BotErrors
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.math.Axis
-import java.lang.Math.clamp
+import net.minecraft.client.renderer.LightTexture
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.world.level.LightLayer
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.loading.math.MolangQueries
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
+import java.lang.Math.clamp
 
 class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : GeoFixedBlockEntityRenderer<StagedBotBlockEntity>(BotModel()) {
     init {
@@ -104,10 +107,7 @@ class StagedBotBlockEntityRenderer(val context: BlockEntityRendererProvider.Cont
             doPostRenderCleanup()
             MolangQueries.clearActor()
         } catch (throwable: Throwable) {
-            val message = throwable.toString()
-            if (!BaseBotModel.errorsTriggered.values.any { it.context == message }) {
-                BaseBotModel.errorsTriggered[animatable] = BaseBotModel.Error.RenderException.withBot(animatable).withContext(message)
-            }
+            BotErrors.add(BotError.RenderException().withBot(animatable).withContext(throwable))
         }
         poseStack.popPose()
     }

@@ -1,8 +1,5 @@
 package com.flooferland.showbiz.resources
 
-import net.minecraft.server.packs.resources.*
-import net.minecraft.util.profiling.*
-import net.minecraft.world.phys.Vec3
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.types.modelpart.ModelPart
 import com.flooferland.showbiz.types.modelpart.ModelPartManager
@@ -11,6 +8,10 @@ import com.flooferland.showbiz.utils.Extensions.divide
 import com.flooferland.showbiz.utils.ShowbizUtils
 import com.flooferland.showbiz.utils.rl
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener
+import net.minecraft.server.packs.resources.ResourceManager
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener
+import net.minecraft.util.profiling.ProfilerFiller
+import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 import software.bernie.geckolib.cache.`object`.GeoBone
 
@@ -30,7 +31,7 @@ object ModelPartReloadListener : SimplePreparableReloadListener<ModelPartMap>(),
             val id = id.withPath(id.path.replace("geo/block/", "").replace(".geo.json", ""))
             val model = run {
                 val reader = res.openAsReader()
-                ShowbizUtils.loadBakedModel(id, reader.readText().also { reader.close() })
+                ShowbizUtils.bakeModel(id, reader.readText().also { reader.close() }).getOrNull()
             } ?: continue
             val partMap = map.getOrPut(id) { hashMapOf() }
 

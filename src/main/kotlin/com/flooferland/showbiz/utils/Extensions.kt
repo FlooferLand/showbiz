@@ -34,6 +34,9 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import software.bernie.geckolib.cache.`object`.BakedGeoModel
 import software.bernie.geckolib.cache.`object`.GeoBone
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.enums.enumEntries
 import kotlin.io.path.Path
 import kotlin.io.path.name
@@ -224,6 +227,11 @@ object Extensions {
     fun String.alwaysEndsWith(suffixes: Collection<String>): String {
         if (suffixes.any { this.endsWith(it) } || suffixes.isEmpty()) return this
         return this + suffixes.first()
+    }
+    @OptIn(ExperimentalContracts::class)
+    public inline fun String.ifNotEmpty(defaultValue: () -> String): String {
+        contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+        return if (isNotEmpty()) defaultValue() else this
     }
     fun String.isSnakeCase() =
         isNotEmpty() && split('_').all { it.isNotEmpty() && it.all { char -> (char.isLowerCase() && char.isLetter()) || char.isDigit() } }

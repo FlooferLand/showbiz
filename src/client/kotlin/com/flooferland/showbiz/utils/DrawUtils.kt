@@ -146,6 +146,7 @@ object DrawUtils {
         val camera = minecraft.gameRenderer?.mainCamera ?: return
         val buffer = buffer ?: minecraft.renderBuffers().bufferSource()
         val style = TextStyle().apply(configure)
+        if (text.string.isNullOrEmpty()) return
 
         poseStack.pushPose()
         poseStack.translate(worldPos.x, worldPos.y, worldPos.z)

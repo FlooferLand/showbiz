@@ -1,5 +1,6 @@
 package com.flooferland.showbiz.utils
 
+import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.BakedModel
 import net.minecraft.world.phys.Vec3
@@ -9,6 +10,13 @@ import software.bernie.geckolib.animation.AnimationProcessor
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
+    /** Safe way to interface with pose stacks, always pops after pushing even on exceptions */
+    fun PoseStack.pushAndPop(block: PoseStack.() -> Unit) {
+        pushPose()
+        try { block() }
+        finally { popPose() }
+    }
+
     fun BakedModel?.isMissing(): Boolean =
         this == null || this == Minecraft.getInstance().modelManager.missingModel
 

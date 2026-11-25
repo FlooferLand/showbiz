@@ -1,0 +1,148 @@
+{
+	"meta": {
+		"format_version": "5.0",
+		"model_format": "geckolib_model",
+		"box_uv": true
+	},
+	"name": "error",
+	"model_identifier": "",
+	"visible_box": [2, 1.5, 0.25],
+	"variable_placeholders": "",
+	"multi_file_ruleset": "",
+	"variable_placeholder_buttons": [],
+	"timeline_setups": [],
+	"unhandled_root_fields": {},
+	"geckolib_modid": "",
+	"geckolib_filepath_cache": {
+		"model": "E:\\Minecraft Mods\\showbiz\\src\\main\\resources\\assets\\showbiz\\geo\\error.geo.json"
+	},
+	"resolution": {
+		"width": 16,
+		"height": 16
+	},
+	"elements": [
+		{
+			"name": "cube",
+			"box_uv": false,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [-6, 0, 0],
+			"to": [6, 5.25, 0.05],
+			"autouv": 0,
+			"color": 7,
+			"origin": [0, 0, 0.025],
+			"faces": {
+				"north": {
+					"uv": [0, 0, 6.25, 2.5],
+					"texture": 0
+				},
+				"east": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"south": {
+					"uv": [0, 0, 6.25, 2.5],
+					"texture": 0
+				},
+				"west": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"up": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"down": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				}
+			},
+			"type": "cube",
+			"uuid": "212aa5ac-3fd9-ee1a-5a37-f110d256021f"
+		},
+		{
+			"name": "cube",
+			"box_uv": false,
+			"render_order": "default",
+			"locked": false,
+			"export": true,
+			"scope": 0,
+			"allow_mirror_modeling": true,
+			"from": [-6, 0, 0],
+			"to": [6, 5.25, 0.05],
+			"autouv": 0,
+			"color": 7,
+			"rotation": [0, -90, 0],
+			"origin": [0, 0, 0.025],
+			"faces": {
+				"north": {
+					"uv": [0, 0, 6.25, 2.5],
+					"texture": 0
+				},
+				"east": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"south": {
+					"uv": [0, 0, 6.25, 2.5],
+					"texture": 0
+				},
+				"west": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"up": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				},
+				"down": {
+					"uv": [0, 0, 0, 0],
+					"texture": null
+				}
+			},
+			"type": "cube",
+			"uuid": "a960b118-6175-dc9a-de90-0fee10f16a82"
+		}
+	],
+	"groups": [],
+	"outliner": ["212aa5ac-3fd9-ee1a-5a37-f110d256021f", "a960b118-6175-dc9a-de90-0fee10f16a82"],
+	"textures": [
+		{
+			"name": "error.png",
+			"relative_path": "../../assets/showbiz/textures/error.png",
+			"folder": "block",
+			"namespace": "",
+			"id": "0",
+			"group": "",
+			"scope": 0,
+			"width": 64,
+			"height": 64,
+			"uv_width": 16,
+			"uv_height": 16,
+			"particle": true,
+			"use_as_default": false,
+			"layers_enabled": false,
+			"sync_to_project": "",
+			"file_format": "png",
+			"render_mode": "default",
+			"render_sides": "auto",
+			"wrap_mode": "limited",
+			"pbr_channel": "color",
+			"fps": 7,
+			"force_translucent": false,
+			"frame_time": 1,
+			"frame_order_type": "loop",
+			"frame_order": "",
+			"frame_interpolate": false,
+			"visible": true,
+			"internal": true,
+			"saved": true,
+			"uuid": "bfdc1a35-a9da-f51f-0b93-a760fdacdde6",
+			"source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABWklEQVR4AexTAQ4CIQw7/f+f9WoyAotxR+44R2niZIMJXVuf27a9boj9iZwfEJAT2U2oCgHeBje9//dnCgFA8ti/LPb089/4tdoZyEOOsNxW7GWOhgCARtSAUYMU26try3GO/FuP7WVdGwIwCKIGG9V1r+X+N7afcW0IyAhwNKaGANjY4sjDUNr6kR/5TbaeQgAGqANAUWO18DX2sYdAjqhz1NmjEJAd6Ch8IACijY5R+E/fCwJOXzLzBSJgZvWuwC4HXMHiTHd4rHKAZ2S1Wg5YTXE/rxzgGVmtlgNWU9zPKwd4Rlar5YDVFPfzygGekdVqOYBd8Wg+OSBiiP1cDmBXOJpPDogYYj+XA9gVjuaTAyKG2M/lAHaFo/nkgIgh9nM5gE3h3nnkgF7G2PrlADZFe+eRA3oZY+uXA9gU7Z1HDuhljK1fDmBTtHceOaCXMbZ+OWB2Rc/ifwMAAP//2AV9mQAAAAZJREFUAwDUljGBuig15gAAAABJRU5ErkJggg=="
+		}
+	],
+	"geckolib_model_type": "Entity"
+}

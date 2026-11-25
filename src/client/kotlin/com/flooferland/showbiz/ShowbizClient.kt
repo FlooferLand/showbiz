@@ -17,7 +17,6 @@ import com.flooferland.showbiz.items.PropItem
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.items.WandItem
 import com.flooferland.showbiz.items.base.GeoBlockItem
-import com.flooferland.showbiz.models.BaseBotModel
 import com.flooferland.showbiz.models.GenericBlockItemModel
 import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
@@ -190,8 +189,10 @@ object ShowbizClient : ClientModInitializer {
 
         // World
         ClientTickEvents.END_WORLD_TICK.register { level ->
-            if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BaseBotModel.errorsTriggered.isNotEmpty()) {
-                for ((_, err) in BaseBotModel.errorsTriggered) {
+            // Global errors that can't display on bots
+            if (StagedBotBlockEntityRenderer.renderExceptionCountdown <= 0 && BotErrors.isNotEmpty()) {
+                for (err in BotErrors.getAll()) {
+                    if (err.bot != null) continue
                     val message = "Render error '${err.name}'${err.botId?.let { " for bot '$it'" } ?: ""}: ${err.context}"
                     Showbiz.log.error(message)
                     Minecraft.getInstance()?.player?.displayClientMessage(
@@ -203,7 +204,7 @@ object ShowbizClient : ClientModInitializer {
             } else {
                 StagedBotBlockEntityRenderer.renderExceptionCountdown -= 1
             }
-            BaseBotModel.errorsTriggered.clear()
+            BotErrors.clear()
         }
         ClientPlayConnectionEvents.JOIN.register { listener, sender, minecraft ->
             resetAssetErrors()
@@ -281,7 +282,7 @@ object ShowbizClient : ClientModInitializer {
     }
 
     fun resetAssetErrors() {
-        BaseBotModel.errorsTriggered.clear()
+        BotErrors.clear()
         StagedBotBlockEntityRenderer.renderExceptionCountdown = 0f
     }
 }
