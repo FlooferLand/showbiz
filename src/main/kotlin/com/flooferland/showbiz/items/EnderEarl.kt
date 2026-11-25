@@ -1,14 +1,17 @@
 package com.flooferland.showbiz.items
 
-import net.minecraft.sounds.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.entity.projectile.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
 import com.flooferland.showbiz.registry.ModSounds
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.projectile.ThrownEnderpearl
+import net.minecraft.world.item.EnderpearlItem
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 
-class EnderEarl(properties: Properties) : EnderpearlItem(properties) {
+class EnderEarl(id: ResourceLocation, properties: Properties) : EnderpearlItem(properties) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
         val itemStack = player.getItemInHand(usedHand)
         val pitch = 1.0f - (level.random.nextFloat() * 0.05f)

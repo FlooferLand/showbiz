@@ -1,19 +1,19 @@
 package com.flooferland.showbiz.items
 
-import net.minecraft.core.*
-import net.minecraft.network.chat.*
-import net.minecraft.server.level.*
-import net.minecraft.world.*
-import net.minecraft.world.item.*
-import net.minecraft.world.item.context.*
 import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.entities.FloodlightEntity
+import com.flooferland.showbiz.items.base.FancyItem
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModItems
-import com.flooferland.showbiz.utils.ShowbizUtils
+import net.minecraft.core.Direction
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.context.UseOnContext
 import kotlin.math.round
 
-class FloodlightItem(properties: Properties) : Item(properties) {
+class FloodlightItem(id: ResourceLocation, properties: Properties) : FancyItem(id, properties) {
     override fun useOn(ctx: UseOnContext): InteractionResult {
         val level = ctx.level as? ServerLevel ?: return InteractionResult.SUCCESS
         val player = ctx.player ?: return InteractionResult.PASS
@@ -35,10 +35,5 @@ class FloodlightItem(properties: Properties) : Item(properties) {
             player.setItemInHand(ctx.hand, ItemStack.EMPTY)
         }
         return InteractionResult.PASS
-    }
-
-    override fun appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: MutableList<Component>, tooltipFlag: TooltipFlag) {
-        super.appendHoverText(stack, context, tooltip, tooltipFlag)
-        ShowbizUtils.itemTooltip(ModItems.Floodlight.id, tooltip)
     }
 }

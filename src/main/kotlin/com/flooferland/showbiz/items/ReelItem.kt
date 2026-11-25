@@ -1,18 +1,22 @@
 package com.flooferland.showbiz.items
 
-import net.minecraft.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.*
-import net.minecraft.world.entity.player.*
-import net.minecraft.world.item.*
-import net.minecraft.world.level.*
+import com.flooferland.showbiz.items.base.FancyItem
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.utils.Extensions.applyComponent
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
+import net.minecraft.world.level.Level
 import kotlin.io.path.Path
 import kotlin.io.path.nameWithoutExtension
 
-class ReelItem(properties: Properties) : Item(properties) {
+class ReelItem(id: ResourceLocation, properties: Properties) : FancyItem(id, properties) {
     override fun getName(stack: ItemStack): Component? {
         val item = Component.translatable(getDescriptionId(stack))
         var boundFile = stack.components.get(ModComponents.FileName.type) ?: return item

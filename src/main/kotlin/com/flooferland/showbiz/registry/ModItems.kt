@@ -60,7 +60,7 @@ enum class ModItems {
     val item: Item
     var model: ItemModelId? = null
     var hideFromPlayer: Boolean = false
-    constructor(name: String, constructor: (Properties) -> Item, properties: Properties.() -> Properties, model: ItemModelId = ItemModelId.Generated, hideFromPlayer: Boolean = false) {
+    constructor(name: String, constructor: (ResourceLocation, Properties) -> Item, properties: Properties.() -> Properties, model: ItemModelId = ItemModelId.Generated, hideFromPlayer: Boolean = false) {
         this.id = rl(name)
         this.model = model;
         this.hideFromPlayer = hideFromPlayer
@@ -69,9 +69,9 @@ enum class ModItems {
         this.item = Items.registerItem(
             ResourceKey.create(BuiltInRegistries.ITEM.key(), this.id),
             //? if >1.21.9 {
-            /*constructor, properties(baseProps)
+            /*constructor, properties(this.id, baseProps)
             *///?} else {
-            constructor(properties(baseProps))
+            constructor(this.id, properties(baseProps))
             //?}
         )
     }

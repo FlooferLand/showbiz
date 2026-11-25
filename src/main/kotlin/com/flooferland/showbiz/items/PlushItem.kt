@@ -3,14 +3,15 @@ package com.flooferland.showbiz.items
 import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.components.PlushComponent
 import com.flooferland.showbiz.entities.PlushEntity
+import com.flooferland.showbiz.items.base.FancyItem
 import com.flooferland.showbiz.registry.ModComponents
 import com.flooferland.showbiz.types.IStackPlacePreview
 import com.flooferland.showbiz.utils.Extensions.applyComponent
 import com.flooferland.showbiz.utils.rl
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
@@ -23,7 +24,7 @@ import software.bernie.geckolib.animation.AnimatableManager
 import software.bernie.geckolib.util.GeckoLibUtil
 import java.util.function.Consumer
 
-class PlushItem(properties: Properties) : Item(properties), GeoItem, IStackPlacePreview {
+class PlushItem(id: ResourceLocation, properties: Properties) : FancyItem(id, properties), GeoItem, IStackPlacePreview {
     val renderProviderHolder = MutableObject<GeoRenderProvider>()
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache

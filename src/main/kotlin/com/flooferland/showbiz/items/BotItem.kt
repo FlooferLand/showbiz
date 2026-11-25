@@ -4,24 +4,22 @@ import com.flooferland.showbiz.Permissions.Companion.mayPlaceAt
 import com.flooferland.showbiz.Showbiz
 import com.flooferland.showbiz.Showbiz.MOD_ID
 import com.flooferland.showbiz.entities.BotEntity
+import com.flooferland.showbiz.items.base.FancyItem
 import com.flooferland.showbiz.registry.ModComponents
-import com.flooferland.showbiz.registry.ModItems
 import com.flooferland.showbiz.types.IStackPlacePreview
 import com.flooferland.showbiz.types.ResourceId
-import com.flooferland.showbiz.utils.ShowbizUtils
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
 
-class BotItem(properties: Properties) : Item(properties), IStackPlacePreview {
+class BotItem(id: ResourceLocation, properties: Properties) : FancyItem(id, properties), IStackPlacePreview {
     override fun getEntity(level: Level, stack: ItemStack): Entity? {
         return BotEntity(level, stack.getOrDefault(ModComponents.BotId.type, firstBotIdOrDefault()))
     }
@@ -56,11 +54,6 @@ class BotItem(properties: Properties) : Item(properties), IStackPlacePreview {
             comp.append(Component.literal(" (${botId.path})").withStyle(ChatFormatting.GRAY))
         }
         return comp
-    }
-
-    override fun appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: MutableList<Component>, tooltipFlag: TooltipFlag) {
-        super.appendHoverText(stack, context, tooltip, tooltipFlag)
-        ShowbizUtils.itemTooltip(ModItems.Bot.id, tooltip)
     }
 
     companion object {
