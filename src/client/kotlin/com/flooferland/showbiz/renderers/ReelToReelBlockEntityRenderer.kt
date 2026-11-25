@@ -41,7 +41,9 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         run {
             val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
             val target = entity.seek * 200.0
-            if (!minecraft.isPaused) {
+            if (entity.seek <= 0.05) {
+                entity.clientSeek = 0.0
+            } else if (!minecraft.isPaused) {
                 entity.clientSeek = if (!entity.showData.isLoaded) target else lerp(entity.clientSeek, target, delta)
             }
         }
