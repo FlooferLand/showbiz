@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 import net.minecraft.util.FastColor
@@ -80,15 +81,12 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
             val worldBox = box.move(blockEntity.blockPos)
             val camera = Minecraft.getInstance().gameRenderer.mainCamera
             if (camera.position.y >= worldBox.maxY) {
-                DrawUtils.drawBox(
-                    poseStack, bufferSource.getBuffer(curtainRenderType),
-                    box,
-                    packedLight = packedLight,
-                    packedOverlay = packedOverlay,
-                    color = blockEntity.getGroupColor(),
-                    drawTop = true,
-                    drawBottom = false
-                )
+                DrawUtils.drawBox(poseStack, bufferSource.getBuffer(curtainRenderType), box) {
+                    it.packedLight = packedLight
+                    it.packedOverlay = packedOverlay
+                    it.color = blockEntity.getGroupColor()
+                    it.faces.set(Direction.UP)
+                }
             }
         }
 
@@ -173,23 +171,25 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
         val endCuts = DoubleArray(4) { Double.MAX_VALUE }
         blockEntity.bottom = box.bottomCenter.y
 
-        fun draw(consumer: VertexConsumer, part: AABB, tint: Int, top: Boolean = false, bottom: Boolean = false, sidesOnly: Boolean = false, sideCuts: DoubleArray = cuts) {
+        fun draw(consumer: VertexConsumer, part: AABB, tint: Int, up: Boolean = false, down: Boolean = false, sidesOnly: Boolean = false, sideCuts: DoubleArray = cuts) {
             val ys = (sideCuts.filter { it > part.minY && it < part.maxY } + part.minY + part.maxY).distinct().sorted()
             for (i in 0 until ys.size - 1) {
                 DrawUtils.drawBox(
                     poseStack, consumer,
-                    AABB(part.minX, ys[i], part.minZ, part.maxX, ys[i + 1], part.maxZ),
-                    packedLight = packedLight,
-                    packedOverlay = packedOverlay,
-                    color = tint,
-                    drawSouth = playerInside || ys[i] < sideCuts[0],
-                    drawNorth = playerInside || ys[i] < sideCuts[1],
-                    drawWest = playerInside || ys[i] < sideCuts[2],
-                    drawEast = playerInside || ys[i] < sideCuts[3],
-                    drawTop = top && i == ys.size - 2,
-                    drawBottom = bottom && i == 0,
-                    sidesOnly = sidesOnly
-                )
+                    AABB(part.minX, ys[i], part.minZ, part.maxX, ys[i + 1], part.maxZ)
+                ) {
+                    it.packedLight = packedLight
+                    it.packedOverlay = packedOverlay
+                    it.color = tint
+                    it.faces = DrawUtils.BoxStyle.Faces(
+                        south = playerInside || ys[i] < sideCuts[0],
+                        north = playerInside || ys[i] < sideCuts[1],
+                        west = playerInside || ys[i] < sideCuts[2],
+                        east = playerInside || ys[i] < sideCuts[3],
+                        up = !sidesOnly && up && i == ys.size - 2,
+                        down = !sidesOnly && down && i == 0
+                    )
+                }
             }
         }
 
@@ -198,22 +198,22 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                 consumer,
                 box,
                 color,
-                top = !drawSidesOnly && if (cullVertical) camera.position.y >= worldBox.maxY else true,
-                bottom = !drawSidesOnly && if (cullVertical) camera.position.y <= worldBox.minY else true
+                up = !drawSidesOnly && if (cullVertical) camera.position.y >= worldBox.maxY else true,
+                down = !drawSidesOnly && if (cullVertical) camera.position.y <= worldBox.minY else true
             )
         } else {
             draw(
                 consumer,
                 originalBox,
                 color,
-                top = !drawSidesOnly && if (cullVertical) camera.position.y >= worldBox.maxY else true,
-                bottom = !(bottomBox.maxY >= originalBox.minY - 0.1f)  // This is sooo cooked
+                up = !drawSidesOnly && if (cullVertical) camera.position.y >= worldBox.maxY else true,
+                down = !(bottomBox.maxY >= originalBox.minY - 0.1f)  // This is sooo cooked
             )
             draw(
                 consumer,
                 bottomBox,
                 color,
-                bottom = true
+                down = true
             )
         }
 
@@ -248,7 +248,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
                     .append(Component.literal("Group ${curtain.group}\n").withColor(curtain.getGroupColor()))
                     .append(Component.literal("-"))
 
-                DrawUtils.drawText(poseStack, curtainPos.bottomCenter, text, buffer) { scale = 0.9f - zoom }
+                DrawUtils.drawText(poseStack, curtainPos.bottomCenter, text, buffer) { it.scale = 0.9f - zoom }
             }
         }
     }

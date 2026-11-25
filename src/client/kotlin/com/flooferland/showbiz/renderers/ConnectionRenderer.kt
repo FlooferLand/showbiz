@@ -206,14 +206,20 @@ object ConnectionRenderer {
             deferRender(DrawLayer.Shadow) { pose, consumer ->
                 pose.pushPose()
                 pose.translate(pos.x, pos.y, pos.z)
-                DrawUtils.drawBox(pose, consumer, bound, 0xAA000000.toInt(), normalShade = false)
+                DrawUtils.drawBox(pose, consumer, bound) {
+                    it.color = 0xAA000000.toInt()
+                    it.normalShade = false
+                }
                 pose.popPose()
             }
         }
         deferRender(if (FastColor.ARGB32.alpha(color) < 255) DrawLayer.Translucent else DrawLayer.Solid) { pose, consumer ->
             pose.pushPose()
             pose.translate(pos.x, pos.y, pos.z)
-            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02), color, normalShade = shade)
+            DrawUtils.drawBox(pose, consumer, bound.inflate(-0.02)) {
+                it.color = color
+                it.normalShade = shade
+            }
             pose.popPose()
         }
     }
@@ -238,7 +244,10 @@ object ConnectionRenderer {
         pose.translate(startPos.x, startPos.y, startPos.z)
         pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
         pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
-        DrawUtils.drawBox(pose, consumer, AABB(0.0, -thickness, -thickness, length, thickness, thickness), color, normalShade = true)
+        DrawUtils.drawBox(pose, consumer, AABB(0.0, -thickness, -thickness, length, thickness, thickness)) {
+            it.color
+            it.normalShade = true
+        }
         pose.popPose()
     }
 
@@ -270,7 +279,7 @@ object ConnectionRenderer {
         run {
             for (text in queuedText.toList()) {
                 DrawUtils.drawText(pose, Vec3(text.x.toDouble(), text.y.toDouble(), text.z.toDouble()), text.value, buffer) {
-                    drawBackground = false
+                    it.drawBackground = false
                 }
             }
         }

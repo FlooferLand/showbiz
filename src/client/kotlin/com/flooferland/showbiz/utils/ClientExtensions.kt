@@ -10,11 +10,18 @@ import software.bernie.geckolib.animation.AnimationProcessor
 import software.bernie.geckolib.cache.`object`.GeoBone
 
 object ClientExtensions {
-    /** Safe way to interface with pose stacks, always pops after pushing even on exceptions */
+    /**
+     * Safe way to interface with pose stacks, always pops after pushing even on exceptions. <br/>
+     * Should generally not be used as any exceptions could cause render instability
+     */
     fun PoseStack.pushAndPop(block: PoseStack.() -> Unit) {
         pushPose()
         try { block() }
         finally { popPose() }
+    }
+
+    fun PoseStack.translateVoxel(x: Double, y: Double, z: Double) {
+        translate(voxelSnap(x), voxelSnap(y), voxelSnap(z))
     }
 
     fun BakedModel?.isMissing(): Boolean =

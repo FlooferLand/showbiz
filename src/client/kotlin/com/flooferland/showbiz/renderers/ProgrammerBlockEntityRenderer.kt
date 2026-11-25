@@ -27,12 +27,12 @@ class ProgrammerBlockEntityRenderer(ctx: BlockEntityRendererProvider.Context) : 
             poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot() + 180f))
             poseStack.translate(-0.5, 0.0, -0.5)
             DrawUtils.drawText(poseStack, Vec3(0.305, 0.7, 0.495), text) {
-                scale = 0.35f
-                rotation = 180f
-                billboard = false
-                drawBackground = false
-                depth = true
-                vAlign = 0f
+                it.scale = 0.35f
+                it.rotation = 180f
+                it.billboard = false
+                it.drawBackground = false
+                it.depth = true
+                it.vAlign = 0f
             }
             poseStack.popPose()
         }

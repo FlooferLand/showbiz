@@ -9,14 +9,15 @@ import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.util.FastColor
 import net.minecraft.util.FormattedCharSequence
 import net.minecraft.util.Mth
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
-import org.joml.Matrix4f
 import org.joml.Vector3f
+import java.util.*
 
 object DrawUtils {
     class TextStyle {
@@ -31,26 +32,53 @@ object DrawUtils {
         var wrapPad: Int = 3
         var linePad: Int = 6
     }
+    class BoxStyle {
+        var color: Int? = null
+        var faces: Faces = Faces()
+        var packedOverlay: Int = OverlayTexture.NO_OVERLAY
+        var packedLight: Int = LightTexture.FULL_BRIGHT
+        var normalShade: Boolean = false
+
+        class Faces() {
+            internal var selected: EnumSet<Direction> = EnumSet.allOf(Direction::class.java)
+            operator fun contains(direction: Direction): Boolean  = selected.contains(direction)
+
+            constructor(north: Boolean = false, south: Boolean = false, east: Boolean = false, west: Boolean = false, up: Boolean = false, down: Boolean = false) : this() {
+                selected.clear()
+                if (north) selected += Direction.NORTH
+                if (south) selected += Direction.SOUTH
+                if (east) selected += Direction.EAST
+                if (west) selected += Direction.WEST
+                if (up) selected += Direction.UP
+                if (down) selected += Direction.DOWN
+            }
+
+            /** Enables faces ((all faces are shown by default) */
+            fun enable(vararg dirs: Direction) {
+                selected = if (dirs.isEmpty()) EnumSet.noneOf(Direction::class.java) else EnumSet.copyOf(dirs.toList())
+            }
+
+            /** Disables faces (all faces are shown by default) */
+            fun disable(vararg dirs: Direction) {
+                dirs.forEach { selected.remove(it) }
+            }
+
+            /** Makes specifically these faces visible */
+            fun set(vararg dirs: Direction) {
+                selected = EnumSet.copyOf(dirs.toList())
+            }
+
+            fun setSidesOnly() {
+                selected = EnumSet.of(Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST)
+            }
+        }
+    }
 
     @Suppress("DuplicatedCode")
-    fun drawBox(
-        poseStack: PoseStack,
-        consumer: VertexConsumer,
-        box: AABB,
-        color: Int? = null,
-        packedOverlay: Int? = null,
-        packedLight: Int? = null,
-        sidesOnly: Boolean = false,
-        drawSouth: Boolean = true,
-        drawNorth: Boolean = true,
-        drawWest: Boolean = true,
-        drawEast: Boolean = true,
-        drawTop: Boolean = true,
-        drawBottom: Boolean = true,
-        normalShade: Boolean = false
-    ) {
+    fun drawBox(poseStack: PoseStack, consumer: VertexConsumer, box: AABB, configure: (style: BoxStyle) -> Unit) {
+        val style = BoxStyle().also(configure)
         val matrix = poseStack.last().pose()
-        val alpha = color?.let { FastColor.ARGB32.alpha(it).toFloat() / 255f }
+        val alpha = style.color?.let { FastColor.ARGB32.alpha(it).toFloat() / 255f }
 
         val minX = box.minX.toFloat()
         val minY = box.minY.toFloat()
@@ -63,89 +91,82 @@ object DrawUtils {
         val height = maxY - minY
         val depth = maxZ - minZ
 
-        fun addVertex(pose: Matrix4f, x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float) {
-            val shaderColor = RenderSystem.getShaderColor()
-            var color = color ?: FastColor.ARGB32.colorFromFloat(
-                alpha ?: shaderColor.getOrNull(3) ?: 1f,
-                shaderColor.getOrNull(0) ?: 0f,
-                shaderColor.getOrNull(1) ?: 0f,
-                shaderColor.getOrNull(2) ?: 0f
-            )
-            if (normalShade) {
+        val shaderColor = RenderSystem.getShaderColor()
+        val fallbackColor = FastColor.ARGB32.colorFromFloat(
+            alpha ?: shaderColor.getOrNull(3) ?: 1f,
+            shaderColor.getOrNull(0) ?: 0f,
+            shaderColor.getOrNull(1) ?: 0f,
+            shaderColor.getOrNull(2) ?: 0f
+        )
+        fun vertex(x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float) {
+            var color = style.color ?: fallbackColor
+            if (style.normalShade) {
                 val normal = poseStack.last().normal().transform(nx, ny, nz, Vector3f())
                 val brightness = normal.let { it.x * it.x * 0.6f + it.z * it.z * 0.8f + it.y * it.y * (if (it.y > 0f) 1.0f else 0.5f) }
                 color = FastColor.ARGB32.multiply(color, FastColor.ARGB32.colorFromFloat(1f, brightness, brightness, brightness))
             }
-            consumer.addVertex(pose, x, y, z)
+            consumer.addVertex(matrix, x, y, z)
                 .setColor(color)
                 .setUv(u, v)
-                .setLight(packedLight ?: LightTexture.FULL_BRIGHT)
-                .setOverlay(packedOverlay ?: OverlayTexture.NO_OVERLAY)
+                .setLight(style.packedLight)
+                .setOverlay(style.packedOverlay)
                 .setNormal(poseStack.last(), nx, ny, nz)
         }
 
         // North (negative z)
-        if (drawNorth) {
-            addVertex(matrix, minX, minY, minZ, 0f, height, 0f, 0f, -1f)
-            addVertex(matrix, minX, maxY, minZ, 0f, 0f, 0f, 0f, -1f)
-            addVertex(matrix, maxX, maxY, minZ, width, 0f, 0f, 0f, -1f)
-            addVertex(matrix, maxX, minY, minZ, width, height, 0f, 0f, -1f)
+        if (Direction.NORTH in style.faces) {
+            vertex(minX, minY, minZ, 0f, height, 0f, 0f, -1f)
+            vertex(minX, maxY, minZ, 0f, 0f, 0f, 0f, -1f)
+            vertex(maxX, maxY, minZ, width, 0f, 0f, 0f, -1f)
+            vertex(maxX, minY, minZ, width, height, 0f, 0f, -1f)
         }
 
         // South (positive z)
-        if (drawSouth) {
-            addVertex(matrix, minX, minY, maxZ, 0f, height, 0f, 0f, 1f)
-            addVertex(matrix, maxX, minY, maxZ, width, height, 0f, 0f, 1f)
-            addVertex(matrix, maxX, maxY, maxZ, width, 0f, 0f, 0f, 1f)
-            addVertex(matrix, minX, maxY, maxZ, 0f, 0f, 0f, 0f, 1f)
+        if (Direction.SOUTH in style.faces) {
+            vertex(minX, minY, maxZ, 0f, height, 0f, 0f, 1f)
+            vertex(maxX, minY, maxZ, width, height, 0f, 0f, 1f)
+            vertex(maxX, maxY, maxZ, width, 0f, 0f, 0f, 1f)
+            vertex(minX, maxY, maxZ, 0f, 0f, 0f, 0f, 1f)
         }
 
         // West (negative x)
-        if (drawWest) {
-            addVertex(matrix, minX, minY, maxZ, 0f, height, -1f, 0f, 0f)
-            addVertex(matrix, minX, maxY, maxZ, 0f, 0f, -1f, 0f, 0f)
-            addVertex(matrix, minX, maxY, minZ, depth, 0f, -1f, 0f, 0f)
-            addVertex(matrix, minX, minY, minZ, depth, height, -1f, 0f, 0f)
+        if (Direction.WEST in style.faces) {
+            vertex(minX, minY, maxZ, 0f, height, -1f, 0f, 0f)
+            vertex(minX, maxY, maxZ, 0f, 0f, -1f, 0f, 0f)
+            vertex(minX, maxY, minZ, depth, 0f, -1f, 0f, 0f)
+            vertex(minX, minY, minZ, depth, height, -1f, 0f, 0f)
         }
 
-        if (drawEast) {
-            // East (positive x)
-            addVertex(matrix, maxX, minY, minZ, 0f, height, 1f, 0f, 0f)
-            addVertex(matrix, maxX, maxY, minZ, 0f, 0f, 1f, 0f, 0f)
-            addVertex(matrix, maxX, maxY, maxZ, depth, 0f, 1f, 0f, 0f)
-            addVertex(matrix, maxX, minY, maxZ, depth, height, 1f, 0f, 0f)
+        // East (positive x)
+        if (Direction.EAST in style.faces) {
+            vertex(maxX, minY, minZ, 0f, height, 1f, 0f, 0f)
+            vertex(maxX, maxY, minZ, 0f, 0f, 1f, 0f, 0f)
+            vertex(maxX, maxY, maxZ, depth, 0f, 1f, 0f, 0f)
+            vertex(maxX, minY, maxZ, depth, height, 1f, 0f, 0f)
         }
 
-        if (!sidesOnly) {
-            if (drawTop) {
-                // Up (positive y)
-                addVertex(matrix, minX, maxY, minZ, 0f, 0f, 0f, 1f, 0f)
-                addVertex(matrix, minX, maxY, maxZ, 0f, depth, 0f, 1f, 0f)
-                addVertex(matrix, maxX, maxY, maxZ, width, depth, 0f, 1f, 0f)
-                addVertex(matrix, maxX, maxY, minZ, width, 0f, 0f, 1f, 0f)
-            }
-            if (drawBottom) {
-                // Down (negative y)
-                addVertex(matrix, minX, minY, minZ, 0f, 0f, 0f, -1f, 0f)
-                addVertex(matrix, maxX, minY, minZ, width, 0f, 0f, -1f, 0f)
-                addVertex(matrix, maxX, minY, maxZ, width, depth, 0f, -1f, 0f)
-                addVertex(matrix, minX, minY, maxZ, 0f, depth, 0f, -1f, 0f)
-            }
+        // Up (positive y)
+        if (Direction.UP in style.faces) {
+            vertex(minX, maxY, minZ, 0f, 0f, 0f, 1f, 0f)
+            vertex(minX, maxY, maxZ, 0f, depth, 0f, 1f, 0f)
+            vertex(maxX, maxY, maxZ, width, depth, 0f, 1f, 0f)
+            vertex(maxX, maxY, minZ, width, 0f, 0f, 1f, 0f)
+        }
+        // Down (negative y)
+        if (Direction.DOWN in style.faces) {
+            vertex(minX, minY, minZ, 0f, 0f, 0f, -1f, 0f)
+            vertex(maxX, minY, minZ, width, 0f, 0f, -1f, 0f)
+            vertex(maxX, minY, maxZ, width, depth, 0f, -1f, 0f)
+            vertex(minX, minY, maxZ, 0f, depth, 0f, -1f, 0f)
         }
     }
 
-    fun drawText(
-        poseStack: PoseStack,
-        worldPos: Vec3,
-        text: Component,
-        buffer: MultiBufferSource.BufferSource? = null,
-        configure: TextStyle.() -> Unit = { }
-    ) {
+    fun drawText(poseStack: PoseStack, worldPos: Vec3, text: Component, buffer: MultiBufferSource.BufferSource? = null, configure: (TextStyle) -> Unit = { }) {
         val minecraft = Minecraft.getInstance() ?: return
         val font = minecraft.font ?: return
         val camera = minecraft.gameRenderer?.mainCamera ?: return
         val buffer = buffer ?: minecraft.renderBuffers().bufferSource()
-        val style = TextStyle().apply(configure)
+        val style = TextStyle().also(configure)
         if (text.string.isNullOrEmpty()) return
 
         poseStack.pushPose()

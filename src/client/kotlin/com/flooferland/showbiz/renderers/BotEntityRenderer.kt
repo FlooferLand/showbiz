@@ -52,8 +52,8 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
                     Component.literal("Bot mappings={${bot.bitmap.bits.map { "${it.key}=${it.value.size}" }.joinToString(" ")}}")
                 ).forEach { text.append(it.append("\n")) }
                 DrawUtils.drawText(poseStack, entity.eyePosition.add(0.0, 0.5, 0.0), text, buffer) {
-                    maxWidth = 300
-                    vAlign = 1f
+                    it.maxWidth = 300
+                    it.vAlign = 1f
                 }
             }
 
@@ -65,9 +65,9 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
                 val text = Component.literal(err.context ?: "X").withStyle(ChatFormatting.RED)
 
                 DrawUtils.drawText(poseStack, pos, text, buffer) {
-                    maxWidth = 150
-                    depth = false
-                    vAlign = 1f
+                    it.maxWidth = 150
+                    it.depth = false
+                    it.vAlign = 1f
                 }
 
                 DrawUtils.drawText(poseStack, pos, Component.empty(), buffer) {}

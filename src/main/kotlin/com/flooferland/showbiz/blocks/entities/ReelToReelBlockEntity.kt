@@ -114,6 +114,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     var clientSeek = 0.0
     var clientLoudness = 0f
+    var clientUpdateTracker = 0
 
     private val fps = 60  // Tied to rshw
     private var seekInt = 0
@@ -512,6 +513,13 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         }
     }
 
+    override fun setLevel(level: Level) {
+        super.setLevel(level)
+        if (level.isClientSide) {
+            clientSeek = seek * 200.0
+        }
+    }
+
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
 
@@ -537,6 +545,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
+        if (level !is ServerLevel)
+            clientUpdateTracker = 0
 
         // Loading other stuff
         playing = tag.getBooleanOrNull("playing") ?: false

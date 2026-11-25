@@ -41,7 +41,7 @@ object JukeboxLyricRenderer {
             }
 
             // Lyric text
-            DrawUtils.drawText(poseStack, textPos, text, buffer) { scale = 1.5f }
+            DrawUtils.drawText(poseStack, textPos, text, buffer) { it.scale = 1.5f }
         }
     }
 

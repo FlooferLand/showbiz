@@ -6,8 +6,11 @@ import com.flooferland.showbiz.blocks.entities.ReelToReelBlockEntity
 import com.flooferland.showbiz.items.ReelItem
 import com.flooferland.showbiz.registry.ModClientModels
 import com.flooferland.showbiz.registry.ModItems
+import com.flooferland.showbiz.types.math.Color4
+import com.flooferland.showbiz.utils.ClientExtensions.translateVoxel
 import com.flooferland.showbiz.utils.DrawUtils
 import com.flooferland.showbiz.utils.Extensions.toShortString
+import com.flooferland.showbiz.utils.ShowbizEnv
 import com.flooferland.showbiz.utils.lerp
 import com.flooferland.showbiz.utils.rlVanilla
 import com.mojang.blaze3d.vertex.PoseStack
@@ -21,6 +24,7 @@ import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.client.resources.model.ModelResourceLocation
+import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 import net.minecraft.world.item.ItemDisplayContext
@@ -38,14 +42,10 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
         val reelStack = entity.getItem(0)
 
         // Time
-        run {
+        if (!minecraft.isPaused) run {
             val delta = (ShowbizClient.getDeltaTime() * 0.05).coerceIn(0.0, 1.0)
             val target = entity.seek * 200.0
-            if (entity.seek <= 0.05) {
-                entity.clientSeek = 0.0
-            } else if (!minecraft.isPaused) {
-                entity.clientSeek = if (!entity.showData.isLoaded) target else lerp(entity.clientSeek, target, delta)
-            }
+            entity.clientSeek = if (!entity.showData.isLoaded) target else lerp(entity.clientSeek, target, delta)
         }
         val rotationAngle = entity.clientSeek.toFloat()
 
@@ -83,6 +83,31 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             poseStack.popPose()
         }
 
+        // Update indicator
+        // Seeing how often the block saves/loads for dev purposes
+        if (ShowbizEnv.isDev()) {
+            val consumer = bufferSource.getBuffer(RenderType.gui())
+            val size = 0.066
+            val trackerMax = 20
+            val tracker = entity.clientUpdateTracker
+
+            poseStack.pushPose()
+            poseStack.translateVoxel(0.75, 0.25, 0.7)
+            poseStack.translate(0.0, 0.0, 0.0015) // Prevents clipping
+            DrawUtils.drawBox(poseStack, consumer, AABB(-size, -size, 0.0, size, size, 0.0)) {
+                it.color = Color4.RED.darken(tracker / trackerMax.toFloat()).pack()
+                it.packedOverlay = packedOverlay
+                it.packedLight = packedLight
+                it.normalShade = true
+                it.faces.set(Direction.SOUTH)
+            }
+            poseStack.popPose()
+
+            if (tracker == 0) {
+                entity.clientUpdateTracker = trackerMax
+            }
+        }
+
         // Rendering volume meter
         runCatching {
             val delta = (ShowbizClient.getDeltaTime() * 0.5).coerceIn(0.0, 1.0)
@@ -100,21 +125,13 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
             poseStack.pushPose()
             poseStack.translate(0.25, 0.125, 0.38)
             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation))
-            DrawUtils.drawBox(
-                poseStack = poseStack,
-                consumer = consumer,
-                box = AABB(-width, 0.0, -0.01, width, length, 0.01),
-                color = CommonColors.BLACK,
-                packedOverlay = packedOverlay,
-                packedLight = packedLight,
-                normalShade = true,
-                drawSouth = false,
-                drawNorth = true,
-                drawWest = false,
-                drawEast = false,
-                drawTop = false,
-                drawBottom = false
-            )
+            DrawUtils.drawBox(poseStack, consumer, AABB(-width, 0.0, -0.01, width, length, 0.01)) {
+                it.color = CommonColors.BLACK
+                it.packedOverlay = packedOverlay
+                it.packedLight = packedLight
+                it.normalShade = true
+                it.faces.set(Direction.NORTH)
+            }
             poseStack.popPose()
         }
 

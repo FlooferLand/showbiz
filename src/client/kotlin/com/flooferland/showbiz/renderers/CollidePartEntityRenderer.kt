@@ -26,7 +26,7 @@ class CollidePartEntityRenderer(val context: EntityRendererProvider.Context) : E
             }
 
             val text = Component.literal(entity.partId.toString())
-            DrawUtils.drawText(poseStack, entity.position(), text, buffer) { scale = 0.8f - pickZoom }
+            DrawUtils.drawText(poseStack, entity.position(), text, buffer) { it.scale = 0.8f - pickZoom }
 
             if (prevPick?.id != entity.id) {
                 pickZoom = 0.1f
