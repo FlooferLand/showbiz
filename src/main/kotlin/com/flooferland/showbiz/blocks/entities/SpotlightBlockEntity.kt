@@ -58,7 +58,7 @@ class SpotlightBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity(
 
     val bitFilter = MappedBits()
     var turn = Vec2f.ZERO
-    var angle = 45f
+    var angle = 25f
     var shadows: Boolean = true
     var kelvin: Int = 3200
     var brightness: Float = 1.0f
