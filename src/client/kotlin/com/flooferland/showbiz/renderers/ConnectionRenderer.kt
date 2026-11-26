@@ -245,7 +245,7 @@ object ConnectionRenderer {
         pose.mulPose(Axis.YP.rotation(yaw.toFloat()))
         pose.mulPose(Axis.ZP.rotation(pitch.toFloat()))
         DrawUtils.drawBox(pose, consumer, AABB(0.0, -thickness, -thickness, length, thickness, thickness)) {
-            it.color
+            it.color = color
             it.normalShade = true
         }
         pose.popPose()

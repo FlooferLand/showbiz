@@ -21,6 +21,7 @@ import java.util.*
 
 object DrawUtils {
     class TextStyle {
+        var drawOutline: Boolean = false
         var drawBackground: Boolean = true
         var backgroundColor: Int = 0xCC_00_00_00.toInt()
         var maxWidth: Int = 150
@@ -221,7 +222,16 @@ object DrawUtils {
 
         for ((line, ly) in lines) {
             val displayMode = if (!style.depth) Font.DisplayMode.SEE_THROUGH else Font.DisplayMode.NORMAL
-            font.drawInBatch(line, -font.width(line) / 2f, yOffset + ly, 0xFF_FF_FF_FF.toInt(), false, matrix, buffer, displayMode, 0, LightTexture.FULL_BRIGHT)
+            val x = -font.width(line) / 2f
+            val y = yOffset + ly
+            val color = 0xFF_FF_FF_FF.toInt()
+            val backgroundColor = 0
+            val packedLightCoords = LightTexture.FULL_BRIGHT
+            if (!style.drawOutline) {
+                font.drawInBatch(line, x, y, color, false, matrix, buffer, displayMode, backgroundColor, packedLightCoords)
+            } else {
+                font.drawInBatch8xOutline(line, x, y, color, backgroundColor, matrix, buffer, packedLightCoords)
+            }
         }
         if (!style.depth) {
             RenderSystem.disableDepthTest()

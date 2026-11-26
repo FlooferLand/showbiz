@@ -252,14 +252,14 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
             val lookaheadBytes = format.sampleRate.toInt() * frameSize / 2
 
             run { // Loudness
-                val windowBytes = ((format.sampleRate * 0.05).toInt() * frameSize).coerceAtLeast(frameSize)
+                val windowBytes = ((format.sampleRate * 0.03).toInt() * frameSize).coerceAtLeast(frameSize)
                 val nextLoudness = AudioUtils.volumePeak(
                     showData.audio,
                     format.toFriendly(),
                     targetBytes,
                     targetBytes + windowBytes
                 )
-                if (abs(nextLoudness - loudness) > 0.1f) {
+                if (abs(nextLoudness - loudness) > 0.03f) {
                     loudness = nextLoudness
                     stateDirty = true
                 }

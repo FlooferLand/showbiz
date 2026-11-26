@@ -110,8 +110,8 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
 
         // Rendering volume meter
         runCatching {
-            val delta = (ShowbizClient.getDeltaTime() * 0.5).coerceIn(0.0, 1.0)
-            val target = if (entity.playing && !entity.paused) entity.loudness else 0f
+            val delta = (ShowbizClient.getDeltaTime() * 0.1).coerceIn(0.0, 1.0)
+            val target = if (entity.playing && !entity.paused) entity.loudness * 3f else 0f
             if (!minecraft.isPaused) {
                 entity.clientLoudness = lerp(entity.clientLoudness.toDouble(), target.toDouble(), delta).toFloat()
                 entity.clientLoudness = entity.clientLoudness.coerceIn(0f, 1f)
@@ -119,11 +119,11 @@ class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Con
 
             val consumer = bufferSource.getBuffer(RenderType.solid())
 
-            val rotation = lerp(-60.0, 60.0, entity.clientLoudness.toDouble()).toFloat()
+            val rotation = lerp(-50.0, 50.0, entity.clientLoudness.toDouble()).toFloat()
             val width = 0.005
-            val length = 0.1
+            val length = 0.09
             poseStack.pushPose()
-            poseStack.translate(0.25, 0.125, 0.38)
+            poseStack.translate(0.25, 0.14, 0.38)
             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation))
             DrawUtils.drawBox(poseStack, consumer, AABB(-width, 0.0, -0.01, width, length, 0.01)) {
                 it.color = CommonColors.BLACK
