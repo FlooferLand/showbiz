@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.CycleButton
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.renderer.Rect2i
 import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 import kotlin.math.roundToInt
 
 private typealias OnChange = (botId: ResourceId?, variant: String) -> Unit
@@ -117,9 +118,11 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
         val button = Button.builder(nameComp) {
                 selectedBot = botId
+                selectedVariant = IBot.DEFAULT_VARIANT
+                variantButton.value = selectedVariant
                 click(selectedBot, selectedVariant)
             }
-            .tooltip(Tooltip.create(Component.literal("By $authorString")))
+            .tooltip(Tooltip.create(Component.empty()))
             .build()!!
 
         override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
@@ -156,17 +159,24 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
 
             button.setPosition(left, top)
             button.setSize(width - variantWidth, itemHeight)
+            button.tooltip = Tooltip.create(
+                Component.literal("${botId?.namespace}:").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal("${botId?.path}").withStyle(ChatFormatting.WHITE))
+            )
             button.message = (if (selected) Component.literal(name ?: "").withStyle(ChatFormatting.GRAY) else nameComp.copy())
                 .let {
                     if (botId in excluded) it.append(
                         Component.literal(" (hidden)").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
                     ) else it
                 }
-            button.tooltip = Tooltip.create(Component.literal(if (selected) "Already selected" else "By $authorString"))
 
             if (showVariant) {
                 variantButton.setPosition(button.right, top)
                 variantButton.setSize(variantWidth, itemHeight)
+            } else if (variants.size > 1) {
+                val text = Component.literal("+${variants.size}")
+                val textWidth = font.width(text)
+                guiGraphics.drawString(font, text, button.right - textWidth - 4, top + (button.height / 2) - (font.lineHeight / 2), CommonColors.WHITE)
             }
             button.active = !selected
             if (bot != null && botId != null) {
