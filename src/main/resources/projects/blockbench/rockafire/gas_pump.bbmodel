@@ -456,7 +456,7 @@
 			"mirror_uv": false,
 			"autouv": 0,
 			"isOpen": true,
-			"primary_selected": false
+			"primary_selected": true
 		}
 	],
 	"outliner": [
@@ -618,7 +618,7 @@
 			"override": false,
 			"length": 0.01667,
 			"snapping": 60,
-			"selected": true,
+			"selected": false,
 			"saved": false,
 			"path": "../../../assets/showbiz/showbiz/bots/gas_pump/models/gas_pump.animation.json",
 			"scope": 0,

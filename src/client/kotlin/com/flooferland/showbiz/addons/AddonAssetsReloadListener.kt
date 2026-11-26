@@ -310,17 +310,11 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
             for ((variantId, variant) in variants) {
                 val initBoneRots = mutableMapOf<String, Vec3fc>()
                 val initBoneMoves = mutableMapOf<String, Vec3fc>()
+                val initBoneScales= mutableMapOf<String, Vec3fc>()
                 for (bone in variant.model.getAllBones()) {
-                    initBoneRots[bone.name] = Vec3fc(
-                        bone.rotX,
-                        bone.rotY,
-                        bone.rotZ
-                    )
-                    initBoneMoves[bone.name] = Vec3fc(
-                        bone.posX,
-                        bone.posY,
-                        bone.posZ
-                    )
+                    initBoneRots[bone.name] = Vec3fc(bone.rotX, bone.rotY, bone.rotZ)
+                    initBoneMoves[bone.name] = Vec3fc(bone.posX, bone.posY, bone.posZ)
+                    initBoneScales[bone.name] = Vec3fc(bone.scaleX, bone.scaleY, bone.scaleZ)
                 }
 
                 // Ordered walk, so parentIndex[i] is always less than i
@@ -336,8 +330,9 @@ internal object AddonAssetsReloadListener : SimplePreparableReloadListener<Loade
 
                 val model = models.getOrPut(botId) { mutableMapOf() }
                 model[variantId] = BotModelData(
-                    initBoneRots = initBoneRots,
+                    initBoneRotations = initBoneRots,
                     initBoneMoves = initBoneMoves,
+                    initBoneScales = initBoneScales,
                     bakedModel = variant.model
                 ).also {
                     it.passivePlan = PassivePlan(order.toTypedArray(), parents.toIntArray())

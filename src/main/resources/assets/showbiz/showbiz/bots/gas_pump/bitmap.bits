@@ -1,5 +1,7 @@
 set rae stage_lights
 
 rae 241 {
-    anim "light"
+    flow accel in:50 out:50
+    scale "light" x:0.04 y:0.04 z:0.04
+    type effect
 }

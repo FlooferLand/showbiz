@@ -5,7 +5,8 @@ import software.bernie.geckolib.cache.`object`.BakedGeoModel
 
 data class BotModelData(
     val bakedModel: BakedGeoModel,
-    val initBoneRots: MutableMap<String, Vec3fc>,
+    val initBoneRotations: MutableMap<String, Vec3fc>,
+    val initBoneScales: MutableMap<String, Vec3fc>,
     val initBoneMoves: MutableMap<String, Vec3fc>
 ) {
     // body property so it stays out of equals(), which runs every frame

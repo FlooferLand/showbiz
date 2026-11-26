@@ -171,9 +171,11 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val held = data.hold == BooleanType.Yes
                         && animatable.show?.data?.playing == true
                         && bitmapBits.none { (otherBit, otherData) ->
-                            otherBit != bit && frame.frameHas(otherBit)
-                                    && (otherData.rotates.any { rotate -> data.rotates.any { it.bone == rotate.bone } }
-                                    || otherData.moves.any { move -> data.moves.any { it.bone == move.bone } })
+                            otherBit != bit && frame.frameHas(otherBit) && (
+                                    otherData.rotates.any { rotate -> data.rotates.any { it.bone == rotate.bone } }
+                                || otherData.moves.any { move -> data.moves.any { it.bone == move.bone } }
+                                || otherData.scales.any { scale -> data.scales.any { it.bone == scale.bone } }
+                            )
                         }
 
                 // Fallback for the old flows
@@ -245,7 +247,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         for ((_, data) in bitmapBits) {
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
-                val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
+                val initRot = model.initBoneRotations[bone.name] ?: Vec3fc()
                 bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
             }
             for (move in data.moves) {
@@ -253,10 +255,15 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 val initMove = model.initBoneMoves[bone.name] ?: Vec3fc()
                 bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
             }
+            for (scale in data.scales) {
+                val bone = animationProcessor.getBone(scale.bone) ?: continue
+                val initScale = model.initBoneScales[bone.name] ?: Vec3fc()
+                bone.scaleX = initScale.x; bone.scaleY = initScale.y; bone.scaleZ = initScale.z
+            }
         }
 
         // FOR SOME REASON THE BLOCK ABOVE DOESN'T RESET
-        for ((name, rot) in model.initBoneRots) {
+        for ((name, rot) in model.initBoneRotations) {
             val bone = animationProcessor.getBone(name) ?: continue
             bone.rotX = rot.x; bone.rotY = rot.y; bone.rotZ = rot.z
         }
@@ -264,15 +271,19 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             val bone = animationProcessor.getBone(name) ?: continue
             bone.posX = pos.x; bone.posY = pos.y; bone.posZ = pos.z
         }
+        for ((name, scale) in model.initBoneScales) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.scaleX = scale.x; bone.scaleY = scale.y; bone.scaleZ = scale.z
+        }
 
         // Resetting physics bones
         for (dynBone in storage.dynBones) for (name in dynBone.boneNames) {
             val bone = animationProcessor.getBone(name) ?: continue
-            val initRot = model.initBoneRots[bone.name] ?: Vec3fc()
+            val initRot = model.initBoneRotations[bone.name] ?: Vec3fc()
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
         }
 
-        // Actually positioning the bonees
+        // Actually positioning the bones
         for ((bit, data) in bitmapBits) {
             val flowEase = data.flow?.easing ?: data.oldFlow?.easing ?: Easing.Default
             val bitSmooth = at(storage.valves.getOrPut(bit) { PneumaticValve() })
@@ -284,24 +295,29 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 Easing.EaseIn -> sin((bitSmooth * PI) / 2).toFloat()
             }
 
-            // Manual rotation
+            // Rotation
             for (rotate in data.rotates) {
                 val bone = animationProcessor.getBone(rotate.bone) ?: continue
-
-                // Applying movement
                 bone.rotX += (rotate.target.x.toFloat() * Mth.DEG_TO_RAD) * eased
                 bone.rotY += (rotate.target.y.toFloat() * Mth.DEG_TO_RAD) * eased
                 bone.rotZ += (rotate.target.z.toFloat() * Mth.DEG_TO_RAD) * eased
             }
 
-            // Manual position
+            // Position
             for (move in data.moves) {
                 val bone = animationProcessor.getBone(move.bone) ?: continue
-
-                // Applying movement
                 bone.posX += move.target.x.toFloat() * eased
                 bone.posY += move.target.y.toFloat() * eased
                 bone.posZ += move.target.z.toFloat() * eased
+            }
+
+            // Scale
+            // For some reason data.scales is empty...
+            for (scale in data.scales) {
+                val bone = animationProcessor.getBone(scale.bone) ?: continue
+                bone.scaleX += scale.target.x.toFloat() * eased
+                bone.scaleY += scale.target.y.toFloat() * eased
+                bone.scaleZ += scale.target.z.toFloat() * eased
             }
         }
     }
@@ -357,7 +373,7 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
                 for (k in 0 until chain.links) {
                     if (!chain.eulerOk[k]) continue
                     val bone = animationProcessor.getBone(links[k]) ?: continue
-                    val rest = model.initBoneRots[links[k]] ?: continue
+                    val rest = model.initBoneRotations[links[k]] ?: continue
                     bone.rotX = rest.x + chain.euler[k * 3]
                     bone.rotY = rest.y + chain.euler[k * 3 + 1]
                     bone.rotZ = rest.z + chain.euler[k * 3 + 2]
@@ -412,9 +428,13 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
             val bone = animationProcessor.getBone(name) ?: continue
             bone.posX = initMove.x; bone.posY = initMove.y; bone.posZ = initMove.z
         }
-        for ((name, initRot) in model.initBoneRots) {
+        for ((name, initRot) in model.initBoneRotations) {
             val bone = animationProcessor.getBone(name) ?: continue
             bone.rotX = initRot.x; bone.rotY = initRot.y; bone.rotZ = initRot.z
+        }
+        for ((name, initScale) in model.initBoneScales) {
+            val bone = animationProcessor.getBone(name) ?: continue
+            bone.scaleX = initScale.x; bone.scaleY = initScale.y; bone.scaleZ = initScale.z
         }
     }
 
