@@ -50,9 +50,6 @@ import software.bernie.geckolib.util.GeckoLibUtil
  * Has to be a LivingEntity unfortunately to cast shadows when using shaders
  */
 class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLivingEntities.Bot.type, level), GeoEntity, IConnectable, IBot, ICollidePartInteractable, ILightEmitter {
-    constructor(level: Level) : this(level, null) {
-        refreshDimensions()
-    }
     val cache = GeckoLibUtil.createInstanceCache(this)!!
     override fun getAnimatableInstanceCache() = cache
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar?) = Unit
@@ -94,8 +91,12 @@ class BotEntity(level: Level, botId: ResourceId? = null) : BasePropEntity(ModLiv
 
     init {
         this.botId = botId
+        noCulling = true
         refreshDimensions()
         updatePersistentData { addAdditionalSaveData(it) }
+    }
+    constructor(level: Level) : this(level, null) {
+        refreshDimensions()
     }
 
     override fun getDefaultDimensions(pose: Pose): EntityDimensions = EntityDimensions.fixed(0.6f, 2.0f)

@@ -24,7 +24,6 @@ class BotEntityRenderer(ctx: EntityRendererProvider.Context) : GeoFixedEntityRen
     override fun shouldRender(livingEntity: BotEntity, camera: Frustum, camX: Double, camY: Double, camZ: Double): Boolean {
         // TODO: Figure out a better fix to solve Sodium cutting off entities early. Bad for performance.
         //       Not sure how to dynamically scale the entity dimensions based on the bot size cause of addons, or if that's even a good idea
-        val texture =
         return true;
     }
 

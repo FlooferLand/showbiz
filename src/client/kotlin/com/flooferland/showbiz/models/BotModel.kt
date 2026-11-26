@@ -239,9 +239,27 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
         poseBits(bitmapBits, storage, model) { it.drawn(alpha) }
         poseEasterEgg(animatable, delta)
         for (dynBone in storage.dynBones) dynBone.draw(animationProcessor::getBone, alpha)
+
+        // Stopping fur from rendering
+        val player = Minecraft.getInstance().player
+        if (player != null && animatable is Entity) {
+            val distance = player.distanceToSqr(animatable)
+            val maxDistance = 32.0
+            val shouldHide = distance > maxDistance * maxDistance
+            for (bone in animationProcessor.registeredBones) {
+                if (!bone.name.startsWith("fur", ignoreCase = true)) continue
+                bone.isHidden = shouldHide
+            }
+        }
+
+        // Rotating the actual entity head for spectator mode
+        // Does NOT work in spectator mode because Minecraft hides the entity for some reason
+        if (animatable is BotEntity) run {
+            val headBone = headBoneNames.firstNotNullOfOrNull { animationProcessor.getBoneCaseInsensitive(it) } ?: return@run
+            animatable.yHeadRot = 180f - (headBone.rotY * Mth.RAD_TO_DEG) + 90f
+        }
     }
 
-    // Laying the bitmap's rotates and moves over the rest pose, each valve at [at] of its travel, floppy parts back at rest
     private fun poseBits(bitmapBits: Map<UShort, BitMappingData>, storage: LocalBotStorage, model: BotModelData, at: (PneumaticValve) -> Float) {
         // Resetting the bones
         for ((_, data) in bitmapBits) {
