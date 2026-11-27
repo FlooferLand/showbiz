@@ -1,19 +1,20 @@
 package com.flooferland.showbiz.utils
 
-import net.minecraft.client.*
-import net.minecraft.client.gui.*
-import net.minecraft.client.gui.screens.inventory.*
-import net.minecraft.network.chat.*
-import net.minecraft.resources.*
-import net.minecraft.world.item.*
 import com.flooferland.showbiz.mixin.accessor.CreativeModeInventoryScreenAccessor
 import com.flooferland.showbiz.registry.ModItemGroups
 import com.flooferland.showbiz.types.math.Color4
 import com.mojang.blaze3d.systems.RenderSystem
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import java.util.function.Consumer
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.ItemStack
 import org.joml.Vector3f
+import java.util.function.Consumer
 
 
 object CreateAeronauticsBurglary {
@@ -23,11 +24,11 @@ object CreateAeronauticsBurglary {
     val sections = mapOf(
         ModItemGroups.Section.Main to SectionData(
             name = "Main", info = Component.literal("Functional, etc"),
-            sprite = rl("main_banner"), color = Color4(201, 151, 42),
+            sprite = rl("main_banner"), color = Color4(242, 238, 237),
         ),
         ModItemGroups.Section.Deco to SectionData(
             name = "Deco", info = Component.literal("Building blocks"),
-            sprite = rl("deco_banner"), color = Color4(201, 151, 42),
+            sprite = rl("deco_banner"), color = Color4(242, 238, 237),
         )
     )
 
@@ -64,15 +65,17 @@ object CreateAeronauticsBurglary {
             val isHovering = mouseX in (left + x..left + x + w) && mouseY in (top + y..top + y + h)
 
             val text = Component.literal(section.name)
-            if (isHovering) text.append(" - ").append(section.info)
             val textWidth = font.width(text)
+            if (isHovering) {
+                text.append(Component.literal(" - ${section.info.string}").withColor(section.color.darken(0.5f).pack()))
+            }
 
-            val background = section.color.darken(0.8f).withOpacity(0.4f).pack()
-            graphics.fill(x + 2, y + 2, x + textWidth + 8, y + h - 2, background)
+            // val background = section.color.darken(0.8f).withOpacity(0.4f).pack()
+            // graphics.fill(x + 2, y + 2, x + textWidth + 8, y + h - 2, background)
 
-            val light = section.color
-            val dark = section.secondaryColor ?: light.darken(0.2f)
-            drawAuraText(graphics, text, dark.pack(), light.pack(), x + 5, y + 5)
+            val light = section.color.lighten(0.1f)
+            val dark = section.secondaryColor ?: section.color.darken(0.2f)
+            drawAuraText(graphics, text, dark.pack(), light.pack(), x + 6, y + 5)
         }
         pose.popPose()
         RenderSystem.disableDepthTest()
