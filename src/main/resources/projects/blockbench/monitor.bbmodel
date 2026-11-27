@@ -370,7 +370,7 @@
 				},
 				"up": {
 					"uv": [0, 0, 9.52, 3.6],
-					"texture": null
+					"texture": 0
 				},
 				"down": {
 					"uv": [46, 5, 36, 9],
@@ -388,14 +388,13 @@
 			"locked": false,
 			"shade": true,
 			"light_emission": 0,
-			"export": false,
+			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [0.975, -1, 5],
 			"to": [14.975, 0, 11],
 			"autouv": 1,
 			"color": 5,
-			"visibility": false,
 			"origin": [0.975, 0, 6],
 			"faces": {
 				"north": {
@@ -434,14 +433,13 @@
 			"locked": false,
 			"shade": true,
 			"light_emission": 0,
-			"export": false,
+			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [0.975, 14, 5],
 			"to": [14.975, 15, 11],
 			"autouv": 1,
 			"color": 5,
-			"visibility": false,
 			"origin": [0.975, 15, 6],
 			"faces": {
 				"north": {
@@ -480,14 +478,13 @@
 			"locked": false,
 			"shade": true,
 			"light_emission": 0,
-			"export": false,
+			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [5.975, 13, 6],
 			"to": [9.975, 20, 10],
 			"autouv": 1,
 			"color": 5,
-			"visibility": false,
 			"origin": [0.975, 14, 6],
 			"faces": {
 				"north": {
@@ -526,14 +523,13 @@
 			"locked": false,
 			"shade": true,
 			"light_emission": 0,
-			"export": false,
+			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [14.975, -1, 5],
 			"to": [15.975, 15, 11],
 			"autouv": 1,
 			"color": 5,
-			"visibility": false,
 			"origin": [15.475, 7.5, 6],
 			"faces": {
 				"north": {
@@ -572,14 +568,13 @@
 			"locked": false,
 			"shade": true,
 			"light_emission": 0,
-			"export": false,
+			"export": true,
 			"scope": 0,
 			"allow_mirror_modeling": true,
 			"from": [0.025, -1, 5],
 			"to": [1.025, 15, 11],
 			"autouv": 1,
 			"color": 5,
-			"visibility": false,
 			"origin": [0.525, 7.5, 6],
 			"faces": {
 				"north": {
@@ -728,11 +723,11 @@
 		{
 			"name": "handle",
 			"uuid": "6412ccf3-0097-3604-ce53-66ee9209c791",
-			"export": false,
+			"export": true,
 			"locked": false,
 			"scope": 0,
 			"selected": false,
-			"visibility": false,
+			"visibility": true,
 			"_static": {
 				"properties": {},
 				"temp_data": {}
@@ -768,11 +763,11 @@
 					"uuid": "6412ccf3-0097-3604-ce53-66ee9209c791",
 					"isOpen": true,
 					"children": [
-						"137929cf-49f9-c0b1-ce41-8ae8576e5b0b",
 						"909d473b-2168-beff-d414-a6d024b9c12a",
 						"cf65a6e3-37ea-cfb8-acf9-0decfd1b4e68",
 						"28f80a63-e62f-5439-6321-0915d5a5459d",
-						"e87d2e80-6af6-816d-d23b-7e8b7dda9ba2"
+						"e87d2e80-6af6-816d-d23b-7e8b7dda9ba2",
+						"137929cf-49f9-c0b1-ce41-8ae8576e5b0b"
 					]
 				}
 			]
@@ -801,6 +796,7 @@
 			"wrap_mode": "limited",
 			"pbr_channel": "color",
 			"fps": 7,
+			"force_translucent": false,
 			"frame_time": 1,
 			"frame_order_type": "loop",
 			"frame_order": "",
