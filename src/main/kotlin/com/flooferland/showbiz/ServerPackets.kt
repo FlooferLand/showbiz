@@ -78,8 +78,10 @@ object ServerPackets {
             }
         }
 
+        // Checking client capabilities and kicking players
         ServerPackets.listen(ClientCapabilitiesPacket.type) { packet, ctx ->
             val player = ctx.player() ?: return@listen
+            val server = ctx.server() ?: return@listen
 
             // Build
             runCatching {
@@ -108,7 +110,7 @@ object ServerPackets {
             val playerAddons = packet.addons
             for ((addonId, addon) in Showbiz.addons) {
                 fun badAddon(reason: Component): Boolean {
-                    if (addonId == MOD_ID || addonId.startsWith(MOD_ID)) {
+                    if (addonId == MOD_ID || addonId.startsWith(MOD_ID) || server.isSingleplayer) {
                         player.sendSystemMessage(Component.literal("$reason"))
                         return false
                     }
