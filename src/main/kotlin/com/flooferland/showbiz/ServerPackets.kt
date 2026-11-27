@@ -109,6 +109,7 @@ object ServerPackets {
             // Addons
             val playerAddons = packet.addons
             for ((addonId, addon) in Showbiz.addons) {
+                /** Returns true if kicked */
                 fun badAddon(reason: Component): Boolean {
                     if (addonId == MOD_ID || addonId.startsWith(MOD_ID) || server.isSingleplayer) {
                         player.sendSystemMessage(Component.literal("$reason"))
