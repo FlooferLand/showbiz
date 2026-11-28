@@ -301,6 +301,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         audio = ByteArray(0)
         isLoaded = false
         loading = false
+        endTime = 0.0
         id = null
         name = null
         mapping = null

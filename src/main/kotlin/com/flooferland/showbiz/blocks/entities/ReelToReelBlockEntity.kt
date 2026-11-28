@@ -416,6 +416,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
     fun sendSignalReset() {
         // Fix for bots and spotlights holding their positions after a show ends/pauses
         show.data.signal.reset()
+        show.data.playing = false
         show.send()
     }
     fun resetPlayback() {
@@ -486,6 +487,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         resetInactivity()
         when (key) {
             0 -> { // Record
+                // TODO: Prevent users from accidentally hitting record because it is VERY annoying
                 if (player.mayInteractWith(this) && Permissions.WriteReels.test(player)) {
                     applyChange(true) {
                         if (recording) {
@@ -498,6 +500,8 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                                     Component.literal("WARNING: Your programmer isn't connected!").withStyle(ChatFormatting.YELLOW),
                                     true
                                 )
+                                sounds.bad()
+                                return@applyChange
                             }
                             recording = true
                             sounds.enter()
@@ -512,6 +516,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
                 }
             }
             1, 2 -> {  // Seek
+                if (!showData.isLoaded) return
                 val seekSecs = if (player.isCrouching) 3 else 10
                 val mul = if (key == 1) -1 else 1
                 seekTo(seek + (seekSecs * mul))
