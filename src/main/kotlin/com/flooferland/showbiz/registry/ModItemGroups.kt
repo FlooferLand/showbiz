@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.ItemStack
 
+// TODO: Add easter egg items to the operators tab
 enum class ModItemGroups {
     Main("main", ModRecipes.MitziPlush, { main, deco ->
         for (block in ModBlocks.entries) {
