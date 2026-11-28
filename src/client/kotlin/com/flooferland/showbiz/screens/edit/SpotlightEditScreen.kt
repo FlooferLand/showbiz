@@ -1,14 +1,16 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.client.gui.components.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.SpotlightEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.SpotlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.client.gui.components.Checkbox
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Inventory
 
 // TODO: Should turn this into a general light edit screen? Floodlights could use it
 
@@ -33,7 +35,7 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
         run {
             turn = EditBox(font, 80, 20, Component.literal("Turn"))
             turn!!.value =
-                editMenu.data.turn.x.toString().replace(".0", "") + ", " + editMenu.data.turn.y.toString().replace(".0", "")
+                editMenu.data.turn.x.toString().removeSuffix(".0") + ", " + editMenu.data.turn.y.toString().removeSuffix(".0")
             turn!!.setFilter { turn -> turn.split(',').map { it.trim() }.all { it.toFloatOrNull() != null || it.isEmpty() || it.startsWith('-') } }
             turn!!.tooltip = Tooltip.create(Component.literal("Turn X and Y separated by a comma"))
             widgets.add(WidgetInfo("Turn X/Y", turn!!))
@@ -43,8 +45,8 @@ class SpotlightEditScreen(editMenu: SpotlightEditMenu, inventory: Inventory, tit
         run {
             angle = EditBox(font, 40, 20, Component.literal("Angle"))
             angle!!.tooltip = Tooltip.create(Component.literal("Angular radius"))
-            angle!!.value = editMenu.data.angle.toString().replace(".0", "")
-            angle!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() }
+            angle!!.value = editMenu.data.angle.toString().removeSuffix(".0")
+            angle!!.setFilter { it.toFloatOrNull() != null || it.endsWith('.') || it.isEmpty() }
             widgets.add(WidgetInfo("Angle", angle!!))
         }
 

@@ -22,6 +22,7 @@ import com.flooferland.showbiz.registry.*
 import com.flooferland.showbiz.renderers.*
 import com.flooferland.showbiz.resources.ModelPartReloadListener
 import com.flooferland.showbiz.screens.*
+import com.flooferland.showbiz.screens.edit.CurtainControllerEditScreen
 import com.flooferland.showbiz.screens.edit.ShowParserEditScreen
 import com.flooferland.showbiz.types.*
 import com.flooferland.showbiz.types.collidepart.CollidePartManager

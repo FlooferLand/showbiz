@@ -9,6 +9,7 @@ import com.flooferland.showbiz.utils.Extensions.applyChange
 import com.flooferland.showbiz.utils.Sounds
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.ItemInteractionResult
@@ -67,7 +68,7 @@ class CurtainBlock(props: Properties) : BaseEntityBlock(props) {
             }
             Sounds.serverPlayer(player).click()
             player.displayClientMessage(Component.literal("[-] interact down, [+] interact up"), true)
-        } else {
+        } else if (level is ServerLevel) {
             entity.setCurtains(!entity.isOpen)
         }
         return InteractionResult.SUCCESS

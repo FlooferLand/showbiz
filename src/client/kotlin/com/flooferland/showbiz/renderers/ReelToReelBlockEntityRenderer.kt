@@ -35,6 +35,10 @@ import org.joml.Vector3f
 import kotlin.time.Duration.Companion.seconds
 
 class ReelToReelBlockEntityRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<ReelToReelBlockEntity> {
+    override fun shouldRenderOffScreen(entity: ReelToReelBlockEntity): Boolean {
+        return entity.playing
+    }
+
     override fun render(entity: ReelToReelBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val facing = entity.blockState.getValue(FacingEntityBlock.FACING) ?: return
         val minecraft = Minecraft.getInstance() ?: return

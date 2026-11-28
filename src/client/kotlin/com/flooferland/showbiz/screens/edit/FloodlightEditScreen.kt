@@ -1,14 +1,16 @@
 package com.flooferland.showbiz.screens
 
-import net.minecraft.client.gui.components.*
-import net.minecraft.network.chat.*
-import net.minecraft.world.entity.player.*
 import com.flooferland.showbiz.menus.FloodlightEditMenu
 import com.flooferland.showbiz.network.packets.editscreen.FloodlightEditPacket
 import com.flooferland.showbiz.screens.base.EditScreen
 import com.flooferland.showbiz.screens.widgets.BitSelectButton
 import com.flooferland.showbiz.screens.widgets.ColorPicker
 import com.flooferland.showbiz.utils.rl
+import net.minecraft.client.gui.components.Checkbox
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Inventory
 
 // TODO: Should turn this into a general light edit screen? Floodlights could use it
 
@@ -43,8 +45,8 @@ class FloodlightEditScreen(editMenu: FloodlightEditMenu, inventory: Inventory, t
         run {
             angle = EditBox(font, 40, 20, Component.literal("Angle"))
             angle!!.tooltip = Tooltip.create(Component.literal("Angular radius"))
-            angle!!.value = editMenu.data.angle.toString().replace(".0", "")
-            angle!!.setFilter { it.toFloatOrNull() != null || it.isEmpty() }
+            angle!!.value = editMenu.data.angle.toString().removeSuffix(".0")
+            angle!!.setFilter { it.toFloatOrNull() != null || it.endsWith('.') || it.isEmpty() }
             widgets.add(WidgetInfo("Angle", angle!!))
         }
 

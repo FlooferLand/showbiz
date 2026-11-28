@@ -98,9 +98,13 @@ object Extensions {
 
     @DslMarker annotation class BlockEntityApplyDsl;
 
-    fun <T: BlockEntity> T.applyChange(rerender: Boolean, change: T.() -> Unit) {
+    fun <T: BlockEntity> T.applyChange(updateState: Boolean = false, change: T.() -> Unit) {
         change(this)
-        markDirtyNotifyAll()
+        if (updateState) {
+            markDirtyNotifyAll()
+        } else {
+            setChanged()
+        }
     }
 
     //region Level

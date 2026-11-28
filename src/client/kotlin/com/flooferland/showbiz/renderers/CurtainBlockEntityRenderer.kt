@@ -77,7 +77,7 @@ class CurtainBlockEntityRenderer(val context: BlockEntityRendererProvider.Contex
 
         // Group cube
         run {
-            val box = AABB(-0.2, 0.0, -0.2, 0.2, 0.05, 0.2).move(0.5, 1.0, 0.5)
+            val box = AABB(-0.2, 0.0, -0.2, 0.2, 0.001, 0.2).move(0.5, 1.0, 0.5)
             val worldBox = box.move(blockEntity.blockPos)
             val camera = Minecraft.getInstance().gameRenderer.mainCamera
             if (camera.position.y >= worldBox.maxY) {

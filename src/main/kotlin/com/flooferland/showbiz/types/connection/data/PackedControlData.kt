@@ -1,10 +1,12 @@
 package com.flooferland.showbiz.types.connection.data
 
-import net.minecraft.nbt.*
-import net.minecraft.network.*
 import com.flooferland.showbiz.types.connection.ConnectionData
 import com.flooferland.showbiz.utils.Extensions.getBooleanOrNull
+import com.flooferland.showbiz.utils.Extensions.getCompoundOrNull
+import com.flooferland.showbiz.utils.Extensions.getFloatOrNull
 import com.flooferland.showbiz.utils.Extensions.getIntOrNull
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.FriendlyByteBuf
 
 data class PackedControlData(
     var instruction: CompoundTag = CompoundTag(),
@@ -21,11 +23,24 @@ data class PackedControlData(
         instruction = CompoundTag()
     }
 
-    fun writeCurtain(open: Boolean) = instruction.putBoolean("curtain_open", open)
-    fun readCurtain(): Boolean? = instruction.getBooleanOrNull("curtain_open")
-    fun clearCurtain() = instruction.remove("curtain_open")
+    fun clearCurtain() {
+        instruction.remove("curtain")
+    }
+    fun writeCurtain(open: Boolean?, speed: Float) {
+        instruction.put("curtain", CompoundTag().also { tag ->
+            open?.let { tag.putBoolean("open", it) }
+            tag.putFloat("speed", speed)
+        })
+    }
+    fun readCurtain(): Pair<Boolean?, Float>? {
+        return instruction.getCompoundOrNull("curtain")?.let { tag ->
+            val open = tag.getBooleanOrNull("open")
+            val speed = tag.getFloatOrNull("speed") ?: return@let null
+            return@let Pair(open, speed)
+        }
+    }
 
+    fun clearShowSelect() = instruction.remove("show_select")
     fun writeShowSelect(id: Int) = instruction.putInt("show_select", id)
     fun readShowSelect(): Int? = instruction.getIntOrNull("show_select")
-    fun clearShowSelect() = instruction.remove("show_select")
 }
