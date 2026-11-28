@@ -1,6 +1,6 @@
 package com.flooferland.showbiz.show
 
-import net.minecraft.network.*
+import net.minecraft.network.FriendlyByteBuf
 
 // TODO: Test the performance of using an inline value class and using BitSet instead of BitIdArray
 
@@ -15,6 +15,9 @@ class SignalFrame(private var raw: BitIdArray = bitIdArrayOf()) : Cloneable, Col
     }
     fun set(array: BitIdArray?) {
         array?.let { raw = array }
+    }
+    fun set(frame: SignalFrame?) {
+        frame?.let { raw = frame.raw.copyOf() }
     }
     operator fun plusAssign(other: SignalFrame) {
         val combined = raw.toMutableSet()

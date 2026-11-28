@@ -239,7 +239,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
             val outMapping = if (runningShow && !showData.mapping.isNullOrEmpty()) showData.mapping else show.dataReceived.mapping
             val outPlaying = playing || show.dataReceived.playing
-            show.send(PackedShowData(outPlaying, signal, outMapping))
+            show.data.playing = outPlaying
+            show.data.mapping = outMapping
+            show.data.signal.set(signal)
+            show.send()
         }
 
         if (runningShow) run {
