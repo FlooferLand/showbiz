@@ -38,9 +38,7 @@ class CurtainControllerBlockEntity(pos: BlockPos, blockState: BlockState) : Bloc
         if (serverSignal > Redstone.SIGNAL_NONE) return@port
         if (serverLastPlaying != data.playing && defaultState != CurtainState.None) {
             serverLastPlaying = data.playing
-            if (!data.playing) {
-                sendControl(defaultState == CurtainState.Open)
-            }
+            sendControl(defaultState == CurtainState.Open && !data.playing)
         } else {
             val hasCloseBit = bitFilterClose[mapping]?.any() { data.signal.frameHas(it) } ?: false
             val hasOpenBit = bitFilterOpen[mapping]?.any() { data.signal.frameHas(it) } ?: false
