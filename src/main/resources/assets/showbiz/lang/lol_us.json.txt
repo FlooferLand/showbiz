@@ -2,7 +2,6 @@
     "text.mod.description": "nuhuhfficial Rocking Fires BOOM simulator foah cube game made by FlooferLands and Monsterwaills !!",
     "config.prop.audio.playPneumaticSounds": "playz pnumatic sounds",
     "config.prop.audio.playBotEffects": "playz clanker pewpews",
-    "config.prop.permissions.restrict": "restrict pawmissions (server-only)",
 
     "itemGroup.showbiz.main": "showbiz",
 
