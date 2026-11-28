@@ -174,7 +174,7 @@ class BotListWidget(x: Int, y: Int, width: Int, height: Int) : ContainerObjectSe
                 variantButton.setPosition(button.right, top)
                 variantButton.setSize(variantWidth, itemHeight)
             } else if (variants.size > 1) {
-                val text = Component.literal("+${variants.size}")
+                val text = Component.literal("+${variants.size - 1}")
                 val textWidth = font.width(text)
                 guiGraphics.drawString(font, text, button.right - textWidth - 4, top + (button.height / 2) - (font.lineHeight / 2), CommonColors.WHITE)
             }
