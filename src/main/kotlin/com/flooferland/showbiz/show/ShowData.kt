@@ -309,6 +309,7 @@ class ShowData(val owner: ReelToReelBlockEntity) {
         video = null
 
         owner.setChanged()
+        owner.resetPlayback()
         //System.gc()
     }
 }

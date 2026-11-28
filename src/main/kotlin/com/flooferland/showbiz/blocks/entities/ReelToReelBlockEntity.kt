@@ -383,6 +383,9 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         if (!paused && showData.isNotLoaded() && !inputItem.isEmpty) {
             loadShow(inputItem) { setPaused(false) }
             return
+        } else if (paused) {
+            // Should signal data reset when paused? idk
+            // sendSignalReset()
         }
 
         show.send(PackedShowData(playing, signal, showData.mapping))
@@ -407,6 +410,11 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         resetInactivity()
         stateDirty = true
     }
+    fun sendSignalReset() {
+        // Fix for bots and spotlights holding their positions after a show ends/pauses
+        show.data.signal.reset()
+        show.send()
+    }
     fun resetPlayback() {
         seek = 0.0
         seekInt = 0
@@ -417,10 +425,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         recordQueue.clear()
         hasFinished = false
         signal.reset()
-        run {  // Fix for bots and spotlights holding their positions after a show ends/pauses
-            show.data.signal.reset()
-            show.send()
-        }
+        sendSignalReset()
         lastVideoFrameIndex = 0
         showData.videoInputInfo = null
         showData.video?.let {
@@ -585,6 +590,7 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
 
     fun loadShow(stack: ItemStack, block: (ShowData?) -> Unit) {
         val filename = ReelItem.getFilename(stack) ?: return
+        if (!showData.loading) resetPlayback() else return
 
         inputItem = stack
         showData.loading = true

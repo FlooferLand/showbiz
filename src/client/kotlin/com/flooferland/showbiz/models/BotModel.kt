@@ -82,20 +82,9 @@ class BotModel<T> : BaseBotModel<T>() where T : IBot, T: GeoAnimatable {
 
         val bitmapBits = bot.bitmap.bits["any"].orEmpty().toMutableMap() + bot.bitmap.bits[showMapping].orEmpty()
 
-        // Resetting bones
+        // Resetting animations
         val instanceCache = animatable.getAnimatableInstanceCache()
         val animManager = instanceCache.getManagerForId<GeoAnimatable>(0)
-        for ((_, data) in bitmapBits) {
-            if (!showPlaying) {
-                for (anim in data.anim) {
-                    animManager.stopTriggeredAnimation(getAnimId(animatable, true, anim))
-                    animManager.stopTriggeredAnimation(getAnimId(animatable, false, anim))
-                }
-                animManager.animationControllers.values.forEach { it.stop() }
-            }
-        }
-
-        // Resetting animations
         if (!showPlaying) {
             for ((_, data) in bitmapBits) {
                 for (anim in data.anim) {
