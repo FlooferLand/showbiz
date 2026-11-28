@@ -417,6 +417,10 @@ class ReelToReelBlockEntity(pos: BlockPos, blockState: BlockState) : BlockEntity
         recordQueue.clear()
         hasFinished = false
         signal.reset()
+        run {  // Fix for bots and spotlights holding their positions after a show ends/pauses
+            show.data.signal.reset()
+            show.send()
+        }
         lastVideoFrameIndex = 0
         showData.videoInputInfo = null
         showData.video?.let {
